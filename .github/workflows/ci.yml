@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  DO_NOT_TRACK: '1'
+  RELATE_VERSION: 1.0.1
+  RELATE_ASSET: relate-linux-amd64
+  RELATE_SIGNER: relate-release
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version: '3.12'
+
+      - name: Install
+        run: uv sync --locked
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Test (real Relate, no mocks)
+        run: uv run pytest
+
+      - name: witness --version
+        run: uv run witness --version
+
+      # Relate CLI 1.0.1 through the pinned, signature-checked steps of the Relate CI guide.
+      - name: Restore the relate download
+        id: relate-cache
+        uses: actions/cache@v6
+        with:
+          path: relate-download
+          key: relate-${{ env.RELATE_VERSION }}-${{ env.RELATE_ASSET }}
+
+      - name: Download relate
+        if: steps.relate-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p relate-download && cd relate-download
+          BASE="https://github.com/relatedb/relate/releases/download/v$RELATE_VERSION"
+          curl -sSfLO "$BASE/$RELATE_ASSET"
+          curl -sSfLO "$BASE/SHA256SUMS"
+          curl -sSfLO "$BASE/SHA256SUMS.sig"
+
+      - name: Verify and install relate
+        working-directory: relate-download
+        run: |
+          echo "$RELATE_SIGNER ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHgv/GHY5mtv/HopH/J/T7KrTT7eOVFEG2ueT4iRKwbK $RELATE_SIGNER" > allowed_signers
+          ssh-keygen -Y verify -f allowed_signers -I "$RELATE_SIGNER" -n "$RELATE_SIGNER" -s SHA256SUMS.sig < SHA256SUMS
+          test "$(head -n 1 SHA256SUMS)" = "# $RELATE_SIGNER-version: v$RELATE_VERSION"
+          grep "  $RELATE_ASSET\$" SHA256SUMS | sha256sum -c -
+          mkdir -p "$HOME/.local/bin"
+          install -m 0755 "$RELATE_ASSET" "$HOME/.local/bin/relate"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Relate CLI re-runs the spike witness
+        run: |
+          relate --version
+          sed -e '/^\/\//d' -e "s/\$country/'MX'/g" -e "s/\$dest/'MEX'/g" queries/two-hub.cypher > /tmp/q.cypher
+          echo ';' >> /tmp/q.cypher
+          relate query --database evidence/spike-witness-two-hub.rl --read-only --mode json --max-rows 0 --timeout 30s \
+            < /tmp/q.cypher | tee /tmp/out.json
+          grep -q '"airport":"UPN"' /tmp/out.json

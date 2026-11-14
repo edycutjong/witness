@@ -1,0 +1,64 @@
+{
+  "query": "queries/two-hub.cypher",
+  "params": {
+    "country": "MX",
+    "dest": "MEX"
+  },
+  "rows": [
+    {
+      "airport": "PBC",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "QRO",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "TLC",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "UPN",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    }
+  ],
+  "query_type": "r",
+  "companion": "queries/two-hub-absence.cypher",
+  "companion_rows": [
+    {
+      "airport": "PBC",
+      "direct_flights": 0,
+      "reaching_hubs": 7
+    },
+    {
+      "airport": "QRO",
+      "direct_flights": 0,
+      "reaching_hubs": 9
+    },
+    {
+      "airport": "TLC",
+      "direct_flights": 0,
+      "reaching_hubs": 10
+    },
+    {
+      "airport": "UPN",
+      "direct_flights": 0,
+      "reaching_hubs": 2
+    }
+  ],
+  "companion_mismatches": 0,
+  "relate_db": "1.0.1",
+  "source_sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+}

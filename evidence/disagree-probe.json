@@ -1,0 +1,68 @@
+{
+  "params": {
+    "country": "MX",
+    "dest": "MEX"
+  },
+  "headline_rows": [
+    {
+      "airport": "PBC",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "QRO",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "TLC",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "UPN",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    }
+  ],
+  "agent_rows": [
+    {
+      "airport": "PBC",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "QRO",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "TLC",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "UPN",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    }
+  ],
+  "differ": false,
+  "relate_db": "1.0.1"
+}

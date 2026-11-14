@@ -1,0 +1,16 @@
+{
+  "binary": "/Users/edycu/.local/bin/relate",
+  "version": "Relate v1.0.1",
+  "sufficiency": {
+    "exit": 0,
+    "stdout": "{\"data\":[{\"airport\":\"PBC\",\"hub_countries\":[\"MX\",\"US\"]},{\"airport\":\"QRO\",\"hub_countries\":[\"MX\",\"US\"]},{\"airport\":\"TLC\",\"hub_countries\":[\"MX\",\"US\"]},{\"airport\":\"UPN\",\"hub_countries\":[\"MX\",\"US\"]}],\"planCache\":\"miss\",\"timings\":{\"elapsed_ms\":14.327207999999999,\"execute_ms\":7.547458,\"lex_parse_ms\":0.61725,\"lower_ms\":1.173833,\"parse_ms\":4.2055,\"plan_ms\":2.53125,\"result_generation_ms\":0.000166,\"rewrite_ms\":0.27775}}\n",
+    "stderr": ""
+  },
+  "begin_rollback": {
+    "exit": 0,
+    "stdout": "{\"data\":[{\"deleted\":1}],\"planCache\":\"miss\",\"timings\":{\"elapsed_ms\":0.992625,\"execute_ms\":0.7724160000000001,\"lex_parse_ms\":0.00475,\"lower_ms\":0.008333,\"parse_ms\":0.20925,\"plan_ms\":0.007042,\"result_generation_ms\":0.00029099999999999997,\"rewrite_ms\":0.00041600000000000003}}\n{\"data\":[{\"airport\":\"PBC\",\"hub_countries\":[\"MX\",\"US\"]},{\"airport\":\"QRO\",\"hub_countries\":[\"MX\",\"US\"]},{\"airport\":\"TLC\",\"hub_countries\":[\"MX\",\"US\"]}],\"planCache\":\"miss\",\"timings\":{\"elapsed_ms\":0.561834,\"execute_ms\":0.397209,\"lex_parse_ms\":0.020874999999999998,\"lower_ms\":0.046583,\"parse_ms\":0.09895799999999999,\"plan_ms\":0.057708999999999996,\"result_generation_ms\":0.000167,\"rewrite_ms\":0.001708}}\n{\"data\":[{\"airport\":\"PBC\",\"hub_countries\":[\"MX\",\"US\"]},{\"airport\":\"QRO\",\"hub_countries\":[\"MX\",\"US\"]},{\"airport\":\"TLC\",\"hub_countries\":[\"MX\",\"US\"]},{\"airport\":\"UPN\",\"hub_countries\":[\"MX\",\"US\"]}],\"planCache\":\"hit-raw-fastpath\",\"timings\":{\"elapsed_ms\":0.239834,\"execute_ms\":0.176,\"lex_parse_ms\":0.0,\"lower_ms\":0.0,\"parse_ms\":0.000166,\"plan_ms\":0.062583,\"result_generation_ms\":0.000125,\"rewrite_ms\":0.0}}\n",
+    "stderr": "--load /var/folders/hy/h4_prwdj11d1p_gf5kr77k5r0000gn/T/witness-spike-3b7m710_/witness-a.rl: loaded into /var/folders/hy/h4_prwdj11d1p_gf5kr77k5r0000gn/T/witness-spike-3b7m710_/cli-probe-copy.rl\n",
+    "target_created": true
+  },
+  "w_rl_sha_unchanged": true
+}

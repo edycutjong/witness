@@ -1,0 +1,19 @@
+# Local stand-in for .github/workflows/ci.yml (2026-11-15 06:51 +0700, commit a8482ea, macOS arm64)
+## uv sync --locked
+Resolved 12 packages in 14ms
+Checked 8 packages in 2ms
+## ruff
+All checks passed!
+## pytest
+.............                                                            [100%]
+13 passed in 2.54s
+## witness --version
+witness 0.0.1 (relate-db 1.0.1)
+## verify linux asset (signature, signed header, sha256)
+Good "relate-release" signature for relate-release with ED25519 key SHA256:BfnIA0YD0h+ldihdq8V1k/xFY91lm8mRCuVS21+3kzA
+header OK
+relate-linux-amd64: OK
+## CLI re-runs the spike witness (macOS binary, same version)
+Relate v1.0.1
+{"data":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"planCache":"miss","timings":{"elapsed_ms":8.008917,"execute_ms":3.7757910000000003,"lex_parse_ms":0.28345
+UPN present: PASS

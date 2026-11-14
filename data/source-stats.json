@@ -1,0 +1,23 @@
+{
+  "source": "krlawrence/graph@efd3b1ae636f602577cfbccb16ecfe358a02ee36",
+  "csv_sha256": {
+    "air-routes-latest-nodes.csv": "f921d4f1dd429418a96c17c49d42b42ce6cf5d6c9772e784556a631760b53579",
+    "air-routes-latest-edges.csv": "01749b2717ccca5efe11c4b1f5e25f8c59ab682014104f3fb8bdb67e23b101b5"
+  },
+  "airports": 3504,
+  "countries": 237,
+  "continents": 7,
+  "has_route": 50637,
+  "in_country": 3504,
+  "on_continent": 3504,
+  "unresolved_dropped": 0,
+  "duplicate_routes_collapsed": 0,
+  "store_counts": {
+    "nodes": 3748,
+    "relationships": 57645
+  },
+  "cypher_sha256": "e1a37cc2e944c765318bfdc7042000bde2e49a2f48c12be2d79cbc7c4e4cb3b8",
+  "rl_sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734",
+  "rl_bytes": 11079680,
+  "relate_db": "1.0.1"
+}

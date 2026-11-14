@@ -1,0 +1,17 @@
+.env
+.env.*
+*.env
+.auth-token
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.next/
+dist/
+coverage/
+out/
+/tmp-*
+.DS_Store
+relate-download/

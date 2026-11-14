@@ -1,0 +1,8 @@
+Witness
+Copyright 2026 Edy Cu
+
+This product includes data derived from the air-routes graph by Kelvin Lawrence,
+https://github.com/krlawrence/graph (commit efd3b1ae636f602577cfbccb16ecfe358a02ee36),
+published in that repository under the Apache License 2.0.
+Modified: reshaped into a property graph for Relate; the version node was dropped.
+See data/SOURCE.md.

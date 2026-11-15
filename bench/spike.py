@@ -52,6 +52,11 @@ EV = ROOT / "evidence"
 Q = (ROOT / "queries" / "two-hub.cypher").read_text()
 ABS = (ROOT / "queries" / "two-hub-absence.cypher").read_text()
 AGENT = (ROOT / "queries" / "two-hub-agent.cypher").read_text()
+BIND_IDS = (
+    (ROOT / "queries" / "two-hub-bindings.cypher")
+    .read_text()
+    .replace("RETURN DISTINCT r", "RETURN DISTINCT elementId(r) AS rid ORDER BY rid")
+)
 PARAMS = {"country": "MX", "dest": "MEX"}  # picked by bench/country_scan.py (evidence/witness-vs-bindings.json)
 TRIALS = 1000
 SEED = 0
@@ -186,11 +191,15 @@ def check_witness(w_rl: Path, baseline: tuple, tmp: Path) -> dict:
 
 
 def reduce_once(tmp: Path, tag: str) -> tuple[dict, str, Path]:
+    t_open = time.perf_counter()
     sc = Scratch.open_copy(SRC, tmp)
+    open_s = time.perf_counter() - t_open
     t0 = time.perf_counter()
     red = Reducer(sc, Q, PARAMS, seed=SEED, strict_lists=True, check_every=1)
     out = red.run()
     out["wall_s_incl_baseline"] = round(time.perf_counter() - t0, 3)
+    out["scratch_open_s"] = round(open_s, 3)
+    out["end_to_end_s"] = round(open_s + out["wall_s_incl_baseline"], 3)
     out["trial_ms_p50"] = round(statistics.median(red.stats.trial_ms), 4)
     out["trial_ms_p95"] = round(pct(red.stats.trial_ms, 95), 4)
     header = (
@@ -207,7 +216,7 @@ def reduce_once(tmp: Path, tag: str) -> tuple[dict, str, Path]:
 def cli_probe(w_rl: Path, tmp: Path) -> dict:
     relate_bin = shutil.which("relate") or str(Path.home() / ".local/bin/relate")
     env = {**os.environ, "DO_NOT_TRACK": "1"}
-    out = {"binary": relate_bin}
+    out = {"binary": "relate (on PATH)" if shutil.which("relate") else "relate (~/.local/bin)"}
     try:
         out["version"] = (
             subprocess.run([relate_bin, "--version"], capture_output=True, text=True, env=env, timeout=30)
@@ -466,11 +475,37 @@ def main() -> None:
         t = sc2.trial(Q, PARAMS, [rid], (), check_counts=base_counts)
         fresh_ok += multiset(t.rows) == multiset(first50[i]["raw_rows"])
     sc2.close()
+    # 3b. targeted replay: the sampled trials above almost never touch the answer, so also run every relationship the
+    # answer rows match (B, queries/two-hub-bindings.cypher) as a trial, then replay that list on the same scratch and
+    # on a fresh copy. Most of these trials change the answer, so a leaked delete would show here.
+    bind_ids = [r["rid"] for r in sc.run(BIND_IDS, PARAMS).data]
+    bind_keys = [sc.rel_keys[r] for r in bind_ids]
+    first = [sc.trial(Q, PARAMS, [r], (), check_counts=base_counts).rows for r in bind_ids]
+    t_changed = sum(canon_rows(x, strict_lists=True, keyer=sc.keyer) != baseline for x in first)
+    t_same = sum(
+        multiset(sc.trial(Q, PARAMS, [r], (), check_counts=base_counts).rows) == multiset(first[i])
+        for i, r in enumerate(bind_ids)
+    )
+    t_ids = sum(relkey_by_id(sc, r) == bind_keys[i] for i, r in enumerate(bind_ids))
+    sc3 = Scratch.open_copy(SRC, tmp)
+    by_key = {k: r for r, k in sc3.rel_keys.items()}
+    t_fresh = sum(
+        multiset(sc3.trial(Q, PARAMS, [by_key[k]], (), check_counts=base_counts).rows) == multiset(first[i])
+        for i, k in enumerate(bind_keys)
+    )
+    sc3.close()
+    nb = len(bind_ids)
     report["replay"] = {
         "same_scratch": f"{same_ok}/50",
         "fresh_copy": f"{fresh_ok}/50",
         "deleted_ids_resolve_to_same_key": f"{id_ok}/50",
-        "passes": same_ok == 50 and fresh_ok == 50 and id_ok == 50,
+        "first50_changed_answer": sum(1 for r in first50 if r["changed"]),
+        "targeted_B": nb,
+        "targeted_changed_answer": t_changed,
+        "targeted_same_scratch": f"{t_same}/{nb}",
+        "targeted_fresh_copy": f"{t_fresh}/{nb}",
+        "targeted_ids_resolve_to_same_key": f"{t_ids}/{nb}",
+        "passes": same_ok == 50 and fresh_ok == 50 and id_ok == 50 and t_same == nb and t_fresh == nb and t_ids == nb,
     }
     print("replay", report["replay"], flush=True)
 
@@ -574,11 +609,19 @@ def render_md(r: dict) -> str:
         f"| RSS (KiB) by trial | {rss}; growth 100→1000: {t['rss_growth_100_to_1000_pct']}% "
         f"(flag > 10%: {t['rss_flag']}) |",
         f"| Replay trials 1–50 | same scratch {r['replay']['same_scratch']} · fresh copy {r['replay']['fresh_copy']} · "
-        f"ids → same key {r['replay']['deleted_ids_resolve_to_same_key']} |",
+        f"ids → same key {r['replay']['deleted_ids_resolve_to_same_key']} "
+        f"({r['replay']['first50_changed_answer']} of these 50 changed the answer) |",
+        f"| Targeted replay: every relationship the answer rows match (B = {r['replay']['targeted_B']}) | "
+        f"{r['replay']['targeted_changed_answer']} of {r['replay']['targeted_B']} change the answer; "
+        f"replay same scratch {r['replay']['targeted_same_scratch']} · "
+        f"fresh copy {r['replay']['targeted_fresh_copy']} · "
+        f"ids → same key {r['replay']['targeted_ids_resolve_to_same_key']} |",
         f"| Delete form, IN list vs UNWIND (200 trials each) | {r['delete_forms']['in_list']['trials_per_s']} vs "
         f"{r['delete_forms']['unwind']['trials_per_s']} trials/s |",
         f"| Full reduction (ddmin, seed {r['seed']}) | **{red['seconds']} s**, {red['trials']} trials, "
         f"{red['inconclusive']} inconclusive, p50 {red['trial_ms_p50']} ms / p95 {red['trial_ms_p95']} ms per trial |",
+        f"| End to end (scratch copy + open + index, then baseline + reduction) | {red['end_to_end_s']} s "
+        f"(scratch {red['scratch_open_s']} s) |",
         f"| Witness size | {red['final_counts'][0]} nodes, {red['final_counts'][1]} relationships "
         f"(from {red['start_counts'][0]} / {red['start_counts'][1]}) |",
         f"| Export → reopen → re-check | sufficient: {chk['sufficient']}; "

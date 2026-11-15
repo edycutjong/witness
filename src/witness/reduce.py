@@ -1,6 +1,6 @@
 """ddmin reduction to a deletion-minimal witness, with Relate transactions as the inner loop.
 
-Phases (spec "The algorithm"): plan chunk (trial 1, never trusted) -> A: ddmin over nodes (DETACH DELETE)
+Phases: plan chunk (trial 1, never trusted) -> A: ddmin over nodes (DETACH DELETE)
 -> B: ddmin over relationships in locality order -> C: ddmin over isolated nodes -> fixpoint.
 A trial that errors is inconclusive: its chunk is kept, never counted as proof.
 """
@@ -217,20 +217,20 @@ class Reducer:
         return info
 
     def singleton_pass(self, phase: str) -> int:
+        """Try every relationship alone; commit and continue; repeat until a sweep commits nothing."""
         removed = 0
-        restart = True
-        while restart:
-            restart = False
+        while True:
+            swept = 0
             rank = {n: i for i, n in enumerate(self.node_order())}
             for r in self.rel_locality_order(rank):
                 if r not in self.sc.rel_keys:
                     continue
                 if self.test([r], (), phase=phase) is True:
                     self.commit([r], ())
-                    removed += 1
-                    restart = True
-                    break
-        return removed
+                    swept += 1
+            removed += swept
+            if not swept:
+                return removed
 
     def run(self) -> dict:
         t0 = time.perf_counter()

@@ -489,6 +489,7 @@ def main() -> None:
     t_ids = sum(relkey_by_id(sc, r) == bind_keys[i] for i, r in enumerate(bind_ids))
     sc3 = Scratch.open_copy(SRC, tmp)
     by_key = {k: r for r, k in sc3.rel_keys.items()}
+    assert len(by_key) == len(sc3.rel_keys), "relationship key collision in the fresh copy"
     t_fresh = sum(
         multiset(sc3.trial(Q, PARAMS, [by_key[k]], (), check_counts=base_counts).rows) == multiset(first[i])
         for i, k in enumerate(bind_keys)
@@ -505,7 +506,14 @@ def main() -> None:
         "targeted_same_scratch": f"{t_same}/{nb}",
         "targeted_fresh_copy": f"{t_fresh}/{nb}",
         "targeted_ids_resolve_to_same_key": f"{t_ids}/{nb}",
-        "passes": same_ok == 50 and fresh_ok == 50 and id_ok == 50 and t_same == nb and t_fresh == nb and t_ids == nb,
+        "passes": same_ok == 50
+        and fresh_ok == 50
+        and id_ok == 50
+        and nb > 0  # never vacuous: the bindings query must return relationships
+        and t_changed > 0  # and some of those trials must change the answer
+        and t_same == nb
+        and t_fresh == nb
+        and t_ids == nb,
     }
     print("replay", report["replay"], flush=True)
 

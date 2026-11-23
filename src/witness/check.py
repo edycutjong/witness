@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from .canon import canon_rows
-from .export import _lit
+from .export import _lit, cypher_name
 from .guard import GuardedQuery, Refused, Tie, engine_checks, static_checks, strip_comments
 from .predicates import answer_of, answer_sha, expected_answer
 from .store import Scratch
@@ -244,7 +244,7 @@ def _element_label(sc: Scratch, kind: str, eid: str) -> str:
 
 def _content_delete(sc: Scratch, kind: str, eid: str) -> str:
     def pat(n, var):
-        labels = "".join(f":`{lb}`" for lb in sorted(sc.node_labels[n]))
+        labels = "".join(f":{cypher_name(lb)}" for lb in sorted(sc.node_labels[n]))
         props = sc.node_props[n]
         return f"({var}{labels} {_lit(props)})" if props else f"({var}{labels})"
 
@@ -253,7 +253,8 @@ def _content_delete(sc: Scratch, kind: str, eid: str) -> str:
     s, e = sc.rel_ends[eid]
     rp = sc.rel_props[eid]
     rprops = f" {_lit(rp)}" if rp else ""
-    return f"MATCH {pat(s, 'a')}-[r:`{sc.rel_type[eid]}`{rprops}]->{pat(e, 'b')} DELETE r RETURN count(*) AS deleted"
+    rtype = cypher_name(sc.rel_type[eid])
+    return f"MATCH {pat(s, 'a')}-[r:{rtype}{rprops}]->{pat(e, 'b')} DELETE r RETURN count(*) AS deleted"
 
 
 def _cli_run(cli: str, args: list[str], stdin: str) -> tuple[int, list[dict], str]:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime as _dt
 import os
 from pathlib import Path
 
@@ -10,6 +11,38 @@ os.environ.setdefault("DO_NOT_TRACK", "1")
 import relate  # noqa: E402
 
 from .store import Scratch  # noqa: E402
+
+# Characters str.splitlines() breaks on, plus every other control character: written as \uXXXX so a string value
+# never spans two script lines (write_rl drops `//` header lines line by line; a raw "\r\n// x" inside a value was
+# silently cut on rebuild, and Relate reads "\r" in a literal as a backslash and an "r").
+_LINE_BREAKS = frozenset("\n\r\x0b\x0c\x1c\x1d\x1e\x85  ")
+
+
+def _str_lit(v: str) -> str:
+    out = []
+    for ch in v:
+        if ch == "\\":
+            out.append("\\\\")
+        elif ch == "'":
+            out.append("\\'")
+        elif ord(ch) < 0x20 or ch == "\x7f" or ch in _LINE_BREAKS:
+            out.append(f"\\u{ord(ch):04X}")
+        else:
+            out.append(ch)
+    return "'" + "".join(out) + "'"
+
+
+def cypher_name(s: str) -> str:
+    """A label, relationship type or property key as a backtick-quoted Cypher name."""
+    return "`" + str(s).replace("`", "``") + "`"
+
+
+def _float_lit(x: float) -> str:
+    if x != x:
+        return "0.0/0.0"
+    if x in (float("inf"), float("-inf")):
+        return "1.0/0.0" if x > 0 else "-1.0/0.0"
+    return repr(x)
 
 
 def _lit(v) -> str:
@@ -20,13 +53,29 @@ def _lit(v) -> str:
     if isinstance(v, int):
         return str(v)
     if isinstance(v, float):
-        return repr(v)
+        return _float_lit(v)
     if isinstance(v, str):
-        return "'" + v.replace("\\", "\\\\").replace("'", "\\'") + "'"
+        return _str_lit(v)
     if isinstance(v, (list, tuple)):
         return "[" + ", ".join(_lit(x) for x in v) + "]"
     if isinstance(v, dict):
-        return "{" + ", ".join(f"`{k}`: {_lit(v[k])}" for k in sorted(v)) + "}"
+        return "{" + ", ".join(f"{cypher_name(k)}: {_lit(v[k])}" for k in sorted(v)) + "}"
+    # Temporal and spatial values (a `relate pull` slice from Neo4j often carries them). relate-db returns stdlib
+    # date/datetime/time where they fit, and its own Temporal / Duration / Point types otherwise (nanoseconds, zones).
+    if isinstance(v, _dt.datetime):
+        return f"{'datetime' if v.tzinfo else 'localdatetime'}({_str_lit(v.isoformat())})"
+    if isinstance(v, _dt.date):
+        return f"date({_str_lit(v.isoformat())})"
+    if isinstance(v, _dt.time):
+        return f"{'time' if v.tzinfo else 'localtime'}({_str_lit(v.isoformat())})"
+    kind = type(v).__name__
+    if kind == "Temporal" and hasattr(v, "kind") and hasattr(v, "text"):
+        return f"{v.kind}({_str_lit(v.text)})"
+    if kind == "Duration" and hasattr(v, "months"):
+        return f"duration({_str_lit(str(v))})"
+    if kind == "Point" and hasattr(v, "srid"):
+        coords = [("x", v.x), ("y", v.y)] + ([("z", v.z)] if getattr(v, "z", None) is not None else [])
+        return "point({srid: " + str(int(v.srid)) + "".join(f", {k}: {_float_lit(float(c))}" for k, c in coords) + "})"
     raise TypeError(f"no Cypher literal for {type(v).__name__}")
 
 
@@ -36,13 +85,13 @@ def cypher_script(sc: Scratch, header: str = "") -> str:
     var = {n: f"n{i}" for i, n in enumerate(nodes)}
     parts = []
     for n in nodes:
-        labels = "".join(f":`{lb}`" for lb in sorted(sc.node_labels[n]))
+        labels = "".join(f":{cypher_name(lb)}" for lb in sorted(sc.node_labels[n]))
         parts.append(f"({var[n]}{labels} {_lit(sc.node_props[n])})")
     for r in sorted(sc.rel_keys, key=lambda r: sc.rel_keys[r]):
         s, e = sc.rel_ends[r]
         props = sc.rel_props[r]
         p = f" {_lit(props)}" if props else ""
-        parts.append(f"({var[s]})-[:`{sc.rel_type[r]}`{p}]->({var[e]})")
+        parts.append(f"({var[s]})-[:{cypher_name(sc.rel_type[r])}{p}]->({var[e]})")
     head = "".join(f"// {line}\n" for line in header.splitlines() if line)
     if not parts:
         return head

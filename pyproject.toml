@@ -1,6 +1,6 @@
 [project]
 name = "witness"
-version = "0.0.1"
+version = "0.1.0"
 description = "Shrink a graph answer to the few relationships it needs, and prove each one is needed. Built on Relate."
 readme = "README.md"
 license = "Apache-2.0"
@@ -36,3 +36,6 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/witness/export.py" = ["E501"]  # the inline HTML/CSS template of the exhibit view

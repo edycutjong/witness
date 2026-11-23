@@ -90,7 +90,7 @@ svg{{width:100%;height:auto;background:rgba(255,255,255,.35);border:1px solid va
 .n{{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}}.nl{{font:700 11px monospace;text-anchor:middle;fill:var(--ink)}}
 .facts{{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:52px 0;padding:24px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}}
 .facts p{{margin:0;font-size:15px;color:var(--muted)}}
-.facts strong{{display:block;font:700 34px/1.1 var(--display);color:var(--ink);margin-bottom:4px}}
+.facts strong{{display:block;font:400 28px/1.15 var(--data);color:var(--ink);margin-bottom:4px}}
 code{{font:600 .92em var(--body);background:rgba(31,26,20,.07);padding:1px 5px;border-radius:2px}}
 h3{{font:600 13px/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}}
 .links{{display:flex;flex-wrap:wrap;gap:8px 28px;margin:36px 0 0;padding:0;list-style:none}}
@@ -101,9 +101,10 @@ footer{{margin-top:56px;font-size:14px;color:var(--muted);max-width:70ch}}
 </head>
 <body>
 <main>
-<p class="eyebrow">Witness · proof for an agent's answer from a graph · built on Relate</p>
+<p class="eyebrow">Witness · proof for a graph-backed agent's answer · Relate + Neo4j</p>
 <h1>Your agent's answer rests on <em>{w_rels}</em> of {src_rels_fmt} relationships.</h1>
-<p class="lede">When an agent answers from a graph, Witness hands back a tiny graph that reproduces the answer, and proves each relationship in it is needed. It is an MCP tool: your agent calls <code>why</code> on a read-only Cypher answer, <code>check</code> re-proves the result, and a slice of a Neo4j graph comes in with <code>relate pull</code>.</p>
+<p class="lede">When an agent answers from a graph, Witness hands back a tiny graph that reproduces the answer, and proves each relationship in it is needed.</p>
+<p class="lede">Built for teams shipping graph-backed agents, on Relate, the embedded graph database. The agent calls the MCP tool <code>why</code> on a read-only Cypher answer and <code>check</code> re-proves the result; <code>relate pull</code> brings a slice in from a Neo4j graph, read-only.</p>
 <div class="stamp">{check_upper}</div>
 
 <h2>Run it yourself</h2>
@@ -112,8 +113,9 @@ footer{{margin-top:56px;font-size:14px;color:var(--muted);max-width:70ch}}
 <pre id="cmd" tabindex="0" aria-label="Commands"><b>$</b> git clone {repo} &amp;&amp; cd witness
 <b>$</b> uv run witness demo</pre>
 <button type="button" id="copy">Copy commands</button>
+<span id="status" role="status" class="note" style="flex-basis:100%;margin:0"></span>
 </div>
-<p class="note" id="status" role="status">The committed air-routes graph ({src_nodes_fmt} nodes, {src_rels_fmt} relationships) is copied, never modified. The result below is the committed output of the same run.</p>
+<p class="note">The committed air-routes graph ({src_nodes_fmt} nodes, {src_rels_fmt} relationships) is copied, never modified. The result below is the committed output of the same run.</p>
 
 <h2>The case file</h2>
 <p class="lede">An agent asks which Mexican airports have no direct flight to MEX but two ways out. It answers {answer_rows}. These are the relationships that answer rests on.</p>
@@ -122,7 +124,7 @@ footer{{margin-top:56px;font-size:14px;color:var(--muted);max-width:70ch}}
 <div class="facts">
 <p><strong>{w_rels} of {w_rels}</strong>deleting any one relationship changes the answer: deletion-minimal, checked on relate-db and on the Relate CLI</p>
 <p><strong>{trials} trials</strong>in {secs} s on the full graph, each run in a Relate transaction and rolled back; in {commits} the answer survived, so that deletion was then applied</p>
-<p><strong>{relate_tps} vs {neo_tps}</strong>trials per second, Relate in-process vs Neo4j {neo_version} Community in Docker over Bolt: the same delete-query-rollback trial on 1,000 sampled deletions, median of 3 runs, same answers ({ratio}x here). One machine, one query, one graph: the cost of this setup (a Docker VM, a Bolt round trip per statement, count checks), not a Neo4j limit. Method: <code>evidence/{cmp_md}</code></p>
+<p><strong>{relate_tps} vs {neo_tps}</strong>trials per second, Relate in-process vs Neo4j {neo_version} Community in Docker over Bolt: the same delete-query-rollback trial on 1,000 sampled deletions, median of 3 runs, same answers ({ratio}x here; Neo4j runs a dialect of the query with an ORDER BY in place of coll.sort(), baseline rows checked identical). One machine, one query, one graph: the cost of this setup (a Docker VM, a Bolt round trip per statement, count checks), not a Neo4j limit. Method: <code>evidence/{cmp_md}</code></p>
 </div>
 
 <ul class="links">
@@ -138,10 +140,10 @@ A work-in-progress page: the full write-up comes later. Apache-2.0.</p>
 </main>
 <script>
 (function(){{
-var b=document.getElementById('copy'),s=document.getElementById('status'),t=b.textContent,keep=s.textContent;
+var b=document.getElementById('copy'),s=document.getElementById('status'),t=b.textContent;
 b.addEventListener('click',function(){{
-var text='git clone {repo} && cd witness\\nuv run witness demo';
-function ok(){{b.textContent='Copied';s.textContent='Copied the two commands.';setTimeout(function(){{b.textContent=t;s.textContent=keep}},1600)}}
+var text='{copy_prefix}git clone {repo} && cd witness\\nuv run witness demo';
+function ok(){{b.textContent='Copied';s.textContent='Copied the two commands.';setTimeout(function(){{b.textContent=t;s.textContent=''}},1600)}}
 if(navigator.clipboard&&navigator.clipboard.writeText){{navigator.clipboard.writeText(text).then(ok,function(){{s.textContent='Select the commands above and copy them.'}})}}
 else{{s.textContent='Select the commands above and copy them.'}}
 }});
@@ -156,15 +158,20 @@ SITE.mkdir(exist_ok=True)
 # the served copy gets a way back home; the committed witnesses/two-hub.html stays byte-identical to what `witness` wrote
 back_css = (
     "a{color:var(--ink);text-underline-offset:3px;transition:color .15s ease,text-decoration-thickness .15s ease}"
-    "a:hover{color:var(--muted);text-decoration-thickness:3px}.t,dt{color:#6F6555}"
+    "a:hover{color:#6F6555;text-decoration-thickness:3px}.t,dt{color:#6F6555}"
     'h2{font:600 13px/1.4 "Source Sans 3",system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6F6555}'
     '.nav{font:600 13px/1.4 "Source Sans 3",system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6F6555}'
     "@media (max-width:600px){.en,.nl{font-size:19px}}"
     "a:focus-visible{outline:3px solid var(--ink);outline-offset:3px}"
     "@media (prefers-reduced-motion:reduce){a{transition:none}}"
 )
+fonts = (
+    '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    '<link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Old+Standard+TT:wght@400;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">'
+)
 served = (
     exhibit.replace("</style>", back_css + "</style>", 1)
+    .replace("<style>", fonts + "<style>", 1)
     .replace(
         '<p class="mono">WITNESS · EXHIBIT REGISTER</p>',
         '<p class="nav"><a href="../">&larr; Witness</a> · EXHIBIT REGISTER</p>',
@@ -198,6 +205,7 @@ page = PAGE.format(
     cmp_md=cmp_path.with_suffix(".md").name,
     private_note=PRIVATE_NOTE,
     source_li=SOURCE_LI,
+    copy_prefix="" if REPO_PUBLIC else "# the repository opens at submission\\n",
     secs=secs,
     relate_tps=relate_tps,
     neo_tps=neo_tps,

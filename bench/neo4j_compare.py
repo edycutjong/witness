@@ -2,7 +2,8 @@
 
 For each trial (same relationship on both sides, same query, same parameters, same order):
     begin -> delete that one relationship -> run the headline query, fetch every row -> rollback -> counts restored?
-Relate runs in this process (`:memory:` copy of data/air-routes.rl). Neo4j runs in Docker (loopback Bolt, one explicit
+Relate runs in this process, on a file-backed scratch copy of data/air-routes.rl in a temp dir (the same
+Scratch.open_copy the reducer uses; not `:memory:`). Neo4j runs in Docker (loopback Bolt, one explicit
 transaction per trial; driver round trips are included, which is the honest cost of a server). Neither side is tuned:
 Neo4j keeps its default heap and page cache, with the Airport.id/Country.code/Continent.code constraints.
 The ONLY query difference is dialect: Neo4j has no coll.sort(), so queries/two-hub.neo4j.cypher orders before collect().
@@ -154,6 +155,8 @@ def main() -> None:
                 got = [r["id"] for r in s.run(q, ps)]
                 if not got:
                     raise SystemExit(f"relationship not found in Neo4j: {sc.rel_keys[rid][:120]}")
+                if len(got) > 1:  # a2a arch r1: never pick one of several matches; the trial would differ
+                    raise SystemExit(f"{len(got)} Neo4j matches for one relationship: {sc.rel_keys[rid][:100]}")
                 ambiguous += len(got) > 1
                 out.append(got[0])
             return out

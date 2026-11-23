@@ -4,11 +4,14 @@ Raw: `neo4j-compare-2026-11-24.json` (3 runs × 1,000 trials, per-run summaries,
 (per-trial ms + whether the answer changed, run 1). Reproduce: `uv run --with neo4j python bench/neo4j_compare.py`
 (needs the local Neo4j container; the graph in it is `data/air-routes.cypher`).
 
+_Correction 2026-11-24 (a2a arch r1): the Relate column first said "`:memory:` copy". The bench ran Relate on a file-backed
+scratch copy in a temp dir (`Scratch.open_copy`, the reducer's own path). The label is fixed; no number changed._
+
 **Loop, identical on both sides:** begin → delete one relationship → run the headline query (`queries/two-hub.cypher`,
 `MX`/`MEX`), fetch every row → rollback → check node and relationship counts are back. Same 1,000 relationships in the same order
 (seeded sample, resolved to Neo4j element ids outside the timed loop), 100 warm-up trials discarded on each side.
 
-| | Relate 1.0.1, in-process (`:memory:` copy) | Neo4j 2026.10.2 community, Docker, Bolt over loopback |
+| | Relate 1.0.1, in-process (file-backed scratch copy in a temp dir) | Neo4j 2026.10.2 community, Docker, Bolt over loopback |
 |---|---|---|
 | trials/s, median of 3 runs (range) | **366.8** (364.1–380.2) | **90.2** (76.9–102.2) |
 | trial ms p50 (begin → rollback) | 2.54 | 6.48 |

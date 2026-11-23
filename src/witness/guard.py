@@ -202,6 +202,10 @@ def _check_temporal(call: Call) -> str | None:
     base = head if head else tail
     if head and base in TEMPORALS and tail in CLOCKS:
         return f"{call.name}() reads the clock"
+    # date.truncate(unit, input = DEFAULT_TEMPORAL_ARGUMENT, ...): without an input it truncates "now" (Relate 1.0.1:
+    # datetime.truncate('second') returned two different values 2 s apart, a2a arch r1).
+    if head and base in TEMPORALS and tail == "truncate" and len(call.args) < 2:
+        return f"{call.name}() without an input temporal reads the clock"
     if head:
         return None  # date.truncate(...) etc.: a clock inside its arguments is caught on its own
     if tail not in TEMPORALS:

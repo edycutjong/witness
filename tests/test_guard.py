@@ -57,6 +57,9 @@ REFUSED = [
         "ORDER BY",
     ),
     ("RETURN COUNT { MATCH (b) CALL { MATCH (c:Y) RETURN c LIMIT 1 } RETURN c } AS n", "ORDER BY"),
+    # a2a arch r1: *.truncate(unit) without an input temporal truncates "now"
+    ("RETURN date.truncate('day') AS d", "clock"),
+    ("MATCH (n) RETURN n.x AS x, DateTime.Truncate('second') AS t", "clock"),
 ]
 
 ALLOWED = [
@@ -70,6 +73,7 @@ ALLOWED = [
     "MATCH (n) RETURN n.name AS x ORDER BY x DESC SKIP 1 LIMIT 2",
     "MATCH (n) RETURN coll.sort(collect(n.name)) AS xs;",
     "MATCH (n:P {name: 'A'}) RETURN {k: n.name, v: size([1, 2])} AS m",
+    "RETURN date.truncate('month', date('2026-11-08')) AS d",
 ]
 
 

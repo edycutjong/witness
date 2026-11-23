@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 470" width="1000" height="470" role="img" aria-labelledby="t d">
+  <title id="t">Witness architecture</title>
+  <desc id="d">A read-only query passes the guard. The reducer copies the committed source .rl into a scratch store and runs delete, query, keep-or-rollback trials inside Relate transactions. The surviving relationships become a witness .rl with a manifest. witness check re-proves each relationship on a fresh copy and on the relate CLI. Outputs: witness .rl, Cypher, HTML exhibit, ledger. Entry points: CLI and MCP tools why and check.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1F1A14"/></marker>
+    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#B42318"/></marker>
+    <style>
+      text{font-family:"Source Sans 3","Helvetica Neue",Arial,sans-serif;fill:#1F1A14;font-size:14px}
+      .h{font-family:"Old Standard TT","Libre Caslon Text",Georgia,serif;font-size:17px;font-weight:700}
+      .m{font-family:"Fragment Mono","SF Mono",Menlo,monospace;font-size:12px;fill:#6F6555}
+      .box{fill:#FBF5E8;stroke:#1F1A14;stroke-width:1.5}
+      .keep{fill:#FBF5E8;stroke:#B42318;stroke-width:2.2}
+      .ln{stroke:#1F1A14;stroke-width:1.5;fill:none}
+      .rl{stroke:#B42318;stroke-width:2;fill:none}
+      .cap{font-size:12px;fill:#6F6555;font-style:italic}
+    </style>
+  </defs>
+  <rect width="1000" height="470" fill="#F2E8D5"/>
+  <text x="30" y="36" class="h" style="font-size:22px">Witness: one read-only query in, one proven witness out</text>
+
+  <!-- entry -->
+  <rect class="box" x="30" y="70" width="170" height="86"/>
+  <text x="44" y="94" class="h">Entry points</text>
+  <text x="44" y="116">witness CLI</text>
+  <text x="44" y="136">MCP: why · check</text>
+
+  <!-- guard -->
+  <rect class="box" x="250" y="70" width="170" height="86"/>
+  <text x="264" y="94" class="h">Guard</text>
+  <text x="264" y="116">query_type == "r" only</text>
+  <text x="264" y="136">no writes, clocks, rand</text>
+
+  <!-- source -->
+  <rect class="box" x="470" y="70" width="230" height="86"/>
+  <text x="484" y="94" class="h">Source store</text>
+  <text x="484" y="116" class="m">data/air-routes.rl</text>
+  <text x="484" y="136">57,645 rels · copied, never written</text>
+
+  <!-- scratch + reducer -->
+  <rect class="box" x="250" y="200" width="450" height="120"/>
+  <text x="264" y="224" class="h">Reducer: Relate transactions in the loop</text>
+  <text x="264" y="248">scratch copy of the source (temp .rl)</text>
+  <text x="264" y="270">delete a chunk → run the query → same answer?</text>
+  <text x="264" y="292">yes: commit the deletion · no: rollback · counts verified</text>
+  <text x="264" y="310" class="m" style="font-size:11px">begin_ / rollback_ / commit_transaction</text>
+
+  <!-- witness -->
+  <rect class="keep" x="740" y="200" width="230" height="120"/>
+  <text x="754" y="224" class="h">Witness</text>
+  <text x="754" y="248" class="m">witnesses/two-hub.rl</text>
+  <text x="754" y="270">22 rels · 12 nodes, kept</text>
+  <text x="754" y="292">+ manifest (settings, hashes)</text>
+  <text x="754" y="310" class="m">deletion-minimal (1-minimal)</text>
+
+  <!-- check -->
+  <rect class="keep" x="470" y="360" width="250" height="90"/>
+  <text x="484" y="384" class="h">witness check</text>
+  <text x="484" y="406">fresh copy per probe, none shared</text>
+  <text x="484" y="426">+ relate CLI cross-check</text>
+  <text x="484" y="442" class="m">"22 of 22 change the answer"</text>
+
+  <!-- outputs -->
+  <rect class="box" x="30" y="360" width="410" height="90"/>
+  <text x="44" y="384" class="h">Outputs</text>
+  <text x="44" y="404" class="m">out/two-hub.{rl,cypher,html,</text>
+  <text x="44" y="418" class="m">manifest.json,trace.json}</text>
+  <text x="44" y="438">ledger: out/ledger.rl</text>
+
+  <!-- arrows -->
+  <path class="ln" d="M200 113H250" marker-end="url(#a)"/>
+  <path class="ln" d="M335 156V200" marker-end="url(#a)"/>
+  <path class="ln" d="M585 156V200" marker-end="url(#a)"/>
+  <path class="rl" d="M700 260H740" marker-end="url(#r)"/>
+  <path class="rl" d="M855 320V405H720" marker-end="url(#r)"/>
+  <path class="ln" d="M470 405H440" marker-end="url(#a)"/>
+  <text x="704" y="252" class="cap">keeps</text>
+  <text x="592" y="182" class="cap">copy (source stays read-only)</text>
+  <text x="862" y="372" class="cap">re-prove</text>
+</svg>

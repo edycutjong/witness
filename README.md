@@ -1,15 +1,93 @@
-# Witness
+<div align="center">
+  <img src="docs/assets/icon.svg" alt="Witness Icon" width="144">
+  <h1>Witness 🔎</h1>
+  <p><em>When an agent answers from a graph, Witness hands back the graph that reproduces the answer (57,645 relationships → 22) and proves each relationship in it is needed.</em></p>
+  <img src="docs/assets/readme-hero-animated.svg" alt="Witness reduces the graph behind an agent's answer to the relationships that reproduce it. Thousands of graphite lines fade; a handful stay, each tagged with a red exhibit number; the answer above never moves." width="100%">
 
-<p align="center">
-  <img src="docs/assets/readme-hero-animated.svg" alt="Witness — reduces the graph behind an agent's answer to the relationships that reproduce it. Thousands of graphite lines fade; a handful stay, each tagged with a red exhibit number; the answer above never moves." width="100%">
-</p>
+  <br/>
 
-When an agent answers from a graph, Witness hands back a tiny graph that reproduces the answer, and proves each relationship in it is needed.
+  [![Live Site](https://img.shields.io/badge/🚀_Live-Site-B42318?style=for-the-badge)](https://witness-wheat.vercel.app)
+  [![Relate by Neo4j Hackathon](https://img.shields.io/badge/Devpost-Relate_by_Neo4j_Hackathon-1F1A14?style=for-the-badge)](https://relate.devpost.com/)
 
-Built on [Relate](https://relatedb.ai). License: Apache-2.0. Work in progress: this README is the quick start; the full
-write-up comes later.
+  <br/>
 
-## Quick start
+  ![Python](https://img.shields.io/badge/Python_3.12-3776AB?style=flat&logo=python&logoColor=white)
+  ![Relate](https://img.shields.io/badge/Relate_1.0.1-1F1A14?style=flat)
+  ![Tests](https://img.shields.io/badge/tests-194-2ea043?style=flat)
+  [![License](https://img.shields.io/badge/License-Apache_2.0-yellow)](LICENSE)
+
+</div>
+
+---
+
+## 💡 The Problem & Solution
+
+**Use case:** checking an agent's graph answer by reading 22 relationships instead of 57,645.
+
+### The Problem
+
+An agent answers a question from a graph of tens of thousands of relationships. A reviewer cannot read them all, so the
+answer is taken on trust. "Show the path" is not enough either: a path can include relationships that change nothing.
+
+### The Solution
+
+**Who benefits:** agents that answer from a graph, and the people and test suites that must check those answers.
+Witness takes a read-only query and its answer and deletes relationships, with Relate transactions as the inner loop, until
+no single remaining relationship can go without changing the answer. What is left is a witness: a small `.rl` file anyone can
+re-run with plain `relate`.
+
+On the committed air-routes graph, the headline question (`queries/two-hub.cypher`: which Mexican airports have no direct flight to MEX, yet reach it in two flights through at least two different hubs)
+shrinks **57,645 relationships to 22** (12 nodes) in 371 trials and 1.1 s, and `witness check` confirms "22 of 22 change the
+answer" on the Python API and on the Relate CLI (`witnesses/two-hub.manifest.json`).
+
+**Deletion-minimal** means: no single remaining relationship (or kept isolated node) can be removed without changing the
+answer. It does not mean "smallest possible". Because Relate's query semantics are not monotone, a witness proves its own
+answer on its own file; it does not prove that every superset of it gives the same answer.
+
+**What it refuses (exit 2):** anything outside a read-only, deterministic subset. Relate's own `query_type` must be `"r"`, so
+no writes, procedures, `LOAD CSV`, clocks, randomness or store ids, plus a heuristic check for storage-order dependence. Witness never writes to the source.
+
+### How it uses Relate
+
+- **Mode:** single file (`.rl`). Reductions run on a file-backed scratch copy of the source in a temp dir; the committed
+  source is copied byte-for-byte, never opened for writing, and its SHA-256 is checked unchanged after every run.
+- **Why this mode:** the unit of evidence is a file. One `.rl` per witness can be committed, handed over and re-run by a
+  reviewer with `relate` alone, with no server. A directory store is many files; `:memory:` disappears when the process ends
+  and cannot be inspected.
+- **What the graph models:** the air-routes network (Kelvin Lawrence): 3,504 airports, 237 countries and 7 continents (3,748 nodes), and
+  57,645 relationships (`HAS_ROUTE`, `IN_COUNTRY`, `ON_CONTINENT`). The relationships that matter are the ones that carry a query's answer.
+- **Where the data lives:** `data/air-routes.rl` (source), `witnesses/two-hub.rl` (the committed witness), `witness.rl` (the
+  ledger of reductions), `fixtures/` (fixture-mode stores).
+
+Relate capabilities used:
+
+1. explicit transactions (`begin_transaction` / `rollback_transaction` / `commit_transaction`), the reducer's inner loop (`store.py`, `ledger.py`)
+2. `QueryResult.query_type` to refuse non-read queries (`guard.py`)
+3. `EXPLAIN` plans to drop labels and types a query cannot reach in one verified step (`reduce.py`)
+4. `read_only=True` opens, so the rerun, ledger-reader and fixture-test paths cannot write (`cli.py`, `ledger.py`, `fixture.py`)
+5. single-file `.rl` stores as the witness, source and ledger format (`export.py`, `ledger.py`)
+6. `relate pull` for fixture mode: one pull from Neo4j, then shrink; never pushed back (`fixture.py`)
+7. `relate query --mode json` on the CLI as the independent re-check of every probe (`check.py`)
+8. MCP: Witness's own tools `why` and `check` (`mcp_server.py`) run beside Relate's `relate serve --mcp`; the pairing is exercised in `scripts/mcp_transcript.py` and `evidence/mcp-transcript.md`
+
+## 🏗️ Architecture & Tech Stack
+
+<p align="center"><img src="docs/architecture.svg" alt="Architecture: entry points (CLI, MCP) feed a guard; the reducer copies the read-only source into a scratch store and runs delete, query, keep-or-rollback trials; survivors become a witness .rl with a manifest; witness check re-proves each relationship on a fresh copy and on the relate CLI." width="100%"></p>
+
+| Layer | Choice |
+|---|---|
+| Engine | Relate 1.0.1 (`relate-db`, embedded, single file) |
+| Reducer, checker, CLI, MCP | Python 3.12, `uv` |
+| Source data | air-routes by Kelvin Lawrence (Apache-2.0), reshaped for Relate; see `NOTICE`, `data/SOURCE.md` |
+| Landing | static `site/` on Vercel, built from the committed witness by `scripts/build_site.py` |
+
+## 🚀 Getting Started (setup and run)
+
+### Prerequisites
+
+[`uv`](https://docs.astral.sh/uv/) and Python 3.12. The optional CLI cross-check needs the `relate` CLI (signed installer at relatedb.ai).
+
+### Installation
 
 ```bash
 git clone https://github.com/edycutjong/witness && cd witness
@@ -17,13 +95,17 @@ uv run witness demo
 ```
 
 `demo` copies the committed source graph (`data/air-routes.rl`, never modified), asks the headline question
-(`queries/two-hub.cypher`), reduces the answer to a deletion-minimal witness with Relate transactions as the inner loop,
-re-proves it with `witness check`, and writes `out/two-hub.{rl,cypher,manifest.json,html,trace.json}` plus a ledger row in
-`out/ledger.rl`. Nothing it runs changes a committed file.
+(`queries/two-hub.cypher`), reduces the answer to a deletion-minimal witness, re-proves it with `witness check`, and writes
+`out/two-hub.{rl,cypher,manifest.json,html,trace.json}` plus a ledger row in `out/ledger.rl`. Nothing it runs changes a
+committed file. The committed result of the same run is in `witnesses/two-hub.*`, `answers/two-hub.json` and `witness.rl`.
 
-The committed result of the same run is in `witnesses/two-hub.*`, `answers/two-hub.json` and the ledger `witness.rl`.
+Then re-run the witness yourself with plain `relate`:
 
-## Commands
+```bash
+relate query --database witnesses/two-hub.rl --read-only --param country=MX --param dest=MEX < queries/two-hub.cypher
+```
+
+### Commands
 
 | Command | What it does |
 |---|---|
@@ -37,12 +119,10 @@ The committed result of the same run is in `witnesses/two-hub.*`, `answers/two-h
 | `witness fixture --from neo4j.env --pull SLICE.cypher --test Q.cypher --expect ROWS.json` | `relate pull` a slice from Neo4j once, shrink it to a deletion-minimal fixture (no single relationship can go without changing the test's answer), write a pytest file; never pushes back (`fixtures/mex-foreign.*`: 1,272 relationships pulled, 126 kept, 126 of 126 change the answer) |
 
 Exit codes: 0 verified · 1 NOT verified · 2 refused (outside the supported read-only subset: no writes, procedures, `LOAD CSV`, clocks, randomness, store ids or
-storage-order dependence) · 3 trial cap ·
+storage-order dependence, the last one heuristic) · 3 trial cap ·
 4 aborted by the demo watchdog.
 
-Deletion-minimal means: no single remaining relationship (or kept isolated node) can be removed without changing the
-answer. It does not mean "smallest possible". With `--predicate disagree` the same sentence reads "without ending the
-disagreement" (one query's answer may stay put), and with `differs --loose` "without ending the mismatch".
+Variants: with `--predicate disagree` "deletion-minimal" reads "without ending the disagreement", and with `differs --loose` "without ending the mismatch".
 
 "The same answer" is exact about types (`1`, `1.0` and `true` differ) and compares rows as a bag (row order is not part of
 the answer, even under a final `ORDER BY`; only an `ORDER BY` with `SKIP`/`LIMIT` uses the order, and Witness applies that
@@ -52,22 +132,38 @@ these settings under `comparison`. The proof is `witness check`: one fresh copy 
 reduction. The node and relationship counts checked after every rollback during the reduction are a tripwire for rollback
 residue, not the proof.
 
-With the Relate CLI installed, the same check runs on the CLI too, and you can re-run the witness yourself:
-
-```bash
-relate query --database witnesses/two-hub.rl --read-only --param country=MX --param dest=MEX < queries/two-hub.cypher
-```
-
-## Measured against Neo4j
+### Measured against Neo4j
 
 The same rollback-trial loop (delete one relationship, run the headline query, roll back, check counts) ran on Relate in-process
 (a file-backed scratch copy) and on Neo4j 2026.10.2 in Docker over Bolt: median of 3 runs of 1,000 trials, 366.8 vs 90.2
 trials/s on one machine, with identical answers per trial: 1,000 sampled relationships run 3 times (2 of them change the answer), plus all 68
 answer-relevant relationships (20 change it). The
 throughput includes each side's count check (two extra Bolt queries per trial on Neo4j); per-trial latency from begin to
-rollback, which excludes it on both sides, is p50 2.54 vs 6.48 ms (median of the 3 runs). Method, caveats and raw rows:
+rollback, which excludes it on both sides, is p50 2.54 vs 6.48 ms (median of the 3 runs). The gap mostly reflects an embedded engine versus a Dockerised server with a network round trip per statement; it says nothing about Neo4j's query engine. Method, caveats and raw rows:
 `evidence/neo4j-compare-2026-11-24.md`, `bench/neo4j_compare.py`.
 
-## Landing page
+## 🧪 Testing & CI
 
-`site/` is the static landing (deployed on Vercel at https://witness-wheat.vercel.app). `scripts/build_site.py` builds it from the committed witness and evidence files.
+```bash
+uv run pytest        # 194 tests
+```
+
+Reproduce every number in this README: [DEMO.md](DEMO.md). Raw evidence and the machine/version of each run:
+`evidence/`. GitHub Actions CI is defined in `.github/workflows/ci.yml`.
+
+## 📽️ Demo Materials
+
+- Landing page: https://witness-wheat.vercel.app (`site/`)
+- Reproduce steps: [DEMO.md](DEMO.md)
+
+## 🧰 Tools and AI use
+
+- **Product capabilities:** Relate 1.0.1 (embedded engine, `relate` CLI, `relate serve --mcp`).
+- **Third-party tools:** `uv`, pytest, Neo4j 2026.10.2 in Docker (comparison only), Vercel (landing hosting).
+- **AI use:** built with Claude Code as the coding agent, under the author's direction. The author is responsible for the result.
+- **Built during the contest period:** first commit 2026-11-15 (`git log --reverse`). No code from before the contest.
+- **Reused material:** the air-routes dataset by Kelvin Lawrence (Apache-2.0, commit `efd3b1a`), modified as stated in `NOTICE`.
+
+## 📄 License
+
+Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

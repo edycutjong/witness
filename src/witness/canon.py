@@ -90,6 +90,12 @@ def canon_rows(
     return tuple(sorted(out, key=repr))
 
 
+def same_answer(a, b) -> bool:
+    """Answer equality, the relation `check` hashes: the repr of the canonical form. Type-aware (1, 1.0 and true
+    differ, as Python's == would not) and NaN equals NaN, so a reducer trial and the final check never disagree."""
+    return repr(a) == repr(b)
+
+
 def digest(canon: tuple) -> str:
     import hashlib
 

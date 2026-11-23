@@ -8,6 +8,7 @@ exhibit view -> ledger row. The source `.rl` is only byte-copied; its SHA-256 is
 from __future__ import annotations
 
 import json
+import os
 import platform
 import sys
 import time
@@ -15,6 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import __version__
+from .canon import same_answer
 from .check import CheckResult, check, plain, spec_from_manifest
 from .export import cypher_script, exhibit_html, exhibits, isolated, write_rl
 from .guard import GuardedQuery, Refused, Tie, guard
@@ -97,12 +99,31 @@ def _cut_rows(gq: GuardedQuery, rows: list[dict]) -> list[dict]:
     return rows[gq.cut.skip : hi]
 
 
+OUT_SUFFIXES = (".rl", ".cypher", ".manifest.json", ".html", ".trace.json")
+
+
+def _refuse_aliased_outputs(req: Request, source: Path) -> None:
+    """No output may land on the source store: write_rl() unlinks its target first, and the source SHA-256 is only
+    compared after the export (`why -f g.cypher --store g.rl --out .` would otherwise replace g.rl; a2a arch r1)."""
+    name = req.name
+    if not name or name in (".", "..") or "/" in name or "\\" in name or Path(name).name != name:
+        raise Refused(f"the output name must be a plain file stem, got {name!r}", "out")
+    src = source.resolve()
+    outs = [Path(f"{Path(req.out_dir) / name}{s}") for s in OUT_SUFFIXES]
+    if req.ledger is not None:
+        outs.append(Path(req.ledger))
+    for o in outs:
+        if o.resolve() == src or (o.exists() and os.path.samefile(o, src)):
+            raise Refused(f"{o} would overwrite the source store; choose another --out or --name", "out")
+
+
 def reduce_request(req: Request, progress=None) -> Outcome:
     t_start = time.perf_counter()
     req.out_dir = Path(req.out_dir)
     source = Path(req.source)
     if not source.exists():
         raise Refused(f"store not found: {source}", "store")
+    _refuse_aliased_outputs(req, source)
     sha_before = sha256_file(source)
     try:
         sc = Scratch.open_copy(source)
@@ -134,7 +155,7 @@ def reduce_request(req: Request, progress=None) -> Outcome:
             try:
                 for gq, a in zip(queries, answers, strict=True):
                     b, _ = _answer(rev, gq, req)
-                    if isinstance(b, Tie) or b != a:
+                    if isinstance(b, Tie) or not same_answer(b, a):
                         raise Refused(
                             "the answer depends on storage order (a second store built in reverse order disagrees)",
                             gq.door,
@@ -147,7 +168,8 @@ def reduce_request(req: Request, progress=None) -> Outcome:
             raise Refused("nothing to witness: the answer is empty", "query")
         if req.claimed is not None:
             cols = list(res0.columns)
-            if expected_answer(req.claimed, cols, strict_lists=req.strict_lists, digits=req.digits) != base:
+            claimed = expected_answer(req.claimed, cols, strict_lists=req.strict_lists, digits=req.digits)
+            if not same_answer(claimed, base):
                 raise Refused(
                     "the answer you gave differs from this store's answer to this query; nothing attached", "answer"
                 )
@@ -219,6 +241,14 @@ def reduce_request(req: Request, progress=None) -> Outcome:
         script = cypher_script(sc, header)
         Path(f"{stem}.cypher").write_text(script)
         write_rl(script, Path(f"{stem}.rl"))
+        exported = Scratch.open_copy(Path(f"{stem}.rl"))
+        try:
+            lost = set(sc.node_keys.values()) ^ set(exported.node_keys.values())
+            lost |= set(sc.rel_keys.values()) ^ set(exported.rel_keys.values())
+        finally:
+            exported.close()
+        if lost:
+            raise RuntimeError(f"export changed the witness: {len(lost)} element(s) differ from the reduced graph")
         out.exhibits = exhibits(sc)
         out.isolated = isolated(sc)
         trace_log = red.stats.log
@@ -264,7 +294,10 @@ def reduce_request(req: Request, progress=None) -> Outcome:
         },
         "run": {k: out.run.get(k) for k in ("trials", "inconclusive", "ties", "commits", "seconds", "capped")},
         "versions": {"witness": __version__, "relate_db": relate_version(), "python": platform.python_version()},
-        "determinism_claimed": out.run["inconclusive"] == 0 and req.max_seconds is None and not capped,
+        "determinism_claimed": out.run["inconclusive"] == 0
+        and req.max_seconds is None
+        and not capped
+        and req.order_check,
     }
     if expected is not None:
         manifest["predicate"]["expected_rows"] = plain(

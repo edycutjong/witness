@@ -21,7 +21,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .canon import canon_rows
+from .canon import canon_rows, same_answer
 from .export import _lit, cypher_name
 from .guard import GuardedQuery, Refused, Tie, engine_checks, static_checks, strip_comments
 from .predicates import answer_of, answer_sha, expected_answer
@@ -115,7 +115,7 @@ class CheckSpec:
         if any(a is None or isinstance(a, Tie) for a in answers):
             return None
         if self.kind == "disagree":
-            return answers[0] != answers[1]
+            return not same_answer(answers[0], answers[1])
         if self.kind == "differs" and self.loose:
             return answer_sha(answers[0]) != self.expected_sha and len(answers[0]) > 0
         return answer_sha(answers[0]) == self.baseline_sha
@@ -316,7 +316,7 @@ def check(
                 sc2.close()
                 if not same_graph:
                     out.disagreements.append("W.rl and W.cypher hold different graphs")
-                if ans_c != ans_w:
+                if not same_answer(ans_c, ans_w):
                     out.disagreements.append("W.rl and the store rebuilt from W.cypher give different answers")
             else:
                 out.reasons.append(f"cypher cross-check unavailable: {w_cypher.name} missing beside {w_rl.name}")
@@ -379,7 +379,7 @@ def check(
                     cli_ans.append(c)
                     if pyraw is not None and gq.cut is None and raw_bag(rows) != raw_bag(pyraw.data):
                         out.disagreements.append("raw rows differ between the CLI and Python on W")
-                if cli_ans != ans_w:
+                if not same_answer(cli_ans, ans_w):
                     out.disagreements.append("canonical answers differ between the CLI and Python on W")
             # necessity, one fresh writable copy per probe (skipped for order-cut queries)
             if cut:
@@ -404,7 +404,8 @@ def check(
                     h = spec.holds(cans)
                     cli_nec = None if h is None else (not h)
                     raw_ok = list(probe.get("_raw") or []) == [raw_bag(r) for r in rows_l]
-                    if cli_nec != probe["necessary"] or cans != list(probe.get("_canon") or []) or not raw_ok:
+                    same = same_answer(cans, list(probe.get("_canon") or []))
+                    if cli_nec != probe["necessary"] or not same or not raw_ok:
                         out.disagreements.append(f"probe {probe['i']} {probe['element']}: CLI and Python disagree")
                     else:
                         agree += 1

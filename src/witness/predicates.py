@@ -14,7 +14,7 @@ import hashlib
 import json
 from dataclasses import dataclass, field
 
-from .canon import canon_rows, canon_value
+from .canon import canon_rows, canon_value, same_answer
 from .guard import GuardedQuery, Refused, Tie, apply_cut
 
 KINDS = ("keep", "differs", "disagree")
@@ -63,12 +63,12 @@ class Predicate:
         if self.kind == "differs":
             if self.expected is None:
                 raise Refused("differs needs --expected", "predicate")
-            if self.baseline == self.expected:
+            if same_answer(self.baseline, self.expected):
                 raise Refused("differs: the query already returns the expected answer on the full graph", "predicate")
         if self.kind == "disagree":
             if len(self.queries) != 2 or self.other_baseline is None:
                 raise Refused("disagree needs --other", "predicate")
-            if self.baseline == self.other_baseline:
+            if same_answer(self.baseline, self.other_baseline):
                 raise Refused("disagree: the two queries give the same answer on the full graph", "predicate")
 
     def holds(self, answers: list) -> bool | None:
@@ -77,12 +77,12 @@ class Predicate:
             return None
         a = answers[0]
         if self.kind == "keep":
-            return a == self.baseline
+            return same_answer(a, self.baseline)
         if self.kind == "differs":
             if self.loose:
-                return a != self.expected and len(a) > 0
-            return a == self.baseline
-        return a != answers[1]
+                return not same_answer(a, self.expected) and len(a) > 0
+            return same_answer(a, self.baseline)
+        return not same_answer(a, answers[1])
 
     @property
     def change_phrase(self) -> str:

@@ -18,7 +18,9 @@ scratch copy in a temp dir (`Scratch.open_copy`, the reducer's own path). The la
 | trial ms p95 | 2.94 | 13.62 |
 | counts restored after rollback | 3000/3000 | 3000/3000 |
 
-Ratio of median trials/s: **4.07×** in this setup. The reduction needs ~371 trials: about 1.1 s on Relate (measured, `witnesses/two-hub.manifest.json`) and about
+Ratio of median trials/s: **4.07×** in this setup. The trials/s wall clock includes each side's count check (two Bolt queries per trial on
+Neo4j, two in-process counts on Relate); the per-trial ms rows above are begin → rollback and exclude it on both sides
+(p50 2.54 vs 6.48 ms, ratio 2.55×). The reduction needs ~371 trials: about 1.1 s on Relate (measured, `witnesses/two-hub.manifest.json`) and about
 4 s at Neo4j's rate here. Neo4j was still speeding up across the three runs (76.9 → 90.2 → 102.2 trials/s), so the gap is the cost of
 this setup (a server in a Docker VM, one Bolt round trip per statement, two extra count queries per trial), not a claim that Neo4j
 cannot run rollback trials. It runs them fine and returned the same answers.

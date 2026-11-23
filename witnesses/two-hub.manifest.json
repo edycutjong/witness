@@ -1,0 +1,248 @@
+{
+  "baseline": {
+    "columns": [
+      "airport",
+      "hub_countries"
+    ],
+    "rows": [
+      {
+        "airport": "PBC",
+        "hub_countries": [
+          "MX",
+          "US"
+        ]
+      },
+      {
+        "airport": "QRO",
+        "hub_countries": [
+          "MX",
+          "US"
+        ]
+      },
+      {
+        "airport": "TLC",
+        "hub_countries": [
+          "MX",
+          "US"
+        ]
+      },
+      {
+        "airport": "UPN",
+        "hub_countries": [
+          "MX",
+          "US"
+        ]
+      }
+    ],
+    "sha256": "5954edf6b5c4c1785b4267c470a821e5de12695ee7921d98204c42d541dcbfad"
+  },
+  "check": {
+    "check_text": "22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)",
+    "cli": "relate CLI: sufficiency + 22 of 22 necessity probes cross-checked",
+    "cli_used": true,
+    "disagreements": [],
+    "inconclusive": 0,
+    "probes": [
+      {
+        "cli_necessary": true,
+        "element": "(LAX)-[:HAS_ROUTE]->(MEX)",
+        "i": 1,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(ACA)-[:HAS_ROUTE]->(MEX)",
+        "i": 2,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(LAS)-[:HAS_ROUTE]->(MEX)",
+        "i": 3,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TIJ)-[:HAS_ROUTE]->(MEX)",
+        "i": 4,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(UPN)-[:HAS_ROUTE]->(LAX)",
+        "i": 5,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(UPN)-[:HAS_ROUTE]->(TIJ)",
+        "i": 6,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DFW)-[:HAS_ROUTE]->(MEX)",
+        "i": 7,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(QRO)-[:HAS_ROUTE]->(TIJ)",
+        "i": 8,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(QRO)-[:HAS_ROUTE]->(DFW)",
+        "i": 9,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(PBC)-[:HAS_ROUTE]->(TIJ)",
+        "i": 10,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(PBC)-[:HAS_ROUTE]->(DFW)",
+        "i": 11,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TLC)-[:HAS_ROUTE]->(ACA)",
+        "i": 12,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TLC)-[:HAS_ROUTE]->(LAS)",
+        "i": 13,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(LAX)-[:IN_COUNTRY]->(US)",
+        "i": 14,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(ACA)-[:IN_COUNTRY]->(MX)",
+        "i": 15,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(LAS)-[:IN_COUNTRY]->(US)",
+        "i": 16,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TIJ)-[:IN_COUNTRY]->(MX)",
+        "i": 17,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(UPN)-[:IN_COUNTRY]->(MX)",
+        "i": 18,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DFW)-[:IN_COUNTRY]->(US)",
+        "i": 19,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(QRO)-[:IN_COUNTRY]->(MX)",
+        "i": 20,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(PBC)-[:IN_COUNTRY]->(MX)",
+        "i": 21,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TLC)-[:IN_COUNTRY]->(MX)",
+        "i": 22,
+        "kind": "rel",
+        "necessary": true
+      }
+    ],
+    "reasons": [],
+    "sufficient": true,
+    "verified": true
+  },
+  "comparison": {
+    "float_digits": 12,
+    "rows": "bag",
+    "strict_lists": true
+  },
+  "determinism_claimed": true,
+  "name": "two-hub",
+  "params": {
+    "country": "MX",
+    "dest": "MEX"
+  },
+  "predicate": {
+    "kind": "keep"
+  },
+  "reasons": [],
+  "run": {
+    "capped": null,
+    "commits": 86,
+    "inconclusive": 0,
+    "seconds": 1.095,
+    "ties": 0,
+    "trials": 371
+  },
+  "schema": "witness.manifest/v1",
+  "seed": 0,
+  "source": {
+    "nodes": 3748,
+    "path": "data/air-routes.rl",
+    "relationships": 57645,
+    "sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+  },
+  "statement": "// Which airports of $country have no direct flight to $dest, yet would still reach it in two flights if any one hub closed?\nMATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\nWHERE a.iata <> $dest\n  AND NOT EXISTS { MATCH (a)-[:HAS_ROUTE]->(:Airport {iata: $dest}) }\nMATCH (a)-[:HAS_ROUTE]->(hub:Airport)-[:HAS_ROUTE]->(:Airport {iata: $dest})\nOPTIONAL MATCH (hub)-[:IN_COUNTRY]->(hc:Country)\nWITH a, count(DISTINCT hub) AS hubs, coll.sort(collect(DISTINCT hc.code)) AS hub_countries\nWHERE hubs >= 2\nRETURN a.iata AS airport, hub_countries\nORDER BY airport\n",
+  "verified": true,
+  "versions": {
+    "python": "3.12.13",
+    "relate_db": "1.0.1",
+    "witness": "0.1.0"
+  },
+  "witness": {
+    "isolated_nodes": 0,
+    "nodes": 12,
+    "relationships": 22
+  }
+}

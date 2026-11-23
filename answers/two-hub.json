@@ -1,0 +1,42 @@
+{
+  "columns": [
+    "airport",
+    "hub_countries"
+  ],
+  "params": {
+    "country": "MX",
+    "dest": "MEX"
+  },
+  "query": "queries/two-hub.cypher",
+  "rows": [
+    {
+      "airport": "PBC",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "QRO",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "TLC",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "UPN",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    }
+  ],
+  "sha256": "5954edf6b5c4c1785b4267c470a821e5de12695ee7921d98204c42d541dcbfad"
+}

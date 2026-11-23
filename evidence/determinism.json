@@ -1,0 +1,33 @@
+{
+  "query": "queries/two-hub.cypher",
+  "params": {
+    "country": "MX",
+    "dest": "MEX"
+  },
+  "seed": 0,
+  "byte_identical": true,
+  "runs": [
+    {
+      "run": 1,
+      "cypher_sha256": "6df99e7d6a7a4b35925ec25792c58ab93e3d5191d2a69db396fba8e9bdd9b015",
+      "trials": 371,
+      "inconclusive": 0,
+      "witness_rels": 22,
+      "reduction_s": 1.06,
+      "verified": true
+    },
+    {
+      "run": 2,
+      "cypher_sha256": "6df99e7d6a7a4b35925ec25792c58ab93e3d5191d2a69db396fba8e9bdd9b015",
+      "trials": 371,
+      "inconclusive": 0,
+      "witness_rels": 22,
+      "reduction_s": 1.072,
+      "verified": true
+    }
+  ],
+  "witness": "0.1.0",
+  "relate_db": "1.0.1",
+  "python": "3.12.13",
+  "machine": "arm64 Darwin 27.2.0"
+}

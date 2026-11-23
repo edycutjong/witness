@@ -69,7 +69,12 @@ def evidence_markdown(res: dict) -> str:
     chk = res["check"]
     stamp = chk["check_text"].split(" (")[0]
     total = f"{res['source_relationships']:,}"
-    head = f"**Evidence:** {w['relationships']} relationships (of {total}) reproduce it; {stamp}"
+    kept = "reproduce it"  # keep / strict differs
+    if "end the disagreement" in stamp:
+        kept = "keep the two queries disagreeing"
+    elif "end the mismatch" in stamp:
+        kept = "keep the mismatch"
+    head = f"**Evidence:** {w['relationships']} relationships (of {total}) {kept}; {stamp}"
     tail = " — verified deletion-minimal." if res["verified"] else " — NOT verified."
     head += tail
     lines.append(head)
@@ -313,7 +318,10 @@ class WitnessTools:
                 _kill_group(proc)
                 proc.join(5)
                 return ToolError("timeout", f"the reply did not complete within {self.request_timeout:g} s").to_dict()
-            except EOFError:
+            except Exception as e:  # noqa: BLE001 - EOFError (worker died) or an unreadable reply (a2a arch r2)
+                if not isinstance(e, EOFError):
+                    _kill_group(proc)
+                    return ToolError("internal", f"unreadable reply from the worker: {type(e).__name__}").to_dict()
                 return ToolError("internal", f"the reduction process died (exit code {proc.exitcode})").to_dict()
             if kind == "ok":
                 payload["request_seconds"] = round(time.monotonic() - t0, 3)

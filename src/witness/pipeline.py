@@ -106,7 +106,9 @@ def _refuse_aliased_outputs(req: Request, source: Path) -> None:
     """No output may land on the source store: write_rl() unlinks its target first, and the source SHA-256 is only
     compared after the export (`why -f g.cypher --store g.rl --out .` would otherwise replace g.rl; a2a arch r1)."""
     name = req.name
-    if not name or name in (".", "..") or "/" in name or "\\" in name or Path(name).name != name:
+    if not name or name in (".", "..") or "/" in name or "\\" in name or bad_name(name) or "\x00" in name:
+        raise Refused(f"the output name must be a plain file stem, got {name!r}", "out")
+    if Path(name).name != name:
         raise Refused(f"the output name must be a plain file stem, got {name!r}", "out")
     src = source.resolve()
     outs = [Path(f"{Path(req.out_dir) / name}{s}") for s in OUT_SUFFIXES]

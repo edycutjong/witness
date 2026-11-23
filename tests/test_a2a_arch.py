@@ -331,3 +331,103 @@ def test_mcp_reply_receive_has_a_deadline():
     with pytest.raises(TimeoutError):
         _recv_within(parent, 0.3)
     child.close()
+
+
+def test_partial_temporal_maps_relate_accepts_are_fixed_values():
+    """a2a r2 (grok P0, rejected with these values): Relate 1.0.1 refuses a date-bearing map without `year`, and
+    time-only maps are fixed values, so the map rule reads no clock. Pinned: a later Relate must keep this."""
+    import time
+
+    import relate
+
+    from witness.guard import static_checks
+
+    db = relate.Database(":memory:")
+    qs = ["RETURN time({hour: 1}) AS t", "RETURN localtime({hour: 1}) AS t", "RETURN datetime({epochSeconds: 5}) AS t"]
+    first = [db.execute(q).data for q in qs]
+    time.sleep(1.1)
+    assert [db.execute(q).data for q in qs] == first
+    for q in qs:
+        static_checks(q)
+    for q in ["RETURN datetime({hour: 1}) AS t", "RETURN date({day: 1}) AS t"]:
+        with pytest.raises(Exception, match="year must be specified"):
+            db.execute(q)
+
+
+def test_check_sentence_is_bare_only_when_verified():
+    from witness.check import CheckResult
+
+    probes = [{"i": 1, "kind": "rel", "element": "x", "necessary": True}]
+    r = CheckResult(sufficient=True, probes=probes, disagreements=["W.rl and W.cypher hold different graphs"])
+    assert not r.verified and r.text.startswith("NOT VERIFIED: 1 of 1 change the answer")
+    assert CheckResult(sufficient=True, probes=[]).text.startswith("NOT VERIFIED: 0 of 0")
+    two = probes + [{"i": 2, "kind": "rel", "element": "y", "necessary": False}]
+    assert CheckResult(sufficient=True, probes=two).text.startswith("NOT VERIFIED: 1 of 2")
+    assert CheckResult(sufficient=True, probes=probes).verified
+
+
+def test_plugin_namespaces_are_refused_statically():
+    from pathlib import Path
+
+    from witness.guard import static_checks
+
+    for q in ["RETURN apoc.load.json('http://x') AS j", "RETURN gds.version() AS v", "RETURN dbms.components() AS c"]:
+        with pytest.raises(Refused, match="namespace"):
+            static_checks(q)
+    root = Path(__file__).parents[1]
+    static_checks((root / "queries" / "two-hub.cypher").read_text(), {"country": "MX", "dest": "MEX"})  # coll.sort
+
+
+def test_vector_properties_and_c1_controls_round_trip(tmp_path):
+    import relate
+
+    from witness.export import _lit, cypher_script, validate_witness_script, write_rl
+    from witness.store import Scratch
+
+    src = tmp_path / "v.rl"
+    db = relate.Database(str(src))
+    db.execute("CREATE (:V {v: vector([1.0, 2.5], 2, FLOAT32), s: $s})", {"s": "a\x90b\x9fc"})
+    db.close()
+    sc = Scratch.open_copy(src, tmp_path)
+    script = cypher_script(sc)
+    keys = set(sc.node_keys.values())
+    sc.close()
+    validate_witness_script(script)
+    write_rl(script, tmp_path / "re.rl")
+    sc2 = Scratch.open_copy(tmp_path / "re.rl", tmp_path)
+    try:
+        assert set(sc2.node_keys.values()) == keys
+    finally:
+        sc2.close()
+    assert "\\u0090" in _lit("a\x90b")
+
+
+def test_mcp_evidence_line_says_what_the_predicate_kept():
+    from witness.mcp_server import evidence_markdown
+
+    res = {
+        "answer": {"columns": ["x"], "rows": [{"x": 1}]},
+        "witness": {"relationships": 2},
+        "check": {"check_text": "2 of 2 end the disagreement (2 of 2 relationships, 0 of 0 isolated nodes)"},
+        "source_relationships": 10,
+        "verified": True,
+        "exhibits": [],
+        "files": {"rl": "w.rl"},
+        "relate_version": "1.0.1",
+    }
+    text = evidence_markdown(res)
+    assert "keep the two queries disagreeing" in text and "reproduce it" not in text
+
+
+def test_manifest_rows_render_graph_values_by_content_not_store_id():
+    import relate
+
+    from witness.check import plain
+
+    db = relate.Database(":memory:")
+    db.execute("CREATE (:P {name: 'A'})-[:R {w: 1}]->(:P {name: 'B'})")
+    row = db.execute("MATCH p = (a:P)-[r:R]->(b) RETURN a, r, p").data[0]
+    out = plain(row)
+    assert out["a"] == {"labels": ["P"], "properties": {"name": "A"}}
+    assert out["r"] == {"type": "R", "properties": {"w": 1}}
+    assert "id=" not in repr(out)

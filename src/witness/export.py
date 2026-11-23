@@ -26,7 +26,7 @@ def _str_lit(v: str) -> str:
             out.append("\\\\")
         elif ch == "'":
             out.append("\\'")
-        elif ord(ch) < 0x20 or ch == "\x7f" or ch in _LINE_BREAKS:
+        elif ord(ch) < 0x20 or 0x7F <= ord(ch) <= 0x9F or ch in _LINE_BREAKS:
             out.append(f"\\u{ord(ch):04X}")
         else:
             out.append(ch)
@@ -69,6 +69,11 @@ def _lit(v) -> str:
         return f"{v.kind}({_str_lit(v.text)})"
     if kind == "Duration" and hasattr(v, "months"):
         return f"duration({_str_lit(str(v))})"
+    if kind == "Vector" and hasattr(v, "coordinate_type") and hasattr(v, "values"):
+        vals = list(v.values)
+        if not str(v.coordinate_type).isidentifier():
+            raise TypeError(f"vector coordinate type {v.coordinate_type!r}")
+        return f"vector({_lit(vals)}, {len(vals)}, {v.coordinate_type})"
     if kind == "Point" and hasattr(v, "srid"):
         coords = [("x", v.x), ("y", v.y)] + ([("z", v.z)] if getattr(v, "z", None) is not None else [])
         return "point({srid: " + str(int(v.srid)) + "".join(f", {k}: {_float_lit(float(c))}" for k, c in coords) + "})"
@@ -94,7 +99,7 @@ def cypher_script(sc: Scratch, header: str = "") -> str:
     return head + "CREATE\n  " + ",\n  ".join(parts) + ";\n"
 
 
-_SCRIPT_CALLS = frozenset({"date", "datetime", "localdatetime", "time", "localtime", "duration", "point"})
+_SCRIPT_CALLS = frozenset({"date", "datetime", "localdatetime", "time", "localtime", "duration", "point", "vector"})
 _SCRIPT_CLAUSES = frozenset(
     "match optional merge set delete detach remove foreach load csv call use with unwind return union where order skip "
     "limit yield show finish filter let insert next transactions start stop alter drop grant revoke deny".split()
@@ -127,7 +132,11 @@ def validate_witness_script(script: str) -> None:
             if prev == "." or t.quoted or t.text not in _SCRIPT_CALLS:
                 raise Refused(f"{t.name}() in a witness .cypher (only temporal/point constructors)", "witness")
             args = _split_args(toks, k + 1)
-            if t.text == "point":
+            if t.text == "vector":  # vector([numbers], dimension, COORDINATE_TYPE)
+                ok = len(args) == 3 and len(args[1]) == 1 and args[1][0].kind == "num" and len(args[2]) == 1
+                ok = ok and args[2][0].kind == "ident" and not args[2][0].quoted
+                ok = ok and args[0][0].text == "[" and all(x.kind in ("num", "punct") for x in args[0])
+            elif t.text == "point":
                 a = args[0] if len(args) == 1 else []
                 ok = bool(a) and a[0].text == "{" and a[-1].text == "}"
                 ok = ok and all(x.kind in ("num", "punct") or x.text in ("srid", "x", "y", "z") for x in a)

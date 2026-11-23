@@ -25,6 +25,7 @@ WRITE_KEYWORDS = {"create", "merge", "set", "delete", "detach", "remove", "forea
 # Schema/administration commands open the statement (DROP INDEX, ALTER DATABASE, START DATABASE, GRANT ...).
 # The engine's query_type catches them on the main path; the fixture slice runs on Neo4j with only these static checks.
 ADMIN_STARTS = {"drop", "alter", "grant", "revoke", "deny", "rename", "start", "stop", "terminate", "enable", "show"}
+REFUSED_CALL_HEADS = {"apoc", "gds", "dbms", "db", "graph", "genai"}  # plugin / server namespaces (a2a arch r2)
 REFUSED_FUNCTIONS = {
     "rand": "rand() is random",
     "randomuuid": "randomUUID() is random",
@@ -303,6 +304,8 @@ def static_checks(text: str, params: dict | None = None, door: str = "query") ->
     for c in _function_calls(toks):
         if c.name in REFUSED_FUNCTIONS:
             raise Refused(REFUSED_FUNCTIONS[c.name], door)
+        if "." in c.name and c.name.split(".", 1)[0] in REFUSED_CALL_HEADS:
+            raise Refused(f"{c.name}() is outside the supported read-only subset (plugin or server namespace)", door)
         why = _check_temporal(c)
         if why:
             raise Refused(why, door)

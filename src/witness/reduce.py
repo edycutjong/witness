@@ -13,7 +13,8 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
-from .canon import canon_rows
+from .guard import GuardedQuery, Tie
+from .predicates import Predicate, answer_of
 from .store import Scratch
 
 
@@ -56,64 +57,103 @@ def untyped_rel_pattern(statement: str) -> bool:
 class Stats:
     trials: int = 0
     inconclusive: int = 0
+    ties: int = 0
     committed: int = 0
     trial_ms: list[float] = field(default_factory=list)
     log: list[dict] = field(default_factory=list)
 
 
 class Reducer:
+    """ddmin over one scratch store. ``predicate`` decides each trial; ``backend`` runs it (in-process by default,
+    or an ``isolate.IsolatedTrials`` child process with a per-trial timeout)."""
+
     def __init__(
         self,
         scratch: Scratch,
-        query: str,
-        params: dict,
+        query: str | None = None,
+        params: dict | None = None,
         *,
+        predicate: Predicate | None = None,
         seed: int = 0,
         strict_lists: bool = False,
+        digits: int = 12,
         max_trials: int = 20000,
-        check_every: int = 1,
-        predicate: Callable[[tuple | None], bool] | None = None,
+        max_seconds: float | None = None,
+        check_every: int = 100,
+        progress: Callable[[Reducer, str], None] | None = None,
+        backend=None,
     ):
         self.sc = scratch
-        self.query = query
-        self.params = params
         self.seed = seed
         self.strict_lists = strict_lists
+        self.digits = digits
         self.max_trials = max_trials
+        self.max_seconds = max_seconds
         self.check_every = check_every
+        self.progress = progress
+        self.backend = backend or scratch
         self.stats = Stats()
-        self.baseline = self.sc.answer(query, params, strict_lists)
-        self.predicate = predicate or (lambda ans: ans == self.baseline)
+        self._t0 = time.perf_counter()
+        if predicate is None:
+            gq = GuardedQuery(text=query, params=params or {}, exec_text=query)
+            base = self._answers_now([gq])[0]
+            predicate = Predicate("keep", [gq], base)
+        self.pred = predicate
+        self.baseline = predicate.baseline
+        self.query = predicate.queries[0].text
+        self.params = predicate.queries[0].params
         self.counts = self.sc.counts()
+
+    def _answers_now(self, queries) -> list:
+        out = []
+        for gq in queries:
+            res = self.sc.run(gq.exec_text, gq.params)
+            out.append(self._ans(gq, res.data, res.columns))
+        return out
+
+    def _ans(self, gq, rows, cols):
+        return answer_of(gq, rows, cols, keyer=self.sc.keyer, strict_lists=self.strict_lists, digits=self.digits)
 
     # ---- one trial ----------------------------------------------------------------------------
     def test(self, rel_ids=(), node_ids=(), phase: str = "") -> bool | None:
         if self.stats.trials >= self.max_trials:
-            raise TrialCapReached(self.stats.trials)
+            raise TrialCapReached(f"trial cap {self.max_trials} reached")
+        if self.max_seconds is not None and time.perf_counter() - self._t0 > self.max_seconds:
+            raise TrialCapReached(f"--max-seconds {self.max_seconds} reached")
         self.stats.trials += 1
         check = self.counts if (self.stats.trials % self.check_every == 0) else None
-        t = self.sc.trial(self.query, self.params, rel_ids, node_ids, check_counts=check)
+        stmts = [(gq.exec_text, gq.params) for gq in self.pred.queries]
+        t = self.backend.trial_many(stmts, list(rel_ids), list(node_ids), check_counts=check)
         self.stats.trial_ms.append(t.ms)
-        if t.error is not None:
+        verdict = None
+        tie = False
+        if t.error is None:
+            try:
+                answers = getattr(t, "answers", None)  # an isolated child returns canonical answers
+                if answers is None:
+                    answers = [self._ans(gq, r, c) for gq, (r, c) in zip(self.pred.queries, t.results, strict=True)]
+                tie = any(isinstance(a, Tie) for a in answers)
+                verdict = self.pred.holds(answers)
+            except Exception:  # noqa: BLE001 - a comparison failure is inconclusive, never proof
+                verdict = None
+        if verdict is None:
             self.stats.inconclusive += 1
-            verdict = None
-        else:
-            ans = canon_rows(t.rows, t.columns, strict_lists=self.strict_lists, keyer=self.sc.keyer)
-            verdict = bool(self.predicate(ans))
-        self.stats.log.append(
-            {
-                "n": self.stats.trials,
-                "phase": phase,
-                "rels": len(rel_ids),
-                "nodes": len(node_ids),
-                "holds": verdict,
-                "ms": round(t.ms, 3),
-            }
-        )
+            self.stats.ties += int(tie)
+        rec = {"n": self.stats.trials, "phase": phase, "rels": len(rel_ids), "nodes": len(node_ids), "holds": verdict}
+        rec["ms"] = round(t.ms, 3)
+        if t.error:
+            rec["error"] = t.error[:200]
+        if tie:
+            rec["tie"] = True
+        self.stats.log.append(rec)
+        if self.progress is not None:
+            self.progress(self, phase)
         return verdict
 
     def commit(self, rel_ids=(), node_ids=()) -> None:
         self.sc.commit_delete(rel_ids, node_ids)
+        if self.backend is not self.sc:
+            self.backend.commit_delete(rel_ids, node_ids)
         self.counts = self.sc.counts()
         self.stats.committed += 1
 
@@ -184,10 +224,12 @@ class Reducer:
             raise EmptyGraphPredicate("the predicate holds on the empty graph")
 
     def plan_chunk(self) -> dict:
-        plan = self.sc.run("EXPLAIN " + self.query, self.params).plan
-        names = named_tokens(self.query, plan)
+        names: set[str] = set()
+        for gq in self.pred.queries:
+            plan = self.sc.run("EXPLAIN " + gq.exec_text, gq.params).plan
+            names |= named_tokens(gq.text, plan)
         info = {"names": sorted(names), "dropped_rels": 0, "dropped_nodes": 0, "kept": None}
-        if untyped_rel_pattern(self.query):
+        if any(untyped_rel_pattern(gq.text) for gq in self.pred.queries):
             info["kept"] = "untyped relationship pattern: type pruning disabled"
             return info
         u_rels = [r for r, t in self.sc.rel_type.items() if t not in names]
@@ -233,7 +275,7 @@ class Reducer:
                 return removed
 
     def run(self) -> dict:
-        t0 = time.perf_counter()
+        t0 = self._t0 = time.perf_counter()
         out = {"seed": self.seed, "start_counts": self.counts}
         self.empty_graph_check()
         out["plan"] = self.plan_chunk()
@@ -246,17 +288,20 @@ class Reducer:
         out["after_b"] = self.sc.counts()
         c_removed = self.ddmin(self.isolated_nodes(rank), "node", "C")
         out["phase_c_removed"] = c_removed
+        # Fixpoint: Phase C changed the graph, so re-run the singleton relationship pass, then Phase C, until Phase C
+        # removes nothing. singleton_pass() itself ends on a commit-free sweep, so when C* then removes nothing the
+        # graph is unchanged since that sweep: every relationship and every isolated node was tried on the final set.
         rounds = 0
         while c_removed:
             rounds += 1
-            b2 = self.singleton_pass("B*")
+            out.setdefault("fixpoint", []).append({"b": self.singleton_pass("B*")})
             c_removed = self.ddmin(self.isolated_nodes(rank), "node", "C*")
-            if not b2 and not c_removed:
-                break
+            out["fixpoint"][-1]["c"] = c_removed
         out["fixpoint_rounds"] = rounds
         out["final_counts"] = self.sc.counts()
         out["trials"] = self.stats.trials
         out["inconclusive"] = self.stats.inconclusive
+        out["ties"] = self.stats.ties
         out["commits"] = self.stats.committed
         out["seconds"] = round(time.perf_counter() - t0, 3)
         return out

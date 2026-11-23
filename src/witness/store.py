@@ -45,12 +45,23 @@ class CollisionError(ValueError):
 
 @dataclass
 class TrialResult:
-    rows: list | None
+    rows: list | None  # the first statement's rows (kept for the spike bench)
     columns: list | None
     error: str | None
     ms: float
     deleted_rels: int = 0
     deleted_nodes: int = 0
+    results: list | None = None  # [(rows, columns)] per statement, None on error
+
+
+def sha256_file(path: str | Path) -> str:
+    import hashlib
+
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 @dataclass
@@ -158,26 +169,40 @@ class Scratch:
         check_counts: tuple[int, int] | None = None,
     ) -> TrialResult:
         """begin -> delete -> query -> rollback. Errors make the trial inconclusive (error set, rows None)."""
+        return self.trial_many([(query, params or {})], rel_ids, node_ids, check_counts)
+
+    def trial_many(
+        self,
+        statements: list[tuple[str, dict]],
+        rel_ids=(),
+        node_ids=(),
+        check_counts: tuple[int, int] | None = None,
+    ) -> TrialResult:
+        """begin -> delete -> every statement -> rollback, in one transaction."""
         t0 = time.perf_counter()
         self.db.begin_transaction()
-        rows = cols = err = None
+        results = err = None
         dr = dn = 0
         try:
             dr, dn = self._delete(rel_ids, node_ids)
-            res = self.db.execute(query, params or {})
-            rows, cols = res.data, res.columns
+            results = []
+            for q, p in statements:
+                res = self.db.execute(q, p or {})
+                results.append((res.data, res.columns))
         except StaleIdMap:
             self.db.rollback_transaction()
             raise
         except Exception as e:  # noqa: BLE001 - any engine error makes the trial inconclusive
             err = f"{type(e).__name__}: {e}"
+            results = None
         finally:
             if self.db.transaction_active():
                 self.db.rollback_transaction()
         ms = (time.perf_counter() - t0) * 1000
         if check_counts is not None and self.counts() != check_counts:
             raise IntegrityError(f"counts after rollback {self.counts()} != {check_counts}")
-        return TrialResult(rows, cols, err, ms, dr, dn)
+        first = results[0] if results else (None, None)
+        return TrialResult(first[0], first[1], err, ms, dr, dn, results)
 
     def commit_delete(self, rel_ids=(), node_ids=()) -> None:
         self.db.begin_transaction()
@@ -197,3 +222,50 @@ class Scratch:
         for r in drop:
             for m in (self.rel_keys, self.rel_ends, self.rel_type, self.rel_props):
                 m.pop(r, None)
+
+
+def replay(sc: Scratch, reverse: bool = False) -> relate.Database:
+    """Rebuild the scratch's graph into a fresh `:memory:` store, elements in canonical-key order (or reversed).
+
+    Used by the guard's order check (a second store in reverse order). Nodes are created per label set with batched
+    UNWIND; relationships are wired by the new elementIds, so no helper property is ever added to the graph.
+    """
+    mem = relate.Database(":memory:")
+    nodes = sorted(sc.node_keys, key=lambda n: sc.node_keys[n], reverse=reverse)
+    new_id: dict[str, str] = {}
+    batch: list[str] = []
+
+    def flush_nodes(group: list[str]) -> None:
+        labels = "".join(f":`{lb}`" for lb in sorted(sc.node_labels[group[0]]))
+        rows = [{"i": i, "p": sc.node_props[n]} for i, n in enumerate(group)]
+        stmt = f"UNWIND $rows AS r CREATE (n{labels}) SET n = r.p RETURN r.i AS i, elementId(n) AS id"
+        out = mem.execute(stmt, {"rows": rows})
+        for row in out.data:
+            new_id[group[row["i"]]] = row["id"]
+
+    for n in nodes:  # consecutive runs of one label set keep the canonical creation order
+        if batch and (sorted(sc.node_labels[batch[-1]]) != sorted(sc.node_labels[n]) or len(batch) >= 2000):
+            flush_nodes(batch)
+            batch = []
+        batch.append(n)
+    if batch:
+        flush_nodes(batch)
+    rels = sorted(sc.rel_keys, key=lambda r: sc.rel_keys[r], reverse=reverse)
+    batch = []
+
+    def flush_rels(group: list[str]) -> None:
+        rows = [{"s": new_id[sc.rel_ends[r][0]], "e": new_id[sc.rel_ends[r][1]], "p": sc.rel_props[r]} for r in group]
+        mem.execute(
+            "UNWIND $rows AS r MATCH (a) WHERE elementId(a) = r.s MATCH (b) WHERE elementId(b) = r.e "
+            f"CREATE (a)-[x:`{sc.rel_type[group[0]]}`]->(b) SET x = r.p",
+            {"rows": rows},
+        )
+
+    for r in rels:
+        if batch and (sc.rel_type[batch[-1]] != sc.rel_type[r] or len(batch) >= 2000):
+            flush_rels(batch)
+            batch = []
+        batch.append(r)
+    if batch:
+        flush_rels(batch)
+    return mem

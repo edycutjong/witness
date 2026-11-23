@@ -57,6 +57,7 @@ class Request:
     use_cli: bool = True
     require_cli: bool = False
     order_check: bool = True
+    claimed: list | None = None  # rows the caller already showed; a mismatch refuses before anything is written
 
 
 @dataclass
@@ -144,6 +145,12 @@ def reduce_request(req: Request, progress=None) -> Outcome:
         base, res0 = answers[0], results[0]
         if len(base) == 0:
             raise Refused("nothing to witness: the answer is empty", "query")
+        if req.claimed is not None:
+            cols = list(res0.columns)
+            if expected_answer(req.claimed, cols, strict_lists=req.strict_lists, digits=req.digits) != base:
+                raise Refused(
+                    "the answer you showed differs from this store's answer to this query; nothing attached", "answer"
+                )
         out.answer_columns = list(res0.columns)
         out.answer_rows = plain(_cut_rows(queries[0], res0.data))
         if len(res0.columns) == 1 and len(out.answer_rows) == 1:

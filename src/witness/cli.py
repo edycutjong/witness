@@ -286,6 +286,16 @@ def cmd_check(args) -> int:
     return 1
 
 
+def cmd_mcp(args) -> int:
+    from . import mcp_server
+
+    rest = list(args.rest)
+    for i, a in enumerate(rest):
+        if a in ("--out", "--ledger") and i + 1 < len(rest):
+            guard_write(rest[i + 1], a)
+    return mcp_server.main(rest)
+
+
 def cmd_rerun(args) -> int:
     import relate
 
@@ -585,6 +595,9 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--name")
     e.add_argument("--ledger")
 
+    m = sub.add_parser("mcp", help="stdio MCP server: tools why + check (needs the mcp extra)", add_help=False)
+    m.add_argument("rest", nargs=argparse.REMAINDER)
+
     v = sub.add_parser("review", help="list unreviewed reductions, or accept / dispute one")
     v.add_argument("id", nargs="?")
     v.add_argument("--accept", action="store_true")
@@ -596,6 +609,13 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     ap = build_parser()
+    raw = sys.argv[1:] if argv is None else list(argv)
+    if raw and raw[0] == "mcp":  # its own option set; argparse's REMAINDER mishandles a leading --flag
+        try:
+            return cmd_mcp(argparse.Namespace(rest=raw[1:]))
+        except Refused as e:
+            print(f"refused ({e.door}): {e.reason}", file=sys.stderr)
+            return EXIT_REFUSED
     args = ap.parse_args(argv)
     if args.version:
         print(f"witness {__version__} (relate-db {relate_version()})")
@@ -607,6 +627,7 @@ def main(argv: list[str] | None = None) -> int:
         "rerun": cmd_rerun,
         "export": cmd_export,
         "review": cmd_review,
+        "mcp": cmd_mcp,
     }
     if args.cmd not in cmds:
         ap.print_help()

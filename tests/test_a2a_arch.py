@@ -124,6 +124,12 @@ def test_request_kill_reaches_the_grandchild(tmp_path):
         "CREATE (n0:`A`);\nMATCH (n) DETACH DELETE n",
         "MATCH (n) RETURN n",
         "CREATE (n0:`A` {`v`: $secret})",
+        # a2a arch r2: calls in map values, namespaced clocks, constructors without a literal argument
+        "CREATE (n0:`N` {p: rand()})",
+        "CREATE (n0:`N` {p: datetime.realtime()})",
+        "CREATE (n0:`N` {p: datetime()})",
+        "CREATE (n0:`N` {p: range(1, 1000000000)})",
+        "CREATE (n0:`N` {p: date(toString(1))})",
     ],
 )
 def test_check_refuses_a_hand_edited_witness_script(script, tiny_rl, tmp_path):
@@ -243,3 +249,85 @@ def test_cut_column_with_a_backtick_in_its_name():
 
     gq = static_checks("MATCH (n:P) RETURN n.name AS `a``b` ORDER BY `a``b` LIMIT 1")
     assert gq.cut.order_cols == ["a`b"]
+
+
+def test_outputs_never_overwrite_each_other(tiny_rl, tmp_path):
+    """`--name ledger` made the witness the ledger's own file; a symlink x.html -> x.rl overwrote the witness."""
+    q = "MATCH (a:P {name: 'A'})-[:R]->(h)-[:R]->(d:P {name: 'D'}) RETURN h.name AS hub"
+    out = tmp_path / "out"
+    with pytest.raises(Refused, match="same file"):
+        reduce_request(
+            Request(source=tiny_rl, statement=q, params={}, name="ledger", out_dir=out, ledger=out / "ledger.rl")
+        )
+    out.mkdir()
+    (out / "x.html").symlink_to(out / "x.rl")
+    with pytest.raises(Refused, match="same file"):
+        reduce_request(
+            Request(source=tiny_rl, statement=q, params={}, name="x", out_dir=out, ledger=None, use_cli=False)
+        )
+
+
+def test_cli_params_keep_json_shaped_strings():
+    from witness.check import cli_param_args
+
+    args = cli_param_args({"a": "MX", "b": '"MX"', "c": "true", "d": "", "e": " x", "f": 3})
+    assert args == [
+        "--param",
+        "a=MX",
+        "--param",
+        'b="\\"MX\\""',
+        "--param",
+        'c="true"',
+        "--param",
+        'd=""',
+        "--param",
+        'e=" x"',
+        "--param",
+        "f=3",
+    ]
+
+
+@pytest.mark.parametrize("stmt", ["DROP INDEX witness_probe", "SHOW INDEXES", "START DATABASE x", "GRANT ROLE r TO u"])
+def test_administrative_commands_are_refused_statically(stmt):
+    from witness.guard import static_checks
+
+    with pytest.raises(Refused, match="administrative"):
+        static_checks(stmt)
+    static_checks("MATCH (start:P)-[:R]->(stop) RETURN start.name AS s, stop.name AS t")  # still legal variable names
+
+
+def test_names_with_control_characters_are_refused_before_reduction(tmp_path):
+    import relate
+
+    src = tmp_path / "ctl.rl"
+    db = relate.Database(str(src))
+    db.execute("CREATE (:`a\nb` {k: 1})-[:R]->(:B {k: 2})")
+    db.close()
+    with pytest.raises(Refused, match="control character"):
+        reduce_request(
+            Request(
+                source=src,
+                statement="MATCH (b:B) RETURN b.k AS k",
+                params={},
+                name="w",
+                out_dir=tmp_path / "o",
+                ledger=None,
+                use_cli=False,
+            )
+        )
+
+
+def test_mcp_reply_receive_has_a_deadline():
+    """poll() fired on a frame header; recv() then blocked on a body that never came."""
+    import multiprocessing as mp
+    import os
+    import struct
+
+    from witness.mcp_server import _recv_within
+
+    parent, child = mp.Pipe()
+    os.write(child.fileno(), struct.pack("!i", 100))  # a frame header promising 100 bytes, then nothing
+    assert parent.poll(1)
+    with pytest.raises(TimeoutError):
+        _recv_within(parent, 0.3)
+    child.close()

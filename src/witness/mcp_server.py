@@ -126,6 +126,27 @@ def override_spec(manifest: dict, statement: str, parameters: dict | None):
     )
 
 
+def _recv_within(conn, timeout: float):
+    """poll() only says a reply has started; recv() can still block on the rest of the frame. Receive under the
+    request deadline instead (a2a arch r2): TimeoutError when it does not complete in time."""
+    box: dict = {}
+
+    def run():
+        try:
+            box["v"] = conn.recv()
+        except BaseException as e:  # noqa: BLE001 - re-raised in the caller
+            box["e"] = e
+
+    th = threading.Thread(target=run, daemon=True)
+    th.start()
+    th.join(timeout)
+    if th.is_alive():
+        raise TimeoutError
+    if "e" in box:
+        raise box["e"]
+    return box["v"]
+
+
 def _check_worker(conn, args: dict) -> None:
     os.environ.setdefault("DO_NOT_TRACK", "1")
     from .check import check, spec_from_manifest
@@ -287,7 +308,11 @@ class WitnessTools:
                     "(determinism not claimed)",
                 ).to_dict()
             try:
-                kind, payload = parent.recv()
+                kind, payload = _recv_within(parent, max(0.1, t0 + self.request_timeout - time.monotonic()))
+            except TimeoutError:
+                _kill_group(proc)
+                proc.join(5)
+                return ToolError("timeout", f"the reply did not complete within {self.request_timeout:g} s").to_dict()
             except EOFError:
                 return ToolError("internal", f"the reduction process died (exit code {proc.exitcode})").to_dict()
             if kind == "ok":

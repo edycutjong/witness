@@ -22,6 +22,9 @@ import re
 from dataclasses import dataclass, field
 
 WRITE_KEYWORDS = {"create", "merge", "set", "delete", "detach", "remove", "foreach", "insert"}
+# Schema/administration commands open the statement (DROP INDEX, ALTER DATABASE, START DATABASE, GRANT ...).
+# The engine's query_type catches them on the main path; the fixture slice runs on Neo4j with only these static checks.
+ADMIN_STARTS = {"drop", "alter", "grant", "revoke", "deny", "rename", "start", "stop", "terminate", "enable", "show"}
 REFUSED_FUNCTIONS = {
     "rand": "rand() is random",
     "randomuuid": "randomUUID() is random",
@@ -266,6 +269,9 @@ def static_checks(text: str, params: dict | None = None, door: str = "query") ->
         raise Refused("empty statement", door)
     if any(t.text == ";" for t in toks):
         raise Refused("one statement only (a ';'-separated script is refused)", door)
+
+    if toks[0].kind == "ident" and toks[0].text in ADMIN_STARTS:
+        raise Refused(f"{toks[0].text.upper()} is an administrative command (read queries only)", door)
 
     def prev(i):
         return toks[i - 1].text if i > 0 else ""

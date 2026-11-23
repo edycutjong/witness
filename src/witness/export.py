@@ -107,7 +107,7 @@ def validate_witness_script(script: str) -> None:
     `check` rebuilds W from the `.cypher` beside a `.rl`, so a hand-edited script (LOAD CSV, CALL, MATCH, a second
     statement, a parameter, a function other than a temporal/point constructor) is refused before it runs
     (a2a arch r1)."""
-    from .guard import Refused, tokenize
+    from .guard import Refused, _split_args, tokenize
 
     toks = tokenize(script)
     if not toks:
@@ -121,6 +121,21 @@ def validate_witness_script(script: str) -> None:
             raise Refused("a witness .cypher holds literal values only (no parameters)", "witness")
         if t.text == ";" and k != len(toks) - 1:
             raise Refused("a witness .cypher must be one CREATE statement", "witness")
+        if k > 0 and t.kind == "ident" and nxt == "(":
+            # Every call, wherever it sits: a map value follows ":" ({p: rand()} slipped past the label skip, a2a r2).
+            # Only the constructors cypher_script() writes, un-namespaced, with literal arguments.
+            if prev == "." or t.quoted or t.text not in _SCRIPT_CALLS:
+                raise Refused(f"{t.name}() in a witness .cypher (only temporal/point constructors)", "witness")
+            args = _split_args(toks, k + 1)
+            if t.text == "point":
+                a = args[0] if len(args) == 1 else []
+                ok = bool(a) and a[0].text == "{" and a[-1].text == "}"
+                ok = ok and all(x.kind in ("num", "punct") or x.text in ("srid", "x", "y", "z") for x in a)
+            else:
+                ok = len(args) == 1 and len(args[0]) == 1 and args[0][0].kind == "str"
+            if not ok:
+                raise Refused(f"{t.name}() in a witness .cypher takes one literal argument", "witness")
+            continue
         if k == 0 or t.kind != "ident" or t.quoted or prev in (".", ":") or (nxt == ":" and prev in ("{", ",")):
             continue  # a label, type or map key
         if t.text in _SCRIPT_CLAUSES:

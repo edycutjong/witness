@@ -1,6 +1,6 @@
 """Build site/ (the static landing on Vercel) from the committed files. Every number on the page is read from them.
 
-uv run python scripts/build_site.py        -> site/index.html + site/exhibit/two-hub.html + site/og.svg
+uv run python scripts/build_site.py        -> site/index.html + site/exhibit/two-hub.html + site/icon.svg + site/og-image.png
 """
 
 from __future__ import annotations
@@ -8,11 +8,14 @@ from __future__ import annotations
 import html
 import json
 import re
+import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
 REPO = "https://github.com/edycutjong/witness"
+# Absolute base for og:image. Switch to https://witness.edycu.dev once its DNS record resolves (HUMAN-TODO #3).
+SITE_URL = "https://witness-wheat.vercel.app"
 # Set True when the repository is public (HUMAN-TODO: the flip at submission), then rebuild and redeploy.
 REPO_PUBLIC = False
 SOURCE_LI = f'<li><a href="{REPO}">Source on GitHub</a></li>' if REPO_PUBLIC else "<li>Source: opens at submission</li>"
@@ -50,6 +53,17 @@ PAGE = """<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Witness: the {w_rels} relationships that prove your agent's answer</title>
 <meta name="description" content="When an agent answers from a graph, Witness hands back a tiny graph that reproduces the answer and proves each relationship in it is needed. Built on Relate.">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Witness">
+<meta property="og:title" content="Witness: the {w_rels} relationships that prove your agent's answer">
+<meta property="og:description" content="{w_rels} of {src_rels_fmt} relationships reproduce the answer, and deleting any one of them changes it. Built on Relate.">
+<meta property="og:image" content="{site_url}/og-image.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta property="og:image:alt" content="Witness: {src_rels_fmt} relationships reduced to {w_rels}; each of the {w_rels} changes the answer when deleted.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{site_url}/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
@@ -211,6 +225,10 @@ page = PAGE.format(
     neo_tps=neo_tps,
     ratio=ratio,
     cmp_name=cmp_path.name,
+    site_url=SITE_URL,
 )
 (SITE / "index.html").write_text(page)
+# favicon + social card: the judge-facing media from docs/assets (synced from the asset pipeline)
+for name in ("icon.svg", "og-image.png"):
+    shutil.copyfile(ROOT / "docs" / "assets" / name, SITE / name)
 print(f"site/index.html {len(page):,} bytes; witness {w_rels} of {src_rels}; compare {cmp_path.name}")

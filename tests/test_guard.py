@@ -60,6 +60,10 @@ REFUSED = [
     # a2a arch r1: *.truncate(unit) without an input temporal truncates "now"
     ("RETURN date.truncate('day') AS d", "clock"),
     ("INSERT (n:P {name: 'Z'})", "INSERT"),
+    # a2a arch r2: a backtick identifier spelled like punctuation hid a LIMIT, or a write keyword, from the token rules
+    ("MATCH (n:P) RETURN n.name AS `{` LIMIT 2", "ORDER BY"),
+    ("MATCH (n:P) WITH n AS `{` LIMIT 1 RETURN `{`.name AS x", "ORDER BY"),
+    ("MATCH (n:P) WITH n AS `:` CREATE (m:Q) RETURN 1 AS x", "CREATE"),
     ("MATCH (n) RETURN n.x AS x, DateTime.Truncate('second') AS t", "clock"),
 ]
 
@@ -75,6 +79,8 @@ ALLOWED = [
     "MATCH (n) RETURN coll.sort(collect(n.name)) AS xs;",
     "MATCH (n:P {name: 'A'}) RETURN {k: n.name, v: size([1, 2])} AS m",
     "RETURN date.truncate('month', date('2026-11-08')) AS d",
+    "MATCH (n:P) RETURN n.name AS `{`, n.name AS `order` ORDER BY `order` LIMIT 2",
+    "RETURN datetime({`year`: 2024, month: 1}) AS d",
 ]
 
 

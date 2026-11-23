@@ -82,10 +82,11 @@ class Refused(ValueError):
 @dataclass
 class Tok:
     kind: str  # ident | num | str | param | punct
-    text: str  # case-folded for idents
+    text: str  # case-folded for idents; a backtick identifier keeps a leading "`" so it never equals "{", ":", LIMIT...
     start: int
     end: int
     quoted: bool = False  # backtick identifier
+    name: str = ""  # the identifier itself, case-folded, without backticks (function names)
 
 
 _TOKEN = re.compile(
@@ -116,9 +117,11 @@ def tokenize(text: str) -> list[Tok]:
         if kind in ("ws", "lc", "bc"):
             pass
         elif kind == "bt":
-            toks.append(Tok("ident", s[1:-1].replace("``", "`").lower(), m.start(), m.end(), quoted=True))
+            # a2a arch r2: `{` and `:` as identifiers matched the punctuation checks (`AS `{` LIMIT 2` hid the LIMIT)
+            name = s[1:-1].replace("``", "`").lower()
+            toks.append(Tok("ident", "`" + name, m.start(), m.end(), quoted=True, name=name))
         elif kind == "ident":
-            toks.append(Tok("ident", s.lower(), m.start(), m.end()))
+            toks.append(Tok("ident", s.lower(), m.start(), m.end(), name=s.lower()))
         else:
             toks.append(Tok(kind, s, m.start(), m.end()))
         pos = m.end()
@@ -139,9 +142,9 @@ def _function_calls(toks: list[Tok]) -> list[Call]:
             continue
         # walk back over ident(.ident)* — a property access followed by "(" is a namespaced function name
         j = i - 1
-        parts = [toks[j].text]
+        parts = [toks[j].name]
         while j >= 2 and toks[j - 1].text == "." and toks[j - 2].kind == "ident":
-            parts.insert(0, toks[j - 2].text)
+            parts.insert(0, toks[j - 2].name)
             j -= 2
         # No label skip here: a label or type is never directly followed by "(", while a map value such as
         # {k: rand()} is preceded by ":" and IS a call (QA r2: skipping after ":" let rand()/id() through in maps).
@@ -153,9 +156,9 @@ def _split_args(toks: list[Tok], open_idx: int) -> list[list[Tok]]:
     depth = 0
     args: list[list[Tok]] = [[]]
     for t in toks[open_idx + 1 :]:
-        if t.text in "([{":
+        if t.text in ("(", "[", "{"):
             depth += 1
-        elif t.text in ")]}":
+        elif t.text in (")", "]", "}"):
             if depth == 0:
                 break
             depth -= 1
@@ -179,7 +182,7 @@ def _literal_map_with_temporal_field(arg: list[Tok]) -> bool:
         if expect_key:
             if t.kind != "ident" or i + 1 >= len(inner) or inner[i + 1].text != ":":
                 return False
-            keys.add(t.text)
+            keys.add(t.name)
             i += 2
             expect_key = False
             continue

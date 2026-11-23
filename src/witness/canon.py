@@ -11,6 +11,20 @@ import json
 from typing import Any
 
 
+def cypher_name(s: str) -> str:
+    """A label, relationship type or property key as a backtick-quoted Cypher name (backticks doubled)."""
+    return "`" + str(s).replace("`", "``") + "`"
+
+
+def _opaque(v: Any) -> str:
+    """repr() of a value with no canonical form, refused when it is an identity repr (`<X object at 0x…>`), which
+    would differ between two runs and make equal answers compare unequal (a2a arch r1)."""
+    r = repr(v)
+    if " at 0x" in r:
+        raise ValueError(f"no canonical form for a {type(v).__name__} value")
+    return r
+
+
 def _round_float(x: float, digits: int) -> float:
     if x != x or x in (float("inf"), float("-inf")):
         return x
@@ -27,7 +41,7 @@ def _plain(v: Any, digits: int) -> Any:
         return [_plain(x, digits) for x in v]
     if isinstance(v, dict):
         return {str(k): _plain(v[k], digits) for k in sorted(v)}
-    return {"__repr__": repr(v)}
+    return {"__repr__": _opaque(v)}
 
 
 def node_key(labels: list[str], props: dict, digits: int = 12) -> str:
@@ -76,7 +90,7 @@ def canon_value(v: Any, *, strict_lists: bool = False, digits: int = 12, keyer=N
                 (str(k), canon_value(v[k], strict_lists=strict_lists, digits=digits, keyer=keyer)) for k in sorted(v)
             ),
         )
-    return ("other", repr(v))
+    return ("other", _opaque(v))
 
 
 def canon_rows(

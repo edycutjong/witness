@@ -59,6 +59,7 @@ REFUSED = [
     ("RETURN COUNT { MATCH (b) CALL { MATCH (c:Y) RETURN c LIMIT 1 } RETURN c } AS n", "ORDER BY"),
     # a2a arch r1: *.truncate(unit) without an input temporal truncates "now"
     ("RETURN date.truncate('day') AS d", "clock"),
+    ("INSERT (n:P {name: 'Z'})", "INSERT"),
     ("MATCH (n) RETURN n.x AS x, DateTime.Truncate('second') AS t", "clock"),
 ]
 

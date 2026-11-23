@@ -17,7 +17,7 @@ os.environ.setdefault("DO_NOT_TRACK", "1")
 
 import relate  # noqa: E402
 
-from .canon import canon_rows, node_key, rel_key  # noqa: E402
+from .canon import canon_rows, cypher_name, node_key, rel_key  # noqa: E402
 
 NODES_Q = "MATCH (n) RETURN elementId(n) AS id, labels(n) AS labels, properties(n) AS props"
 RELS_Q = (
@@ -236,7 +236,7 @@ def replay(sc: Scratch, reverse: bool = False) -> relate.Database:
     batch: list[str] = []
 
     def flush_nodes(group: list[str]) -> None:
-        labels = "".join(f":`{lb}`" for lb in sorted(sc.node_labels[group[0]]))
+        labels = "".join(f":{cypher_name(lb)}" for lb in sorted(sc.node_labels[group[0]]))
         rows = [{"i": i, "p": sc.node_props[n]} for i, n in enumerate(group)]
         stmt = f"UNWIND $rows AS r CREATE (n{labels}) SET n = r.p RETURN r.i AS i, elementId(n) AS id"
         out = mem.execute(stmt, {"rows": rows})
@@ -257,7 +257,7 @@ def replay(sc: Scratch, reverse: bool = False) -> relate.Database:
         rows = [{"s": new_id[sc.rel_ends[r][0]], "e": new_id[sc.rel_ends[r][1]], "p": sc.rel_props[r]} for r in group]
         mem.execute(
             "UNWIND $rows AS r MATCH (a) WHERE elementId(a) = r.s MATCH (b) WHERE elementId(b) = r.e "
-            f"CREATE (a)-[x:`{sc.rel_type[group[0]]}`]->(b) SET x = r.p",
+            f"CREATE (a)-[x:{cypher_name(sc.rel_type[group[0]])}]->(b) SET x = r.p",
             {"rows": rows},
         )
 

@@ -135,3 +135,55 @@ def test_check_refuses_a_hand_edited_witness_script(script, tiny_rl, tmp_path):
     spec = spec_from_args("MATCH (n:P) RETURN n.name AS n", {}, '[{"n": "A"}]')
     with pytest.raises(Refused, match="witness .cypher"):
         check(w, spec, use_cli=False)
+
+
+def test_check_text_counts_nothing_when_w_does_not_reproduce_the_answer():
+    from witness.check import CheckResult
+
+    probes = [{"i": 1, "kind": "rel", "element": "x", "necessary": True}]
+    assert CheckResult(sufficient=False, probes=probes).text.startswith("NOT SUFFICIENT")
+    assert CheckResult(sufficient=True, probes=probes).text.startswith("1 of 1 change the answer")
+
+
+def test_loose_differs_says_what_a_necessary_element_does(tiny_rl):
+    from witness.check import CheckSpec
+    from witness.predicates import Predicate
+
+    p = Predicate("differs", [], (("x", 1),), expected=(("x", 2),), loose=True)
+    assert p.change_phrase == "end the mismatch"
+    assert CheckSpec([], "differs", "", None, True).change_phrase == "end the mismatch"
+
+
+def test_order_check_replays_backtick_names(tmp_path):
+    import relate
+
+    from witness.store import Scratch, replay
+
+    src = tmp_path / "bt.rl"
+    db = relate.Database(str(src))
+    db.execute("CREATE (:`We``ird` {k: 1})-[:`RE``L`]->(:B {k: 2})")
+    db.close()
+    sc = Scratch.open_copy(src, tmp_path)
+    mem = replay(sc, reverse=True)
+    try:
+        assert mem.execute("MATCH (:`We``ird`)-[r:`RE``L`]->(:B) RETURN count(r) AS c").data == [{"c": 1}]
+    finally:
+        mem.close()
+        sc.close()
+
+
+def test_a_time_cap_that_never_fired_keeps_the_determinism_claim(tiny_rl, tmp_path):
+    q = "MATCH (a:P {name: 'A'})-[:R]->(h)-[:R]->(d:P {name: 'D'}) RETURN h.name AS hub"
+    o = reduce_request(
+        Request(
+            source=tiny_rl,
+            statement=q,
+            params={},
+            name="w",
+            out_dir=tmp_path / "o",
+            ledger=None,
+            use_cli=False,
+            max_seconds=600,
+        )
+    )
+    assert o.verified and o.manifest["determinism_claimed"]

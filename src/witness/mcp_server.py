@@ -118,6 +118,7 @@ def _check_worker(conn, args: dict) -> None:
         manifest = json.loads(Path(args["manifest"]).read_text())
         spec = spec_from_manifest(manifest)
         if args["statement"] is not None:
+            cmp_ = manifest.get("comparison", {})  # the override is compared the way the witness was (a2a arch r1)
             spec = spec_from_args(
                 args["statement"],
                 dict(args["parameters"] or {}),
@@ -125,8 +126,8 @@ def _check_worker(conn, args: dict) -> None:
                 "keep",
                 None,
                 False,
-                False,
-                12,
+                bool(cmp_.get("strict_lists")),
+                int(cmp_.get("float_digits", 12)),
             )
         conn.send(("ok", check(Path(args["witness"]), spec, use_cli=args["use_cli"]).to_dict()))
     except Refused as e:

@@ -79,7 +79,7 @@ class Reducer:
         digits: int = 12,
         max_trials: int = 20000,
         max_seconds: float | None = None,
-        check_every: int = 100,
+        check_every: int = 1,
         progress: Callable[[Reducer, str], None] | None = None,
         backend=None,
     ):

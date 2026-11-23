@@ -618,7 +618,12 @@ def build_parser() -> argparse.ArgumentParser:
     _reduce_opts(w)
     w.add_argument("--seed", type=int, default=0)
     w.add_argument("--max-trials", type=int, default=20000)
-    w.add_argument("--max-seconds", type=float, default=None, help="off by default; when set, no determinism claim")
+    w.add_argument(
+        "--max-seconds",
+        type=float,
+        default=None,
+        help="off by default; a run it stops is NOT verified and claims no determinism",
+    )
     w.add_argument("--isolate", action="store_true", help="run each trial in a child process (with --trial-timeout)")
     w.add_argument("--trial-timeout", type=float, default=30.0)
     w.add_argument("--name", default="witness", help="output file stem (default: the query file's stem)")

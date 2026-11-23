@@ -86,7 +86,11 @@ class Predicate:
 
     @property
     def change_phrase(self) -> str:
-        return "end the disagreement" if self.kind == "disagree" else "change the answer"
+        if self.kind == "disagree":
+            return "end the disagreement"
+        if self.kind == "differs" and self.loose:
+            return "end the mismatch"  # the answer becomes the expected one, or empty
+        return "change the answer"
 
     def describe(self) -> dict:
         d = {"kind": self.kind}

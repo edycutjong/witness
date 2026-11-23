@@ -21,7 +21,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-WRITE_KEYWORDS = {"create", "merge", "set", "delete", "detach", "remove", "foreach"}
+WRITE_KEYWORDS = {"create", "merge", "set", "delete", "detach", "remove", "foreach", "insert"}
 REFUSED_FUNCTIONS = {
     "rand": "rand() is random",
     "randomuuid": "randomUUID() is random",

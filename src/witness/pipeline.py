@@ -294,10 +294,7 @@ def reduce_request(req: Request, progress=None) -> Outcome:
         },
         "run": {k: out.run.get(k) for k in ("trials", "inconclusive", "ties", "commits", "seconds", "capped")},
         "versions": {"witness": __version__, "relate_db": relate_version(), "python": platform.python_version()},
-        "determinism_claimed": out.run["inconclusive"] == 0
-        and req.max_seconds is None
-        and not capped
-        and req.order_check,
+        "determinism_claimed": out.run["inconclusive"] == 0 and not capped and req.order_check,
     }
     if expected is not None:
         manifest["predicate"]["expected_rows"] = plain(

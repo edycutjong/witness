@@ -122,7 +122,11 @@ class CheckSpec:
 
     @property
     def change_phrase(self) -> str:
-        return "end the disagreement" if self.kind == "disagree" else "change the answer"
+        if self.kind == "disagree":
+            return "end the disagreement"
+        if self.kind == "differs" and self.loose:
+            return "end the mismatch"  # the answer becomes the expected one, or empty
+        return "change the answer"
 
 
 def spec_from_manifest(manifest: dict) -> CheckSpec:
@@ -193,6 +197,9 @@ class CheckResult:
         rels = [p for p in self.probes if p["kind"] == "rel"]
         nodes = [p for p in self.probes if p["kind"] == "node"]
         n = len(self.probes)
+        if self.sufficient is not True:  # every probe "changes" an answer W never reproduced: count nothing (a2a r1)
+            why = "W does not reproduce the answer" if self.sufficient is False else "sufficiency inconclusive"
+            return f"NOT SUFFICIENT: {why}; {n} necessity probes not counted"
         t = f"{self.necessary} of {n} {self.change_phrase}"
         t += f" ({sum(p['necessary'] is True for p in rels)} of {len(rels)} relationships"
         t += f", {sum(p['necessary'] is True for p in nodes)} of {len(nodes)} isolated nodes)"

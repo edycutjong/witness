@@ -10,6 +10,7 @@ os.environ.setdefault("DO_NOT_TRACK", "1")
 
 import relate  # noqa: E402
 
+from .canon import cypher_name  # noqa: E402
 from .store import Scratch  # noqa: E402
 
 # Characters str.splitlines() breaks on, plus every other control character: written as \uXXXX so a string value
@@ -30,11 +31,6 @@ def _str_lit(v: str) -> str:
         else:
             out.append(ch)
     return "'" + "".join(out) + "'"
-
-
-def cypher_name(s: str) -> str:
-    """A label, relationship type or property key as a backtick-quoted Cypher name."""
-    return "`" + str(s).replace("`", "``") + "`"
 
 
 def _float_lit(x: float) -> str:

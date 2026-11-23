@@ -390,10 +390,11 @@ def serve(tools: WitnessTools) -> None:
         """Shrink a read-only Cypher answer to the few relationships it needs, and prove each one is needed.
 
         Returns a tiny `.rl` store you can re-run with plain `relate`, the exhibit list, a `check` result
-        ("N of N change the answer") and `evidence_markdown` to paste into your reply. `answer` = the rows you already
-        showed (rows as objects keyed by column); if they differ from the store's answer, nothing is attached.
+        ("N of N change the answer"; "end the disagreement" for disagree) and `evidence_markdown` to paste into your
+        reply. When `verified` is false the sentence starts NOT VERIFIED or NOT SUFFICIENT. `answer` = the rows you
+        already showed (rows as objects keyed by column); if they differ from the store's answer, nothing is attached.
         `predicate`: keep (default) | differs (needs `expected`) | disagree (needs `other_statement`).
-        Read-only, deterministic queries only; refusals come back as an `error` object."""
+        Read-only queries in the supported subset only; refusals come back as an `error` object."""
         return tools.why(statement, parameters, store, predicate, expected, other_statement, answer)
 
     @server.tool()

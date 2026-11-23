@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import json
 import multiprocessing as mp
+import os
+import signal
 import threading
 import time
 from pathlib import Path
@@ -87,10 +89,59 @@ def evidence_markdown(res: dict) -> str:
     return "\n".join(lines[:MAX_EVIDENCE_LINES])
 
 
-def _why_worker(conn, req_dict: dict) -> None:
-    import os
+def _own_group() -> None:
+    """Lead a new process group: a request kill then reaches the isolate trial child too (a2a arch r1)."""
+    if hasattr(os, "setsid"):
+        try:
+            os.setsid()
+        except OSError:
+            pass
 
+
+def _kill_group(proc) -> None:
+    if hasattr(os, "killpg") and proc.pid:
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except (ProcessLookupError, PermissionError, OSError):
+            pass
+    if proc.is_alive():
+        proc.kill()
+
+
+def _check_worker(conn, args: dict) -> None:
     os.environ.setdefault("DO_NOT_TRACK", "1")
+    from .check import check, spec_from_args, spec_from_manifest
+    from .guard import Refused
+
+    _own_group()
+    try:
+        manifest = json.loads(Path(args["manifest"]).read_text())
+        spec = spec_from_manifest(manifest)
+        if args["statement"] is not None:
+            spec = spec_from_args(
+                args["statement"],
+                dict(args["parameters"] or {}),
+                json.dumps(manifest["baseline"]["rows"]),
+                "keep",
+                None,
+                False,
+                False,
+                12,
+            )
+        conn.send(("ok", check(Path(args["witness"]), spec, use_cli=args["use_cli"]).to_dict()))
+    except Refused as e:
+        conn.send(("refused", {"kind": e.door, "message": e.reason}))
+    except (ValueError, KeyError, TypeError) as e:
+        conn.send(("refused", {"kind": "witness", "message": f"unreadable manifest: {type(e).__name__}: {e}"}))
+    except Exception as e:  # noqa: BLE001
+        conn.send(("error", {"kind": "internal", "message": f"{type(e).__name__}: {e}"}))
+    finally:
+        conn.close()
+
+
+def _why_worker(conn, req_dict: dict) -> None:
+    os.environ.setdefault("DO_NOT_TRACK", "1")
+    _own_group()
     from .guard import Refused
     from .pipeline import Request, reduce_request
 
@@ -205,20 +256,20 @@ class WitnessTools:
                     "use_cli": self.use_cli,
                     "claimed": answer,
                 }
-                return self._supervise(req)
+                return self._supervise(_why_worker, req)
         except ToolError as e:
             return e.to_dict()
 
-    def _supervise(self, req: dict) -> dict:
+    def _supervise(self, target, req: dict) -> dict:
         ctx = mp.get_context("spawn")
         parent, child = ctx.Pipe()
-        proc = ctx.Process(target=_why_worker, args=(child, req))  # not a daemon: it spawns the isolate child
+        proc = ctx.Process(target=target, args=(child, req))  # not a daemon: it spawns the isolate child
         t0 = time.monotonic()
         proc.start()
         child.close()
         try:
             if not parent.poll(self.request_timeout):
-                proc.kill()
+                _kill_group(proc)
                 proc.join(5)
                 return ToolError(
                     "timeout",
@@ -236,14 +287,10 @@ class WitnessTools:
             return ToolError(payload["kind"], payload["message"]).to_dict()
         finally:
             proc.join(5)
-            if proc.is_alive():
-                proc.kill()
+            _kill_group(proc)  # also reaps a descendant the worker left behind
 
     # ---- check -------------------------------------------------------------------------------------------------
     def check(self, witness_path: str, statement: str | None = None, parameters: dict | None = None) -> dict:
-        from .check import check, spec_from_args, spec_from_manifest
-        from .guard import Refused
-
         try:
             w = Path(witness_path).expanduser()
             if not w.is_absolute():
@@ -259,30 +306,25 @@ class WitnessTools:
             man = w.with_suffix(".manifest.json")
             if not man.is_file():
                 raise ToolError("witness", f"no {man.name} beside {w.name}")
-            manifest = json.loads(man.read_text())
-            spec = spec_from_manifest(manifest)
-            overridden = []
-            if statement is not None:
-                spec = spec_from_args(
-                    statement,
-                    dict(parameters or {}),
-                    json.dumps(manifest["baseline"]["rows"]),
-                    "keep",
-                    None,
-                    False,
-                    False,
-                    12,
-                )
-                overridden.append("statement")
-            elif parameters:
+            if parameters and statement is None:
                 raise ToolError("check", "parameters without statement: pass both or neither")
-            res = check(w, spec, use_cli=self.use_cli)
-        except Refused as e:
-            return ToolError(e.door, e.reason).to_dict()
+            args = {
+                "witness": str(w),
+                "manifest": str(man),
+                "statement": statement,
+                "parameters": dict(parameters or {}),
+                "use_cli": self.use_cli,
+            }
+            # Same supervision as `why` (a2a arch r1): an agent-written override query is killed at the request
+            # deadline, and one request runs at a time.
+            with self._lock:
+                d = self._supervise(_check_worker, args)
         except ToolError as e:
             return e.to_dict()
-        d = res.to_dict()
-        d["overridden"] = overridden
+        if "error" in d:
+            return d
+        d.pop("request_seconds", None)
+        d["overridden"] = ["statement"] if statement is not None else []
         d["witness_path"] = str(w)
         return d
 

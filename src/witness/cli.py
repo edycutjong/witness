@@ -152,7 +152,8 @@ def print_outcome(o, verbose_exhibits: bool = True, extra: str | None = None) ->
     if extra:
         print(f"  {extra}")
     if verbose_exhibits:
-        print("\nEXHIBITS  (register order; every one is needed)")
+        note = "every one is needed" if o.verified else "necessity NOT verified"
+        print(f"\nEXHIBITS  (register order; {note})")
         for x in o.exhibits:
             print(f"  {x['n']:>2}  ({x['start']})-[:{x['type']}]->({x['end']})")
         for n in o.isolated:
@@ -314,7 +315,7 @@ def cmd_export(args) -> int:
             copied.append(dst)
     if not any(str(c).endswith(".rl") for c in copied):
         raise Refused(f"{stem}.rl not found", "export")
-    print(f"EXPORT  {len(copied)} files → {shown(to)}")
+    print(f"EXPORT  {len(copied)} files → {shown(to)}  (copies the recorded verdict; `witness check` re-proves it)")
     for c in copied:
         print(f"  {shown(c)}")
     return 0

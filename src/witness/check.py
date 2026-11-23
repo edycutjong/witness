@@ -181,6 +181,7 @@ class CheckResult:
     def verified(self) -> bool:
         return (
             self.sufficient is True
+            and len(self.probes) > 0  # an empty W proves nothing
             and self.inconclusive == 0
             and self.necessary == len(self.probes)
             and not self.disagreements
@@ -312,7 +313,7 @@ def check(w_rl: str | Path, spec: CheckSpec, *, use_cli: bool = True, require_cl
                 if ans_c != ans_w:
                     out.disagreements.append("W.rl and the store rebuilt from W.cypher give different answers")
             else:
-                out.reasons.append(f"{w_cypher.name} missing beside {w_rl.name}")
+                out.reasons.append(f"cypher cross-check unavailable: {w_cypher.name} missing beside {w_rl.name}")
             out.sufficient = suff
             if suff is not True:
                 why = "the predicate does not hold on W" if suff is False else "sufficiency inconclusive"

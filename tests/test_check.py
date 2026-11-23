@@ -102,3 +102,23 @@ def test_cli_surface_cross_checks_every_probe(reduced):
     assert res.verified and res.cli_used
     assert "4 of 4 necessity probes cross-checked" in res.cli_status
     assert all(p["cli_necessary"] is True for p in res.probes)
+
+
+def test_an_empty_witness_is_never_verified(tmp_path):
+    w = tmp_path / "empty.rl"
+    db = relate.Database(str(w))
+    db.close()
+    (tmp_path / "empty.cypher").write_text("")
+    from witness.check import spec_from_args
+
+    res = check(w, spec_from_args("RETURN 1 AS one", {}, '[{"one": 1}]'), use_cli=False)
+    assert res.sufficient is True and res.probes == [] and not res.verified
+
+
+def test_exhibits_header_does_not_claim_necessity_when_not_verified(tiny_rl, tmp_path, capsys):
+    q = tmp_path / "hubs.cypher"
+    q.write_text(NAMES)
+    out = tmp_path / "out"
+    assert main(["why", "-f", str(q), "--store", str(tiny_rl), "--out", str(out), "--no-cli", "--max-trials", "3"]) == 3
+    text = capsys.readouterr().out
+    assert "necessity NOT verified" in text and "every one is needed" not in text

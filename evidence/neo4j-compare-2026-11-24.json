@@ -1,0 +1,181 @@
+{
+  "date": "2026-11-24 04:27:17 +0700",
+  "machine": {
+    "arch": "arm64",
+    "cpu": "Apple M1 Max",
+    "docker_server": "29.2.1",
+    "docker_vm_cpus": "10",
+    "docker_vm_mem_bytes": "10418851840",
+    "mem_bytes": "34359738368",
+    "os": "Darwin 27.2.0",
+    "python": "3.12.13",
+    "relate_db": "1.0.1"
+  },
+  "median_trial_ms_p50": {
+    "neo4j_docker": 6.477,
+    "relate_in_process": 2.542
+  },
+  "median_trial_ms_p95": {
+    "neo4j_docker": 13.624,
+    "relate_in_process": 2.937
+  },
+  "median_trials_per_s": {
+    "neo4j_docker": 90.2,
+    "relate_in_process": 366.8
+  },
+  "neo4j": {
+    "components": [
+      {
+        "edition": "community",
+        "name": "Neo4j Kernel",
+        "v": "2026.10.2"
+      },
+      {
+        "edition": "",
+        "name": "Cypher",
+        "v": "5"
+      }
+    ],
+    "image": "neo4j:2026.10.2-community",
+    "transport": "Bolt over loopback, Docker Desktop VM"
+  },
+  "protocol": {
+    "neo4j_ambiguous_matches": 0,
+    "neo4j_delete_stmt": "UNWIND $ids AS i MATCH ()-[r]->() WHERE elementId(r) = i DELETE r RETURN count(*) AS c",
+    "relate_delete_stmt": "UNWIND $ids AS i MATCH ()-[r]->() WHERE elementId(r) = i DELETE r RETURN count(*) AS c",
+    "runs": 3,
+    "sample": "random.Random(0).sample over relationships sorted by canonical key; same ones on both sides",
+    "seed": 0,
+    "trials_per_run": 1000,
+    "warmup_discarded": 100
+  },
+  "queries": {
+    "baseline_rows": [
+      {
+        "airport": "PBC",
+        "hub_countries": [
+          "MX",
+          "US"
+        ]
+      },
+      {
+        "airport": "QRO",
+        "hub_countries": [
+          "MX",
+          "US"
+        ]
+      },
+      {
+        "airport": "TLC",
+        "hub_countries": [
+          "MX",
+          "US"
+        ]
+      },
+      {
+        "airport": "UPN",
+        "hub_countries": [
+          "MX",
+          "US"
+        ]
+      }
+    ],
+    "neo4j": "queries/two-hub.neo4j.cypher",
+    "params": {
+      "country": "MX",
+      "dest": "MEX"
+    },
+    "relate": "queries/two-hub.cypher"
+  },
+  "ratio_trials_per_s": 4.07,
+  "runs": [
+    {
+      "answers_identical_per_trial": "1000/1000",
+      "neo4j": {
+        "answer_changed": 2,
+        "counts_restored": "1000/1000",
+        "delete_count_asserted": "1000/1000",
+        "trial_ms_max": 35.415,
+        "trial_ms_p50": 7.71,
+        "trial_ms_p95": 14.383,
+        "trials": 1000,
+        "trials_per_s": 76.9,
+        "wall_s": 13.008
+      },
+      "relate": {
+        "answer_changed": 2,
+        "counts_restored": "1000/1000",
+        "trial_ms_max": 4.08,
+        "trial_ms_p50": 2.498,
+        "trial_ms_p95": 2.861,
+        "trials": 1000,
+        "trials_per_s": 380.2,
+        "wall_s": 2.63
+      },
+      "run": 1
+    },
+    {
+      "answers_identical_per_trial": "1000/1000",
+      "neo4j": {
+        "answer_changed": 2,
+        "counts_restored": "1000/1000",
+        "delete_count_asserted": "1000/1000",
+        "trial_ms_max": 64.463,
+        "trial_ms_p50": 6.477,
+        "trial_ms_p95": 13.624,
+        "trials": 1000,
+        "trials_per_s": 90.2,
+        "wall_s": 11.085
+      },
+      "relate": {
+        "answer_changed": 2,
+        "counts_restored": "1000/1000",
+        "trial_ms_max": 7.15,
+        "trial_ms_p50": 2.542,
+        "trial_ms_p95": 2.937,
+        "trials": 1000,
+        "trials_per_s": 366.8,
+        "wall_s": 2.727
+      },
+      "run": 2
+    },
+    {
+      "answers_identical_per_trial": "1000/1000",
+      "neo4j": {
+        "answer_changed": 2,
+        "counts_restored": "1000/1000",
+        "delete_count_asserted": "1000/1000",
+        "trial_ms_max": 38.145,
+        "trial_ms_p50": 5.619,
+        "trial_ms_p95": 12.21,
+        "trials": 1000,
+        "trials_per_s": 102.2,
+        "wall_s": 9.789
+      },
+      "relate": {
+        "answer_changed": 2,
+        "counts_restored": "1000/1000",
+        "trial_ms_max": 5.184,
+        "trial_ms_p50": 2.59,
+        "trial_ms_p95": 2.963,
+        "trials": 1000,
+        "trials_per_s": 364.1,
+        "wall_s": 2.746
+      },
+      "run": 3
+    }
+  ],
+  "source": {
+    "nodes": 3748,
+    "path": "data/air-routes.rl",
+    "relationships": 57645,
+    "sha256_after": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734",
+    "sha256_before": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+  },
+  "targeted_agreement": {
+    "identical": 68,
+    "neo4j_changed": 20,
+    "relate_changed": 20,
+    "rels": 68
+  }
+}

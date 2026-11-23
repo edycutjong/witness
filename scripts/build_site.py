@@ -141,7 +141,20 @@ else{{s.textContent='Select the commands above and copy them.'}}
 
 SITE.mkdir(exist_ok=True)
 (SITE / "exhibit").mkdir(exist_ok=True)
-shutil.copyfile(ROOT / "witnesses" / "two-hub.html", SITE / "exhibit" / "two-hub.html")
+# the served copy gets a way back home; the committed witnesses/two-hub.html stays byte-identical to what `witness` wrote
+back_css = (
+    "a{color:var(--after);text-underline-offset:3px;transition:color .15s ease}a:hover{color:var(--ink)}"
+    "a:focus-visible{outline:3px solid var(--ink);outline-offset:3px}"
+    "@media (prefers-reduced-motion:reduce){a{transition:none}}"
+)
+served = exhibit.replace("</style>", back_css + "</style>", 1).replace(
+    '<p class="mono">WITNESS · EXHIBIT REGISTER</p>',
+    '<p class="mono"><a href="../">&larr; Witness</a> · EXHIBIT REGISTER</p>',
+    1,
+)
+if served == exhibit:
+    raise SystemExit("exhibit html changed shape: no style/eyebrow to patch")
+(SITE / "exhibit" / "two-hub.html").write_text(served)
 page = PAGE.format(
     w_rels=w_rels,
     src_rels_fmt=fmt(src_rels),

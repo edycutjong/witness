@@ -43,4 +43,5 @@ extend-exclude = ["fixtures"]  # generated fixture tests keep the whole statemen
 select = ["E", "F", "W", "I", "B", "UP"]
 
 [tool.ruff.lint.per-file-ignores]
+"scripts/build_site.py" = ["E501"]  # the inline HTML/CSS template of the landing page
 "src/witness/export.py" = ["E501"]  # the inline HTML/CSS template of the exhibit view

@@ -21,7 +21,7 @@ os.environ.setdefault("DO_NOT_TRACK", "1")
 
 from . import __version__  # noqa: E402
 from .guard import Refused  # noqa: E402
-from .pipeline import EXIT_REFUSED, EXIT_WATCHDOG, Request, reduce_request, relate_version  # noqa: E402
+from .pipeline import EXIT_NOT_VERIFIED, EXIT_REFUSED, EXIT_WATCHDOG, Request, reduce_request, relate_version  # noqa: E402
 
 PKG_ROOT = Path(__file__).resolve().parents[2]
 HEADLINE = {
@@ -117,7 +117,7 @@ def cli_flags(params: dict) -> str:
     return " ".join(f"{a[i]} {a[i + 1]}" for i in range(0, len(a), 2))
 
 
-COMMITTED_DIRS = ("witnesses", "answers", "data", "queries", "src", "tests", "evidence", "scripts", "bench")
+COMMITTED_DIRS = ("witnesses", "fixtures", "answers", "data", "queries", "src", "tests", "evidence", "scripts", "bench")
 COMMITTED_FILES = ("witness.rl",)
 
 
@@ -284,6 +284,55 @@ def cmd_check(args) -> int:
         print(f"  - {r}")
     print(f"  inconclusive: {res.inconclusive}")
     return 1
+
+
+def cmd_fixture(args) -> int:
+    from .fixture import build_fixture, write_test_file
+
+    guard_write(args.out, "--out", args.update)
+    guard_name(args.name)
+    raw = args.expect
+    text = Path(raw).read_text() if Path(raw).is_file() else raw
+    try:
+        expected = json.loads(text)
+    except ValueError as e:
+        raise Refused(f"--expect is neither a JSON file nor inline JSON: {e}", "expected") from e
+    if isinstance(expected, dict) and "rows" in expected:
+        expected = expected["rows"]
+    if not isinstance(expected, list):
+        raise Refused("--expect must be a JSON list of row objects (or an object with a `rows` list)", "expected")
+    creds = Path(args.creds)
+    if not creds.is_file():
+        raise Refused(f"credentials file not found: {args.creds}", "fixture")
+    image = None
+    for ln in creds.read_text().splitlines():
+        if ln.startswith("NEO4J_IMAGE="):
+            image = ln.split("=", 1)[1]
+    statement, params = read_query(args.test), parse_params(args.param)
+    prog = Progress()
+    try:
+        o, report = build_fixture(
+            creds=creds,
+            slice_query=read_query(args.pull),
+            statement=statement,
+            params=params,
+            expected=expected,
+            name=args.name,
+            out_dir=Path(args.out),
+            neo4j_image=image,
+            progress=prog,
+        )
+    finally:
+        prog.done()
+    test = write_test_file(Path(args.out), args.name, o, statement, params, expected)
+    (Path(args.out) / f"{args.name}.report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+    s, fx = report["slice"], report["fixture"]
+    print(f"PULLED   {s['relationships']:,} relationships · {s['nodes']:,} nodes in {s['pull_seconds']} s (relate pull; nothing pushed)")
+    print(f"FIXTURE  {fx['relationships']} relationships · {fx['nodes']} nodes · {fx['trials']} trials · {fx['reduction_seconds']} s")
+    print(f"CHECK    {report['check']}")
+    print(f"FILES    {shown(o.files['rl'])} (+ .cypher .manifest.json)  test: {shown(test)}")
+    print("VERIFIED" if o.verified else "NOT verified")
+    return 0 if o.verified else EXIT_NOT_VERIFIED
 
 
 def cmd_mcp(args) -> int:
@@ -595,6 +644,16 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--name")
     e.add_argument("--ledger")
 
+    f = sub.add_parser("fixture", help="pull a slice from Neo4j once, shrink it to the smallest fixture a test needs")
+    f.add_argument("--from", dest="creds", required=True, help="Neo4j env file (NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD)")
+    f.add_argument("--pull", required=True, help="the slice: a Cypher file that RETURNs graph elements")
+    f.add_argument("--test", required=True, help="the test's query file (read-only Cypher)")
+    f.add_argument("--expect", required=True, help="the test's expected answer: a JSON file or inline JSON (rows)")
+    f.add_argument("--param", action="append", metavar="K=V")
+    f.add_argument("--name", default="fixture")
+    f.add_argument("--out", default="out/fixture")
+    f.add_argument("--update", action="store_true", help="build only: allow writing under fixtures/")
+
     m = sub.add_parser("mcp", help="stdio MCP server: tools why + check (needs the mcp extra)", add_help=False)
     m.add_argument("rest", nargs=argparse.REMAINDER)
 
@@ -628,6 +687,7 @@ def main(argv: list[str] | None = None) -> int:
         "export": cmd_export,
         "review": cmd_review,
         "mcp": cmd_mcp,
+        "fixture": cmd_fixture,
     }
     if args.cmd not in cmds:
         ap.print_help()

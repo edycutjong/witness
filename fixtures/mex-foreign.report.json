@@ -1,0 +1,24 @@
+{
+  "check": "126 of 126 change the answer (126 of 126 relationships, 0 of 0 isolated nodes)",
+  "fixture": {
+    "inconclusive": 0,
+    "nodes": 88,
+    "reduction_seconds": 0.713,
+    "relationships": 126,
+    "trials": 2092
+  },
+  "name": "mex-foreign",
+  "neo4j_image": "neo4j:2026.10.2-community",
+  "never_pushed": true,
+  "pull_tail": [
+    "pulled 207 new / 115 reused nodes, 1272 new / 230 reused rels (+ 3 constraints, 0 indexes; 0 schema skipped) to <slice.rl>"
+  ],
+  "relate_cli": "relate CLI v1.0.1",
+  "relate_db": "1.0.1",
+  "slice": {
+    "nodes": 207,
+    "pull_seconds": 0.174,
+    "relationships": 1272
+  },
+  "verified": true
+}

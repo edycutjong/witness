@@ -1,0 +1,974 @@
+{
+  "baseline": {
+    "columns": [
+      "foreign_airports",
+      "countries"
+    ],
+    "rows": [
+      {
+        "countries": [
+          "AR",
+          "BR",
+          "CA",
+          "CL",
+          "CN",
+          "CO",
+          "CR",
+          "CU",
+          "DE",
+          "DO",
+          "EC",
+          "ES",
+          "FR",
+          "GT",
+          "HN",
+          "JP",
+          "KR",
+          "NL",
+          "PA",
+          "PE",
+          "SV",
+          "UK",
+          "US",
+          "VE"
+        ],
+        "foreign_airports": 63
+      }
+    ],
+    "sha256": "bd939ff736adf804c4b07254fc1d4fd20fa77eb9c68c35037b78b84c6efe5f3a"
+  },
+  "check": {
+    "check_text": "126 of 126 change the answer (126 of 126 relationships, 0 of 0 isolated nodes)",
+    "cli": "relate CLI: sufficiency + 126 of 126 necessity probes cross-checked",
+    "cli_used": true,
+    "disagreements": [],
+    "inconclusive": 0,
+    "probes": [
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(AMS)",
+        "i": 1,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SAL)",
+        "i": 2,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(ATL)",
+        "i": 3,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(MFE)",
+        "i": 4,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(LIM)",
+        "i": 5,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(PHX)",
+        "i": 6,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(PEK)",
+        "i": 7,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(YUL)",
+        "i": 8,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(BCN)",
+        "i": 9,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(JFK)",
+        "i": 10,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(LAX)",
+        "i": 11,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SFO)",
+        "i": 12,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(PTY)",
+        "i": 13,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(YVR)",
+        "i": 14,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(NRT)",
+        "i": 15,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(MUC)",
+        "i": 16,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SCL)",
+        "i": 17,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SAN)",
+        "i": 18,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(EWR)",
+        "i": 19,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(BOS)",
+        "i": 20,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(GYE)",
+        "i": 21,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(MAD)",
+        "i": 22,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(HAV)",
+        "i": 23,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(LAS)",
+        "i": 24,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(ICN)",
+        "i": 25,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(CCS)",
+        "i": 26,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(GRU)",
+        "i": 27,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SMF)",
+        "i": 28,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(LIR)",
+        "i": 29,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SJO)",
+        "i": 30,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(PDX)",
+        "i": 31,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(IAD)",
+        "i": 32,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(CLO)",
+        "i": 33,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(YYC)",
+        "i": 34,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(PHL)",
+        "i": 35,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(FRA)",
+        "i": 36,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(CDG)",
+        "i": 37,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SEA)",
+        "i": 38,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(HOU)",
+        "i": 39,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(PUJ)",
+        "i": 40,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(GUA)",
+        "i": 41,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(CAN)",
+        "i": 42,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(AUS)",
+        "i": 43,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(DEN)",
+        "i": 44,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SFB)",
+        "i": 45,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SLC)",
+        "i": 46,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SNA)",
+        "i": 47,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(YYZ)",
+        "i": 48,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(DFW)",
+        "i": 49,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SJC)",
+        "i": 50,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(FLL)",
+        "i": 51,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(DTW)",
+        "i": 52,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(EZE)",
+        "i": 53,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(ORD)",
+        "i": 54,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(CLT)",
+        "i": 55,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(MIA)",
+        "i": 56,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SAT)",
+        "i": 57,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(LHR)",
+        "i": 58,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(BOG)",
+        "i": 59,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(SAP)",
+        "i": 60,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(UIO)",
+        "i": 61,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(IAH)",
+        "i": 62,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MEX)-[:HAS_ROUTE]->(MCO)",
+        "i": 63,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(AMS)-[:IN_COUNTRY]->(NL)",
+        "i": 64,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SAL)-[:IN_COUNTRY]->(SV)",
+        "i": 65,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(ATL)-[:IN_COUNTRY]->(US)",
+        "i": 66,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MFE)-[:IN_COUNTRY]->(US)",
+        "i": 67,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(LIM)-[:IN_COUNTRY]->(PE)",
+        "i": 68,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(PHX)-[:IN_COUNTRY]->(US)",
+        "i": 69,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(PEK)-[:IN_COUNTRY]->(CN)",
+        "i": 70,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(YUL)-[:IN_COUNTRY]->(CA)",
+        "i": 71,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(BCN)-[:IN_COUNTRY]->(ES)",
+        "i": 72,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(JFK)-[:IN_COUNTRY]->(US)",
+        "i": 73,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(LAX)-[:IN_COUNTRY]->(US)",
+        "i": 74,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SFO)-[:IN_COUNTRY]->(US)",
+        "i": 75,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(PTY)-[:IN_COUNTRY]->(PA)",
+        "i": 76,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(YVR)-[:IN_COUNTRY]->(CA)",
+        "i": 77,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(NRT)-[:IN_COUNTRY]->(JP)",
+        "i": 78,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MUC)-[:IN_COUNTRY]->(DE)",
+        "i": 79,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SCL)-[:IN_COUNTRY]->(CL)",
+        "i": 80,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SAN)-[:IN_COUNTRY]->(US)",
+        "i": 81,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(EWR)-[:IN_COUNTRY]->(US)",
+        "i": 82,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(BOS)-[:IN_COUNTRY]->(US)",
+        "i": 83,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(GYE)-[:IN_COUNTRY]->(EC)",
+        "i": 84,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MAD)-[:IN_COUNTRY]->(ES)",
+        "i": 85,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(HAV)-[:IN_COUNTRY]->(CU)",
+        "i": 86,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(LAS)-[:IN_COUNTRY]->(US)",
+        "i": 87,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(ICN)-[:IN_COUNTRY]->(KR)",
+        "i": 88,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CCS)-[:IN_COUNTRY]->(VE)",
+        "i": 89,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(GRU)-[:IN_COUNTRY]->(BR)",
+        "i": 90,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SMF)-[:IN_COUNTRY]->(US)",
+        "i": 91,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(LIR)-[:IN_COUNTRY]->(CR)",
+        "i": 92,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SJO)-[:IN_COUNTRY]->(CR)",
+        "i": 93,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(PDX)-[:IN_COUNTRY]->(US)",
+        "i": 94,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IAD)-[:IN_COUNTRY]->(US)",
+        "i": 95,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CLO)-[:IN_COUNTRY]->(CO)",
+        "i": 96,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(YYC)-[:IN_COUNTRY]->(CA)",
+        "i": 97,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(PHL)-[:IN_COUNTRY]->(US)",
+        "i": 98,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(FRA)-[:IN_COUNTRY]->(DE)",
+        "i": 99,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CDG)-[:IN_COUNTRY]->(FR)",
+        "i": 100,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SEA)-[:IN_COUNTRY]->(US)",
+        "i": 101,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(HOU)-[:IN_COUNTRY]->(US)",
+        "i": 102,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(PUJ)-[:IN_COUNTRY]->(DO)",
+        "i": 103,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(GUA)-[:IN_COUNTRY]->(GT)",
+        "i": 104,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CAN)-[:IN_COUNTRY]->(CN)",
+        "i": 105,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(AUS)-[:IN_COUNTRY]->(US)",
+        "i": 106,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DEN)-[:IN_COUNTRY]->(US)",
+        "i": 107,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SFB)-[:IN_COUNTRY]->(US)",
+        "i": 108,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SLC)-[:IN_COUNTRY]->(US)",
+        "i": 109,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SNA)-[:IN_COUNTRY]->(US)",
+        "i": 110,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(YYZ)-[:IN_COUNTRY]->(CA)",
+        "i": 111,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DFW)-[:IN_COUNTRY]->(US)",
+        "i": 112,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SJC)-[:IN_COUNTRY]->(US)",
+        "i": 113,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(FLL)-[:IN_COUNTRY]->(US)",
+        "i": 114,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DTW)-[:IN_COUNTRY]->(US)",
+        "i": 115,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(EZE)-[:IN_COUNTRY]->(AR)",
+        "i": 116,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(ORD)-[:IN_COUNTRY]->(US)",
+        "i": 117,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CLT)-[:IN_COUNTRY]->(US)",
+        "i": 118,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MIA)-[:IN_COUNTRY]->(US)",
+        "i": 119,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SAT)-[:IN_COUNTRY]->(US)",
+        "i": 120,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(LHR)-[:IN_COUNTRY]->(UK)",
+        "i": 121,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(BOG)-[:IN_COUNTRY]->(CO)",
+        "i": 122,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SAP)-[:IN_COUNTRY]->(HN)",
+        "i": 123,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(UIO)-[:IN_COUNTRY]->(EC)",
+        "i": 124,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IAH)-[:IN_COUNTRY]->(US)",
+        "i": 125,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MCO)-[:IN_COUNTRY]->(US)",
+        "i": 126,
+        "kind": "rel",
+        "necessary": true
+      }
+    ],
+    "reasons": [],
+    "sufficient": true,
+    "verified": true
+  },
+  "comparison": {
+    "float_digits": 12,
+    "rows": "bag",
+    "strict_lists": false
+  },
+  "determinism_claimed": true,
+  "name": "mex-foreign",
+  "params": {},
+  "predicate": {
+    "kind": "keep"
+  },
+  "reasons": [],
+  "run": {
+    "capped": null,
+    "commits": 127,
+    "inconclusive": 0,
+    "seconds": 0.713,
+    "ties": 0,
+    "trials": 2092
+  },
+  "schema": "witness.manifest/v1",
+  "seed": 0,
+  "source": {
+    "nodes": 207,
+    "path": "/var/folders/hy/h4_prwdj11d1p_gf5kr77k5r0000gn/T/witness-fixture-980boklm/slice.rl",
+    "relationships": 1272,
+    "sha256": "43b07a50ee6142cb9099be84135ac5a319ebcd083ca901f552bf673d2bcce5eb"
+  },
+  "statement": "// A test's assertion: which foreign countries does MEX fly to directly? (aggregation over a collected list)\nMATCH (:Airport {iata: 'MEX'})-[:HAS_ROUTE]->(b:Airport)-[:IN_COUNTRY]->(c:Country)\nWHERE c.code <> 'MX'\nRETURN count(DISTINCT b) AS foreign_airports, coll.sort(collect(DISTINCT c.code)) AS countries\n",
+  "verified": true,
+  "versions": {
+    "python": "3.12.13",
+    "relate_db": "1.0.1",
+    "witness": "0.1.0"
+  },
+  "witness": {
+    "isolated_nodes": 0,
+    "nodes": 88,
+    "relationships": 126
+  }
+}

@@ -149,7 +149,7 @@ def reduce_request(req: Request, progress=None) -> Outcome:
             cols = list(res0.columns)
             if expected_answer(req.claimed, cols, strict_lists=req.strict_lists, digits=req.digits) != base:
                 raise Refused(
-                    "the answer you showed differs from this store's answer to this query; nothing attached", "answer"
+                    "the answer you gave differs from this store's answer to this query; nothing attached", "answer"
                 )
         out.answer_columns = list(res0.columns)
         out.answer_rows = plain(_cut_rows(queries[0], res0.data))

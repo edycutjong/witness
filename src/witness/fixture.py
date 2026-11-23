@@ -1,4 +1,4 @@
-"""`witness fixture` (W4): pull a slice from a live Neo4j once, shrink it to the smallest fixture a test still needs.
+"""`witness fixture` (W4): pull a slice from a live Neo4j once, shrink it to a deletion-minimal test fixture.
 
 1. `relate pull` copies the slice into a FRESH temp `.rl` (pull refuses a non-empty destination and `:memory:`).
 2. The test's own query must already return the expected answer on that slice (else nothing is written).

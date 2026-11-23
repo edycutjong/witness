@@ -650,7 +650,9 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--name")
     e.add_argument("--ledger")
 
-    f = sub.add_parser("fixture", help="pull a slice from Neo4j once, shrink it to the smallest fixture a test needs")
+    f = sub.add_parser(
+        "fixture", help="pull a slice from Neo4j once, shrink it to a deletion-minimal fixture a test needs"
+    )
     f.add_argument(
         "--from", dest="creds", required=True, help="Neo4j env file (NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD)"
     )

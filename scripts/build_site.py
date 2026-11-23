@@ -15,6 +15,7 @@ SITE = ROOT / "site"
 REPO = "https://github.com/edycutjong/witness"
 # Set True when the repository is public (HUMAN-TODO: the flip at submission), then rebuild and redeploy.
 REPO_PUBLIC = False
+SOURCE_LI = f'<li><a href="{REPO}">Source on GitHub</a></li>' if REPO_PUBLIC else "<li>Source: opens at submission</li>"
 PRIVATE_NOTE = (
     ""
     if REPO_PUBLIC
@@ -38,7 +39,7 @@ ratio = cmp["ratio_trials_per_s"]
 m = re.search(r'<div class="grid">(.*?)</div>\n<dl>', exhibit, re.S)
 if not m:
     raise SystemExit("exhibit html changed shape: no grid block")
-grid = m.group(1)
+grid = m.group(1).replace("<h2>", "<h3>").replace("</h2>", "</h3>")
 answer_rows = ", ".join(r["airport"] for r in rows)
 fmt = lambda n: f"{n:,}"  # noqa: E731
 
@@ -90,6 +91,8 @@ svg{{width:100%;height:auto;background:rgba(255,255,255,.35);border:1px solid va
 .facts{{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:52px 0;padding:24px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}}
 .facts p{{margin:0;font-size:15px;color:var(--muted)}}
 .facts strong{{display:block;font:700 34px/1.1 var(--display);color:var(--ink);margin-bottom:4px}}
+code{{font:600 .92em var(--body);background:rgba(31,26,20,.07);padding:1px 5px;border-radius:2px}}
+h3{{font:600 13px/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}}
 .links{{display:flex;flex-wrap:wrap;gap:8px 28px;margin:36px 0 0;padding:0;list-style:none}}
 footer{{margin-top:56px;font-size:14px;color:var(--muted);max-width:70ch}}
 @media (max-width:600px){{.en,.nl{{font-size:19px}}}}
@@ -99,36 +102,37 @@ footer{{margin-top:56px;font-size:14px;color:var(--muted);max-width:70ch}}
 <body>
 <main>
 <p class="eyebrow">Witness · proof for an agent's answer from a graph · built on Relate</p>
-<h1><em>{w_rels}</em> of {src_rels_fmt} relationships are why.</h1>
-<p class="lede">When an agent answers from a graph, Witness hands back a tiny graph that reproduces the answer, and proves each relationship in it is needed.</p>
+<h1>Your agent's answer rests on <em>{w_rels}</em> of {src_rels_fmt} relationships.</h1>
+<p class="lede">When an agent answers from a graph, Witness hands back a tiny graph that reproduces the answer, and proves each relationship in it is needed. It is an MCP tool: your agent calls <code>why</code> on a read-only Cypher answer, <code>check</code> re-proves the result, and a slice of a Neo4j graph comes in with <code>relate pull</code>.</p>
 <div class="stamp">{check_upper}</div>
 
 <h2>Run it yourself</h2>
 {private_note}
 <div class="run">
-<pre id="cmd"><b>$</b> git clone {repo} &amp;&amp; cd witness
+<pre id="cmd" tabindex="0" aria-label="Commands"><b>$</b> git clone {repo} &amp;&amp; cd witness
 <b>$</b> uv run witness demo</pre>
 <button type="button" id="copy">Copy commands</button>
 </div>
 <p class="note" id="status" role="status">The committed air-routes graph ({src_nodes_fmt} nodes, {src_rels_fmt} relationships) is copied, never modified. The result below is the committed output of the same run.</p>
 
-<h2>The case file: an agent asks which Mexican airports have no direct flight to MEX but two ways out. It answers {answer_rows}. These are its relationships.</h2>
+<h2>The case file</h2>
+<p class="lede">An agent asks which Mexican airports have no direct flight to MEX but two ways out. It answers {answer_rows}. These are the relationships that answer rests on.</p>
 <div class="grid">{grid}</div>
 
 <div class="facts">
 <p><strong>{w_rels} of {w_rels}</strong>deleting any one relationship changes the answer: deletion-minimal, checked on relate-db and on the Relate CLI</p>
-<p><strong>{trials} trials</strong>in {secs} s on the full graph, each tested inside a Relate transaction; {commits} were kept as deletions, the rest rolled back</p>
-<p><strong>{relate_tps} vs {neo_tps}</strong>trials per second, Relate in-process vs Neo4j {neo_version} in Docker over Bolt, same loop, same answers ({ratio}x here). One machine, one query, one graph: the cost of a server round trip, not a Neo4j limit. Method: <span class="mono">evidence/{cmp_md}</span></p>
+<p><strong>{trials} trials</strong>in {secs} s on the full graph, each run in a Relate transaction and rolled back; in {commits} the answer survived, so that deletion was then applied</p>
+<p><strong>{relate_tps} vs {neo_tps}</strong>trials per second, Relate in-process vs Neo4j {neo_version} Community in Docker over Bolt: the same delete-query-rollback trial on 1,000 sampled deletions, median of 3 runs, same answers ({ratio}x here). One machine, one query, one graph: the cost of this setup (a Docker VM, a Bolt round trip per statement, count checks), not a Neo4j limit. Method: <code>evidence/{cmp_md}</code></p>
 </div>
 
 <ul class="links">
 <li><a href="exhibit/two-hub.html">Open the exhibit page</a></li>
-<li><a href="{repo}">Source on GitHub</a></li>
+{source_li}
 <li><a href="https://relatedb.ai">Relate</a></li>
 </ul>
 <footer>
 <p>Deletion-minimal means no single remaining relationship can be removed without changing the answer. It does not mean smallest possible.
-Numbers on this page are read from the committed files in the repository (<span class="mono">witnesses/two-hub.manifest.json</span>, <span class="mono">evidence/{cmp_name}</span>) by <span class="mono">scripts/build_site.py</span>.
+Numbers on this page are read from the committed files in the repository (<code>witnesses/two-hub.manifest.json</code>, <code>evidence/{cmp_name}</code>) by <code>scripts/build_site.py</code>.
 A work-in-progress page: the full write-up comes later. Apache-2.0.</p>
 </footer>
 </main>
@@ -154,6 +158,7 @@ back_css = (
     "a{color:var(--ink);text-underline-offset:3px;transition:color .15s ease,text-decoration-thickness .15s ease}"
     "a:hover{color:var(--muted);text-decoration-thickness:3px}.t,dt{color:#6F6555}"
     'h2{font:600 13px/1.4 "Source Sans 3",system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6F6555}'
+    '.nav{font:600 13px/1.4 "Source Sans 3",system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6F6555}'
     "@media (max-width:600px){.en,.nl{font-size:19px}}"
     "a:focus-visible{outline:3px solid var(--ink);outline-offset:3px}"
     "@media (prefers-reduced-motion:reduce){a{transition:none}}"
@@ -162,7 +167,7 @@ served = (
     exhibit.replace("</style>", back_css + "</style>", 1)
     .replace(
         '<p class="mono">WITNESS · EXHIBIT REGISTER</p>',
-        '<p class="mono"><a href="../">&larr; Witness</a> · EXHIBIT REGISTER</p>',
+        '<p class="nav"><a href="../">&larr; Witness</a> · EXHIBIT REGISTER</p>',
         1,
     )
     .replace(
@@ -173,6 +178,11 @@ served = (
 )
 if served == exhibit:
     raise SystemExit("exhibit html changed shape: no style/eyebrow to patch")
+served = served.replace(
+    "airports of $country have no direct flight to $dest",
+    "airports of {country} have no direct flight to {dest}".format(**man["params"]),
+    1,
+)
 (SITE / "exhibit" / "two-hub.html").write_text(served)
 page = PAGE.format(
     w_rels=w_rels,
@@ -187,6 +197,7 @@ page = PAGE.format(
     neo_version=cmp["neo4j"]["components"][0]["v"],
     cmp_md=cmp_path.with_suffix(".md").name,
     private_note=PRIVATE_NOTE,
+    source_li=SOURCE_LI,
     secs=secs,
     relate_tps=relate_tps,
     neo_tps=neo_tps,

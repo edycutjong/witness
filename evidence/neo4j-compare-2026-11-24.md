@@ -15,7 +15,7 @@ Raw: `neo4j-compare-2026-11-24.json` (3 runs × 1,000 trials, per-run summaries,
 | trial ms p95 | 2.94 | 13.62 |
 | counts restored after rollback | 3000/3000 | 3000/3000 |
 
-Ratio of median trials/s: **4.07×** in this setup. The reduction needs ~371 trials: about 1.0 s on Relate (measured, P1b) and about
+Ratio of median trials/s: **4.07×** in this setup. The reduction needs ~371 trials: about 1.1 s on Relate (measured, `witnesses/two-hub.manifest.json`) and about
 4 s at Neo4j's rate here. Neo4j was still speeding up across the three runs (76.9 → 90.2 → 102.2 trials/s), so the gap is the cost of
 this setup (a server in a Docker VM, one Bolt round trip per statement, two extra count queries per trial), not a claim that Neo4j
 cannot run rollback trials. It runs them fine and returned the same answers.

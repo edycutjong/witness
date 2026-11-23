@@ -30,7 +30,7 @@ The committed result of the same run is in `witnesses/two-hub.*`, `answers/two-h
 | `witness export <ledger-id\|out-dir\|W.rl> --to DIR` | copy a reduction's files |
 | `witness review [ID] [--accept\|--dispute REASON]` | list unreviewed reductions, or record a verdict |
 | `witness mcp [--allow DIR]` | stdio MCP server with tools `why` and `check`, beside Relate's own `relate serve --mcp`; transcript: `evidence/mcp-transcript.md` |
-| `witness fixture --from neo4j.env --pull SLICE.cypher --test Q.cypher --expect ROWS.json` | `relate pull` a slice from Neo4j once, shrink it to the smallest fixture the test still needs, write a pytest file; never pushes back (`fixtures/mex-foreign.*`) |
+| `witness fixture --from neo4j.env --pull SLICE.cypher --test Q.cypher --expect ROWS.json` | `relate pull` a slice from Neo4j once, shrink it to a deletion-minimal fixture (no single relationship can go without changing the test's answer), write a pytest file; never pushes back (`fixtures/mex-foreign.*`: 1,272 relationships pulled, 126 kept, 126 of 126 change the answer) |
 
 Exit codes: 0 verified · 1 NOT verified · 2 refused (outside the supported read-only, deterministic subset) · 3 trial cap ·
 4 aborted by the demo watchdog.
@@ -53,4 +53,4 @@ identical answers on all 3,000 sampled trials and on the 68 answer-relevant rela
 
 ## Landing page
 
-`site/` is the static landing (deployed on Vercel). `scripts/build_site.py` builds it from the committed witness and evidence files.
+`site/` is the static landing (deployed on Vercel at https://witness-wheat.vercel.app). `scripts/build_site.py` builds it from the committed witness and evidence files.

@@ -55,9 +55,10 @@ def cli_param_args(params: dict) -> list[str]:
     for k, v in params.items():
         if isinstance(v, str):
             try:
-                bare_ok = isinstance(json.loads(v), str)
+                json.loads(v)  # '"MX"', 'true', '1': the CLI would read the JSON value, not this string (a2a r2)
+                bare_ok = False
             except ValueError:
-                bare_ok = True
+                bare_ok = v != "" and v == v.strip()
             out += ["--param", f"{k}={v}" if bare_ok else f"{k}={json.dumps(v)}"]
         else:
             out += ["--param", f"{k}={json.dumps(v)}"]

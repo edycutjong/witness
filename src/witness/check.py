@@ -304,10 +304,12 @@ def check(
                 spec.resolve(list(raw_w[0].columns))
             suff = spec.holds(ans_w)
             if w_cypher.exists():
-                from .export import write_rl
+                from .export import validate_witness_script, write_rl
 
                 rebuilt = tmp / "from-cypher.rl"
-                write_rl(w_cypher.read_text(), rebuilt)
+                script = w_cypher.read_text()
+                validate_witness_script(script)
+                write_rl(script, rebuilt)
                 sc2 = Scratch.open_copy(rebuilt, tmp)
                 ans_c, _ = _answers(sc2, spec)
                 same_graph = set(sc2.node_keys.values()) == set(base.node_keys.values()) and set(

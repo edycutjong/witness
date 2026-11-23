@@ -98,6 +98,41 @@ def cypher_script(sc: Scratch, header: str = "") -> str:
     return head + "CREATE\n  " + ",\n  ".join(parts) + ";\n"
 
 
+_SCRIPT_CALLS = frozenset({"date", "datetime", "localdatetime", "time", "localtime", "duration", "point"})
+_SCRIPT_CLAUSES = frozenset(
+    "match optional merge set delete detach remove foreach load csv call use with unwind return union where order skip "
+    "limit yield show finish filter let insert next transactions start stop alter drop grant revoke deny".split()
+)
+
+
+def validate_witness_script(script: str) -> None:
+    """A witness `.cypher` is one CREATE of literal values (what cypher_script() writes).
+
+    `check` rebuilds W from the `.cypher` beside a `.rl`, so a hand-edited script (LOAD CSV, CALL, MATCH, a second
+    statement, a parameter, a function other than a temporal/point constructor) is refused before it runs
+    (a2a arch r1)."""
+    from .guard import Refused, tokenize
+
+    toks = tokenize(script)
+    if not toks:
+        return
+    if toks[0].kind != "ident" or toks[0].quoted or toks[0].text != "create":
+        raise Refused("a witness .cypher must be one CREATE statement", "witness")
+    for k, t in enumerate(toks):
+        prev = toks[k - 1].text if k else ""
+        nxt = toks[k + 1].text if k + 1 < len(toks) else ""
+        if t.kind == "param":
+            raise Refused("a witness .cypher holds literal values only (no parameters)", "witness")
+        if t.text == ";" and k != len(toks) - 1:
+            raise Refused("a witness .cypher must be one CREATE statement", "witness")
+        if k == 0 or t.kind != "ident" or t.quoted or prev in (".", ":") or (nxt == ":" and prev in ("{", ",")):
+            continue  # a label, type or map key
+        if t.text in _SCRIPT_CLAUSES:
+            raise Refused(f"{t.text.upper()} in a witness .cypher (one literal CREATE only)", "witness")
+        if nxt == "(" and t.text not in _SCRIPT_CALLS:
+            raise Refused(f"{t.text}() in a witness .cypher (only temporal/point constructors)", "witness")
+
+
 def write_rl(script: str, path: Path) -> tuple[int, int]:
     path = Path(path)
     if path.exists():

@@ -115,3 +115,23 @@ def test_request_kill_reaches_the_grandchild(tmp_path):
         time.sleep(0.05)
     else:
         pytest.fail("grandchild survived the request kill")
+
+
+@pytest.mark.parametrize(
+    "script",
+    [
+        "CREATE (n0:`A`) WITH 1 AS x LOAD CSV FROM 'file:///etc/hosts' AS r CREATE (:`B` {`v`: r[0]})",
+        "CREATE (n0:`A`);\nMATCH (n) DETACH DELETE n",
+        "MATCH (n) RETURN n",
+        "CREATE (n0:`A` {`v`: $secret})",
+    ],
+)
+def test_check_refuses_a_hand_edited_witness_script(script, tiny_rl, tmp_path):
+    from witness.check import check, spec_from_args
+
+    w = tmp_path / "w.rl"
+    shutil.copyfile(tiny_rl, w)
+    (tmp_path / "w.cypher").write_text("// header\n" + script + "\n")
+    spec = spec_from_args("MATCH (n:P) RETURN n.name AS n", {}, '[{"n": "A"}]')
+    with pytest.raises(Refused, match="witness .cypher"):
+        check(w, spec, use_cli=False)

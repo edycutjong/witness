@@ -121,7 +121,7 @@ def _refuse_aliased_outputs(req: Request, source: Path) -> None:
     # symlinked x.html -> x.rl would overwrite the checked witness after the check (a2a arch r2)
     seen: dict[Path, Path] = {}
     for o in outs:
-        r = o.resolve()
+        r = Path(os.path.normcase(str(o.resolve())).casefold())  # macOS/Windows: Out/W.RL is out/w.rl
         if r in seen:
             raise Refused(f"{o} and {seen[r]} are the same file; choose another --name or --ledger", "out")
         seen[r] = o

@@ -198,7 +198,10 @@ def test_a_time_cap_that_never_fired_keeps_the_determinism_claim(tiny_rl, tmp_pa
 def test_mcp_override_is_compared_the_way_the_witness_was():
     from witness.mcp_server import override_spec
 
-    m = {"baseline": {"rows": [{"x": [1, 2]}]}, "comparison": {"strict_lists": True, "float_digits": 6}}
+    m = {
+        "baseline": {"rows": [{"x": [1, 2]}], "sha256": "abc"},
+        "comparison": {"strict_lists": True, "float_digits": 6},
+    }
     s = override_spec(m, "MATCH (n:P) RETURN [1, 2] AS x", {})
     assert (s.strict_lists, s.digits) == (True, 6)
 
@@ -431,3 +434,47 @@ def test_manifest_rows_render_graph_values_by_content_not_store_id():
     assert out["a"] == {"labels": ["P"], "properties": {"name": "A"}}
     assert out["r"] == {"type": "R", "properties": {"w": 1}}
     assert "id=" not in repr(out)
+
+
+def test_mcp_override_works_on_a_graph_valued_witness(tmp_path):
+    """The override re-parsed display rows: a witness whose answer holds nodes could never pass its own query."""
+    import json
+
+    import relate
+
+    from witness.check import check
+    from witness.mcp_server import override_spec
+
+    src = tmp_path / "g.rl"
+    db = relate.Database(str(src))
+    db.execute("CREATE (:P {name: 'A'})-[:R]->(:P {name: 'B'}), (:P {name: 'C'})-[:R]->(:P {name: 'D'})")
+    db.close()
+    q = "MATCH (a:P {name: 'A'})-[:R]->(b) RETURN b"
+    o = reduce_request(
+        Request(source=src, statement=q, params={}, name="w", out_dir=tmp_path / "o", ledger=None, use_cli=False)
+    )
+    assert o.verified
+    manifest = json.loads(open(o.files["manifest"]).read())
+    res = check(o.files["rl"], override_spec(manifest, q, {}), use_cli=False)
+    assert res.verified, res.text
+    other = check(o.files["rl"], override_spec(manifest, "MATCH (b:P {name: 'X'}) RETURN b", {}), use_cli=False)
+    assert not other.verified and other.text.startswith("NOT SUFFICIENT")
+
+
+def test_unverified_evidence_line_does_not_claim_reproduction():
+    from witness.mcp_server import evidence_markdown
+
+    res = {
+        "answer": {"columns": ["x"], "rows": [{"x": 1}]},
+        "witness": {"relationships": 2},
+        "check": {"check_text": "NOT SUFFICIENT: W does not reproduce the answer; 2 necessity probes not counted"},
+        "source_relationships": 10,
+        "verified": False,
+        "reasons": ["the predicate does not hold on W"],
+        "warnings": [],
+        "exhibits": [],
+        "files": {"rl": "w.rl"},
+        "relate_version": "1.0.1",
+    }
+    text = evidence_markdown(res)
+    assert "reproduce it" not in text and "NOT SUFFICIENT" in text and "NOT verified" in text

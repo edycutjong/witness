@@ -955,7 +955,7 @@
   "seed": 0,
   "source": {
     "nodes": 207,
-    "path": "/var/folders/hy/h4_prwdj11d1p_gf5kr77k5r0000gn/T/witness-fixture-3nwg0_sz/slice.rl",
+    "path": "<slice.rl: temp store pulled from Neo4j>",
     "relationships": 1272,
     "sha256": "73c1b97ca782965ef812c0ce9e26debeeb6c2e351d3193c3b7a9fcdf716c3fc1"
   },

@@ -42,7 +42,8 @@ disagreement" (one query's answer may stay put), and with `differs --loose` "wit
 
 "The same answer" is exact about types (`1`, `1.0` and `true` differ) and compares rows as a bag (row order is not part of
 the answer, even under a final `ORDER BY`; only an `ORDER BY` with `SKIP`/`LIMIT` uses the order, and Witness applies that
-cut itself), lists as bags unless `--strict-lists`, floats to 12 significant digits (`--float-digits`). Each manifest records
+cut itself), lists as bags unless `--strict-lists` (the headline demo uses it), floats to 12 significant digits
+(`--float-digits`). Each manifest records
 these settings under `comparison`. The proof is `witness check`: one fresh copy of W per probe, nothing shared with the
 reduction. The node and relationship counts checked after every rollback during the reduction are a tripwire for rollback
 residue, not the proof.

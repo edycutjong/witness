@@ -67,10 +67,12 @@ def evidence_markdown(res: dict) -> str:
         lines[-1] += f"; … (+{len(ans['rows']) - len(shown_rows)} more)"
     w = res["witness"]
     chk = res["check"]
-    stamp = chk["check_text"].split(" (")[0]
+    stamp = chk["check_text"].split(" (")[0] if res["verified"] else chk["check_text"]
     total = f"{res['source_relationships']:,}"
     kept = "reproduce it"  # keep / strict differs
-    if "end the disagreement" in stamp:
+    if not res["verified"]:
+        kept = "were kept"
+    elif "end the disagreement" in stamp:
         kept = "keep the two queries disagreeing"
     elif "end the mismatch" in stamp:
         kept = "keep the mismatch"
@@ -116,18 +118,18 @@ def _kill_group(proc) -> None:
 def override_spec(manifest: dict, statement: str, parameters: dict | None):
     """`check` with an agent's own statement: keep-compared against W's baseline rows, the way W was compared
     (its manifest's strict_lists / float_digits, not hard-coded defaults; a2a arch r1)."""
-    from .check import spec_from_args
+    from .check import CheckSpec
+    from .guard import static_checks
 
     cmp_ = manifest.get("comparison", {})
-    return spec_from_args(
-        statement,
-        dict(parameters or {}),
-        json.dumps(manifest["baseline"]["rows"]),
-        "keep",
-        None,
-        False,
-        bool(cmp_.get("strict_lists")),
-        int(cmp_.get("float_digits", 12)),
+    # Against the baseline's own sha256, not rows re-parsed from JSON: rows that hold nodes or relationships are
+    # display dicts and could never match a canonical node again (P1d QA r2).
+    return CheckSpec(
+        queries=[static_checks(statement, dict(parameters or {}), "check")],
+        kind="keep",
+        baseline_sha=manifest["baseline"]["sha256"],
+        strict_lists=bool(cmp_.get("strict_lists")),
+        digits=int(cmp_.get("float_digits", 12)),
     )
 
 

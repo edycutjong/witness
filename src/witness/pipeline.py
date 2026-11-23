@@ -179,6 +179,14 @@ def reduce_request(req: Request, progress=None) -> Outcome:
             backend = IsolatedTrials(
                 source, queries, timeout=req.trial_timeout, strict_lists=req.strict_lists, digits=req.digits
             )
+            probe = backend.trial_many([], [], [])  # a trial that deletes nothing must finish inside the watchdog
+            if probe.error and probe.error.startswith("TrialTimeout"):
+                backend.close()
+                raise Refused(
+                    f"one trial on the full graph does not finish within --trial-timeout {req.trial_timeout:g} s: "
+                    "raise it (every trial would otherwise time out and nothing could be reduced)",
+                    "timeout",
+                )
         red = Reducer(
             sc,
             predicate=pred,

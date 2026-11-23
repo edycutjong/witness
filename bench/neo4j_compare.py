@@ -1,14 +1,14 @@
-"""W5: the same rollback-trial loop, in-process on Relate and over Bolt on Neo4j in Docker. A measured number, not a claim.
+"""W5: the same rollback-trial loop, Relate in-process vs Neo4j in Docker over Bolt. A measured number, not a claim.
 
-For each trial (identical relationship on both sides, identical query, identical parameters, identical order):
-    begin -> delete that one relationship -> run the headline query, fetch every row -> rollback -> check counts restored.
+For each trial (same relationship on both sides, same query, same parameters, same order):
+    begin -> delete that one relationship -> run the headline query, fetch every row -> rollback -> counts restored?
 Relate runs in this process (`:memory:` copy of data/air-routes.rl). Neo4j runs in Docker (loopback Bolt, one explicit
-transaction per trial, driver round trips included, which is the honest cost of a server). Neither side is tuned:
-Neo4j keeps its default heap/page cache and the Airport.id / Country.code / Continent.code constraints created for the load.
-The ONLY query difference is the dialect: Neo4j has no coll.sort(), so queries/two-hub.neo4j.cypher orders before collect().
+transaction per trial; driver round trips are included, which is the honest cost of a server). Neither side is tuned:
+Neo4j keeps its default heap and page cache, with the Airport.id / Country.code / Continent.code constraints of the load.
+The ONLY query difference is dialect: Neo4j has no coll.sort(), so queries/two-hub.neo4j.cypher orders before collect().
 
     uv run --with neo4j python bench/neo4j_compare.py [--trials 1000] [--runs 3]
-        -> evidence/neo4j-compare-<date>.{json,md}, evidence/neo4j-compare-rows.jsonl
+        -> evidence/neo4j-compare-<date>.json + neo4j-compare-rows.jsonl
 
 Credentials come from ~/.config/witness/neo4j.env (never printed, never written to evidence).
 """
@@ -36,7 +36,6 @@ sys.path.insert(0, str(ROOT / "src"))
 import relate  # noqa: E402
 from neo4j import GraphDatabase  # noqa: E402
 
-from witness.canon import canon_rows  # noqa: E402
 from witness.store import DEL_RELS, Scratch  # noqa: E402
 
 SRC = ROOT / "data" / "air-routes.rl"
@@ -93,9 +92,13 @@ def machine() -> dict:
         except OSError:
             return ""
 
-    docker = subprocess.run(
-        ["docker", "info", "--format", "{{.ServerVersion}}|{{.NCPU}}|{{.MemTotal}}"], capture_output=True, text=True
-    ).stdout.strip().split("|")
+    docker = (
+        subprocess.run(
+            ["docker", "info", "--format", "{{.ServerVersion}}|{{.NCPU}}|{{.MemTotal}}"], capture_output=True, text=True
+        )
+        .stdout.strip()
+        .split("|")
+    )
     return {
         "os": f"{platform.system()} {platform.release()}",
         "arch": platform.machine(),
@@ -203,9 +206,10 @@ def main() -> None:
             t0 = time.perf_counter()
             for nid in neo_ids[meas]:
                 ms, rows, deleted = neo_trial(session, nid)
-                c = session.run("MATCH (n) RETURN count(n) AS n").single()["n"], session.run(
-                    "MATCH ()-[r]->() RETURN count(r) AS r"
-                ).single()["r"]
+                c = (
+                    session.run("MATCH (n) RETURN count(n) AS n").single()["n"],
+                    session.run("MATCH ()-[r]->() RETURN count(r) AS r").single()["r"],
+                )
                 ms_n.append(ms)
                 counts_ok_n += c == base_counts
                 deleted_ok += deleted == 1
@@ -216,19 +220,33 @@ def main() -> None:
             runs.append(
                 {
                     "run": run + 1,
-                    "relate": {**summarize(ms_r, wall_r, a.trials), "counts_restored": f"{counts_ok_r}/{a.trials}",
-                               "answer_changed": changed_r},
-                    "neo4j": {**summarize(ms_n, wall_n, a.trials), "counts_restored": f"{counts_ok_n}/{a.trials}",
-                              "delete_count_asserted": f"{deleted_ok}/{a.trials}", "answer_changed": changed_n},
+                    "relate": {
+                        **summarize(ms_r, wall_r, a.trials),
+                        "counts_restored": f"{counts_ok_r}/{a.trials}",
+                        "answer_changed": changed_r,
+                    },
+                    "neo4j": {
+                        **summarize(ms_n, wall_n, a.trials),
+                        "counts_restored": f"{counts_ok_n}/{a.trials}",
+                        "delete_count_asserted": f"{deleted_ok}/{a.trials}",
+                        "answer_changed": changed_n,
+                    },
                     "answers_identical_per_trial": f"{agree}/{a.trials}",
                 }
             )
             print(json.dumps(runs[-1]), flush=True)
             if run == 0:
                 for i, (rid, nid) in enumerate(zip(sample[meas], neo_ids[meas], strict=True), 1):
-                    rows_out.append({"n": i, "rel": sc.rel_keys[rid][:200], "relate_ms": round(ms_r[i - 1], 4),
-                                     "neo4j_ms": round(ms_n[i - 1], 4), "relate_changed": ans_r[i - 1] != multiset(base_relate),
-                                     "neo4j_changed": ans_n[i - 1] != multiset(base_neo)})
+                    rows_out.append(
+                        {
+                            "n": i,
+                            "rel": sc.rel_keys[rid][:200],
+                            "relate_ms": round(ms_r[i - 1], 4),
+                            "neo4j_ms": round(ms_n[i - 1], 4),
+                            "relate_changed": ans_r[i - 1] != multiset(base_relate),
+                            "neo4j_changed": ans_n[i - 1] != multiset(base_neo),
+                        }
+                    )
     # targeted agreement: the answer-relevant relationships (the headline query's own bindings), where many trials
     # DO change the answer, so "identical answers per trial" is a real check and not 1,000 unchanged rows
     tg = {"rels": len(bound), "relate_changed": 0, "neo4j_changed": 0, "identical": 0}
@@ -240,7 +258,11 @@ def main() -> None:
             tg["neo4j_changed"] += multiset(nr) != multiset(base_neo)
             tg["identical"] += multiset(rr) == multiset(nr)
     print("targeted", tg, flush=True)
-    versions = driver.session().run("CALL dbms.components() YIELD name, versions, edition RETURN name, versions[0] AS v, edition").data()
+    versions = (
+        driver.session()
+        .run("CALL dbms.components() YIELD name, versions, edition RETURN name, versions[0] AS v, edition")
+        .data()
+    )
     driver.close()
     sc.close()
     tmp_ctx.cleanup()
@@ -248,19 +270,48 @@ def main() -> None:
     report = {
         "date": time.strftime("%Y-%m-%d %H:%M:%S %z"),
         "machine": machine(),
-        "neo4j": {"image": env.get("NEO4J_IMAGE"), "components": versions, "transport": "Bolt over loopback, Docker Desktop VM"},
-        "source": {"path": "data/air-routes.rl", "sha256_before": sha_before, "sha256_after": sha256(SRC),
-                   "nodes": base_counts[0], "relationships": base_counts[1]},
-        "queries": {"relate": "queries/two-hub.cypher", "neo4j": "queries/two-hub.neo4j.cypher", "params": PARAMS,
-                    "baseline_rows": base_relate},
-        "protocol": {"trials_per_run": a.trials, "runs": a.runs, "warmup_discarded": a.warmup, "seed": SEED,
-                     "sample": "random.Random(0).sample over relationships sorted by canonical key; same ones on both sides",
-                     "neo4j_ambiguous_matches": ambiguous, "relate_delete_stmt": DEL_RELS, "neo4j_delete_stmt": del_neo},
+        "neo4j": {
+            "image": env.get("NEO4J_IMAGE"),
+            "components": versions,
+            "transport": "Bolt over loopback, Docker Desktop VM",
+        },
+        "source": {
+            "path": "data/air-routes.rl",
+            "sha256_before": sha_before,
+            "sha256_after": sha256(SRC),
+            "nodes": base_counts[0],
+            "relationships": base_counts[1],
+        },
+        "queries": {
+            "relate": "queries/two-hub.cypher",
+            "neo4j": "queries/two-hub.neo4j.cypher",
+            "params": PARAMS,
+            "baseline_rows": base_relate,
+        },
+        "protocol": {
+            "trials_per_run": a.trials,
+            "runs": a.runs,
+            "warmup_discarded": a.warmup,
+            "seed": SEED,
+            "sample": "random.Random(0).sample over relationships sorted by canonical key; same ones on both sides",
+            "neo4j_ambiguous_matches": ambiguous,
+            "relate_delete_stmt": DEL_RELS,
+            "neo4j_delete_stmt": del_neo,
+        },
         "runs": runs,
         "targeted_agreement": tg,
-        "median_trials_per_s": {"relate_in_process": med("trials_per_s", "relate"), "neo4j_docker": med("trials_per_s", "neo4j")},
-        "median_trial_ms_p50": {"relate_in_process": med("trial_ms_p50", "relate"), "neo4j_docker": med("trial_ms_p50", "neo4j")},
-        "median_trial_ms_p95": {"relate_in_process": med("trial_ms_p95", "relate"), "neo4j_docker": med("trial_ms_p95", "neo4j")},
+        "median_trials_per_s": {
+            "relate_in_process": med("trials_per_s", "relate"),
+            "neo4j_docker": med("trials_per_s", "neo4j"),
+        },
+        "median_trial_ms_p50": {
+            "relate_in_process": med("trial_ms_p50", "relate"),
+            "neo4j_docker": med("trial_ms_p50", "neo4j"),
+        },
+        "median_trial_ms_p95": {
+            "relate_in_process": med("trial_ms_p95", "relate"),
+            "neo4j_docker": med("trial_ms_p95", "neo4j"),
+        },
     }
     report["ratio_trials_per_s"] = round(
         report["median_trials_per_s"]["relate_in_process"] / report["median_trials_per_s"]["neo4j_docker"], 2
@@ -268,7 +319,15 @@ def main() -> None:
     date = time.strftime("%Y-%m-%d")
     (EV / f"neo4j-compare-{date}.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     (EV / "neo4j-compare-rows.jsonl").write_text("".join(json.dumps(r, sort_keys=True) + "\n" for r in rows_out))
-    print(json.dumps({k: report[k] for k in ("median_trials_per_s", "median_trial_ms_p50", "median_trial_ms_p95", "ratio_trials_per_s")}, indent=1))
+    print(
+        json.dumps(
+            {
+                k: report[k]
+                for k in ("median_trials_per_s", "median_trial_ms_p50", "median_trial_ms_p95", "ratio_trials_per_s")
+            },
+            indent=1,
+        )
+    )
 
 
 if __name__ == "__main__":

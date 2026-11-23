@@ -143,7 +143,10 @@ def reduce_request(req: Request, progress=None) -> Outcome:
         # ---- order check: same answer from a second store built in reverse canonical order ----------------
         answers, results = [], []
         for gq in queries:
-            a, r = _answer(sc, gq, req)
+            try:
+                a, r = _answer(sc, gq, req)
+            except ValueError as e:  # e.g. a result value with no canonical form (canon._opaque)
+                raise Refused(f"the answer cannot be compared: {e}", gq.door) from e
             if isinstance(a, Tie):
                 raise Refused(f"a tie straddles the SKIP/LIMIT cut on the full graph: {plain(a.rows)}", gq.door)
             answers.append(a)

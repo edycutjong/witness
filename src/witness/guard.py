@@ -369,7 +369,8 @@ def _parse_cut(body: str, words: list[Tok], params: dict, door: str) -> Cut:
             break
         if w.kind != "ident":
             raise Refused("ORDER BY with LIMIT/SKIP must sort by returned column names (no expressions) in v0.1", door)
-        cols.append(body[w.start : w.end].strip("`"))
+        raw = body[w.start : w.end]
+        cols.append(raw[1:-1].replace("``", "`") if w.quoted else raw)
         j += 1
         if j < len(words) and words[j].kind == "ident" and words[j].text in ("asc", "desc", "ascending", "descending"):
             j += 1

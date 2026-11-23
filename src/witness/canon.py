@@ -65,7 +65,7 @@ def canon_value(v: Any, *, strict_lists: bool = False, digits: int = 12, keyer=N
     if v is None or isinstance(v, (bool, int, str)):
         return v
     if isinstance(v, float):
-        return _round_float(v, digits)
+        return 0.0 if v == 0 else _round_float(v, digits)  # -0.0 = 0.0 in Cypher; element keys keep the sign
     if _is_node(v):
         return ("node", node_key(list(v.labels), dict(v.properties), digits))
     if _is_rel(v):

@@ -187,3 +187,59 @@ def test_a_time_cap_that_never_fired_keeps_the_determinism_claim(tiny_rl, tmp_pa
         )
     )
     assert o.verified and o.manifest["determinism_claimed"]
+
+
+def test_mcp_override_is_compared_the_way_the_witness_was():
+    from witness.mcp_server import override_spec
+
+    m = {"baseline": {"rows": [{"x": [1, 2]}]}, "comparison": {"strict_lists": True, "float_digits": 6}}
+    s = override_spec(m, "MATCH (n:P) RETURN [1, 2] AS x", {})
+    assert (s.strict_lists, s.digits) == (True, 6)
+
+
+def test_a_value_with_no_canonical_form_is_refused_not_hashed():
+    from witness.canon import canon_value
+
+    with pytest.raises(ValueError, match="no canonical form"):
+        canon_value(object())
+
+
+def test_minus_zero_is_zero_in_answers_but_not_in_element_keys():
+    from witness.canon import node_key
+
+    assert same_answer(canon_rows([{"x": -0.0}]), canon_rows([{"x": 0.0}]))
+    assert node_key(["A"], {"x": -0.0}) != node_key(["A"], {"x": 0.0})
+
+
+def test_export_that_loses_an_element_stops_the_run(tiny_rl, tmp_path, monkeypatch):
+    import witness.pipeline as pl
+
+    real = pl.write_rl
+
+    def lossy(script, path):  # drop the last CREATE element
+        head, _, _ = script.rstrip().rstrip(";").rpartition(",\n")
+        return real(head + ";\n", path)
+
+    monkeypatch.setattr(pl, "write_rl", lossy)
+    q = "MATCH (a:P {name: 'A'})-[:R]->(h)-[:R]->(d:P {name: 'D'}) RETURN h.name AS hub"
+    with pytest.raises(RuntimeError, match="export changed the witness"):
+        reduce_request(
+            Request(
+                source=tiny_rl, statement=q, params={}, name="w", out_dir=tmp_path / "o", ledger=None, use_cli=False
+            )
+        )
+
+
+def test_residue_counts_are_checked_after_every_rollback_by_default(tiny_rl):
+    import inspect
+
+    from witness.reduce import Reducer
+
+    assert inspect.signature(Reducer).parameters["check_every"].default == 1
+
+
+def test_cut_column_with_a_backtick_in_its_name():
+    from witness.guard import static_checks
+
+    gq = static_checks("MATCH (n:P) RETURN n.name AS `a``b` ORDER BY `a``b` LIMIT 1")
+    assert gq.cut.order_cols == ["a`b"]

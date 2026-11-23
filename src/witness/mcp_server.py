@@ -108,9 +108,27 @@ def _kill_group(proc) -> None:
         proc.kill()
 
 
+def override_spec(manifest: dict, statement: str, parameters: dict | None):
+    """`check` with an agent's own statement: keep-compared against W's baseline rows, the way W was compared
+    (its manifest's strict_lists / float_digits, not hard-coded defaults; a2a arch r1)."""
+    from .check import spec_from_args
+
+    cmp_ = manifest.get("comparison", {})
+    return spec_from_args(
+        statement,
+        dict(parameters or {}),
+        json.dumps(manifest["baseline"]["rows"]),
+        "keep",
+        None,
+        False,
+        bool(cmp_.get("strict_lists")),
+        int(cmp_.get("float_digits", 12)),
+    )
+
+
 def _check_worker(conn, args: dict) -> None:
     os.environ.setdefault("DO_NOT_TRACK", "1")
-    from .check import check, spec_from_args, spec_from_manifest
+    from .check import check, spec_from_manifest
     from .guard import Refused
 
     _own_group()
@@ -118,17 +136,7 @@ def _check_worker(conn, args: dict) -> None:
         manifest = json.loads(Path(args["manifest"]).read_text())
         spec = spec_from_manifest(manifest)
         if args["statement"] is not None:
-            cmp_ = manifest.get("comparison", {})  # the override is compared the way the witness was (a2a arch r1)
-            spec = spec_from_args(
-                args["statement"],
-                dict(args["parameters"] or {}),
-                json.dumps(manifest["baseline"]["rows"]),
-                "keep",
-                None,
-                False,
-                bool(cmp_.get("strict_lists")),
-                int(cmp_.get("float_digits", 12)),
-            )
+            spec = override_spec(manifest, args["statement"], args["parameters"])
         conn.send(("ok", check(Path(args["witness"]), spec, use_cli=args["use_cli"]).to_dict()))
     except Refused as e:
         conn.send(("refused", {"kind": e.door, "message": e.reason}))
@@ -288,7 +296,8 @@ class WitnessTools:
             return ToolError(payload["kind"], payload["message"]).to_dict()
         finally:
             proc.join(5)
-            _kill_group(proc)  # also reaps a descendant the worker left behind
+            if proc.is_alive():  # never killpg a reaped pid: it may have been recycled
+                _kill_group(proc)
 
     # ---- check -------------------------------------------------------------------------------------------------
     def check(self, witness_path: str, statement: str | None = None, parameters: dict | None = None) -> dict:

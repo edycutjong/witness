@@ -41,7 +41,8 @@ answer. It does not mean "smallest possible". With `--predicate disagree` the sa
 disagreement" (one query's answer may stay put), and with `differs --loose` "without ending the mismatch".
 
 "The same answer" is exact about types (`1`, `1.0` and `true` differ) and compares rows as a bag (row order is not part of
-the answer), lists as bags unless `--strict-lists`, floats to 12 significant digits (`--float-digits`). Each manifest records
+the answer, even under a final `ORDER BY`; only an `ORDER BY` with `SKIP`/`LIMIT` uses the order, and Witness applies that
+cut itself), lists as bags unless `--strict-lists`, floats to 12 significant digits (`--float-digits`). Each manifest records
 these settings under `comparison`. The proof is `witness check`: one fresh copy of W per probe, nothing shared with the
 reduction. The node and relationship counts checked after every rollback during the reduction are a tripwire for rollback
 residue, not the proof.
@@ -56,7 +57,8 @@ relate query --database witnesses/two-hub.rl --read-only --param country=MX --pa
 
 The same rollback-trial loop (delete one relationship, run the headline query, roll back, check counts) ran on Relate in-process
 (a file-backed scratch copy) and on Neo4j 2026.10.2 in Docker over Bolt: median of 3 runs of 1,000 trials, 366.8 vs 90.2
-trials/s on one machine, with identical answers on all 3,000 sampled trials and on the 68 answer-relevant relationships. The
+trials/s on one machine, with identical answers per trial: 1,000 sampled relationships run 3 times (2 of them change the answer), plus all 68
+answer-relevant relationships (20 change it). The
 throughput includes each side's count check (two extra Bolt queries per trial on Neo4j); per-trial latency from begin to
 rollback, which excludes it on both sides, is p50 2.54 vs 6.48 ms (median of the 3 runs). Method, caveats and raw rows:
 `evidence/neo4j-compare-2026-11-24.md`, `bench/neo4j_compare.py`.

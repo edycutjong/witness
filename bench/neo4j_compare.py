@@ -139,7 +139,6 @@ def main() -> None:
         ambiguous = 0
 
         def resolve(rids):
-            nonlocal ambiguous
             out = []
             for rid in rids:
                 sid, eid = sc.rel_ends[rid]
@@ -157,7 +156,6 @@ def main() -> None:
                     raise SystemExit(f"relationship not found in Neo4j: {sc.rel_keys[rid][:120]}")
                 if len(got) > 1:  # a2a arch r1: never pick one of several matches; the trial would differ
                     raise SystemExit(f"{len(got)} Neo4j matches for one relationship: {sc.rel_keys[rid][:100]}")
-                ambiguous += len(got) > 1
                 out.append(got[0])
             return out
 

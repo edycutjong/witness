@@ -25,7 +25,7 @@ Neo4j, two in-process counts on Relate); the per-trial ms rows above are begin â
 this setup (a server in a Docker VM, one Bolt round trip per statement, two extra count queries per trial), not a claim that Neo4j
 cannot run rollback trials. It runs them fine and returned the same answers.
 
-**Answers agree.** Per-trial answers identical on all 3,000 sampled trials (only 2 of 1,000 change the answer per run, on both
+**Answers agree.** Per-trial answers identical on all 3,000 trials: the same 1,000 sampled relationships in each of the 3 runs (only 2 of 1,000 change the answer per run, on both
 engines). Because that sample barely changes the answer, a targeted pass ran the 68 relationships the headline query actually
 binds: 20 change the answer on Relate and the same 20 on Neo4j, 68/68 identical.
 

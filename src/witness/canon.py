@@ -10,9 +10,19 @@ from __future__ import annotations
 import json
 from typing import Any
 
+_NAME_BREAKS = frozenset("\n\r\x0b\x0c\x1c\x1d\x1e\x85\u2028\u2029")
+
+
+def bad_name(s: str) -> bool:
+    """A label, type or key a CREATE script cannot carry byte-exact: Relate accepts `a\nb`, but a backtick name has no
+    escapes and a line break inside it does not survive the script's line handling (a2a arch r2)."""
+    return any(ord(c) < 0x20 or c == "\x7f" or c in _NAME_BREAKS for c in str(s))
+
 
 def cypher_name(s: str) -> str:
     """A label, relationship type or property key as a backtick-quoted Cypher name (backticks doubled)."""
+    if bad_name(s):
+        raise ValueError(f"the name {str(s)!r} holds a control character and cannot be exported")
     return "`" + str(s).replace("`", "``") + "`"
 
 

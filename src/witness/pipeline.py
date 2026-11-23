@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import __version__
-from .canon import same_answer
+from .canon import bad_name, same_answer
 from .check import CheckResult, check, plain, spec_from_manifest
 from .export import cypher_script, exhibit_html, exhibits, isolated, write_rl
 from .guard import GuardedQuery, Refused, Tie, guard
@@ -115,6 +115,14 @@ def _refuse_aliased_outputs(req: Request, source: Path) -> None:
     for o in outs:
         if o.resolve() == src or (o.exists() and os.path.samefile(o, src)):
             raise Refused(f"{o} would overwrite the source store; choose another --out or --name", "out")
+    # ... nor on each other: `--name ledger --out out` made the witness out/ledger.rl, the ledger's own file, and a
+    # symlinked x.html -> x.rl would overwrite the checked witness after the check (a2a arch r2)
+    seen: dict[Path, Path] = {}
+    for o in outs:
+        r = o.resolve()
+        if r in seen:
+            raise Refused(f"{o} and {seen[r]} are the same file; choose another --name or --ledger", "out")
+        seen[r] = o
 
 
 def reduce_request(req: Request, progress=None) -> Outcome:
@@ -133,6 +141,11 @@ def reduce_request(req: Request, progress=None) -> Outcome:
     backend = None
     try:
         out.source_counts = sc.counts()
+        names = {lb for ls in sc.node_labels.values() for lb in ls} | set(sc.rel_type.values())
+        names |= {k for p in (*sc.node_props.values(), *sc.rel_props.values()) for k in p}
+        bad = sorted(n for n in names if bad_name(n))
+        if bad:
+            raise Refused(f"label/type/key {bad[0]!r} holds a control character; no witness could be exported", "store")
         # ---- guard every user statement (W2) ----------------------------------------------------------------
         queries = [guard(req.statement, req.params, sc.db, "query")]
         if req.predicate == "disagree":

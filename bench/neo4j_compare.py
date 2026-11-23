@@ -4,7 +4,7 @@ For each trial (same relationship on both sides, same query, same parameters, sa
     begin -> delete that one relationship -> run the headline query, fetch every row -> rollback -> counts restored?
 Relate runs in this process (`:memory:` copy of data/air-routes.rl). Neo4j runs in Docker (loopback Bolt, one explicit
 transaction per trial; driver round trips are included, which is the honest cost of a server). Neither side is tuned:
-Neo4j keeps its default heap and page cache, with the Airport.id / Country.code / Continent.code constraints of the load.
+Neo4j keeps its default heap and page cache, with the Airport.id/Country.code/Continent.code constraints.
 The ONLY query difference is dialect: Neo4j has no coll.sort(), so queries/two-hub.neo4j.cypher orders before collect().
 
     uv run --with neo4j python bench/neo4j_compare.py [--trials 1000] [--runs 3]
@@ -236,7 +236,7 @@ def main() -> None:
             )
             print(json.dumps(runs[-1]), flush=True)
             if run == 0:
-                for i, (rid, nid) in enumerate(zip(sample[meas], neo_ids[meas], strict=True), 1):
+                for i, rid in enumerate(sample[meas], 1):
                     rows_out.append(
                         {
                             "n": i,

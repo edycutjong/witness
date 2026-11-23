@@ -1,5 +1,7 @@
 """Every refusal a judge can trigger from the CLI: a one-line reason, exit 2, nothing written."""
 
+import json
+
 import pytest
 
 from witness.cli import main
@@ -52,7 +54,31 @@ def test_differs_needs_an_expected_answer(tiny_rl, tmp_path, capsys):
     assert rc == 2 and "differs needs --expected" in err
 
 
-def test_timeout_too_short_for_one_trial_is_refused_fast(tiny_rl, tmp_path, capsys):
-    rc, err, out = run(tmp_path, capsys, NAMES, "--isolate", "--trial-timeout", "0", store=tiny_rl)
-    assert rc == 2 and "refused (timeout)" in err and "--trial-timeout" in err
-    assert not out.exists() or not any(out.iterdir())
+def test_timeout_is_inconclusive_never_verified(tiny_rl, tmp_path, capsys):
+    slow = (
+        "MATCH (a:P {name: 'A'})-[:R]->(h)-[:R]->(:P {name: 'D'}) WITH collect(h.name) AS hubs "
+        "UNWIND range(1, 3000000) AS i WITH hubs, sum(i) AS s RETURN hubs, s"
+    )  # ~1 s per run: every trial overruns the 0.2 s watchdog
+    q = tmp_path / "slow.cypher"
+    q.write_text(slow)
+    rc = main(
+        [
+            "why",
+            "-f",
+            str(q),
+            "--store",
+            str(tiny_rl),
+            "--out",
+            str(tmp_path / "o"),
+            "--no-cli",
+            "--isolate",
+            "--trial-timeout",
+            "0.2",
+            "--max-trials",
+            "2",
+        ]
+    )
+    out = capsys.readouterr().out
+    man = json.loads((tmp_path / "o" / "slow.manifest.json").read_text())
+    assert rc != 0 and "NOT verified" in out
+    assert man["verified"] is False and man["run"]["inconclusive"] == 2 and man["determinism_claimed"] is False

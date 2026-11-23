@@ -198,7 +198,7 @@ def verdict_line(o) -> None:
         for r in o.reasons:
             print(f"  - {r}")
         if o.check is not None:
-            print(f"  inconclusive: {o.check.inconclusive}")
+            print(f"  necessity probes inconclusive: {o.check.inconclusive}")
 
 
 # ---- commands ----------------------------------------------------------------------------------------------------

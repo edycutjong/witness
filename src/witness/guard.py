@@ -439,11 +439,10 @@ def strip_comments(text: str) -> str:
         if m is None:
             out.append(text[pos:])
             break
-        if m.lastgroup in ("lc", "bc"):
-            out.append(" ")
-        elif m.lastgroup == "ws":
-            out.append(" ")
+        if m.lastgroup in ("lc", "bc", "ws"):
+            if out and out[-1] != " ":
+                out.append(" ")
         else:
-            out.append(m.group(0))
+            out.append(m.group(0))  # string literals stay byte-exact ('a  b' is not 'a b'; a2a arch r1)
         pos = m.end()
-    return re.sub(r"\s+", " ", "".join(out)).strip().rstrip(";").strip()
+    return "".join(out).strip().rstrip(";").strip()

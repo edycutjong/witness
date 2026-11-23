@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Witness — reduces a graph to its witness. Thousands of graphite lines fade; a handful stay, each tagged with a red exhibit number; the answer above never moves.">
+<!-- STORYBOARD (dur 6s — must equal this file's single master dur)
+  0-8%    steady state: the mark as filed: manila plate, red kept relationship between two ink nodes, red exhibit tag on its string, dashed graphite ghosts (poster = brand)
+  8-24%   trigger:      the tag lifts away and the kept line returns to graphite; six more graphite relationships draw in: the whole graph, unproven      data-story="beat-2"
+  24-50%  mechanism:    Thousands of graphite lines fade; a handful stay, each tagged with a red exhibit number; the answer above never moves.      data-story="beat-3"
+  50-66%  resolution:   the red line is drawn back in; the tag swings in on its string and settles at its filed angle                       data-story="beat-4"
+  66-100% breathe:      a red glow breathes behind the kept line and tag; the state now equals frame 0, so the seam needs no cut
+-->
+<title>Witness</title>
+<defs>
+  <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
+  <filter id="tagshadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#1F1A14" flood-opacity="0.18"/></filter>
+</defs>
+<style>
+  .swing{transform-box:view-box;transform-origin:289px 294px;animation:swing 6s cubic-bezier(.2,1.4,.4,1) infinite}
+  @keyframes swing{0%,8%{transform:rotate(0deg)}12%,50%{transform:rotate(-38deg)}58%{transform:rotate(6deg)}63%{transform:rotate(-3deg)}68%,100%{transform:rotate(0deg)}}
+  @media (prefers-reduced-motion: reduce){*{animation:none !important}}
+</style>
+<rect x="16" y="16" width="480" height="480" rx="108" fill="var(--bg-base, #F2E8D5)" stroke="#CDBB97" stroke-width="6"/>
+<g fill="none" stroke="#9C978E" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 20" opacity="0.9"><path d="M60 336Q112 262 146 212"/><path d="M394 154Q452 232 456 336"/><path d="M150 66Q140 118 136 176"/><path d="M300 62Q350 98 382 142"/></g>
+<g fill="none" stroke="#9C978E" stroke-width="9" stroke-linecap="round">
+  <path d="M40 120Q160 150 250 96" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" opacity="0" data-story="beat-2"><animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.08;0.1;0.26;0.31;1" values="0;0;1;1;0;0"/><animate attributeName="stroke-dashoffset" dur="6s" repeatCount="indefinite" keyTimes="0;0.08;0.15;1" values="100;100;0;0"/></path>
+  <path d="M70 470Q150 380 140 210" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" opacity="0" data-story="beat-2"><animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.096;0.116;0.295;0.345;1" values="0;0;1;1;0;0"/><animate attributeName="stroke-dashoffset" dur="6s" repeatCount="indefinite" keyTimes="0;0.096;0.166;1" values="100;100;0;0"/></path>
+  <path d="M250 470Q320 360 390 150" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" opacity="0" data-story="beat-2"><animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.112;0.132;0.33;0.38;1" values="0;0;1;1;0;0"/><animate attributeName="stroke-dashoffset" dur="6s" repeatCount="indefinite" keyTimes="0;0.112;0.182;1" values="100;100;0;0"/></path>
+  <path d="M470 250Q330 220 140 206" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" opacity="0" data-story="beat-2"><animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.128;0.148;0.365;0.415;1" values="0;0;1;1;0;0"/><animate attributeName="stroke-dashoffset" dur="6s" repeatCount="indefinite" keyTimes="0;0.128;0.198;1" values="100;100;0;0"/></path>
+  <path d="M200 40Q260 120 380 150" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" opacity="0" data-story="beat-2"><animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.144;0.164;0.4;0.45;1" values="0;0;1;1;0;0"/><animate attributeName="stroke-dashoffset" dur="6s" repeatCount="indefinite" keyTimes="0;0.144;0.214;1" values="100;100;0;0"/></path>
+  <path d="M470 420Q400 330 290 300" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" opacity="0" data-story="beat-2"><animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.16;0.18;0.435;0.485;1" values="0;0;1;1;0;0"/><animate attributeName="stroke-dashoffset" dur="6s" repeatCount="indefinite" keyTimes="0;0.16;0.23;1" values="100;100;0;0"/></path>
+</g>
+<path d="M140,206Q264,156 388,150" fill="none" stroke="#9C978E" stroke-width="20" stroke-linecap="round" opacity="0" data-story="beat-2"><animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.1;0.13;0.5;0.6;1" values="0;0;1;1;0;0"/></path>
+<g filter="url(#glow)" opacity="0" data-story="beat-4"><animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.66;0.76;0.86;0.94;1" values="0;0;0.55;0.2;0.45;0"/>
+  <path d="M140,206Q264,156 388,150" fill="none" stroke="#B42318" stroke-width="30" stroke-linecap="round"/>
+  <g transform="translate(300 300) rotate(28)"><path d="M-40 0L-10 -46L150 -46Q160 -46 160 -36L160 36Q160 46 150 46L-10 46Z" fill="#B42318"/></g>
+</g>
+<path d="M140,206Q264,156 388,150" fill="none" stroke="#B42318" stroke-width="22" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"><animate attributeName="stroke-dashoffset" dur="6s" repeatCount="indefinite" keyTimes="0;0.1;0.13;0.44;0.54;1" values="0;0;100;100;0;0"/></path>
+<circle cx="140" cy="206" r="30" fill="#1F1A14"/><circle cx="388" cy="150" r="30" fill="#1F1A14"/>
+<g><animate attributeName="opacity" dur="6s" repeatCount="indefinite" keyTimes="0;0.08;0.14;0.5;0.54;1" values="1;1;0;0;1;1"/>
+  <path d="M264 167C262 212 280 238 289 294" fill="none" stroke="#1F1A14" stroke-width="6" stroke-linecap="round"/>
+  <g class="swing"><g transform="translate(300 300) rotate(28)" filter="url(#tagshadow)"><path d="M-40 0L-10 -46L150 -46Q160 -46 160 -36L160 36Q160 46 150 46L-10 46Z" fill="#B42318"/><circle cx="-12" cy="0" r="12" fill="#F2E8D5" stroke="#D9CBAE" stroke-width="5"/><path d="M22 -12H132M22 14H108" stroke="#F2E8D5" stroke-width="7" stroke-linecap="round" opacity="0.85"/></g></g>
+</g>
+</svg>

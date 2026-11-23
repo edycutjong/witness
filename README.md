@@ -1,5 +1,9 @@
 # Witness
 
+<p align="center">
+  <img src="docs/assets/readme-hero-animated.svg" alt="Witness — reduces the graph behind an agent's answer to the relationships that reproduce it. Thousands of graphite lines fade; a handful stay, each tagged with a red exhibit number; the answer above never moves." width="100%">
+</p>
+
 When an agent answers from a graph, Witness hands back a tiny graph that reproduces the answer, and proves each relationship in it is needed.
 
 Built on [Relate](https://relatedb.ai). License: Apache-2.0. Work in progress: this README is the quick start; the full

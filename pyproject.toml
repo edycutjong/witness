@@ -37,6 +37,7 @@ addopts = "-q"
 [tool.ruff]
 line-length = 120
 target-version = "py310"
+extend-exclude = ["fixtures"]  # generated fixture tests keep the whole statement + expected rows on one line
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP"]

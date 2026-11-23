@@ -3,7 +3,7 @@
   "fixture": {
     "inconclusive": 0,
     "nodes": 88,
-    "reduction_seconds": 0.713,
+    "reduction_seconds": 0.68,
     "relationships": 126,
     "trials": 2092
   },
@@ -17,7 +17,7 @@
   "relate_db": "1.0.1",
   "slice": {
     "nodes": 207,
-    "pull_seconds": 0.174,
+    "pull_seconds": 0.189,
     "relationships": 1272
   },
   "verified": true

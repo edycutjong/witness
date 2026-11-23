@@ -327,8 +327,14 @@ def cmd_fixture(args) -> int:
     test = write_test_file(Path(args.out), args.name, o, statement, params, expected)
     (Path(args.out) / f"{args.name}.report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     s, fx = report["slice"], report["fixture"]
-    print(f"PULLED   {s['relationships']:,} relationships · {s['nodes']:,} nodes in {s['pull_seconds']} s (relate pull; nothing pushed)")
-    print(f"FIXTURE  {fx['relationships']} relationships · {fx['nodes']} nodes · {fx['trials']} trials · {fx['reduction_seconds']} s")
+    print(
+        f"PULLED   {s['relationships']:,} relationships · {s['nodes']:,} nodes in {s['pull_seconds']} s"
+        " (relate pull; nothing pushed)"
+    )
+    print(
+        f"FIXTURE  {fx['relationships']} relationships · {fx['nodes']} nodes · {fx['trials']} trials"
+        f" · {fx['reduction_seconds']} s"
+    )
     print(f"CHECK    {report['check']}")
     print(f"FILES    {shown(o.files['rl'])} (+ .cypher .manifest.json)  test: {shown(test)}")
     print("VERIFIED" if o.verified else "NOT verified")
@@ -645,7 +651,9 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--ledger")
 
     f = sub.add_parser("fixture", help="pull a slice from Neo4j once, shrink it to the smallest fixture a test needs")
-    f.add_argument("--from", dest="creds", required=True, help="Neo4j env file (NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD)")
+    f.add_argument(
+        "--from", dest="creds", required=True, help="Neo4j env file (NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD)"
+    )
     f.add_argument("--pull", required=True, help="the slice: a Cypher file that RETURNs graph elements")
     f.add_argument("--test", required=True, help="the test's query file (read-only Cypher)")
     f.add_argument("--expect", required=True, help="the test's expected answer: a JSON file or inline JSON (rows)")

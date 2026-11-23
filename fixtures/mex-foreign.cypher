@@ -1,5 +1,5 @@
 // Witness 0.1.0 · relate-db 1.0.1 · seed 0
-// source sha256 43b07a50ee6142cb9099be84135ac5a319ebcd083ca901f552bf673d2bcce5eb
+// source sha256 73c1b97ca782965ef812c0ce9e26debeeb6c2e351d3193c3b7a9fcdf716c3fc1
 // params {}
 CREATE
   (n0:`Airport` {`altitude`: -11, `city`: 'Amsterdam', `descr`: 'Amsterdam Airport Schiphol', `iata`: 'AMS', `icao`: 'EHAM', `id`: 70, `lat`: 52.3086013794, `lon`: 4.76388978958, `longest`: 12467, `region`: 'NL-NH', `runways`: 6}),

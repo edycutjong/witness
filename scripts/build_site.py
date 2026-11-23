@@ -13,6 +13,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
 REPO = "https://github.com/edycutjong/witness"
+# Set True when the repository is public (HUMAN-TODO: the flip at submission), then rebuild and redeploy.
+REPO_PUBLIC = False
+PRIVATE_NOTE = (
+    ""
+    if REPO_PUBLIC
+    else '<p class="note">The repository opens at submission; until then the clone command does not resolve and the committed output below is the run.</p>'
+)
 
 man = json.loads((ROOT / "witnesses" / "two-hub.manifest.json").read_text())
 cmp_path = sorted((ROOT / "evidence").glob("neo4j-compare-*.json"))[-1]
@@ -52,31 +59,31 @@ PAGE = """<!doctype html>
 *{{box-sizing:border-box}}
 html{{scroll-behavior:smooth}}
 body{{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 var(--body)}}
-a{{color:var(--after);text-underline-offset:3px;text-decoration-thickness:1px;transition:color .15s ease,text-decoration-thickness .15s ease}}
-a:hover{{color:var(--ink);text-decoration-thickness:2px}}
+a{{color:var(--ink);text-underline-offset:3px;text-decoration-thickness:1px;transition:color .15s ease,text-decoration-thickness .15s ease,text-decoration-color .15s ease}}
+a:hover{{color:var(--muted);text-decoration-thickness:3px}}
 a:active{{opacity:.7}}
 a:focus-visible,button:focus-visible{{outline:3px solid var(--ink);outline-offset:3px;border-radius:2px}}
 main{{max-width:1040px;margin:0 auto;padding:48px 24px 72px}}
-.eyebrow{{font:14px/1 var(--data);letter-spacing:.14em;color:var(--muted);margin:0 0 20px}}
+.eyebrow{{font:600 13px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 20px}}
 h1{{font:700 clamp(36px,6.4vw,64px)/1.05 var(--display);margin:0 0 18px;letter-spacing:-.01em}}
 h1 em{{font-style:normal;color:var(--after)}}
-h2{{font:700 14px/1 var(--data);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}}
+h2{{font:600 13px/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}}
 .lede{{font-size:21px;max-width:60ch;margin:0 0 28px}}
 .stamp{{display:inline-block;margin:6px 0 28px;padding:8px 14px;border:3px solid var(--after);color:var(--after);font:700 18px/1 var(--data);letter-spacing:.08em;transform:rotate(-1.5deg)}}
 .run{{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch;margin:0 0 8px}}
 pre{{margin:0;padding:14px 18px;background:#1F1A14;color:#F2E8D5;font:15px/1.6 var(--data);border-radius:3px;overflow-x:auto;flex:1 1 360px}}
-pre b{{color:#E5484D;font-weight:400}}
-button{{font:600 15px/1 var(--body);padding:0 20px;min-height:48px;background:var(--after);color:#fff;border:0;border-radius:3px;cursor:pointer;transition:background .15s ease,transform .1s ease}}
-button:hover{{background:#8F1B12}}
+pre b{{color:#D9CBAE;font-weight:400}}
+button{{font:600 15px/1 var(--body);padding:0 20px;min-height:48px;background:var(--ink);color:var(--paper);border:0;border-radius:3px;cursor:pointer;transition:background .15s ease,transform .1s ease}}
+button:hover{{background:#4A4034}}
 button:active{{transform:translateY(1px) scale(.98)}}
 .note{{font-size:15px;color:var(--muted);margin:0 0 44px}}
 .mono,td,th,dt,dd{{font-family:var(--data);font-size:14px}}
 table{{border-collapse:collapse;width:100%;margin-bottom:24px}}
 th,td{{text-align:left;padding:6px 10px;border-bottom:1px solid var(--before)}}
-tbody tr{{transition:background .15s ease}}tbody tr:hover{{background:rgba(180,35,24,.07)}}
+tbody tr{{transition:background .15s ease}}tbody tr:hover{{background:rgba(31,26,20,.07)}}
 .grid{{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:8px}}
 @media (max-width:820px){{.grid{{grid-template-columns:1fr}}}}
-.tag{{color:#fff;background:var(--after);font-weight:700;text-align:center;width:2.6em}}.t{{color:var(--before)}}
+.tag{{color:#fff;background:var(--after);font-weight:700;text-align:center;width:2.6em}}.t{{color:var(--muted)}}
 svg{{width:100%;height:auto;background:rgba(255,255,255,.35);border:1px solid var(--before)}}
 .e{{stroke:var(--after);stroke-width:1.6}}.en{{fill:var(--after);font:700 11px monospace}}
 .n{{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}}.nl{{font:700 11px monospace;text-anchor:middle;fill:var(--ink)}}
@@ -85,31 +92,33 @@ svg{{width:100%;height:auto;background:rgba(255,255,255,.35);border:1px solid va
 .facts strong{{display:block;font:700 34px/1.1 var(--display);color:var(--ink);margin-bottom:4px}}
 .links{{display:flex;flex-wrap:wrap;gap:8px 28px;margin:36px 0 0;padding:0;list-style:none}}
 footer{{margin-top:56px;font-size:14px;color:var(--muted);max-width:70ch}}
+@media (max-width:600px){{.en,.nl{{font-size:19px}}}}
 @media (prefers-reduced-motion:reduce){{*{{transition:none!important;scroll-behavior:auto!important}}}}
 </style>
 </head>
 <body>
 <main>
-<p class="eyebrow">WITNESS · EXHIBIT REGISTER · BUILT ON RELATE</p>
+<p class="eyebrow">Witness · proof for an agent's answer from a graph · built on Relate</p>
 <h1><em>{w_rels}</em> of {src_rels_fmt} relationships are why.</h1>
 <p class="lede">When an agent answers from a graph, Witness hands back a tiny graph that reproduces the answer, and proves each relationship in it is needed.</p>
 <div class="stamp">{check_upper}</div>
 
 <h2>Run it yourself</h2>
+{private_note}
 <div class="run">
 <pre id="cmd"><b>$</b> git clone {repo} &amp;&amp; cd witness
 <b>$</b> uv run witness demo</pre>
-<button type="button" id="copy" aria-label="Copy the two commands">Copy commands</button>
+<button type="button" id="copy">Copy commands</button>
 </div>
 <p class="note" id="status" role="status">The committed air-routes graph ({src_nodes_fmt} nodes, {src_rels_fmt} relationships) is copied, never modified. The result below is the committed output of the same run.</p>
 
-<h2>The case file: airports {answer_rows} (from <span class="mono">MX</span> to <span class="mono">MEX</span>)</h2>
+<h2>The case file: an agent asks which Mexican airports have no direct flight to MEX but two ways out. It answers {answer_rows}. These are its relationships.</h2>
 <div class="grid">{grid}</div>
 
 <div class="facts">
 <p><strong>{w_rels} of {w_rels}</strong>deleting any one relationship changes the answer: deletion-minimal, checked on relate-db and on the Relate CLI</p>
-<p><strong>{trials} trials</strong>in {secs} s, each a rolled-back Relate transaction on the full graph</p>
-<p><strong>{relate_tps} vs {neo_tps}</strong>trials per second, in-process Relate vs Neo4j in Docker, same loop, same answers ({ratio}x here)</p>
+<p><strong>{trials} trials</strong>in {secs} s on the full graph, each tested inside a Relate transaction; {commits} were kept as deletions, the rest rolled back</p>
+<p><strong>{relate_tps} vs {neo_tps}</strong>trials per second, Relate in-process vs Neo4j {neo_version} in Docker over Bolt, same loop, same answers ({ratio}x here). One machine, one query, one graph: the cost of a server round trip, not a Neo4j limit. Method: <span class="mono">evidence/{cmp_md}</span></p>
 </div>
 
 <ul class="links">
@@ -142,14 +151,25 @@ SITE.mkdir(exist_ok=True)
 (SITE / "exhibit").mkdir(exist_ok=True)
 # the served copy gets a way back home; the committed witnesses/two-hub.html stays byte-identical to what `witness` wrote
 back_css = (
-    "a{color:var(--after);text-underline-offset:3px;transition:color .15s ease}a:hover{color:var(--ink)}"
+    "a{color:var(--ink);text-underline-offset:3px;transition:color .15s ease,text-decoration-thickness .15s ease}"
+    "a:hover{color:var(--muted);text-decoration-thickness:3px}.t,dt{color:#6F6555}"
+    'h2{font:600 13px/1.4 "Source Sans 3",system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6F6555}'
+    "@media (max-width:600px){.en,.nl{font-size:19px}}"
     "a:focus-visible{outline:3px solid var(--ink);outline-offset:3px}"
     "@media (prefers-reduced-motion:reduce){a{transition:none}}"
 )
-served = exhibit.replace("</style>", back_css + "</style>", 1).replace(
-    '<p class="mono">WITNESS · EXHIBIT REGISTER</p>',
-    '<p class="mono"><a href="../">&larr; Witness</a> · EXHIBIT REGISTER</p>',
-    1,
+served = (
+    exhibit.replace("</style>", back_css + "</style>", 1)
+    .replace(
+        '<p class="mono">WITNESS · EXHIBIT REGISTER</p>',
+        '<p class="mono"><a href="../">&larr; Witness</a> · EXHIBIT REGISTER</p>',
+        1,
+    )
+    .replace(
+        '<div class="grid">',
+        '<p class="q">Deletion-minimal: no single remaining relationship can be removed without changing the answer. It does not mean smallest possible.</p>\n<div class="grid">',
+        1,
+    )
 )
 if served == exhibit:
     raise SystemExit("exhibit html changed shape: no style/eyebrow to patch")
@@ -163,6 +183,10 @@ page = PAGE.format(
     answer_rows=html.escape(answer_rows),
     grid=grid,
     trials=trials,
+    commits=man["run"]["commits"],
+    neo_version=cmp["neo4j"]["components"][0]["v"],
+    cmp_md=cmp_path.with_suffix(".md").name,
+    private_note=PRIVATE_NOTE,
     secs=secs,
     relate_tps=relate_tps,
     neo_tps=neo_tps,

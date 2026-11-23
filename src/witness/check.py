@@ -23,7 +23,7 @@ from pathlib import Path
 
 from .canon import canon_rows
 from .export import _lit
-from .guard import GuardedQuery, Refused, Tie, static_checks, strip_comments
+from .guard import GuardedQuery, Refused, Tie, engine_checks, static_checks, strip_comments
 from .predicates import answer_of, answer_sha, expected_answer
 from .store import Scratch
 
@@ -284,7 +284,10 @@ def _cli_canon(spec: CheckSpec, gq: GuardedQuery, doc: dict, columns: list[str])
     return canon_rows(rows, columns, strict_lists=spec.strict_lists, digits=spec.digits), rows
 
 
-def check(w_rl: str | Path, spec: CheckSpec, *, use_cli: bool = True, require_cli: bool = False) -> CheckResult:
+def check(
+    w_rl: str | Path, spec: CheckSpec, *, use_cli: bool = True, require_cli: bool = False, necessity: bool = True
+) -> CheckResult:
+    """``necessity=False`` (a trial-capped run's partial W, possibly huge) checks sufficiency only: never verified."""
     w_rl = Path(w_rl)
     out = CheckResult(change_phrase=spec.change_phrase)
     w_cypher = w_rl.with_suffix(".cypher")
@@ -293,6 +296,8 @@ def check(w_rl: str | Path, spec: CheckSpec, *, use_cli: bool = True, require_cl
         # ---- Python sufficiency: on W.rl, and on a store rebuilt from W.cypher ----------------------------------
         base = Scratch.open_copy(w_rl, tmp)
         try:
+            for gq in spec.queries:  # every door: Relate's own query_type 'r' too, not only the static checks
+                engine_checks(gq, base.db)
             ans_w, raw_w = _answers(base, spec)
             if raw_w[0] is not None:
                 spec.resolve(list(raw_w[0].columns))
@@ -328,6 +333,9 @@ def check(w_rl: str | Path, spec: CheckSpec, *, use_cli: bool = True, require_cl
         finally:
             base.close()
 
+        if not necessity:
+            elements = []
+            out.reasons.append("necessity not checked (partial witness from a capped run)")
         # ---- Python necessity: one fresh copy of W per probe ----------------------------------------------------
         for i, (kind, eid) in enumerate(elements, 1):
             sc = Scratch.open_copy(w_rl, tmp)

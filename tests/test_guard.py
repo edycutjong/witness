@@ -38,6 +38,16 @@ REFUSED = [
     ("MATCH (n) RETURN n.name AS x SKIP 1", "ORDER BY"),
     ("MATCH (n) WITH n ORDER BY n.name LIMIT 2 RETURN n.name AS x", "final RETURN"),
     ("MATCH (n) RETURN n.name AS x ORDER BY toUpper(n.name) LIMIT 2", "column names"),
+    # QA r2: calls used as map values, and LIMIT inside a subquery body before more reading
+    ("MATCH (n) RETURN {k: rand()} AS m", "rand"),
+    ("MATCH (n) RETURN {k: timestamp()} AS m", "clock"),
+    ("MATCH (n) RETURN {k: id(n)} AS m", "store"),
+    ("MATCH (n) RETURN n {.name, k: elementId(n)} AS m", "store"),
+    ("MATCH (a) WHERE EXISTS { MATCH (b) WITH b LIMIT 1 MATCH (b)-->(c) RETURN c } RETURN a.x AS x", "ORDER BY"),
+    (
+        "MATCH (a) WHERE COUNT { MATCH (b) WITH b ORDER BY b.x LIMIT 1 MATCH (b)-->(c) RETURN c } > 0 RETURN a.x AS x",
+        "final RETURN",
+    ),
 ]
 
 ALLOWED = [
@@ -50,6 +60,7 @@ ALLOWED = [
     "MATCH (n) WHERE EXISTS { MATCH (n)-->(m) RETURN m LIMIT 1 } RETURN n.name AS x",
     "MATCH (n) RETURN n.name AS x ORDER BY x DESC SKIP 1 LIMIT 2",
     "MATCH (n) RETURN coll.sort(collect(n.name)) AS xs;",
+    "MATCH (n:P {name: 'A'}) RETURN {k: n.name, v: size([1, 2])} AS m",
 ]
 
 
@@ -110,3 +121,23 @@ def test_storage_order_dependence_is_refused(tiny_rl, tmp_path, capsys):
     q.write_text("MATCH (n:P) WITH collect(n.name) AS xs RETURN xs[0] AS first")
     assert main(["why", "-f", str(q), "--store", str(tiny_rl), "--out", str(tmp_path / "o"), "--no-cli"]) == 2
     assert "storage order" in capsys.readouterr().err
+
+
+def test_judge_commands_never_write_into_committed_witnesses(tiny_rl, tmp_path, monkeypatch, capsys):
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent
+    monkeypatch.chdir(root)
+    q = tmp_path / "q.cypher"
+    q.write_text("MATCH (a:P {name: 'A'})-[:R]->(h) RETURN h.name AS hub")
+    assert main(["why", "-f", str(q), "--store", str(tiny_rl), "--out", "witnesses", "--no-cli"]) == 2
+    assert main(["demo", "--out", "witnesses", "--no-cli"]) == 2
+    assert "reserved for `witness demo --update`" in capsys.readouterr().err
+
+
+def test_rerun_missing_param_is_a_clean_refusal(capsys):
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent
+    assert main(["rerun", str(root / "witnesses/two-hub.rl"), "-f", str(root / "queries/two-hub.cypher")]) == 2
+    assert "refused (rerun): Relate:" in capsys.readouterr().err

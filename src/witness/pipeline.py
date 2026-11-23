@@ -263,7 +263,13 @@ def reduce_request(req: Request, progress=None) -> Outcome:
         manifest["predicate"]["expected_rows"] = plain(
             req.expected if isinstance(req.expected, list) else json.loads(req.expected)
         )
-    chk = check(files["rl"], spec_from_manifest(manifest), use_cli=req.use_cli, require_cli=req.require_cli)
+    chk = check(
+        files["rl"],
+        spec_from_manifest(manifest),
+        use_cli=req.use_cli,
+        require_cli=req.require_cli,
+        necessity=not capped,
+    )
     out.check = chk
     reasons = list(chk.reasons) + chk.disagreements
     if capped:

@@ -33,8 +33,8 @@ The committed result of the same run is in `witnesses/two-hub.*`, `answers/two-h
 Exit codes: 0 verified · 1 NOT verified · 2 refused (outside the supported read-only, deterministic subset) · 3 trial cap ·
 4 aborted by the demo watchdog.
 
-Deletion-minimal means: no single remaining relationship can be removed without changing the answer. It does not mean
-"smallest possible".
+Deletion-minimal means: no single remaining relationship (or kept isolated node) can be removed without changing the
+answer. It does not mean "smallest possible".
 
 With the Relate CLI installed, the same check runs on the CLI too, and you can re-run the witness yourself:
 

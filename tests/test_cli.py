@@ -77,3 +77,32 @@ def test_missing_store_is_refused(tmp_path):
     q = tmp_path / "q.cypher"
     q.write_text(NAMES)
     assert main(["why", "-f", str(q), "--store", str(tmp_path / "nope.rl"), "--no-cli"]) == 2
+
+
+def test_capped_run_on_the_full_graph_skips_necessity_and_stays_fast(tmp_path, monkeypatch):
+    """A capped partial W can hold thousands of relationships: check sufficiency only, never probe each one."""
+    import time
+
+    monkeypatch.chdir(ROOT)
+    t = time.perf_counter()
+    rc = main(
+        [
+            "why",
+            "-f",
+            "queries/two-hub.cypher",
+            "--param",
+            "country=MX",
+            "--param",
+            "dest=MEX",
+            "--strict-lists",
+            "--max-trials",
+            "5",
+            "--out",
+            str(tmp_path / "cap"),
+            "--no-cli",
+        ]
+    )
+    assert rc == 3 and time.perf_counter() - t < 60
+    man = json.loads((tmp_path / "cap" / "two-hub.manifest.json").read_text())
+    assert man["verified"] is False and man["check"]["probes"] == []
+    assert any("necessity not checked" in r for r in man["reasons"])

@@ -117,6 +117,14 @@ def cli_flags(params: dict) -> str:
     return " ".join(f"{a[i]} {a[i + 1]}" for i in range(0, len(a), 2))
 
 
+def guard_out(out: str | Path, update: bool = False) -> None:
+    """Judge-facing commands never write into the committed witnesses/ (only `demo --update`, the build, does)."""
+    committed = (root() / "witnesses").resolve()
+    o = Path(out).resolve()
+    if not update and (o == committed or committed in o.parents):
+        raise Refused("--out inside the committed witnesses/ is reserved for `witness demo --update`", "out")
+
+
 def request_from(args, statement: str, source: Path, params: dict) -> Request:
     other = read_query(args.other) if getattr(args, "other", None) else None
     return Request(
@@ -180,6 +188,7 @@ def verdict_line(o) -> None:
 def cmd_why(args) -> int:
     params = parse_params(args.param)
     statement = read_query(args.file)
+    guard_out(args.out)
     source = Path(args.store) if args.store else root() / HEADLINE["source"]
     if args.name == "witness":
         args.name = Path(args.file).stem
@@ -273,7 +282,10 @@ def cmd_rerun(args) -> int:
     db = relate.Database(str(w), read_only=True)
     try:
         gq = guard(statement, params, db, "rerun")
-        res = db.execute(gq.text, params)
+        try:
+            res = db.execute(gq.text, params)
+        except Exception as e:  # noqa: BLE001 - e.g. a missing --param: one clean line, exit 2
+            raise Refused(f"Relate: {type(e).__name__}: {e}", "rerun") from e
         print(f"RERUN  {shown(w)} · relate-db {relate_version()} · read-only · {len(res.data)} rows")
         from .check import plain
 
@@ -408,6 +420,7 @@ def cmd_demo(args) -> int:
     qpath = r / HEADLINE["query"]
     params = {**HEADLINE["params"], **parse_params(args.param)}
     statement = qpath.read_text()
+    guard_out(args.out, args.update)
     # repo-relative paths, so the committed manifest and ledger never carry a machine's home directory
     out_dir = Path(shown(r / "witnesses")) if args.update else Path(args.out)
     ledger = Path(shown(r / "witness.rl")) if args.update else out_dir / "ledger.rl"

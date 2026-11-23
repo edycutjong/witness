@@ -10,7 +10,8 @@ Layers, all fail-closed:
 2. static order rules: one statement; LIMIT/SKIP only after an ORDER BY, and only in the final RETURN;
 3. Relate's own ``EXPLAIN`` ``query_type``, which must be ``"r"``;
 4. (``order_check``) the same answer from a second store built in reverse canonical order — a heuristic second net,
-   not a proof.
+   not a proof. It is the only net for order-dependent expressions such as ``head(collect(x))`` or
+   ``collect(x)[0]`` over an unsorted collect; two orders can agree while a third differs.
 
 The guard defines "a supported query subset". It never claims to prove a query deterministic.
 """
@@ -142,9 +143,8 @@ def _function_calls(toks: list[Tok]) -> list[Call]:
         while j >= 2 and toks[j - 1].text == "." and toks[j - 2].kind == "ident":
             parts.insert(0, toks[j - 2].text)
             j -= 2
-        # a pattern like (a:Label)( or a node variable followed by "(" is not a call; labels follow ":"
-        if j >= 1 and toks[j - 1].text == ":":
-            continue
+        # No label skip here: a label or type is never directly followed by "(", while a map value such as
+        # {k: rand()} is preceded by ":" and IS a call (QA r2: skipping after ":" let rand()/id() through in maps).
         calls.append(Call(".".join(parts), i, _split_args(toks, i)))
     return calls
 
@@ -334,7 +334,9 @@ def _order_rules(body: str, toks: list[Tok], params: dict, door: str) -> Guarded
     for ci, cl in enumerate(clauses):
         words = [toks[i] for i in cl["idx"]]
         has = {w.text for w in words if w.kind == "ident" and not w.quoted}
-        if not ({"limit", "skip"} & has) or cl["insensitive"]:
+        # Inside EXISTS { } / COUNT { } only the body's closing RETURN is exempt: a WITH ... LIMIT followed by more
+        # reading picks arbitrary rows and changes the result (QA r2).
+        if not ({"limit", "skip"} & has) or (cl["insensitive"] and cl["kw"] == "return"):
             continue
         ordered = any(
             w.text == "order" and k + 1 < len(words) and words[k + 1].text == "by" for k, w in enumerate(words)

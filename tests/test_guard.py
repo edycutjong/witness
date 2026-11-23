@@ -48,6 +48,15 @@ REFUSED = [
         "MATCH (a) WHERE COUNT { MATCH (b) WITH b ORDER BY b.x LIMIT 1 MATCH (b)-->(c) RETURN c } > 0 RETURN a.x AS x",
         "final RETURN",
     ),
+    # QA r3: OFFSET is a SKIP synonym; a CALL { } nested in an EXISTS body does not inherit the exemption
+    ("MATCH (a) RETURN a.x AS x OFFSET 1", "ORDER BY"),
+    ("MATCH (a) WITH a.x AS x OFFSET 1 RETURN x", "ORDER BY"),
+    (
+        "MATCH (a:X) WHERE EXISTS { MATCH (a)-->(b) CALL { MATCH (c:Y) RETURN c LIMIT 1 } WITH b, c WHERE c.v > b.v "
+        "RETURN a } RETURN a.id AS i",
+        "ORDER BY",
+    ),
+    ("RETURN COUNT { MATCH (b) CALL { MATCH (c:Y) RETURN c LIMIT 1 } RETURN c } AS n", "ORDER BY"),
 ]
 
 ALLOWED = [
@@ -80,6 +89,11 @@ def test_query_type_from_relate_is_required():
     db = relate.Database(":memory:")
     assert guard("MATCH (n) RETURN count(n) AS c", {}, db).query_type == "r"
     db.close()
+
+
+def test_ordered_offset_is_a_cut():
+    g = static_checks("MATCH (n) RETURN n.name AS x ORDER BY x OFFSET 1", {})
+    assert g.cut.skip == 1 and g.cut.limit is None and "OFFSET" not in g.exec_text
 
 
 def test_cut_is_lifted_and_ties_are_detected():
@@ -132,7 +146,14 @@ def test_judge_commands_never_write_into_committed_witnesses(tiny_rl, tmp_path, 
     q.write_text("MATCH (a:P {name: 'A'})-[:R]->(h) RETURN h.name AS hub")
     assert main(["why", "-f", str(q), "--store", str(tiny_rl), "--out", "witnesses", "--no-cli"]) == 2
     assert main(["demo", "--out", "witnesses", "--no-cli"]) == 2
-    assert "reserved for `witness demo --update`" in capsys.readouterr().err
+    out = str(tmp_path / "o")
+    assert main(["why", "-f", str(q), "--store", str(tiny_rl), "--out", out, "--ledger", "witness.rl", "--no-cli"]) == 2
+    assert main(["why", "-f", str(q), "--store", str(tiny_rl), "--out", out, "--name", "../x", "--no-cli"]) == 2
+    assert main(["why", "-f", str(q), "--store", str(tiny_rl), "--out", "data", "--no-cli"]) == 2
+    assert main(["export", "witnesses/two-hub.rl", "--to", "witnesses"]) == 2
+    assert main(["export", "witnesses/two-hub.rl", "--to", "answers"]) == 2
+    assert main(["review", "r-x", "--accept", "--ledger", "witness.rl"]) == 2
+    assert capsys.readouterr().err.count("is a committed path") == 7
 
 
 def test_rerun_missing_param_is_a_clean_refusal(capsys):

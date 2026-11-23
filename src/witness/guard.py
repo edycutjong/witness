@@ -304,9 +304,8 @@ def _order_rules(body: str, toks: list[Tok], params: dict, door: str) -> Guarded
     cur = None
     for i, t in enumerate(toks):
         if t.text == "{":
-            insensitive = (i > 0 and toks[i - 1].kind == "ident" and toks[i - 1].text in ORDER_INSENSITIVE_BODIES) or (
-                bool(stack) and stack[-1][0]
-            )
+            # Not inherited (QA r3): a CALL { } or COLLECT { } nested inside an EXISTS body is order-sensitive again.
+            insensitive = i > 0 and toks[i - 1].kind == "ident" and toks[i - 1].text in ORDER_INSENSITIVE_BODIES
             stack.append((insensitive, cur))
             continue
         if t.text == "}":
@@ -336,18 +335,18 @@ def _order_rules(body: str, toks: list[Tok], params: dict, door: str) -> Guarded
         has = {w.text for w in words if w.kind == "ident" and not w.quoted}
         # Inside EXISTS { } / COUNT { } only the body's closing RETURN is exempt: a WITH ... LIMIT followed by more
         # reading picks arbitrary rows and changes the result (QA r2).
-        if not ({"limit", "skip"} & has) or (cl["insensitive"] and cl["kw"] == "return"):
+        if not ({"limit", "skip", "offset"} & has) or (cl["insensitive"] and cl["kw"] == "return"):
             continue
         ordered = any(
             w.text == "order" and k + 1 < len(words) and words[k + 1].text == "by" for k, w in enumerate(words)
         )
         if not ordered:
-            raise Refused("LIMIT/SKIP without ORDER BY depends on storage order", door)
+            raise Refused("LIMIT/SKIP/OFFSET without ORDER BY depends on storage order", door)
         final = cl["kw"] == "return" and ci == last_top
         if not final or union:
             raise Refused("ORDER BY + LIMIT/SKIP is supported only in the final RETURN (no UNION) in v0.1", door)
         cut = _parse_cut(body, words, params, door)
-        first = next(w for w in words if w.kind == "ident" and w.text in ("skip", "limit"))
+        first = next(w for w in words if w.kind == "ident" and w.text in ("skip", "offset", "limit"))
         exec_text = body[: first.start].rstrip()
     return GuardedQuery(text=body, params=params, exec_text=exec_text, cut=cut, door=door)
 
@@ -359,7 +358,7 @@ def _parse_cut(body: str, words: list[Tok], params: dict, door: str) -> Cut:
     skip, limit = 0, None
     while j < len(words):
         w = words[j]
-        if w.kind == "ident" and w.text in ("skip", "limit"):
+        if w.kind == "ident" and w.text in ("skip", "offset", "limit"):
             break
         if w.kind != "ident":
             raise Refused("ORDER BY with LIMIT/SKIP must sort by returned column names (no expressions) in v0.1", door)

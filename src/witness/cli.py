@@ -117,12 +117,29 @@ def cli_flags(params: dict) -> str:
     return " ".join(f"{a[i]} {a[i + 1]}" for i in range(0, len(a), 2))
 
 
+COMMITTED_DIRS = ("witnesses", "answers", "data", "queries", "src", "tests", "evidence", "scripts", "bench")
+COMMITTED_FILES = ("witness.rl",)
+
+
+def guard_write(path: str | Path, what: str = "--out", update: bool = False) -> None:
+    """Judge-facing commands never write into committed files: witnesses/, answers/, data/, the ledger witness.rl, …
+    Only the build does, with `--update`."""
+    if update:
+        return
+    r = root().resolve()
+    p = Path(path).resolve()
+    hits = [r / f for f in COMMITTED_FILES] + [r / d for d in COMMITTED_DIRS]
+    if any(p == h or h in p.parents for h in hits):
+        raise Refused(f"{what} {shown(path)} is a committed path; only the build writes there (with --update)", "out")
+
+
 def guard_out(out: str | Path, update: bool = False) -> None:
-    """Judge-facing commands never write into the committed witnesses/ (only `demo --update`, the build, does)."""
-    committed = (root() / "witnesses").resolve()
-    o = Path(out).resolve()
-    if not update and (o == committed or committed in o.parents):
-        raise Refused("--out inside the committed witnesses/ is reserved for `witness demo --update`", "out")
+    guard_write(out, "--out", update)
+
+
+def guard_name(name: str) -> None:
+    if not name or "/" in name or "\\" in name or name in (".", ".."):
+        raise Refused(f"--name must be a plain file stem, got {name!r}", "out")
 
 
 def request_from(args, statement: str, source: Path, params: dict) -> Request:
@@ -192,6 +209,9 @@ def cmd_why(args) -> int:
     source = Path(args.store) if args.store else root() / HEADLINE["source"]
     if args.name == "witness":
         args.name = Path(args.file).stem
+    guard_name(args.name)
+    if args.ledger and not args.no_ledger:
+        guard_write(args.ledger, "--ledger")
     prog = Progress()
     try:
         o = reduce_request(request_from(args, statement, source, params), progress=prog)
@@ -316,6 +336,7 @@ def cmd_export(args) -> int:
             raise Refused(f"no reduction {ref!r} in {ledger}", "export")
         stem = Path(row["w"]["path_rl"][:-3])
     to = Path(args.to)
+    guard_write(to, "--to")
     to.mkdir(parents=True, exist_ok=True)
     copied = []
     for suf in (".rl", ".cypher", ".manifest.json", ".html", ".trace.json"):
@@ -339,6 +360,8 @@ def cmd_review(args) -> int:
     ledger = Path(args.ledger or "out/ledger.rl")
     if not ledger.exists():
         raise Refused(f"ledger not found: {ledger}", "review")
+    if args.id and (args.accept or args.dispute is not None):
+        guard_write(ledger, "--ledger", args.update)
     if not args.id:
         rows = unreviewed(ledger)
         print(f"UNREVIEWED  {len(rows)} in {shown(ledger)}")
@@ -567,6 +590,7 @@ def build_parser() -> argparse.ArgumentParser:
     v.add_argument("--accept", action="store_true")
     v.add_argument("--dispute", metavar="REASON")
     v.add_argument("--ledger")
+    v.add_argument("--update", action="store_true", help="build only: allow writing the committed witness.rl")
     return ap
 
 

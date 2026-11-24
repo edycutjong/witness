@@ -23,7 +23,7 @@ section{position:relative}
 
 /* ── hero ── */
 .hero{padding:46px 0 54px}
-.hero .wrap{max-width:1360px}
+
 .hero-in{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:54px;align-items:start}
 .eyebrow{margin:0 0 22px}
 h1{font-size:clamp(40px,4.2vw,60px);line-height:1.03;max-width:none}

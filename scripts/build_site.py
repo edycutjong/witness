@@ -236,13 +236,13 @@ def deck_page() -> str:
     # cover terminal: lines selected from the recorded run, order kept, text never edited
     cover = []
     for ln in sp.demo.splitlines()[1:]:
-        if ln.startswith(("WITNESS ", "  reduced in", "CHECK ", "  relate CLI:", "VERIFIED")):
+        if ln.startswith(("WITNESS ", "  68 relationships", "CHECK ", "  relate CLI:", "PROVE ONE", "  CHANGED:")):
             e = html.escape(ln)
             if ln.startswith("CHECK"):
                 cover.append(_ln(f'<b class="k">{e}</b>'))
             else:
-                cover.append(_ln(re.sub(r"^([A-Z]{4,})", r'<b class="h">\1</b>', e)))
-    assert len(cover) == 5, "cover lines missing from the demo transcript"
+                cover.append(_ln(re.sub(r"^([A-Z]{4,}(?: [A-Z]{3,})?)", r'<b class="h">\1</b>', e)))
+    assert len(cover) == 6, "cover lines missing from the demo transcript"
     # the query, verbatim, with the three hard parts marked
     cy = html.escape((ROOT / "queries" / "two-hub.cypher").read_text().rstrip("\n"))
     for kw in ("NOT EXISTS", "OPTIONAL MATCH", "count(DISTINCT hub)", "collect(DISTINCT hc.code)"):
@@ -306,7 +306,8 @@ def deck_page() -> str:
     assert det["byte_identical"] is True
     p50 = cmp["median_trial_ms_p50"]
     vals = {
-        "DESC": html.escape(CLAIM),
+        "DESC": html.escape(DESC),
+        "DESC_OG": html.escape(DESC_OG),
         "SITE": SITE_URL,
         "OGV": og,
         "CSS": (PARTS / "witness.css").read_text(),
@@ -338,9 +339,13 @@ def deck_page() -> str:
         "FINAL_PULL": 15,
         "FINAL_ROWS": frows,
         "FINAL_FX": html.escape(f"Exhibit 15 pulled: {fin['rel']} · {sp.EFFECTS[15]}."),
+        "CAPS_LEAD": (
+            f'<span class="no">1</span><code>{html.escape(CAPS[0][0])}</code>'
+            f"<span>{CAPS[0][1]}: {trials} trials in the headline run</span>"
+        ),
         "CAPS": "".join(
-            f'<li><span class="no">{i}</span><div><code>{html.escape(c)}</code><span>{d}</span></div></li>'
-            for i, (c, d, _) in enumerate(CAPS, 1)
+            f'<li class="{"big" if i <= 4 else "sm"}"><span class="no">{i}</span><code>{html.escape(c)}</code><span>{d}</span></li>'
+            for i, (c, d, _) in enumerate(CAPS[1:], 2)
         ),
         "DET_RUNS": len(det["runs"]) if isinstance(det["runs"], list) else det["runs"],
         "TESTS": TESTS,
@@ -352,6 +357,7 @@ def deck_page() -> str:
         "CMP_RUNS": len(cmp["runs"]),
         "P50_R": f"{p50['relate_in_process']:.2f}",
         "P50_N": f"{p50['neo4j_docker']:.2f}",
+        "P50_RW": round(100 * p50["relate_in_process"] / p50["neo4j_docker"], 1),
         "CMP_MD": cmp_path.with_suffix(".md").name,
         "WHY_S": whys[0]["seconds"],
         "MCP_WHY": why_html,

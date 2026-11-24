@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Witness · pitch deck</title>
 <meta name="description" content="{{DESC}}">
+<meta name="author" content="edycutjong">
 <meta name="theme-color" content="#F2E8D5">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="canonical" href="{{SITE}}/deck/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Witness">
 <meta property="og:title" content="Witness · pitch deck">
-<meta property="og:description" content="{{DESC}}">
+<meta property="og:description" content="{{DESC_OG}}">
 <meta property="og:url" content="{{SITE}}/deck/">
 <meta property="og:image" content="{{SITE}}/og-image.png?v={{OGV}}">
 <meta property="og:image:width" content="1200">
@@ -30,9 +31,11 @@
 <div class="stage" id="stage">
 
 <section class="frame s1" data-n="1" aria-label="Slide 1 of 10: cover">
-  <div class="cover-copy">
+  <div class="s1-top">
     <p class="lbl">Relate by Neo4j hackathon</p>
     <h1>Witness cross-examines the graph until <em>only the evidence remains.</em></h1>
+  </div>
+  <div class="cover-copy">
     <p class="big-sub">{{W_RELS}} of {{SRC_RELS}} relationships, each proven needed.</p>
     <p class="cover-meta"><img src="/icon.svg" alt="" width="64" height="64"><a class="chip" id="ver" href="{{RELEASES}}" title="Latest release"{{VER_LIVE}}>v{{VERSION}}</a></p>
   </div>
@@ -103,6 +106,7 @@
     <p class="lbl">Relate is the engine</p>
     <h2>Remove Relate and the loop has <em>nothing to run on.</em></h2>
   </div>
+  <div class="caps-lead">{{CAPS_LEAD}}</div>
   <ol class="caps">{{CAPS}}</ol>
   <aside class="notes">Eight Relate capabilities, each in a named file. The inner loop is Relate's own transactions; Relate's query_type must report read-only after Witness's own token check; names from the query and its EXPLAIN plan prune; the single-file .rl is the evidence format; relate query on the CLI re-checks every probe independently.</aside>
 </section>
@@ -113,11 +117,10 @@
     <h2>Checked twice, <em>on two surfaces.</em></h2>
   </div>
   <div class="proofs">
-    <div class="pf"><b><em>{{W_RELS}}</em> of {{W_RELS}}</b><span>change the answer, on relate-db and on the Relate CLI</span></div>
-    <div class="pf"><b>{{DET_RUNS}} runs</b><span>byte-identical witness from the same query and seed</span></div>
-    <div class="pf"><b>{{TESTS}} · 100%</b><span>tests on real Relate · line and branch coverage</span></div>
+    <div class="pf"><b><em>{{W_RELS}}</em><i>of</i>{{W_RELS}}</b><span>change the answer, on relate-db and on the Relate CLI</span><code>witnesses/two-hub.manifest.json</code></div>
+    <div class="pf"><b>{{DET_RUNS}}<i>runs</i></b><span>byte-identical witness from the same query and seed</span><code>evidence/determinism.json</code></div>
+    <div class="pf"><b>{{TESTS}}</b><span>tests on real Relate, 100% line and branch coverage</span><code>evidence/{{PYTEST}}</code></div>
   </div>
-  <p class="src data"><code>witnesses/two-hub.manifest.json</code> · <code>evidence/determinism.json</code> · <code>evidence/{{PYTEST}}</code></p>
   <aside class="notes">witness check re-proves sufficiency and every necessity probe on the Python API and again through the Relate CLI. Determinism is claimed only because two runs gave byte-identical files. The test suite runs on real Relate; relate pull is stood in because it needs a Neo4j server.</aside>
 </section>
 
@@ -126,13 +129,17 @@
     <p class="lbl">Speed</p>
     <h2>Same loop, <em>two engines.</em></h2>
   </div>
-  <div class="bars">
-    <div class="br"><span>Relate, in-process</span><i style="--w:100%"></i><b class="data">{{RELATE_TPS}}</b></div>
-    <div class="br"><span>Neo4j {{NEO_V}}, Docker</span><i style="--w:{{NEO_W}}%"></i><b class="data">{{NEO_TPS}}</b></div>
-    <p class="unit data">trials/s · median of {{CMP_RUNS}} runs · one machine</p>
+  <div class="grp">
+    <p class="lbl">Trials per second</p>
+    <div class="br big"><span>Relate, in-process</span><i style="--w:100%"></i><b class="data">{{RELATE_TPS}}</b></div>
+    <div class="br big"><span>Neo4j {{NEO_V}}, Docker</span><i style="--w:{{NEO_W}}%"></i><b class="data">{{NEO_TPS}}</b></div>
   </div>
-  <p class="p50"><span class="lbl">p50 trial</span><b class="data">{{P50_R}} ms</b><span class="vs">vs</span><b class="data">{{P50_N}} ms</b></p>
-  <p class="caveat">An embedded engine against a server in Docker over the network: this says nothing about Neo4j's query engine.</p>
+  <div class="grp">
+    <p class="lbl">p50 trial, ms</p>
+    <div class="br"><span>Relate</span><i style="--w:{{P50_RW}}%"></i><b class="data">{{P50_R}}</b></div>
+    <div class="br"><span>Neo4j</span><i style="--w:100%"></i><b class="data">{{P50_N}}</b></div>
+  </div>
+  <p class="caveat">Median of {{CMP_RUNS}} runs, one machine. An embedded engine versus a Dockerised server: it says nothing about Neo4j's query engine.</p>
   <aside class="notes">Same rollback-trial loop, same query, identical answers per trial on both sides. Throughput includes each side's count check; the p50 latency from begin to rollback excludes it on both. Method and raw rows: evidence/{{CMP_MD}}.</aside>
 </section>
 
@@ -160,14 +167,14 @@
     <pre class="cmd10">git clone {{REPO}}
 cd witness &amp;&amp; uv run witness demo</pre>
     <p class="fine10">{{RUN_NOTE}}</p>
-    <ul class="links"><li><a href="/judge/">/judge</a> the 30-second path</li><li><a href="/exhibit/two-hub.html">/exhibit</a> the register</li></ul>
-    <ul class="lims"><li>Deletion-minimal, not smallest.</li><li>One headline graph and query.</li></ul>
+    <ul class="links"><li><span>For judges</span><a href="/judge/">/judge/</a></li><li><span>Exhibit</span><a href="/exhibit/two-hub.html">/exhibit/two-hub.html</a></li></ul>
+    <p class="close10">Deletion-minimal, never “smallest”: every kept relationship is needed.</p>
   </div>
   <figure class="qr-card">{{QR}}<figcaption class="data">{{SITE_HOST}}</figcaption></figure>
   <aside class="notes">One command on a fresh clone runs the whole flow against the committed graph. The landing page has the interactive exhibit; /judge has the receipts and the honest limits in one page.</aside>
 </section>
 
-<footer class="deck-foot" aria-label="Deck footer"><span><b>Witness</b> · <a class="chip vchip" href="{{RELEASES}}">v{{VERSION}}</a> · {{SITE_HOST}}</span><span class="data" id="count">1 / 10</span></footer>
+<footer class="deck-foot" aria-label="Deck footer"><span><b>Witness</b> · <a class="vtext" href="{{RELEASES}}">v{{VERSION}}</a> · {{SITE_HOST}}</span><span class="data" id="count">1 / 10</span></footer>
 </div>
 </main>
 <nav class="ctl" aria-label="Deck controls">

@@ -5,7 +5,7 @@ Thanks for your interest in improving Witness.
 ## Getting started
 
 1. Fork the repo and branch from `main`: `git checkout -b feat/your-feature`
-2. Install: `uv sync` (Python 3.10 or newer; the pinned `relate-db` is installed for you)
+2. Install: `uv sync` (Python 3.11 or newer; the pinned `relate-db` is installed for you)
 3. Optional, for the cross-check against the Relate CLI: install the CLI from <https://relatedb.ai> (the version pinned in
    `.github/workflows/ci.yml`), then run everything with `DO_NOT_TRACK=1` set.
 4. Try it: `uv run witness demo`

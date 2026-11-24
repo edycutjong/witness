@@ -14,7 +14,7 @@
 
   [![CI](https://github.com/edycutjong/witness/actions/workflows/ci.yml/badge.svg)](https://github.com/edycutjong/witness/actions/workflows/ci.yml)
   [![Release](https://img.shields.io/github/v/release/edycutjong/witness?sort=semver)](https://github.com/edycutjong/witness/releases/latest)
-  ![Python](https://img.shields.io/badge/Python_3.10_|_3.12-3776AB?style=flat&logo=python&logoColor=white)
+  ![Python](https://img.shields.io/badge/Python_3.11_|_3.12-3776AB?style=flat&logo=python&logoColor=white)
   ![Relate](https://img.shields.io/badge/Relate_1.0.1-1F1A14?style=flat)
   ![Tests](https://img.shields.io/badge/tests-499-2ea043?style=flat)
   [![License](https://img.shields.io/badge/License-Apache_2.0-yellow)](LICENSE)
@@ -155,7 +155,7 @@ uv run pytest --cov=witness      # 499 tests against real Relate, 100% line + br
 Reproduce every number in this README: [DEMO.md](DEMO.md). Raw evidence and the machine/version of each run:
 `evidence/` (this suite's run: `evidence/ci-local-2026-11-24.txt`). The tests use real Relate, not mocks of the graph store. The only stand-ins: `relate pull` in the fixture-mode tests (it needs a running Neo4j server; the Neo4j side is exercised by `bench/neo4j_compare.py`) and injected faults (a failing CLI, an OS error) around real calls.
 
-GitHub Actions (`.github/workflows/ci.yml`) runs six stages: **Quality** (ruff, mypy, tests with the coverage gate; Python 3.10
+GitHub Actions (`.github/workflows/ci.yml`) runs six stages: **Quality** (ruff, mypy, tests with the coverage gate; Python 3.11
 and 3.12 on `main`) and **Security** (gitleaks over the full history, pip-audit) in parallel, then **Build** (wheel, sdist,
 the site checked against the committed evidence), **E2E** (the built wheel: `witness demo`, the plain Relate CLI re-running the
 committed witness, the site and `/judge/` with no credentials), **Performance** (a throughput floor) and a **Deploy Gate**.

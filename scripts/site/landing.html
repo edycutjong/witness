@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Witness · the relationships your agent's graph answer rests on</title>
+<meta name="description" content="{{DESC}}">
+<meta name="theme-color" content="#F2E8D5">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="canonical" href="{{SITE}}/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Witness">
+<meta property="og:title" content="Witness · cross-examine the graph behind an agent's answer">
+<meta property="og:description" content="{{DESC}}">
+<meta property="og:url" content="{{SITE}}/">
+<meta property="og:image" content="{{SITE}}/og-image.png?v={{OGV}}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Witness: 57,645 relationships reduced to 22, each tagged as an exhibit; 22 of 22 change the answer">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Witness · cross-examine the graph behind an agent's answer">
+<meta name="twitter:description" content="{{DESC}}">
+<meta name="twitter:image" content="{{SITE}}/og-image.png?v={{OGV}}">
+<link rel="preload" href="/fonts/old-standard-tt-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+{{CSS}}
+{{LANDING_CSS}}
+</style>
+</head>
+<body>
+<a class="skip sr" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="/" aria-label="Witness, home"><img src="/icon.svg" alt="" width="34" height="34"><span>Witness</span></a>
+    <nav aria-label="Sections">
+      <a href="#exhibit">Exhibit A</a><a href="#how">How it works</a><a href="#honest">Limits</a><a href="#faq">FAQ</a>
+      <a class="nav-strong" href="/deck/">Pitch deck</a><a class="nav-strong" href="/judge/">For judges</a>
+      <a class="chip" id="ver" href="{{RELEASES}}" aria-label="Latest release">v{{VERSION}}</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero" aria-labelledby="h1">
+  <div class="wrap hero-in">
+    <div class="hero-copy">
+      <p class="lbl eyebrow">Relate by Neo4j hackathon <span>·</span> Case <b>two-hub</b></p>
+      <h1 id="h1">Witness cross-examines the graph until <em>only the evidence remains.</em></h1>
+      <p class="sub">When your agent answers from a graph, Witness hands back the <b>{{W_RELS}} relationships out of {{SRC_RELS}}</b> that the answer rests on, and proves that deleting <b>any one of the {{W_RELS}}</b> changes the answer. One <code>.rl</code> file, re-run with plain Relate.</p>
+      <div class="ctas">
+        <a class="btn solid" href="/deck/"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v10H3zM7 17h6M10 14v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Pitch deck</a>
+        <a class="btn" href="/judge/"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3h9l3 3v11H4zM7 9h6M7 12h6M7 15h4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>For judges</a>
+      </div>
+      <div class="cmd"><span class="lbl">Run it</span><code id="cmd">uv run witness demo</code><button type="button" class="copy" data-copy="git clone {{REPO}} &amp;&amp; cd witness &amp;&amp; uv run witness demo" aria-label="Copy the clone and run commands">copy</button></div>
+      <p class="fine">{{CMD_NOTE}}</p>
+      <p class="src-line">{{SOURCE_CTA}}</p>
+    </div>
+
+    <figure class="file" id="replay" aria-label="The reduction, replayed from the committed trace">
+      <div class="file-tab lbl">Exhibit list <b>· two-hub</b></div>
+      <div class="answer">
+        <span class="lbl">The answer</span>
+        <span class="ans data">{{ANSWER}}</span>
+        <span class="stamp ink" id="unch">Unchanged</span>
+      </div>
+      <div class="stage">
+        {{HERO_SVG}}
+        <p class="note data" id="note" aria-live="polite">EXPLAIN plan drops :ON_CONTINENT · −{{PLAN_DROP}}</p>
+        <span class="stamp red slam" id="nofn">{{W_RELS}} of {{W_RELS}} change the answer</span>
+      </div>
+      <div class="meter">
+        <div class="ctr"><span class="lbl">Relationships</span><b class="data" id="c-rels">{{W_RELS}}</b><span class="data of">of {{SRC_RELS}}</span></div>
+        <div class="ctr"><span class="lbl">Trial</span><b class="data" id="c-trial">{{TRIALS}}</b><span class="data of">of {{TRIALS}}</span></div>
+        <button type="button" class="btn replay" id="play">Replay the reduction</button>
+      </div>
+      {{TAPE}}
+      <figcaption class="cap">Every tick is a trial in a Relate transaction: <span class="kk">tall</span> = the deletion kept the answer and was applied ({{APPLIED}}), <span class="kr">short</span> = it changed the answer and was rolled back ({{ROLLED}}). Counters are the trace's milestones (<code>witnesses/two-hub.trace.json</code>); the fading map is the real air-routes frame ({{FRAME_PAIRS}} airport pairs drawn), faded for the eye.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="receipts" aria-label="Receipts">
+  <div class="wrap rc-in">
+    {{RECEIPTS}}
+  </div>
+  <p class="wrap rc-src data">Read from <code>witnesses/two-hub.manifest.json</code>, <code>evidence/pull-each-tag.json</code>, <code>evidence/{{CMP_MD}}</code>, <code>evidence/{{PYTEST}}</code>. Relate {{RELATE_V}} · Python {{PY_V}}.</p>
+</section>
+
+<section class="exhibit" id="exhibit" aria-labelledby="ex-h">
+  <div class="wrap">
+    <p class="lbl">Exhibit A <span>·</span> pull a tag</p>
+    <h2 id="ex-h">Pull any tag. <em>The answer moves.</em></h2>
+    <p class="lede">The agent's question: <q>{{QUESTION}}</q> The answer is four airports. Each red tag below is one relationship of the witness; pulling it shows what Relate returned with that relationship deleted.</p>
+    <div class="ex-grid">
+      <div class="ex-left">
+        <div class="ex-draw">{{EX_SVG}}</div>
+        <div class="ex-answer">
+          <div class="ex-ahead"><span class="lbl">Answer with exhibit <b id="ex-n">none</b> pulled</span><span class="stamp ink small" id="ex-mark">Unchanged</span></div>
+          <table class="ans-t"><thead><tr><th scope="col">airport</th><th scope="col">hub_countries</th></tr></thead><tbody id="ex-rows">{{ANSWER_ROWS}}</tbody></table>
+          <p class="ex-proof data" id="ex-proof" aria-live="polite">Pick a tag or a register line. Each answer was recorded by deleting that one relationship in a Relate transaction, re-running the query, and rolling back.</p>
+        </div>
+      </div>
+      <div class="ex-right">
+        <div class="reg-head"><span class="lbl">The register</span><span class="lbl">pull it and</span></div>
+        <ol class="reg" id="reg">{{REGISTER}}</ol>
+        <div class="reg-foot">
+          <button type="button" class="btn solid" id="pull-all">Pull all {{W_RELS}}, one at a time</button>
+          <span class="tally data" id="tally"><b>{{W_RELS}}</b> of {{W_RELS}} change the answer</span>
+        </div>
+        <span class="stamp red reg-stamp" id="reg-stamp">{{W_RELS}} of {{W_RELS}} change the answer</span>
+      </div>
+    </div>
+    <p class="ex-src data">Recorded {{PULL_UTC}} UTC by <code>scripts/pull_each_tag.py</code> on a copy of <code>witnesses/two-hub.rl</code> → <code>evidence/pull-each-tag.json</code>. <code>witness check</code> runs the same probes on relate-db and on the Relate CLI.</p>
+  </div>
+</section>
+
+<section class="run" aria-labelledby="run-h">
+  <div class="wrap">
+    <p class="lbl">The run <span>·</span> as your terminal prints it</p>
+    <h2 id="run-h">One command, and the exhibit is filed.</h2>
+    <div class="run-grid">
+      <figure class="shot">
+        <div class="shot-bar"><i></i><i></i><i></i><span class="data">exhibit/two-hub.html</span></div>
+        <a href="/exhibit/two-hub.html"><img src="/media/exhibit-page.png" width="1200" height="{{SHOT_H}}" alt="The exhibit page Witness writes beside the witness file: the question, the answer, and the register of 22 tagged relationships" loading="lazy"></a>
+        <figcaption>The page <code>witness why</code> writes beside every witness. <a href="/exhibit/two-hub.html">Open it</a>.</figcaption>
+      </figure>
+      <figure class="term" id="term">
+        <div class="bar"><i></i><i></i><i></i><span>uv run witness demo</span><button type="button" class="t-play" id="t-play">replay</button></div>
+        <pre tabindex="0" aria-label="Recorded output of uv run witness demo">{{TERM}}</pre>
+        <figcaption class="t-cap data">Verbatim output, recorded {{DEMO_UTC}} (<code>evidence/{{DEMO_FILE}}</code>); this run reduced in {{DEMO_REDUCE}} s.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <p class="lbl">How it works <span>·</span> Relate is the engine</p>
+    <h2 id="how-h">Delete, re-run, roll back. <em>Hundreds of times a second.</em></h2>
+    <div class="bento">
+      <article class="b b1">
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 14h26a8 8 0 0 1 0 16H14" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M19 24l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M8 8v12" stroke="var(--after)" stroke-width="2.4"/></svg>
+        <h3>Every trial is a transaction</h3>
+        <p>Witness deletes a set of relationships inside a Relate transaction, re-runs your query, compares the answer, and rolls back. Only deletions that keep the answer are applied, on a scratch copy; the source file is never opened for writing.</p>
+        <span class="chip">begin_transaction · rollback_transaction</span>
+        <div class="speed" aria-label="Trials per second, median of three runs">
+          <div class="sp"><span class="data">Relate, in-process</span><i style="--w:100%"></i><b class="data">{{RELATE_TPS}}/s</b></div>
+          <div class="sp"><span class="data">Neo4j {{NEO_V}}, Docker</span><i style="--w:{{NEO_W}}%"></i><b class="data">{{NEO_TPS}}/s</b></div>
+          <p class="fine">Same loop and query, one machine, median of 3 runs, answers identical. It measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.</p>
+        </div>
+      </article>
+      <article class="b b2">
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 6h20l8 8v28H10z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M16 20h16M16 27h16M16 34h9" stroke="currentColor" stroke-width="2.4"/><path d="M14 27h20" stroke="var(--after)" stroke-width="2.4" opacity="0"/></svg>
+        <h3>EXPLAIN prunes first</h3>
+        <p>Relate's plan says which labels and types the query can reach. <code>:ON_CONTINENT</code> is not one of them, so {{PLAN_DROP}} relationships go in one verified step, before trial 3.</p>
+        <span class="chip">EXPLAIN · relate.plan/v1</span>
+      </article>
+      <article class="b b3">
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="20" width="28" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M16 20v-6a8 8 0 0 1 16 0v6" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>
+        <h3>Read-only, by Relate's own word</h3>
+        <p>A query is reduced only if Relate reports its <code>query_type</code> as <code>"r"</code>. Writes, procedures, clocks and randomness are refused with exit 2.</p>
+        <span class="chip">QueryResult.query_type</span>
+      </article>
+      <article class="b b4">
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M6 14h14l4 4h18v22H6z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M26 30l6-6h8v12h-8z" fill="var(--after)"/></svg>
+        <h3>A witness is one file</h3>
+        <p><code>two-hub.rl</code> is the witness: open it with plain <code>relate</code>. Beside it: a Cypher script that rebuilds it, a manifest, the exhibit page, and a line in the <code>witness.rl</code> ledger.</p>
+        <span class="chip">single-file .rl</span>
+      </article>
+      <article class="b b5">
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 10h32v20H22l-8 8v-8H8z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M20 17c0-3 8-3 8 0s-4 3-4 6M24 26v.5" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>
+        <h3>An agent can ask why</h3>
+        <p>The MCP tools <code>why</code> and <code>check</code> let an agent request the witness of its own answer and re-prove it, beside Relate's own <code>relate serve --mcp</code>.</p>
+        <span class="chip">MCP · why · check</span>
+      </article>
+      <article class="b b6">
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 12h32M8 24h32M8 36h32" stroke="currentColor" stroke-width="2.4"/><path d="M14 8v8M28 20v8M20 32v8" stroke="var(--after)" stroke-width="2.4"/></svg>
+        <h3>Fixture mode</h3>
+        <p><code>relate pull</code> brings a slice in from Neo4j once; Witness shrinks it to a test fixture. In the committed run, {{FIX_FROM}} relationships became {{FIX_TO}}, {{FIX_TO}} of {{FIX_TO}} needed. Nothing is pushed back.</p>
+        <span class="chip">relate pull</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="honest" id="honest" aria-labelledby="hon-h">
+  <div class="wrap">
+    <p class="lbl">Honest by design <span>·</span> what the stamp does not say</p>
+    <h2 id="hon-h">Deletion-minimal. <em>Not smallest.</em></h2>
+    <ol class="limits">
+      {{LIMITS}}
+    </ol>
+  </div>
+</section>
+
+<section class="faq" id="faq" aria-labelledby="faq-h">
+  <div class="wrap faq-in">
+    <div>
+      <p class="lbl">Questions a judge would ask</p>
+      <h2 id="faq-h">Before you clone it.</h2>
+    </div>
+    <div class="qa">
+      {{FAQ}}
+    </div>
+  </div>
+</section>
+
+<section class="close" aria-labelledby="close-h">
+  <div class="wrap close-in">
+    <h2 id="close-h">File the evidence, <em>not the whole house.</em></h2>
+    <div class="cmd big"><code>git clone {{REPO}} &amp;&amp; cd witness &amp;&amp; uv run witness demo</code><button type="button" class="copy" data-copy="git clone {{REPO}} &amp;&amp; cd witness &amp;&amp; uv run witness demo" aria-label="Copy the clone and run commands">copy</button></div>
+    <p class="fine">{{CMD_NOTE}}</p>
+    <div class="ctas">{{SOURCE_CTA}}<a class="btn solid" href="/deck/">Pitch deck</a><a class="btn" href="/judge/">For judges</a></div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <p><img src="/icon.svg" alt="" width="22" height="22"> <b>Witness</b> · Apache-2.0 · built on <a href="https://relatedb.ai">Relate</a> for the Relate by Neo4j hackathon · <a class="chip" href="{{RELEASES}}">v{{VERSION}}</a></p>
+    <p class="data">{{SOURCE_FOOT}} · <a href="/deck/">deck</a> · <a href="/judge/">judges</a> · <a href="/exhibit/two-hub.html">exhibit</a> · data: air-routes by Kelvin Lawrence (Apache-2.0)</p>
+  </div>
+</footer>
+<script type="application/json" id="wdata">{{DATA}}</script>
+<script>
+{{JS}}
+</script>
+</body>
+</html>

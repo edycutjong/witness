@@ -5,10 +5,12 @@ uv run python scripts/build_site.py        -> site/index.html + site/exhibit/two
 
 from __future__ import annotations
 
+import hashlib
 import html
 import json
 import re
 import shutil
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -18,13 +20,6 @@ REPO = "https://github.com/edycutjong/witness"
 SITE_URL = "https://witness-wheat.vercel.app"
 # Set True when the repository is public (HUMAN-TODO: the flip at submission), then rebuild and redeploy.
 REPO_PUBLIC = False
-SOURCE_LI = f'<li><a href="{REPO}">Source on GitHub</a></li>' if REPO_PUBLIC else "<li>Source: opens at submission</li>"
-PRIVATE_NOTE = (
-    ""
-    if REPO_PUBLIC
-    else '<p class="note">The repository opens at submission; until then the clone command does not resolve and the committed output below is the run.</p>'
-)
-
 VERSION = re.search(r'^version = "([^"]+)"', (ROOT / "pyproject.toml").read_text(), re.M).group(1)
 RELEASES = f"{REPO}/releases/latest"
 RELEASES_API = "https://api.github.com/repos/" + REPO.split("github.com/")[1] + "/releases/latest"
@@ -45,140 +40,169 @@ relate_tps = cmp["median_trials_per_s"]["relate_in_process"]
 neo_tps = cmp["median_trials_per_s"]["neo4j_docker"]
 ratio = cmp["ratio_trials_per_s"]
 
-m = re.search(r'<div class="grid">(.*?)</div>\n<dl>', exhibit, re.S)
-if not m:
-    raise SystemExit("exhibit html changed shape: no grid block")
-grid = m.group(1).replace("<h2>", "<h3>").replace("</h2>", "</h3>")
-answer_rows = ", ".join(r["airport"] for r in rows)
 fmt = lambda n: f"{n:,}"  # noqa: E731
+CLAIM = (
+    f"When an agent answers from a graph, Witness hands back the graph that reproduces the answer "
+    f"({fmt(src_rels)} relationships → {w_rels}) and proves each relationship in it is needed."
+)
 
-PAGE = """<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Witness: the {w_rels} relationships that prove your agent's answer</title>
-<meta name="description" content="When an agent answers from a graph, Witness hands back a tiny graph that reproduces the answer and proves each relationship in it is needed. Built on Relate.">
-<link rel="icon" href="/icon.svg" type="image/svg+xml">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Witness">
-<meta property="og:title" content="Witness: the {w_rels} relationships that prove your agent's answer">
-<meta property="og:description" content="{w_rels} of {src_rels_fmt} relationships reproduce the answer, and deleting any one of them changes it. Built on Relate.">
-<meta property="og:image" content="{site_url}/og-image.png">
-<meta property="og:image:width" content="2400">
-<meta property="og:image:height" content="1260">
-<meta property="og:image:alt" content="Witness: {src_rels_fmt} relationships reduced to {w_rels}; each of the {w_rels} changes the answer when deleted.">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="{site_url}/og-image.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
-<style>
-:root{{--paper:#F2E8D5;--ink:#1F1A14;--muted:#6F6555;--before:#9C978E;--after:#B42318;--rule:#D9CBAE;
---display:"Old Standard TT","Libre Caslon Text",Georgia,serif;--body:"Source Sans 3","Helvetica Neue",Arial,sans-serif;
---data:"Fragment Mono","SF Mono",Menlo,monospace}}
-*{{box-sizing:border-box}}
-html{{scroll-behavior:smooth}}
-body{{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 var(--body)}}
-a{{color:var(--ink);text-underline-offset:3px;text-decoration-thickness:1px;transition:color .15s ease,text-decoration-thickness .15s ease,text-decoration-color .15s ease}}
-a:hover{{color:var(--muted);text-decoration-thickness:3px}}
-a:active{{opacity:.7}}
-a:focus-visible,button:focus-visible{{outline:3px solid var(--ink);outline-offset:3px;border-radius:2px}}
-main{{max-width:1040px;margin:0 auto;padding:48px 24px 72px}}
-.eyebrow{{font:600 13px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 20px}}
-h1{{font:700 clamp(36px,6.4vw,64px)/1.05 var(--display);margin:0 0 18px;letter-spacing:-.01em}}
-h1 em{{font-style:normal;color:var(--after)}}
-h2{{font:600 13px/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}}
-.lede{{font-size:21px;max-width:60ch;margin:0 0 28px}}
-.stamp{{display:inline-block;margin:6px 0 28px;padding:8px 14px;border:3px solid var(--after);color:var(--after);font:700 18px/1 var(--data);letter-spacing:.08em;transform:rotate(-1.5deg)}}
-.run{{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch;margin:0 0 8px}}
-pre{{margin:0;padding:14px 18px;background:#1F1A14;color:#F2E8D5;font:15px/1.6 var(--data);border-radius:3px;overflow-x:auto;flex:1 1 360px}}
-pre b{{color:#D9CBAE;font-weight:400}}
-button{{font:600 15px/1 var(--body);padding:0 20px;min-height:48px;background:var(--ink);color:var(--paper);border:0;border-radius:3px;cursor:pointer;transition:background .15s ease,transform .1s ease}}
-button:hover{{background:#4A4034}}
-button:active{{transform:translateY(1px) scale(.98)}}
-.note{{font-size:15px;color:var(--muted);margin:0 0 44px}}
-.mono,td,th,dt,dd{{font-family:var(--data);font-size:14px}}
-table{{border-collapse:collapse;width:100%;margin-bottom:24px}}
-th,td{{text-align:left;padding:6px 10px;border-bottom:1px solid var(--before)}}
-tbody tr{{transition:background .15s ease}}tbody tr:hover{{background:rgba(31,26,20,.07)}}
-.grid{{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:8px}}
-@media (max-width:820px){{.grid{{grid-template-columns:1fr}}}}
-.tag{{color:#fff;background:var(--after);font-weight:700;text-align:center;width:2.6em}}.t{{color:var(--muted)}}
-svg{{width:100%;height:auto;background:rgba(255,255,255,.35);border:1px solid var(--before)}}
-.e{{stroke:var(--after);stroke-width:1.6}}.en{{fill:var(--after);font:700 11px monospace}}
-.n{{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}}.nl{{font:700 11px monospace;text-anchor:middle;fill:var(--ink)}}
-.facts{{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:52px 0;padding:24px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}}
-.facts p{{margin:0;font-size:15px;color:var(--muted)}}
-.facts strong{{display:block;font:400 28px/1.15 var(--data);color:var(--ink);margin-bottom:4px}}
-code{{font:600 .92em var(--body);background:rgba(31,26,20,.07);padding:1px 5px;border-radius:2px}}
-h3{{font:600 13px/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}}
-.links{{display:flex;flex-wrap:wrap;gap:8px 28px;margin:36px 0 0;padding:0;list-style:none}}
-footer{{margin-top:56px;font-size:14px;color:var(--muted);max-width:70ch}}
-.chip{{display:inline-block;font:600 12px/1 var(--data);letter-spacing:.04em;color:var(--muted);border:1px solid var(--rule);padding:4px 8px;border-radius:2px;text-decoration:none;margin-top:6px}}
-.chip:hover{{color:var(--ink);border-color:var(--ink)}}.chip:focus-visible{{outline:3px solid var(--ink);outline-offset:3px}}
-@media (max-width:600px){{.en,.nl{{font-size:19px}}}}
-@media (prefers-reduced-motion:reduce){{*{{transition:none!important;scroll-behavior:auto!important}}}}
-</style>
-</head>
-<body>
-<main>
-<p class="eyebrow">Witness · proof for a graph-backed agent's answer · Relate + Neo4j</p>
-<h1>Your agent's answer rests on <em>{w_rels}</em> of {src_rels_fmt} relationships.</h1>
-<p class="lede">When an agent answers from a graph, Witness hands back a tiny graph that reproduces the answer, and proves each relationship in it is needed.</p>
-<p class="lede">Built for teams shipping graph-backed agents, on Relate, the embedded graph database. The agent calls the MCP tool <code>why</code> on a read-only Cypher answer and <code>check</code> re-proves the result; <code>relate pull</code> brings a slice in from a Neo4j graph, read-only.</p>
-<div class="stamp">{check_upper}</div>
 
-<h2>Run it yourself</h2>
-{private_note}
-<div class="run">
-<pre id="cmd" tabindex="0" aria-label="Commands"><b>$</b> git clone {repo} &amp;&amp; cd witness
-<b>$</b> uv run witness demo</pre>
-<button type="button" id="copy">Copy commands</button>
-<span id="status" role="status" class="note" style="flex-basis:100%;margin:0"></span>
-</div>
-<p class="note">The committed air-routes graph ({src_nodes_fmt} nodes, {src_rels_fmt} relationships) is copied, never modified. The result below is the committed output of the same run.</p>
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import site_parts as sp  # noqa: E402
 
-<h2>The case file</h2>
-<p class="lede">An agent asks which Mexican airports have no direct flight to MEX but two ways out. It answers {answer_rows}. These are the relationships that answer rests on.</p>
-<div class="grid">{grid}</div>
+PARTS = Path(__file__).resolve().parent / "site"
+fix = json.loads((ROOT / "fixtures" / "mex-foreign.manifest.json").read_text())
+assert fix["check"]["check_text"].startswith(
+    f"{fix['witness']['relationships']} of {fix['witness']['relationships']} change"
+)
+cov = re.search(r"TOTAL .*: ([\d.]+)%", pytest_log.read_text())
+assert cov and float(cov.group(1)) == 100.0, "coverage receipt is not 100%"
+readme = (ROOT / "README.md").read_text()
+QUOTES = [
+    (
+        'Deletion-minimal means: no single remaining relationship (or kept isolated node) can be removed without changing the\nanswer. It does not mean "smallest possible".',
+        "README · The Solution",
+    ),
+    (
+        "Because Relate's query semantics are not monotone, a witness proves its own\nanswer on its own file; it does not prove that every superset of it gives the same answer.",
+        "README · The Solution",
+    ),
+    (
+        "The gap mostly reflects an embedded engine versus a Dockerised server with a network round trip per statement; it says nothing about Neo4j's query engine.",
+        "README · Measured against Neo4j",
+    ),
+]
+for q, _ in QUOTES:
+    assert q in readme.replace("**", ""), f"quote not verbatim in README: {q[:50]}"
+FAQ = [
+    (
+        "Is the witness the smallest subgraph that gives the answer?",
+        "No, and Witness never says so. It is deletion-minimal: no single remaining relationship can be removed without changing the answer. A smaller witness may exist; finding the smallest is a much harder search.",
+    ),
+    (
+        "What counts as changing the answer?",
+        "The answer is compared exactly: types matter, rows are a bag (order is not part of the answer), floats to 12 significant digits, and this headline run compares lists strictly (<code>--strict-lists</code>). Pulling exhibit 4 keeps all four airports but drops US from two rows, and that is a change.",
+    ),
+    (
+        "Does Witness ever write to my graph?",
+        "No. The source <code>.rl</code> is copied byte for byte and never opened for writing; its SHA-256 is checked unchanged after every run. Queries Relate does not report as read-only are refused. Fixture mode pulls from Neo4j once and never pushes back.",
+    ),
+    (
+        "Is anything mocked?",
+        "Not the judged path: the graph store, transactions, rollback and queries are real Relate in every test. In tests, <code>relate pull</code> (it needs a Neo4j server) is stood in, and a few tests substitute timers, process calls or a failing CLI to reach rare branches. The committed fixture run used a real Neo4j in Docker.",
+    ),
+    (
+        "Why Relate rather than a Neo4j server?",
+        f"The inner loop is one transaction per trial, in process, on a single file: {relate_tps} trials/s here against {neo_tps} over Bolt to Neo4j in Docker on the same machine. And a witness is a file you can commit, hand over and open with plain <code>relate</code>, with no server.",
+    ),
+    (
+        "How does an agent use it?",
+        "Over MCP. The <code>why</code> tool returns the witness of the agent's own answer and <code>check</code> re-proves it. A recorded session is committed in <code>evidence/mcp-transcript.md</code>.",
+    ),
+]
 
-<div class="facts">
-<p><strong>{w_rels} of {w_rels}</strong>deleting any one relationship changes the answer: deletion-minimal, checked on relate-db and on the Relate CLI</p>
-<p><strong>{trials} trials</strong>in {secs} s on the full graph, each run in a Relate transaction and rolled back; in {commits} the answer survived, so that deletion was then applied</p>
-<p><strong>{relate_tps} vs {neo_tps}</strong>trials per second, Relate in-process vs Neo4j {neo_version} Community in Docker over Bolt: the same delete-query-rollback trial on 1,000 sampled deletions, median of 3 runs, same answers ({ratio}x here; Neo4j runs a dialect of the query with an ORDER BY in place of coll.sort(), baseline rows checked identical). One machine, one query, one graph: the cost of this setup (a Docker VM, a Bolt round trip per statement, count checks), not a Neo4j limit. Method: <code>evidence/{cmp_md}</code></p>
-</div>
 
-<ul class="links">
-<li><a href="exhibit/two-hub.html">Open the exhibit page</a></li>
-{source_li}
-<li><a href="https://relatedb.ai">Relate</a></li>
-</ul>
-<footer>
-<p>Deletion-minimal means no single remaining relationship can be removed without changing the answer. It does not mean smallest possible.
-Numbers on this page are read from the committed files in the repository (<code>witnesses/two-hub.manifest.json</code>, <code>evidence/{cmp_name}</code>) by <code>scripts/build_site.py</code>.
-A work-in-progress page: the full write-up comes later. Apache-2.0.</p>
-<p><a class="chip" id="ver" href="{releases}" title="Latest release">{version_tag}</a> <a class="chip" href="judge/">For judges</a></p>
-</footer>
-</main>
-<script>
-(function(){{
-var b=document.getElementById('copy'),s=document.getElementById('status'),t=b.textContent;
-b.addEventListener('click',function(){{
-var text='{copy_prefix}git clone {repo} && cd witness\\nuv run witness demo';
-function ok(){{b.textContent='Copied';s.textContent='Copied the two commands.';setTimeout(function(){{b.textContent=t;s.textContent=''}},1600)}}
-if(navigator.clipboard&&navigator.clipboard.writeText){{navigator.clipboard.writeText(text).then(ok,function(){{s.textContent='Select the commands above and copy them.'}})}}
-else{{s.textContent='Select the commands above and copy them.'}}
-}});
-}})();
-</script>
-<script>
-(function(){{var v=document.getElementById('ver');if(!v||!window.fetch)return;
-fetch('{releases_api}',{{headers:{{Accept:'application/vnd.github+json'}}}}).then(function(r){{return r.ok?r.json():null}}).then(function(j){{if(j&&j.tag_name)v.textContent=j.tag_name}}).catch(function(){{}})}})();
-</script>
-</body>
-</html>
-"""
+def png_size(path: Path) -> tuple[int, int]:
+    b = path.read_bytes()[16:24]
+    return int.from_bytes(b[:4], "big"), int.from_bytes(b[4:], "big")
+
+
+def fill(tpl: str, vals: dict) -> str:
+    out = re.sub(r"\{\{([A-Z0-9_]+)\}\}", lambda m: str(vals[m.group(1)]), tpl)
+    assert "{{" not in out, "unfilled slot"
+    return out
+
+
+def landing_page() -> str:
+    shot_w, shot_h = png_size(SITE / "media" / "exhibit-page.png")
+    og = hashlib.sha256((ROOT / "docs" / "assets" / "og-image.png").read_bytes()).hexdigest()[:10]
+    question = (
+        man["statement"]
+        .splitlines()[0]
+        .lstrip("/ ")
+        .replace("$country", man["params"]["country"])
+        .replace("$dest", man["params"]["dest"])
+    )
+    src_cta = (
+        f'<a class="btn solid" href="{REPO}"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5L2 10l5 5M13 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>Source on GitHub</a>'
+        if REPO_PUBLIC
+        else '<span class="src-pending"><svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M7 5L2 10l5 5M13 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>Source on GitHub opens at submission</span>'
+    )
+    receipts = [
+        (
+            f'<span data-count="{src_rels}">{fmt(src_rels)}</span><span class="to">→</span><em>{w_rels}</em>',
+            f"relationships in the air-routes graph, then in its witness ({fmt(src_nodes)} → {w_nodes} nodes)",
+        ),
+        (
+            f'<em>{w_rels}</em><span class="to">of</span>{w_rels}',
+            "deleting any one changes the answer, checked on relate-db and on the Relate CLI",
+        ),
+        (
+            f'<span data-count="{relate_tps}">{relate_tps}</span><span class="to">vs</span>{neo_tps}',
+            "trials per second, Relate in-process vs Neo4j in Docker, one machine",
+        ),
+        (
+            f'<span data-count="{TESTS}">{TESTS}</span><span class="to">·</span>100%',
+            "tests against real Relate · line and branch coverage",
+        ),
+    ]
+    vals = {
+        "DESC": html.escape(CLAIM),
+        "SITE": SITE_URL,
+        "OGV": og,
+        "CSS": (PARTS / "witness.css").read_text(),
+        "LANDING_CSS": (PARTS / "landing.css").read_text(),
+        "RELEASES": RELEASES,
+        "VERSION": VERSION,
+        "W_RELS": w_rels,
+        "SRC_RELS": fmt(src_rels),
+        "SOURCE_CTA": src_cta,
+        "REPO": REPO,
+        "CMD_NOTE": (
+            "Needs uv. The committed air-routes graph is copied, never modified."
+            if REPO_PUBLIC
+            else "Needs uv. The repository opens at submission; until then the clone does not resolve and the recorded run below is the output."
+        ),
+        "ANSWER": " ".join(r["airport"] for r in rows),
+        "HERO_SVG": sp.schematic("h", ghost=True),
+        "PLAN_DROP": fmt(sp.trace["plan"]["dropped_rels"]),
+        "TRIALS": trials,
+        "TAPE": sp.tape_svg(),
+        "APPLIED": sp.HOLDS.count("1"),
+        "ROLLED": sp.HOLDS.count("0"),
+        "FRAME_PAIRS": fmt(sp.FRAME_COUNTS["pairs"]),
+        "RECEIPTS": "\n    ".join(f'<div class="rc"><b>{a}</b><span>{b}</span></div>' for a, b in receipts),
+        "CMP_MD": cmp_path.with_suffix(".md").name,
+        "PYTEST": pytest_log.name,
+        "RELATE_V": man["versions"]["relate_db"],
+        "PY_V": man["versions"]["python"],
+        "QUESTION": html.escape(question),
+        "EX_SVG": sp.schematic("x", ghost=False),
+        "ANSWER_ROWS": sp.answer_rows(),
+        "REGISTER": sp.register_rows(),
+        "PULL_UTC": sp.pulls["run"]["utc"].replace("T", " ").rstrip("Z"),
+        "SHOT_H": round(1200 * shot_h / shot_w),
+        "TERM": sp.terminal_lines(),
+        "DEMO_UTC": sp.DEMO_HEADER.split(" · ")[0].replace("recorded ", "").replace("T", " ").replace("Z", " UTC"),
+        "DEMO_FILE": sp.demo_path.name,
+        "DEMO_REDUCE": sp.DEMO_REDUCE,
+        "RELATE_TPS": relate_tps,
+        "NEO_TPS": neo_tps,
+        "NEO_V": cmp["neo4j"]["components"][0]["v"],
+        "NEO_W": round(100 * neo_tps / relate_tps, 1),
+        "FIX_FROM": fmt(fix["source"]["relationships"]),
+        "FIX_TO": fix["witness"]["relationships"],
+        "LIMITS": "\n      ".join(
+            f'<li><span class="ln-no">{i}</span><div><blockquote>{html.escape(" ".join(q.split()))}</blockquote><cite>{c}</cite></div></li>'
+            for i, (q, c) in enumerate(QUOTES, 1)
+        ),
+        "FAQ": "\n      ".join(f"<details><summary>{html.escape(q)}</summary><p>{a}</p></details>" for q, a in FAQ),
+        "SOURCE_FOOT": f'<a href="{REPO}">source</a>' if REPO_PUBLIC else "source opens at submission",
+        "DATA": sp.page_json(),
+        "JS": (PARTS / "landing.js").read_text(),
+    }
+    return fill((PARTS / "landing.html").read_text(), vals)
+
 
 SITE.mkdir(exist_ok=True)
 (SITE / "exhibit").mkdir(exist_ok=True)
@@ -218,31 +242,7 @@ served = served.replace(
     1,
 )
 (SITE / "exhibit" / "two-hub.html").write_text(served)
-page = PAGE.format(
-    w_rels=w_rels,
-    src_rels_fmt=fmt(src_rels),
-    src_nodes_fmt=fmt(src_nodes),
-    check_upper=html.escape(check.upper()),
-    repo=REPO,
-    answer_rows=html.escape(answer_rows),
-    grid=grid,
-    trials=trials,
-    commits=man["run"]["commits"],
-    neo_version=cmp["neo4j"]["components"][0]["v"],
-    cmp_md=cmp_path.with_suffix(".md").name,
-    private_note=PRIVATE_NOTE,
-    source_li=SOURCE_LI,
-    copy_prefix="" if REPO_PUBLIC else "# the repository opens at submission\\n",
-    secs=secs,
-    relate_tps=relate_tps,
-    neo_tps=neo_tps,
-    ratio=ratio,
-    cmp_name=cmp_path.name,
-    site_url=SITE_URL,
-    releases=RELEASES,
-    releases_api=RELEASES_API,
-    version_tag=f"v{VERSION}",
-)
+page = landing_page()
 (SITE / "index.html").write_text(page)
 # favicon + social card: the judge-facing media from docs/assets (synced from the asset pipeline)
 for name in ("icon.svg", "og-image.png"):
@@ -251,51 +251,104 @@ for name in ("icon.svg", "og-image.png"):
 # ── /judge and JUDGE.md: one reader, one page, every number read from the committed files ───────────────────────────
 COMMITS = man["run"]["commits"]
 det = json.loads((ROOT / "evidence" / "determinism.json").read_text())
-CLAIM = (
-    f"When an agent answers from a graph, Witness hands back the graph that reproduces the answer "
-    f"({fmt(src_rels)} relationships → {w_rels}) and proves each relationship in it is needed."
-)
 LIVE = SITE_URL + "/"
 EXHIBIT = SITE_URL + "/exhibit/two-hub.html"
 OPENS = "" if REPO_PUBLIC else " (the repository opens at submission)"
 OPENS_LINE = "" if REPO_PUBLIC else "The repository opens at submission; until then use the live pages above."
 PATH30 = [
-    ("Open the landing page", LIVE, f"the agent's answer, the {w_rels} relationships it rests on, and the check line; nothing to install"),
-    ("Open the exhibit page", EXHIBIT, "the register of kept relationships, each tagged as one whose deletion changes the answer"),
+    (
+        "Open the landing page",
+        LIVE,
+        f"the agent's answer, the {w_rels} relationships it rests on, and the check line; nothing to install",
+    ),
+    (
+        "Open the exhibit page",
+        EXHIBIT,
+        "the register of kept relationships, each tagged as one whose deletion changes the answer",
+    ),
     ("Optional, one command", None, "`git clone " + REPO + " && cd witness && uv run witness demo` (needs uv)" + OPENS),
 ]
 RECEIPTS = [
-    (f"{fmt(src_rels)} → {w_rels}", f"relationships in the air-routes graph vs in the witness ({fmt(src_nodes)} nodes → {w_nodes} nodes in the witness graph; `witnesses/two-hub.manifest.json`)"),
-    (f"{w_rels} of {w_rels}", f"deleting any one relationship changes the answer; checked on relate-db and on the Relate CLI (`{check}`)"),
-    (f"{trials} trials · {secs} s", f"delete, re-run, roll back; {COMMITS} deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`)"),
-    (f"{relate_tps} vs {neo_tps}", f"trials per second, Relate in-process vs Neo4j {cmp['neo4j']['components'][0]['v']} in Docker, median of 3 runs on one machine (`evidence/{cmp_path.with_suffix('.md').name}`)"),
-    (f"{TESTS} tests · 100% coverage", f"real Relate; the graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls or a failing CLI to force rare branches (`evidence/{pytest_log.name}`, `pytest --cov=witness`, gate in `pyproject.toml`)"),
-    ("byte-identical", f"the same query and seed give the same witness on {len(det['runs'])} runs (`evidence/determinism.json`)"),
+    (
+        f"{fmt(src_rels)} → {w_rels}",
+        f"relationships in the air-routes graph vs in the witness ({fmt(src_nodes)} nodes → {w_nodes} nodes in the witness graph; `witnesses/two-hub.manifest.json`)",
+    ),
+    (
+        f"{w_rels} of {w_rels}",
+        f"deleting any one relationship changes the answer; checked on relate-db and on the Relate CLI (`{check}`)",
+    ),
+    (
+        f"{trials} trials · {secs} s",
+        f"delete, re-run, roll back; {COMMITS} deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`)",
+    ),
+    (
+        f"{relate_tps} vs {neo_tps}",
+        f"trials per second, Relate in-process vs Neo4j {cmp['neo4j']['components'][0]['v']} in Docker, median of 3 runs on one machine (`evidence/{cmp_path.with_suffix('.md').name}`)",
+    ),
+    (
+        f"{TESTS} tests · 100% coverage",
+        f"real Relate; the graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls or a failing CLI to force rare branches (`evidence/{pytest_log.name}`, `pytest --cov=witness`, gate in `pyproject.toml`)",
+    ),
+    (
+        "byte-identical",
+        f"the same query and seed give the same witness on {len(det['runs'])} runs (`evidence/determinism.json`)",
+    ),
 ]
 REPRO = [
     "git clone " + REPO + " && cd witness",
     "uv run witness demo",
 ]
-REPLAY = "CI / deterministic replay, not the product path: uv run pytest --cov=witness (the whole suite against real Relate)"
+REPLAY = (
+    "CI / deterministic replay, not the product path: uv run pytest --cov=witness (the whole suite against real Relate)"
+)
 LIMITS = [
     "Deletion-minimal, not smallest: no single remaining relationship can be removed without changing the answer; a smaller witness may exist.",
     "Read-only, deterministic Cypher only. Witness refuses writes, procedures, clocks and randomness (exit 2) rather than guess.",
     "One headline graph (a public air-routes dataset, Apache-2.0) and one headline query. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
 ]
-LINKS = [("Repository", REPO + OPENS), ("Live site", LIVE), ("Exhibit page", EXHIBIT), ("Relate", "https://relatedb.ai")]
+LINKS = [
+    ("Repository", REPO + OPENS),
+    ("Live site", LIVE),
+    ("Exhibit page", EXHIBIT),
+    ("Relate", "https://relatedb.ai"),
+]
 
-md = ["# For judges", "", f"**The claim.** {CLAIM}", "", "Witness is built on Relate, the embedded graph database, for the Relate by Neo4j hackathon.", "", "## The 30-second path", ""]
+md = [
+    "# For judges",
+    "",
+    f"**The claim.** {CLAIM}",
+    "",
+    "Witness is built on Relate, the embedded graph database, for the Relate by Neo4j hackathon.",
+    "",
+    "## The 30-second path",
+    "",
+]
 for i, (t, u, d) in enumerate(PATH30, 1):
     md.append(f"{i}. {f'[{t}]({u})' if u else t}: {d}.")
 md += ["", "## The receipts", "", "| Number | What it is |", "|---|---|"]
 md += [f"| **{a}** | {b} |" for a, b in RECEIPTS]
-md += ["", "## Reproduce it", "", "```bash", *REPRO, "```", "", *([OPENS_LINE, ""] if OPENS_LINE else []), f"{REPLAY}", "", "## Honest limitations", ""]
+md += [
+    "",
+    "## Reproduce it",
+    "",
+    "```bash",
+    *REPRO,
+    "```",
+    "",
+    *([OPENS_LINE, ""] if OPENS_LINE else []),
+    f"{REPLAY}",
+    "",
+    "## Honest limitations",
+    "",
+]
 md += [f"- {x}" for x in LIMITS]
 md += ["", "## Links", ""] + [f"- {a}: {b}" for a, b in LINKS] + [""]
 (ROOT / "JUDGE.md").write_text("\n".join(md))
 
+
 def inline(t):
     return re.sub(r"`([^`]+)`", r"<code>\1</code>", html.escape(t, quote=False))
+
 
 JUDGE_PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -325,8 +378,11 @@ table{{border-collapse:collapse;width:100%}}td{{border-top:1px solid var(--rule)
 <h2>Links</h2><ul>{links}</ul>
 </main></body></html>
 """
+
+
 def _link(u):
     return f'<a href="{u.split(" ")[0]}">{html.escape(u)}</a>' if u.startswith("http") else html.escape(u)
+
 
 (SITE / "judge").mkdir(exist_ok=True)
 (SITE / "judge" / "index.html").write_text(

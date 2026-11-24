@@ -1,0 +1,920 @@
+{
+  "schema": "witness.pull-each-tag/v1",
+  "what": "each of the witness's relationships deleted alone in a Relate transaction, the query re-run, then rolled back",
+  "witness": "witnesses/two-hub.rl",
+  "query": "queries/two-hub.cypher",
+  "params": {
+    "country": "MX",
+    "dest": "MEX"
+  },
+  "baseline": [
+    "PBC",
+    "QRO",
+    "TLC",
+    "UPN"
+  ],
+  "baseline_rows": [
+    {
+      "airport": "PBC",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "QRO",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "TLC",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    },
+    {
+      "airport": "UPN",
+      "hub_countries": [
+        "MX",
+        "US"
+      ]
+    }
+  ],
+  "counts": {
+    "nodes": 12,
+    "relationships": 22
+  },
+  "changed": 22,
+  "of": 22,
+  "tags": [
+    {
+      "n": 1,
+      "rel": "(ACA)-[:HAS_ROUTE]->(MEX)",
+      "rows_after": 3,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "TLC"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.655
+    },
+    {
+      "n": 2,
+      "rel": "(ACA)-[:IN_COUNTRY]->(MX)",
+      "rows_after": 4,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "TLC",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [],
+      "appears": [],
+      "changed": true,
+      "ms": 0.289
+    },
+    {
+      "n": 3,
+      "rel": "(DFW)-[:HAS_ROUTE]->(MEX)",
+      "rows_after": 2,
+      "answer_after": [
+        "TLC",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "PBC",
+        "QRO"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.251
+    },
+    {
+      "n": 4,
+      "rel": "(DFW)-[:IN_COUNTRY]->(US)",
+      "rows_after": 4,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "TLC",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [],
+      "appears": [],
+      "changed": true,
+      "ms": 0.318
+    },
+    {
+      "n": 5,
+      "rel": "(LAS)-[:HAS_ROUTE]->(MEX)",
+      "rows_after": 3,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "TLC"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.266
+    },
+    {
+      "n": 6,
+      "rel": "(LAS)-[:IN_COUNTRY]->(US)",
+      "rows_after": 4,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "TLC",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [],
+      "appears": [],
+      "changed": true,
+      "ms": 0.262
+    },
+    {
+      "n": 7,
+      "rel": "(LAX)-[:HAS_ROUTE]->(MEX)",
+      "rows_after": 3,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "TLC"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "UPN"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.243
+    },
+    {
+      "n": 8,
+      "rel": "(LAX)-[:IN_COUNTRY]->(US)",
+      "rows_after": 4,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "TLC",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX"
+          ]
+        }
+      ],
+      "drops": [],
+      "appears": [],
+      "changed": true,
+      "ms": 0.245
+    },
+    {
+      "n": 9,
+      "rel": "(PBC)-[:HAS_ROUTE]->(DFW)",
+      "rows_after": 3,
+      "answer_after": [
+        "QRO",
+        "TLC",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "PBC"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.228
+    },
+    {
+      "n": 10,
+      "rel": "(PBC)-[:HAS_ROUTE]->(TIJ)",
+      "rows_after": 3,
+      "answer_after": [
+        "QRO",
+        "TLC",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "PBC"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.227
+    },
+    {
+      "n": 11,
+      "rel": "(PBC)-[:IN_COUNTRY]->(MX)",
+      "rows_after": 3,
+      "answer_after": [
+        "QRO",
+        "TLC",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "PBC"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.21
+    },
+    {
+      "n": 12,
+      "rel": "(QRO)-[:HAS_ROUTE]->(DFW)",
+      "rows_after": 3,
+      "answer_after": [
+        "PBC",
+        "TLC",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "QRO"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.223
+    },
+    {
+      "n": 13,
+      "rel": "(QRO)-[:HAS_ROUTE]->(TIJ)",
+      "rows_after": 3,
+      "answer_after": [
+        "PBC",
+        "TLC",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "QRO"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.229
+    },
+    {
+      "n": 14,
+      "rel": "(QRO)-[:IN_COUNTRY]->(MX)",
+      "rows_after": 3,
+      "answer_after": [
+        "PBC",
+        "TLC",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "QRO"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.229
+    },
+    {
+      "n": 15,
+      "rel": "(TIJ)-[:HAS_ROUTE]->(MEX)",
+      "rows_after": 1,
+      "answer_after": [
+        "TLC"
+      ],
+      "rows": [
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "PBC",
+        "QRO",
+        "UPN"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.235
+    },
+    {
+      "n": 16,
+      "rel": "(TIJ)-[:IN_COUNTRY]->(MX)",
+      "rows_after": 4,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "TLC",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "US"
+          ]
+        }
+      ],
+      "drops": [],
+      "appears": [],
+      "changed": true,
+      "ms": 0.243
+    },
+    {
+      "n": 17,
+      "rel": "(TLC)-[:HAS_ROUTE]->(ACA)",
+      "rows_after": 3,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "TLC"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.235
+    },
+    {
+      "n": 18,
+      "rel": "(TLC)-[:HAS_ROUTE]->(LAS)",
+      "rows_after": 3,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "TLC"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.241
+    },
+    {
+      "n": 19,
+      "rel": "(TLC)-[:IN_COUNTRY]->(MX)",
+      "rows_after": 3,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "UPN"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "UPN",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "TLC"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.214
+    },
+    {
+      "n": 20,
+      "rel": "(UPN)-[:HAS_ROUTE]->(LAX)",
+      "rows_after": 3,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "TLC"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "UPN"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.232
+    },
+    {
+      "n": 21,
+      "rel": "(UPN)-[:HAS_ROUTE]->(TIJ)",
+      "rows_after": 3,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "TLC"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "UPN"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.236
+    },
+    {
+      "n": 22,
+      "rel": "(UPN)-[:IN_COUNTRY]->(MX)",
+      "rows_after": 3,
+      "answer_after": [
+        "PBC",
+        "QRO",
+        "TLC"
+      ],
+      "rows": [
+        {
+          "airport": "PBC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "QRO",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        },
+        {
+          "airport": "TLC",
+          "hub_countries": [
+            "MX",
+            "US"
+          ]
+        }
+      ],
+      "drops": [
+        "UPN"
+      ],
+      "appears": [],
+      "changed": true,
+      "ms": 0.663
+    }
+  ],
+  "run": {
+    "utc": "2026-11-24T00:57:18Z",
+    "witness": "0.1.0",
+    "relate_db": "1.0.1",
+    "python": "3.12.13",
+    "machine": "Darwin arm64"
+  }
+}

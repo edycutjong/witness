@@ -17,7 +17,7 @@
   window.addEventListener("resize", fit); fit();
 
   // version chips: baked text stays if the releases API is unreachable (private repo → 404)
-  if (window.fetch) {
+  if (document.getElementById("ver") && document.getElementById("ver").hasAttribute("data-live") && window.fetch) {
     fetch("https://api.github.com/repos/edycutjong/witness/releases/latest", { headers: { Accept: "application/vnd.github+json" } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) { if (j && j.tag_name) $$('a[href$="/releases/latest"].chip').forEach(function (c) { c.textContent = j.tag_name; }); })

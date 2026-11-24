@@ -9,7 +9,7 @@
 
   // version chip: baked text stays if the releases API is unreachable (private repo → 404)
   var v = document.getElementById("ver");
-  if (v && window.fetch) {
+  if (v && v.hasAttribute("data-live") && window.fetch) {
     fetch("https://api.github.com/repos/edycutjong/witness/releases/latest", { headers: { Accept: "application/vnd.github+json" } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) { if (j && j.tag_name) { $$('a[href$="/releases/latest"].chip').forEach(function (c) { c.textContent = j.tag_name; }); } })

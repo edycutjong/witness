@@ -16,6 +16,7 @@ import tempfile
 import threading
 import time
 from pathlib import Path
+from typing import Any
 
 os.environ.setdefault("DO_NOT_TRACK", "1")
 
@@ -24,7 +25,7 @@ from .guard import Refused  # noqa: E402
 from .pipeline import EXIT_NOT_VERIFIED, EXIT_REFUSED, EXIT_WATCHDOG, Request, reduce_request, relate_version  # noqa: E402
 
 PKG_ROOT = Path(__file__).resolve().parents[2]
-HEADLINE = {
+HEADLINE: dict[str, Any] = {
     "query": "queries/two-hub.cypher",
     "absence": "queries/two-hub-absence.cypher",
     "bindings": "queries/two-hub-bindings.cypher",

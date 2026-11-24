@@ -20,6 +20,7 @@ import tempfile
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from .canon import canon_rows, same_answer
 from .export import _lit, cypher_name
@@ -313,8 +314,8 @@ def check(
     w_rl = Path(w_rl)
     out = CheckResult(change_phrase=spec.change_phrase)
     w_cypher = w_rl.with_suffix(".cypher")
-    with tempfile.TemporaryDirectory(prefix="witness-check-") as tmp:
-        tmp = Path(tmp)
+    with tempfile.TemporaryDirectory(prefix="witness-check-") as tmp_name:
+        tmp = Path(tmp_name)
         # ---- Python sufficiency: on W.rl, and on a store rebuilt from W.cypher ----------------------------------
         base = Scratch.open_copy(w_rl, tmp)
         try:
@@ -347,9 +348,10 @@ def check(
             if suff is not True:
                 why = "the predicate does not hold on W" if suff is False else "sufficiency inconclusive"
                 out.reasons.append(why)
-            elements = [("rel", r) for r in sorted(base.rel_keys, key=base.rel_keys.get)]
+            elements = [("rel", r) for r in sorted(base.rel_keys, key=lambda k: base.rel_keys[k])]
             touched = {x for ends in base.rel_ends.values() for x in ends}
-            elements += [("node", n) for n in sorted(base.node_keys, key=base.node_keys.get) if n not in touched]
+            node_order = sorted(base.node_keys, key=lambda k: base.node_keys[k])
+            elements += [("node", n) for n in node_order if n not in touched]
             labels = {eid: _element_label(base, k, eid) for k, eid in elements}
             deletes = {eid: _content_delete(base, k, eid) for k, eid in elements}
             py_raw_cols = [r.columns if r is not None else None for r in raw_w]
@@ -367,7 +369,12 @@ def check(
                 sc.commit_delete([eid] if kind == "rel" else [], [eid] if kind == "node" else [])
                 ans, raws = _answers(sc, spec)
                 h = spec.holds(ans)
-                probe = {"i": i, "kind": kind, "element": labels[eid], "necessary": None if h is None else (not h)}
+                probe: dict[str, Any] = {
+                    "i": i,
+                    "kind": kind,
+                    "element": labels[eid],
+                    "necessary": None if h is None else (not h),
+                }
                 probe["_raw"] = [raw_bag(r.data) if r is not None else None for r in raws]
                 probe["_canon"] = ans
             except Exception as e:  # noqa: BLE001

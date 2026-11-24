@@ -114,7 +114,9 @@ def tokenize(text: str) -> list[Tok]:
     pos = 0
     while pos < len(text):
         m = _TOKEN.match(text, pos)  # never None: the punct alternative takes any char the others did not
+        assert m is not None
         kind = m.lastgroup
+        assert kind is not None  # every alternative is a named group
         s = m.group(0)
         if kind in ("ws", "lc", "bc"):
             pass
@@ -443,10 +445,11 @@ def guard(text: str, params: dict | None, db, door: str = "query") -> GuardedQue
 
 def strip_comments(text: str) -> str:
     """The statement without // and /* */ comments (string literals untouched), on one line, trailing ';' removed."""
-    out = []
+    out: list[str] = []
     pos = 0
     while pos < len(text):
         m = _TOKEN.match(text, pos)
+        assert m is not None  # see tokenize: the punct alternative matches any char
         if m.lastgroup in ("lc", "bc", "ws"):
             if out and out[-1] != " ":
                 out.append(" ")

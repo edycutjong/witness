@@ -14,6 +14,7 @@ import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from . import __version__
 from .canon import bad_name, same_answer
@@ -290,7 +291,7 @@ def reduce_request(req: Request, progress=None) -> Outcome:
         )
     }
     out.files = files
-    manifest = {
+    manifest: dict[str, Any] = {
         "schema": "witness.manifest/v1",
         "name": req.name,
         "source": {
@@ -315,6 +316,7 @@ def reduce_request(req: Request, progress=None) -> Outcome:
         "determinism_claimed": out.run["inconclusive"] == 0 and not capped and req.order_check,
     }
     if expected is not None:
+        assert req.expected is not None  # expected is only built from req.expected
         manifest["predicate"]["expected_rows"] = plain(
             req.expected if isinstance(req.expected, list) else json.loads(req.expected)
         )

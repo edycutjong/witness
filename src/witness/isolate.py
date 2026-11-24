@@ -47,6 +47,7 @@ def _child(conn, source: str, log: list, queries: list, strict_lists: bool, digi
         t = sc.trial_many([(q.exec_text, q.params) for q in queries], rels, nodes, check_counts=check)
         answers = None
         if t.error is None:
+            assert t.results is not None  # error is None, so the trial returned its results
             try:
                 answers = [
                     answer_of(q, r, c, keyer=sc.keyer, strict_lists=strict_lists, digits=digits)

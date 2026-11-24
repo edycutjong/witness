@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass, field
+from typing import Any
 
 from .canon import canon_rows, canon_value, same_answer
 from .guard import GuardedQuery, Refused, Tie, apply_cut
@@ -93,11 +94,13 @@ class Predicate:
         return "change the answer"
 
     def describe(self) -> dict:
-        d = {"kind": self.kind}
+        d: dict[str, Any] = {"kind": self.kind}
         if self.kind == "differs":
+            assert self.expected is not None  # validate() refuses a differs without --expected
             d["loose"] = self.loose
             d["expected_sha256"] = answer_sha(self.expected)
         if self.kind == "disagree":
+            assert self.other_baseline is not None  # validate() refuses a disagree without the second baseline
             d["other_statement"] = self.queries[1].text
             d["other_baseline_sha256"] = answer_sha(self.other_baseline)
         return d

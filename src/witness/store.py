@@ -12,6 +12,7 @@ import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 os.environ.setdefault("DO_NOT_TRACK", "1")
 
@@ -181,7 +182,8 @@ class Scratch:
         """begin -> delete -> every statement -> rollback, in one transaction."""
         t0 = time.perf_counter()
         self.db.begin_transaction()
-        results = err = None
+        results: list[tuple[Any, Any]] | None = None
+        err: str | None = None
         dr = dn = 0
         try:
             dr, dn = self._delete(rel_ids, node_ids)

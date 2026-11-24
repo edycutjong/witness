@@ -18,6 +18,7 @@ import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 os.environ.setdefault("DO_NOT_TRACK", "1")
 
@@ -71,7 +72,7 @@ def new_id(created_at: str, statement: str, params_json: str) -> str:
 
 def record_reduction(path: str | Path, fields: dict, witness: dict) -> str:
     """Write one Reduction and its Witness node in one transaction; returns the reduction id."""
-    props = {k: fields.get(k) for k in REDUCTION_FIELDS}
+    props: dict[str, Any] = {k: fields.get(k) for k in REDUCTION_FIELDS}
     props["created_at"] = props["created_at"] or now_iso()
     props["id"] = props["id"] or new_id(props["created_at"], props["statement"] or "", props["params_json"] or "")
     _write(

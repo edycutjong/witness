@@ -10,8 +10,9 @@ from __future__ import annotations
 import random
 import re
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
+from typing import Any
 
 from .guard import GuardedQuery, Tie
 from .predicates import Predicate, answer_of
@@ -95,6 +96,7 @@ class Reducer:
         self.stats = Stats()
         self._t0 = time.perf_counter()
         if predicate is None:
+            assert query is not None  # a bare query is the only way to build the default keep predicate
             gq = GuardedQuery(text=query, params=params or {}, exec_text=query)
             base = self._answers_now([gq])[0]
             predicate = Predicate("keep", [gq], base)
@@ -131,6 +133,7 @@ class Reducer:
             try:
                 answers = getattr(t, "answers", None)  # an isolated child returns canonical answers
                 if answers is None:
+                    assert t.results is not None  # error is None, so the trial returned its results
                     answers = [self._ans(gq, r, c) for gq, (r, c) in zip(self.pred.queries, t.results, strict=True)]
                 tie = any(isinstance(a, Tie) for a in answers)
                 verdict = self.pred.holds(answers)
@@ -182,7 +185,7 @@ class Reducer:
                 ch = [x for x in ch if x not in gone and (kind == "node" or x in self.sc.rel_keys)]
                 if not ch:
                     continue
-                args = ((), ch) if kind == "node" else (ch, ())
+                args: tuple[Sequence[str], Sequence[str]] = ((), ch) if kind == "node" else (ch, ())
                 if self.test(*args, phase=phase) is True:
                     self.commit(*args)
                     gone.update(ch)
@@ -274,7 +277,7 @@ class Reducer:
 
     def run(self) -> dict:
         t0 = self._t0 = time.perf_counter()
-        out = {"seed": self.seed, "start_counts": self.counts}
+        out: dict[str, Any] = {"seed": self.seed, "start_counts": self.counts}
         self.empty_graph_check()
         out["plan"] = self.plan_chunk()
         out["after_plan"] = self.sc.counts()

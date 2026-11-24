@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime as _dt
 import os
 from pathlib import Path
+from typing import Any
 
 os.environ.setdefault("DO_NOT_TRACK", "1")
 
@@ -174,7 +175,7 @@ def display_name(props: dict, fallback: str = "?") -> str:
 
 def exhibits(sc: Scratch) -> list[dict]:
     """The witness relationships in register order: by start name, type, end name (then key, so the order is total)."""
-    out = []
+    out: list[dict[str, Any]] = []
     for r in sc.rel_keys:
         s, e = sc.rel_ends[r]
         out.append(

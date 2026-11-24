@@ -25,6 +25,12 @@ PRIVATE_NOTE = (
     else '<p class="note">The repository opens at submission; until then the clone command does not resolve and the committed output below is the run.</p>'
 )
 
+VERSION = re.search(r'^version = "([^"]+)"', (ROOT / "pyproject.toml").read_text(), re.M).group(1)
+RELEASES = f"{REPO}/releases/latest"
+RELEASES_API = "https://api.github.com/repos/" + REPO.split("github.com/")[1] + "/releases/latest"
+pytest_log = sorted((ROOT / "evidence").glob("pytest-*.txt"))[-1]
+TESTS = int(re.search(r"(\d+) passed", pytest_log.read_text()).group(1))
+
 man = json.loads((ROOT / "witnesses" / "two-hub.manifest.json").read_text())
 cmp_path = sorted((ROOT / "evidence").glob("neo4j-compare-*.json"))[-1]
 cmp = json.loads(cmp_path.read_text())
@@ -109,6 +115,8 @@ code{{font:600 .92em var(--body);background:rgba(31,26,20,.07);padding:1px 5px;b
 h3{{font:600 13px/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}}
 .links{{display:flex;flex-wrap:wrap;gap:8px 28px;margin:36px 0 0;padding:0;list-style:none}}
 footer{{margin-top:56px;font-size:14px;color:var(--muted);max-width:70ch}}
+.chip{{display:inline-block;font:600 12px/1 var(--data);letter-spacing:.04em;color:var(--muted);border:1px solid var(--rule);padding:4px 8px;border-radius:2px;text-decoration:none;margin-top:6px}}
+.chip:hover{{color:var(--ink);border-color:var(--ink)}}.chip:focus-visible{{outline:3px solid var(--ink);outline-offset:3px}}
 @media (max-width:600px){{.en,.nl{{font-size:19px}}}}
 @media (prefers-reduced-motion:reduce){{*{{transition:none!important;scroll-behavior:auto!important}}}}
 </style>
@@ -150,6 +158,7 @@ footer{{margin-top:56px;font-size:14px;color:var(--muted);max-width:70ch}}
 <p>Deletion-minimal means no single remaining relationship can be removed without changing the answer. It does not mean smallest possible.
 Numbers on this page are read from the committed files in the repository (<code>witnesses/two-hub.manifest.json</code>, <code>evidence/{cmp_name}</code>) by <code>scripts/build_site.py</code>.
 A work-in-progress page: the full write-up comes later. Apache-2.0.</p>
+<p><a class="chip" id="ver" href="{releases}" aria-label="Latest release">{version_tag}</a> <a class="chip" href="judge/">For judges</a></p>
 </footer>
 </main>
 <script>
@@ -162,6 +171,10 @@ if(navigator.clipboard&&navigator.clipboard.writeText){{navigator.clipboard.writ
 else{{s.textContent='Select the commands above and copy them.'}}
 }});
 }})();
+</script>
+<script>
+(function(){{var v=document.getElementById('ver');if(!v||!window.fetch)return;
+fetch('{releases_api}',{{headers:{{Accept:'application/vnd.github+json'}}}}).then(function(r){{return r.ok?r.json():null}}).then(function(j){{if(j&&j.tag_name)v.textContent=j.tag_name}}).catch(function(){{}})}})();
 </script>
 </body>
 </html>
@@ -226,9 +239,106 @@ page = PAGE.format(
     ratio=ratio,
     cmp_name=cmp_path.name,
     site_url=SITE_URL,
+    releases=RELEASES,
+    releases_api=RELEASES_API,
+    version_tag=f"v{VERSION}",
 )
 (SITE / "index.html").write_text(page)
 # favicon + social card: the judge-facing media from docs/assets (synced from the asset pipeline)
 for name in ("icon.svg", "og-image.png"):
     shutil.copyfile(ROOT / "docs" / "assets" / name, SITE / name)
+
+# ── /judge and JUDGE.md: one reader, one page, every number read from the committed files ───────────────────────────
+COMMITS = man["run"]["commits"]
+det = json.loads((ROOT / "evidence" / "determinism.json").read_text())
+CLAIM = (
+    f"When an agent answers from a graph, Witness hands back the graph that reproduces the answer "
+    f"({fmt(src_rels)} relationships → {w_rels}) and proves each relationship in it is needed."
+)
+LIVE = SITE_URL + "/"
+EXHIBIT = SITE_URL + "/exhibit/two-hub.html"
+PATH30 = [
+    ("Open the landing page", LIVE, f"the agent's answer, the {w_rels} relationships it rests on, and the check line; nothing to install"),
+    ("Open the exhibit page", EXHIBIT, "the register of kept relationships, each tagged as one whose deletion changes the answer"),
+    ("Optional, one command", None, "`git clone " + REPO + " && cd witness && uv run witness demo` (needs uv; the repository opens at submission)"),
+]
+RECEIPTS = [
+    (f"{fmt(src_rels)} → {w_rels}", f"relationships in the air-routes graph vs in the witness ({fmt(src_nodes)} nodes → {w_nodes} nodes in the witness graph; `witnesses/two-hub.manifest.json`)"),
+    (f"{w_rels} of {w_rels}", f"deleting any one relationship changes the answer; checked on relate-db and on the Relate CLI (`{check}`)"),
+    (f"{trials} trials · {secs} s", f"delete, re-run, roll back; {COMMITS} deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`)"),
+    (f"{relate_tps} vs {neo_tps}", f"trials per second, Relate in-process vs Neo4j {cmp['neo4j']['components'][0]['v']} in Docker, median of 3 runs on one machine (`evidence/{cmp_path.with_suffix('.md').name}`)"),
+    (f"{TESTS} tests · 100% coverage", f"real Relate, no mocks of the graph store (`evidence/{pytest_log.name}`, `pytest --cov=witness --cov-fail-under=100`)"),
+    ("byte-identical", f"the same query and seed give the same witness on {len(det['runs'])} runs (`evidence/determinism.json`)"),
+]
+REPRO = [
+    "git clone " + REPO + " && cd witness",
+    "uv run witness demo",
+]
+REPLAY = "uv run pytest  # CI / deterministic replay of the whole suite against real Relate; not the product path"
+LIMITS = [
+    "Deletion-minimal, not smallest: no single remaining relationship can be removed without changing the answer; a smaller witness may exist.",
+    "Read-only, deterministic Cypher only. Witness refuses writes, procedures, clocks and randomness (exit 2) rather than guess.",
+    "One headline graph (a public air-routes dataset, Apache-2.0) and one headline query. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
+]
+LINKS = [("Repository", REPO + " (opens at submission)"), ("Live site", LIVE), ("Exhibit page", EXHIBIT), ("Relate", "https://relatedb.ai")]
+
+md = ["# For judges", "", f"**The claim.** {CLAIM}", "", "## The 30-second path", ""]
+for i, (t, u, d) in enumerate(PATH30, 1):
+    md.append(f"{i}. {f'[{t}]({u})' if u else t}: {d}.")
+md += ["", "## The receipts", "", "| Number | What it is |", "|---|---|"]
+md += [f"| **{a}** | {b} |" for a, b in RECEIPTS]
+md += ["", "## Reproduce it", "", "```bash", *REPRO, "```", "", f"`{REPLAY}`", "", "## Honest limitations", ""]
+md += [f"- {x}" for x in LIMITS]
+md += ["", "## Links", ""] + [f"- {a}: {b}" for a, b in LINKS] + [""]
+(ROOT / "JUDGE.md").write_text("\n".join(md))
+
+def inline(t):
+    return re.sub(r"`([^`]+)`", r"<code>\1</code>", html.escape(t, quote=False))
+
+JUDGE_PAGE = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>For judges · Witness</title>
+<meta name="description" content="{claim_attr}">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Old+Standard+TT:wght@400;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{{--paper:#F2E8D5;--ink:#1F1A14;--muted:#6F6555;--after:#B42318;--rule:#D9CBAE}}
+body{{margin:0;background:var(--paper);color:var(--ink);font:18px/1.55 "Source Sans 3",Arial,sans-serif}}
+main{{max-width:760px;margin:0 auto;padding:40px 20px 72px}}
+h1{{font:700 34px/1.15 "Old Standard TT",Georgia,serif;margin:.2em 0 .5em}}
+h2{{font:600 13px/1.4 "Source Sans 3",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:40px 0 10px}}
+a{{color:var(--ink);text-underline-offset:3px}}a:hover{{color:var(--after)}}a:focus-visible{{outline:3px solid var(--ink);outline-offset:3px}}
+code,pre{{font-family:"Fragment Mono",Menlo,monospace;font-size:.88em}}pre{{background:rgba(31,26,20,.07);padding:14px;overflow-x:auto}}
+table{{border-collapse:collapse;width:100%}}td{{border-top:1px solid var(--rule);padding:10px 8px 10px 0;vertical-align:top}}td:first-child{{font:400 17px "Fragment Mono",monospace;white-space:nowrap;padding-right:18px}}
+.claim{{font-size:21px}}@media (max-width:600px){{td:first-child{{white-space:normal}}}}
+</style></head><body><main>
+<p><a href="/">&larr; Witness</a></p>
+<h1>For judges</h1>
+<p class="claim" id="claim">{claim}</p>
+<h2>The 30-second path</h2><ol>{path}</ol>
+<h2>The receipts</h2><table>{receipts}</table>
+<h2>Reproduce it</h2><pre>{repro}</pre><p>{replay}</p>
+<h2>Honest limitations</h2><ul>{limits}</ul>
+<h2>Links</h2><ul>{links}</ul>
+</main></body></html>
+"""
+def _link(u):
+    return f'<a href="{u.split(" ")[0]}">{html.escape(u)}</a>' if u.startswith("http") else html.escape(u)
+
+(SITE / "judge").mkdir(exist_ok=True)
+(SITE / "judge" / "index.html").write_text(
+    JUDGE_PAGE.format(
+        claim=html.escape(CLAIM, quote=False),
+        claim_attr=html.escape(CLAIM),
+        path="".join(
+            "<li>" + (f'<a href="{u}">{html.escape(t)}</a>' if u else html.escape(t)) + f": {inline(d)}.</li>"
+            for t, u, d in PATH30
+        ),
+        receipts="".join(f"<tr><td>{html.escape(a)}</td><td>{inline(b)}</td></tr>" for a, b in RECEIPTS),
+        repro=html.escape("\n".join(REPRO)),
+        replay=inline(f"`{REPLAY}`"),
+        limits="".join(f"<li>{inline(x)}</li>" for x in LIMITS),
+        links="".join(f"<li>{html.escape(a)}: {_link(b)}</li>" for a, b in LINKS),
+    )
+)
 print(f"site/index.html {len(page):,} bytes; witness {w_rels} of {src_rels}; compare {cmp_path.name}")

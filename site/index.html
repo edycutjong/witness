@@ -61,6 +61,8 @@ code{font:600 .92em var(--body);background:rgba(31,26,20,.07);padding:1px 5px;bo
 h3{font:600 13px/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
 .links{display:flex;flex-wrap:wrap;gap:8px 28px;margin:36px 0 0;padding:0;list-style:none}
 footer{margin-top:56px;font-size:14px;color:var(--muted);max-width:70ch}
+.chip{display:inline-block;font:600 12px/1 var(--data);letter-spacing:.04em;color:var(--muted);border:1px solid var(--rule);padding:4px 8px;border-radius:2px;text-decoration:none;margin-top:6px}
+.chip:hover{color:var(--ink);border-color:var(--ink)}.chip:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 @media (max-width:600px){.en,.nl{font-size:19px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -109,6 +111,7 @@ footer{margin-top:56px;font-size:14px;color:var(--muted);max-width:70ch}
 <p>Deletion-minimal means no single remaining relationship can be removed without changing the answer. It does not mean smallest possible.
 Numbers on this page are read from the committed files in the repository (<code>witnesses/two-hub.manifest.json</code>, <code>evidence/neo4j-compare-2026-11-24.json</code>) by <code>scripts/build_site.py</code>.
 A work-in-progress page: the full write-up comes later. Apache-2.0.</p>
+<p><a class="chip" id="ver" href="https://github.com/edycutjong/witness/releases/latest" aria-label="Latest release">v0.1.0</a> <a class="chip" href="judge/">For judges</a></p>
 </footer>
 </main>
 <script>
@@ -121,6 +124,10 @@ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.write
 else{s.textContent='Select the commands above and copy them.'}
 });
 })();
+</script>
+<script>
+(function(){var v=document.getElementById('ver');if(!v||!window.fetch)return;
+fetch('https://api.github.com/repos/edycutjong/witness/releases/latest',{headers:{Accept:'application/vnd.github+json'}}).then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.tag_name)v.textContent=j.tag_name}).catch(function(){})})();
 </script>
 </body>
 </html>

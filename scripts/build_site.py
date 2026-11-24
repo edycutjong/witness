@@ -11,6 +11,7 @@ import json
 import re
 import shutil
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -204,6 +205,171 @@ def landing_page() -> str:
     return fill((PARTS / "landing.html").read_text(), vals)
 
 
+CAPS = [  # (code token as in README "Relate capabilities used", the deck's 2-3 word gloss)
+    ("begin_transaction · rollback_transaction", "the inner loop", "begin_transaction"),
+    ("QueryResult.query_type", "refuse writes", "query_type"),
+    ("EXPLAIN", "prune unreachable types", "`EXPLAIN` plans"),
+    ("read_only=True", "reruns cannot write", "read_only=True"),
+    ("single-file .rl", "the evidence format", "single-file `.rl`"),
+    ("relate pull", "fixture mode", "`relate pull` for fixture mode"),
+    ("relate query --mode json", "independent re-check", "relate query --mode json"),
+    ("MCP · why · check", "agents ask why", "MCP: Witness's own tools `why` and `check`"),
+]
+
+
+def _ln(e: str, cls: str = "") -> str:
+    return f'<span class="ln{(" " + cls) if cls else ""}">{e or " "}</span>'
+
+
+def deck_page() -> str:
+    og = hashlib.sha256((ROOT / "docs" / "assets" / "og-image.png").read_bytes()).hexdigest()[:10]
+    host = SITE_URL.split("://")[1]
+    # cover terminal: lines selected from the recorded run, order kept, text never edited
+    cover = []
+    for ln in sp.demo.splitlines()[1:]:
+        if ln.startswith(("WITNESS ", "  reduced in", "CHECK ", "  relate CLI:", "VERIFIED")):
+            e = html.escape(ln)
+            if ln.startswith("CHECK"):
+                cover.append(_ln(f'<b class="k">{e}</b>'))
+            else:
+                cover.append(_ln(re.sub(r"^([A-Z]{4,})", r'<b class="h">\1</b>', e)))
+    assert len(cover) == 5, "cover lines missing from the demo transcript"
+    # the query, verbatim, with the three hard parts marked
+    cy = html.escape((ROOT / "queries" / "two-hub.cypher").read_text().rstrip("\n"))
+    for kw in ("NOT EXISTS", "OPTIONAL MATCH", "count(DISTINCT hub)", "collect(DISTINCT hc.code)"):
+        assert kw in cy, kw
+        cy = cy.replace(kw, f'<b class="hi">{kw}</b>', 1)
+    cy = re.sub(r"^(//.*)$", r'<span class="cm">\1</span>', cy, count=1, flags=re.M)
+    # slide 2: the real frame alone (no witness drawn)
+    g = sp.schematic("g", ghost=True)
+    g = g[: g.index('<g class="edges">')] + "</svg>"
+    g = re.sub(
+        r"<title id=\"g-t\">.*?</title>",
+        f'<title id="g-t">The air-routes graph in frame: {fmt(sp.FRAME_COUNTS["pairs"])} airport pairs</title>',
+        g,
+    )
+    # slide 5 final state: exhibit 15 pulled (the markup alone is the last step)
+    fin = next(t for t in sp.pulls["tags"] if t["n"] == 15)
+    pv = sp.schematic("p", ghost=False)
+    for a, b in (
+        (' class="ed" data-n="15"', ' class="ed pulled" data-n="15"'),
+        ('class="tg" data-n="15"', 'class="tg pulled" data-n="15"'),
+    ):
+        assert a in pv
+        pv = pv.replace(a, b, 1)
+    for a in fin["drops"]:
+        pv = pv.replace(f'class="nd" data-c="{a}"', f'class="nd out" data-c="{a}"', 1)
+    after = {r["airport"]: r["hub_countries"] for r in fin["rows"]}
+    frows = "".join(
+        (
+            f'<tr class="out"><td>{r["airport"]}</td><td>[{", ".join(r["hub_countries"])}]</td></tr>'
+            if r["airport"] not in after
+            else f"<tr><td>{r['airport']}</td><td>[{', '.join(c if c in after[r['airport']] else f'<s>{c}</s>' for c in r['hub_countries'])}]</td></tr>"
+        )
+        for r in sp.pulls["baseline_rows"]
+    )
+    # slide 9: the MCP transcript, verbatim lines
+    mcp_md = (ROOT / "evidence" / "mcp-transcript.md").read_text()
+    mcp = json.loads((ROOT / "evidence" / "mcp-transcript.json").read_text())
+    whys = [c for c in mcp["calls"] if c["tool"] == "why"]
+    sec2 = mcp_md.split("## 2. witness `why`")[1].split("## 3.")[0]
+    why_lines = [
+        ln.replace("**", "")
+        for ln in sec2.splitlines()
+        if ln.startswith(("**Answer**", "**Evidence:**", "verified=True"))
+    ]
+    assert len(why_lines) == 3
+    why_html = "".join(
+        _ln(html.escape(x) if not x.startswith("Evidence") else f'<b class="k">{html.escape(x)}</b>') for x in why_lines
+    )
+    sec4 = mcp_md.split("## 4. witness `why`")[1].split("```json")[1].split("```")[0].strip("\n")
+    assert "read-only queries only" in sec4
+    ref_html = _ln(html.escape("// statement: " + whys[1]["arguments"]["statement"])) + "".join(
+        _ln(html.escape(x)) for x in sec4.splitlines()
+    )
+    rec = mcp["recorded"]
+    mcp_utc = datetime.strptime(rec, "%Y-%m-%dT%H:%M:%S%z").astimezone(UTC).strftime("%Y-%m-%d %H:%M UTC")
+    for _code, _, cite in CAPS:
+        assert cite.split(" · ")[0] in readme, f"capability not in README: {cite}"
+    qr = (PARTS / "qr.svg").read_text().strip()
+    assert f'aria-label="QR code: {SITE_URL}/"' in qr, "qr.svg encodes a different URL: regenerate it"
+    det = json.loads((ROOT / "evidence" / "determinism.json").read_text())
+    assert det["byte_identical"] is True
+    p50 = cmp["median_trial_ms_p50"]
+    vals = {
+        "DESC": html.escape(CLAIM),
+        "SITE": SITE_URL,
+        "OGV": og,
+        "CSS": (PARTS / "witness.css").read_text(),
+        "DECK_CSS": (PARTS / "deck.css").read_text(),
+        "W_RELS": w_rels,
+        "SRC_RELS": fmt(src_rels),
+        "SRC_NODES": fmt(src_nodes),
+        "RELEASES": RELEASES,
+        "VERSION": VERSION,
+        "SITE_HOST": host,
+        "COVER_TERM": "".join(cover),
+        "DEMO_UTC": sp.DEMO_HEADER.split(" · ")[0].replace("recorded ", "").replace("T", " ").replace("Z", " UTC"),
+        "DEMO_FILE": sp.demo_path.name,
+        "MAP_SVG": g,
+        "FRAME_PAIRS": fmt(sp.FRAME_COUNTS["pairs"]),
+        "CYPHER": cy,
+        "ANSWER_ROWS": sp.answer_rows(),
+        "TRIALS": trials,
+        "MS_LAST": f"Trial {sp.MILESTONES[-1][0]}: {sp.MILESTONES[-1][2]}, every relationship needed.",
+        "RED_SVG": sp.schematic("d", ghost=True),
+        "TAPE": sp.tape_svg(),
+        "APPLIED": sp.HOLDS.count("1"),
+        "ROLLED": sp.HOLDS.count("0"),
+        "PLAN_DROP": fmt(sp.trace["plan"]["dropped_rels"]),
+        "A_END": sp.MILESTONES[2][0],
+        "A_RELS": sp.MILESTONES[2][1],
+        "PULL_SVG": pv,
+        "FINAL_PULL": 15,
+        "FINAL_ROWS": frows,
+        "FINAL_FX": html.escape(f"Exhibit 15 pulled: {fin['rel']} · {sp.EFFECTS[15]}."),
+        "CAPS": "".join(
+            f'<li><span class="no">{i}</span><div><code>{html.escape(c)}</code><span>{d}</span></div></li>'
+            for i, (c, d, _) in enumerate(CAPS, 1)
+        ),
+        "DET_RUNS": len(det["runs"]) if isinstance(det["runs"], list) else det["runs"],
+        "TESTS": TESTS,
+        "PYTEST": pytest_log.name,
+        "RELATE_TPS": relate_tps,
+        "NEO_TPS": neo_tps,
+        "NEO_V": cmp["neo4j"]["components"][0]["v"],
+        "NEO_W": round(100 * neo_tps / relate_tps, 1),
+        "CMP_RUNS": len(cmp["runs"]),
+        "P50_R": f"{p50['relate_in_process']:.2f}",
+        "P50_N": f"{p50['neo4j_docker']:.2f}",
+        "CMP_MD": cmp_path.with_suffix(".md").name,
+        "WHY_S": whys[0]["seconds"],
+        "MCP_WHY": why_html,
+        "REFUSE_S": whys[1]["seconds"],
+        "MCP_REFUSE": ref_html,
+        "MCP_DATE": mcp_utc,
+        "REPO": REPO,
+        "RUN_NOTE": (
+            "Needs uv. The committed graph is copied, never modified."
+            if REPO_PUBLIC
+            else "Needs uv. The repository opens at submission; until then the clone does not resolve."
+        ),
+        "QR": qr,
+        "DATA": sp.page_json(),
+        "JS": (PARTS / "deck.js").read_text(),
+    }
+    out = fill((PARTS / "deck.html").read_text(), vals)
+    n = [0]
+
+    def foot(m):
+        n[0] += 1
+        return f'<div class="pfoot"><span><b>Witness</b> · v{VERSION} · {host}</span><span>{n[0]} / 10</span></div>\n</section>'
+
+    out = re.sub(r"</section>", foot, out)
+    assert n[0] == 10, "deck must have 10 slides"
+    return out
+
+
 SITE.mkdir(exist_ok=True)
 (SITE / "exhibit").mkdir(exist_ok=True)
 # the served copy gets a way back home; the committed witnesses/two-hub.html stays byte-identical to what `witness` wrote
@@ -244,6 +410,8 @@ served = served.replace(
 (SITE / "exhibit" / "two-hub.html").write_text(served)
 page = landing_page()
 (SITE / "index.html").write_text(page)
+(SITE / "deck").mkdir(exist_ok=True)
+(SITE / "deck" / "index.html").write_text(deck_page())
 # favicon + social card: the judge-facing media from docs/assets (synced from the asset pipeline)
 for name in ("icon.svg", "og-image.png"):
     shutil.copyfile(ROOT / "docs" / "assets" / name, SITE / name)

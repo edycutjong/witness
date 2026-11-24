@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Witness · pitch deck</title>
+<meta name="description" content="{{DESC}}">
+<meta name="theme-color" content="#F2E8D5">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="canonical" href="{{SITE}}/deck/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Witness">
+<meta property="og:title" content="Witness · pitch deck">
+<meta property="og:description" content="{{DESC}}">
+<meta property="og:url" content="{{SITE}}/deck/">
+<meta property="og:image" content="{{SITE}}/og-image.png?v={{OGV}}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Witness: 57,645 relationships reduced to 22, each tagged as an exhibit; 22 of 22 change the answer">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{{SITE}}/og-image.png?v={{OGV}}">
+<link rel="preload" href="/fonts/old-standard-tt-700.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+{{CSS}}
+{{DECK_CSS}}
+</style>
+</head>
+<body>
+<main class="viewport" id="viewport">
+<div class="stage" id="stage">
+
+<section class="frame s1" data-n="1" aria-label="Slide 1 of 10: cover">
+  <div class="cover-copy">
+    <p class="lbl">Relate by Neo4j hackathon</p>
+    <h1>Witness cross-examines the graph until <em>only the evidence remains.</em></h1>
+    <p class="big-sub">{{W_RELS}} of {{SRC_RELS}} relationships, each proven needed.</p>
+    <p class="cover-meta"><img src="/icon.svg" alt="" width="64" height="64"><a class="chip" id="ver" href="{{RELEASES}}" aria-label="Latest release">v{{VERSION}}</a></p>
+  </div>
+  <figure class="term cover-term">
+    <div class="bar"><i></i><i></i><i></i><span>uv run witness demo</span></div>
+    <pre>{{COVER_TERM}}</pre>
+    <figcaption class="t-cap data">Recorded {{DEMO_UTC}} · <code>evidence/{{DEMO_FILE}}</code> · lines selected, order kept</figcaption>
+  </figure>
+  <aside class="notes">Open on the claim: Witness takes a graph-backed answer and hands back only the relationships it rests on. The terminal is the real run a judge gets from one command; the numbers on every slide come from files in the repository.</aside>
+</section>
+
+<section class="frame s2" data-n="2" aria-label="Slide 2 of 10: the problem">
+  <div class="s2-copy">
+    <p class="lbl">The problem</p>
+    <h2>Graph answers are taken <em>on trust.</em></h2>
+    <p class="body">A reviewer cannot read {{SRC_RELS}} relationships. “Show the path” is not enough either: a path can include relationships that change nothing.</p>
+  </div>
+  <div class="s2-map">{{MAP_SVG}}<p class="map-cap data">{{SRC_RELS}} relationships · {{SRC_NODES}} nodes · air-routes, drawn: {{FRAME_PAIRS}} airport pairs in frame</p></div>
+  <aside class="notes">The agent answers from the whole graph. A path view still mixes relationships that matter with ones that do not, so a reviewer has nothing small enough to check. This is the pain Witness removes.</aside>
+</section>
+
+<section class="frame s3" data-n="3" aria-label="Slide 3 of 10: the question">
+  <div class="s3-head">
+    <p class="lbl">The question <span>·</span> <code>queries/two-hub.cypher</code></p>
+    <h2>One question, <em>three hard parts.</em></h2>
+    <p class="chips"><span class="chip">NOT EXISTS</span><span class="chip">OPTIONAL MATCH</span><span class="chip">aggregation</span></p>
+  </div>
+  <pre class="cy">{{CYPHER}}</pre>
+  <div class="s3-ans">
+    <p class="lbl">The answer <span>·</span> full graph</p>
+    <table class="ans-t"><thead><tr><th scope="col">airport</th><th scope="col">hub_countries</th></tr></thead><tbody>{{ANSWER_ROWS}}</tbody></table>
+  </div>
+  <aside class="notes">Not a plain MATCH, where the matched path already is the explanation. The answer depends on an absence (no direct flight), on an optional match and on a count, so the evidence is not visible in any single path.</aside>
+</section>
+
+<section class="frame s4" data-n="4" data-steps="3" aria-label="Slide 4 of 10: the reduction">
+  <div class="s4-head">
+    <p class="lbl">The reduction <span>·</span> from the trace</p>
+    <h2>Delete, re-run, roll back. <em>{{TRIALS}} trials.</em></h2>
+    <div class="s4-ctr">
+      <div><span class="lbl">Relationships</span><b class="data kept" id="d-rels">{{W_RELS}}</b></div>
+      <div><span class="lbl">Trial</span><b class="data" id="d-trial">{{TRIALS}}</b></div>
+    </div>
+    <p class="s4-note data" id="d-note">{{MS_LAST}}</p>
+  </div>
+  <div class="s4-draw" id="d-draw">{{RED_SVG}}<div class="d-tape" id="d-tape">{{TAPE}}</div>
+    <p class="map-cap data">Tall tick: answer kept, deletion applied ({{APPLIED}}). Short: answer changed, rolled back ({{ROLLED}}).</p></div>
+  <aside class="notes">Press → to step. Trial 2 is the EXPLAIN plan: :ON_CONTINENT is unreachable, so {{PLAN_DROP}} relationships go at once. By trial {{A_END}} only {{A_RELS}} remain. The last trials test single relationships until every one left is needed: {{W_RELS}}. The fading map is the real frame, faded for the eye; the counters are the trace.</aside>
+</section>
+
+<section class="frame s5" data-n="5" data-steps="4" aria-label="Slide 5 of 10: pull a tag">
+  <div class="s5-head">
+    <p class="lbl">Exhibit A <span>·</span> pull a tag</p>
+    <h2>Pull any tag. <em>The answer moves.</em></h2>
+  </div>
+  <div class="s5-draw" id="p-draw">{{PULL_SVG}}</div>
+  <div class="s5-ans">
+    <div class="s5-ahead"><span class="lbl">Answer with exhibit <b id="p-n">{{FINAL_PULL}}</b> pulled</span><span class="stamp ink small" id="p-mark">Changed</span></div>
+    <table class="ans-t"><thead><tr><th scope="col">airport</th><th scope="col">hub_countries</th></tr></thead><tbody id="p-rows">{{FINAL_ROWS}}</tbody></table>
+    <p class="s5-fx data" id="p-fx">{{FINAL_FX}}</p>
+    <span class="stamp red s5-stamp" id="p-stamp">{{W_RELS}} of {{W_RELS}} change the answer</span>
+  </div>
+  <aside class="notes">Each pull is a recorded trial: that one relationship deleted in a Relate transaction on a copy of the witness, the query re-run, rolled back (evidence/pull-each-tag.json). Exhibit 9 is a route; exhibit 4 is DFW's country, and the answer keeps four rows but loses US twice; exhibit 15 takes three airports out. Every one of the {{W_RELS}} changes the answer.</aside>
+</section>
+
+<section class="frame s6" data-n="6" aria-label="Slide 6 of 10: Relate is the engine">
+  <div class="s6-head">
+    <p class="lbl">Relate is the engine</p>
+    <h2>Remove Relate and the loop has <em>nothing to run on.</em></h2>
+  </div>
+  <ol class="caps">{{CAPS}}</ol>
+  <aside class="notes">Eight Relate capabilities, each in a named file. The inner loop is Relate's own transactions; Relate's query_type decides what is read-only; its EXPLAIN plan prunes; the single-file .rl is the evidence format; relate query on the CLI re-checks every probe independently.</aside>
+</section>
+
+<section class="frame s7" data-n="7" aria-label="Slide 7 of 10: the proof">
+  <div class="s7-head">
+    <p class="lbl">The proof</p>
+    <h2>Checked twice, <em>on two surfaces.</em></h2>
+  </div>
+  <div class="proofs">
+    <div class="pf"><b><em>{{W_RELS}}</em> of {{W_RELS}}</b><span>change the answer, on relate-db and on the Relate CLI</span></div>
+    <div class="pf"><b>{{DET_RUNS}} runs</b><span>byte-identical witness from the same query and seed</span></div>
+    <div class="pf"><b>{{TESTS}} · 100%</b><span>tests on real Relate · line and branch coverage</span></div>
+  </div>
+  <p class="src data"><code>witnesses/two-hub.manifest.json</code> · <code>evidence/determinism.json</code> · <code>evidence/{{PYTEST}}</code></p>
+  <aside class="notes">witness check re-proves sufficiency and every necessity probe on the Python API and again through the Relate CLI. Determinism is claimed only because two runs gave byte-identical files. The test suite runs on real Relate; relate pull is stood in because it needs a Neo4j server.</aside>
+</section>
+
+<section class="frame s8" data-n="8" aria-label="Slide 8 of 10: speed">
+  <div class="s8-head">
+    <p class="lbl">Speed</p>
+    <h2>Same loop, <em>two engines.</em></h2>
+  </div>
+  <div class="bars">
+    <div class="br"><span>Relate, in-process</span><i style="--w:100%"></i><b class="data">{{RELATE_TPS}}</b></div>
+    <div class="br"><span>Neo4j {{NEO_V}}, Docker</span><i style="--w:{{NEO_W}}%"></i><b class="data">{{NEO_TPS}}</b></div>
+    <p class="unit data">trials/s · median of {{CMP_RUNS}} runs · one machine</p>
+  </div>
+  <p class="p50"><span class="lbl">p50 trial</span><b class="data">{{P50_R}} ms</b><span class="vs">vs</span><b class="data">{{P50_N}} ms</b></p>
+  <p class="caveat">An embedded engine against a server in Docker over the network: this says nothing about Neo4j's query engine.</p>
+  <aside class="notes">Same rollback-trial loop, same query, identical answers per trial on both sides. Throughput includes each side's count check; the p50 latency from begin to rollback excludes it on both. Method and raw rows: evidence/{{CMP_MD}}.</aside>
+</section>
+
+<section class="frame s9" data-n="9" aria-label="Slide 9 of 10: for agents">
+  <div class="s9-head">
+    <p class="lbl">For agents <span>·</span> MCP</p>
+    <h2>An agent asks why, <em>and gets the evidence.</em></h2>
+  </div>
+  <figure class="term mcp m1">
+    <div class="bar"><span>witness · why</span><span class="sec">{{WHY_S}} s</span></div>
+    <pre>{{MCP_WHY}}</pre>
+  </figure>
+  <figure class="term mcp m2">
+    <div class="bar"><span>witness · why · a write</span><span class="sec">{{REFUSE_S}} s</span></div>
+    <pre>{{MCP_REFUSE}}</pre>
+  </figure>
+  <p class="src data">Verbatim from <code>evidence/mcp-transcript.md</code> · scripted MCP client, no model in the loop · recorded {{MCP_DATE}}</p>
+  <aside class="notes">The agent sends its own question and answer to the why tool and gets the witness back, verified. A write statement is refused before anything runs. The check tool re-proves a witness file on demand.</aside>
+</section>
+
+<section class="frame s10" data-n="10" aria-label="Slide 10 of 10: run it">
+  <div class="s10-copy">
+    <p class="lbl">Run it</p>
+    <h2>File the evidence, <em>not the whole house.</em></h2>
+    <pre class="cmd10">git clone {{REPO}}
+cd witness &amp;&amp; uv run witness demo</pre>
+    <p class="fine10">{{RUN_NOTE}}</p>
+    <ul class="links"><li><a href="/judge/">/judge</a> the 30-second path</li><li><a href="/exhibit/two-hub.html">/exhibit</a> the register</li></ul>
+    <ul class="lims"><li>Deletion-minimal, not smallest.</li><li>One headline graph and query.</li></ul>
+  </div>
+  <figure class="qr-card">{{QR}}<figcaption class="data">{{SITE_HOST}}</figcaption></figure>
+  <aside class="notes">One command on a fresh clone runs the whole flow against the committed graph. The landing page has the interactive exhibit; /judge has the receipts and the honest limits in one page.</aside>
+</section>
+
+<footer class="deck-foot" aria-label="Deck footer"><span><b>Witness</b> · <a class="chip vchip" href="{{RELEASES}}">v{{VERSION}}</a> · {{SITE_HOST}}</span><span class="data" id="count">1 / 10</span></footer>
+</div>
+</main>
+<nav class="ctl" aria-label="Deck controls">
+  <button type="button" id="prev" aria-label="Previous slide">←</button>
+  <button type="button" id="next" aria-label="Next slide">→</button>
+  <button type="button" id="ovb" aria-pressed="false">Overview <kbd>O</kbd></button>
+  <button type="button" id="ntb" aria-pressed="false">Notes <kbd>N</kbd></button>
+  <a href="/">Landing</a>
+</nav>
+<div class="notes-panel" id="notes" aria-live="polite" hidden></div>
+<script type="application/json" id="wdata">{{DATA}}</script>
+<script>
+{{JS}}
+</script>
+</body>
+</html>

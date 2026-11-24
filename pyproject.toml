@@ -7,7 +7,7 @@ license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.11"
 dependencies = [
-    "relate-db==1.0.1",
+    "relate-db==1.2.0",
 ]
 
 [project.optional-dependencies]
@@ -24,7 +24,7 @@ dev = [
     "pip-audit>=2.10.1",
     "pytest>=8",
     "pytest-cov>=7.1.0",
-    "ruff>=0.6",
+    "ruff>=0.17.6",
 ]
 
 [build-system]

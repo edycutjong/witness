@@ -235,7 +235,11 @@ h1{font-size:clamp(40px,4.2vw,60px);line-height:1.03;max-width:none}
 .reg-stamp{display:inline-block;margin-top:18px;font-size:15px}
 .js .reg-stamp:not(.on){opacity:0}
 .reg-stamp.on{opacity:1;animation:flip .35s cubic-bezier(.2,1.6,.4,1)}
-.ex-src{font-size:12.5px;color:var(--muted);margin-top:30px}
+.ex-src{font-size:12.5px;color:var(--muted);margin-top:18px}
+.ex-right .lede{margin:0 0 26px}
+.ex-ahead{padding-right:8px}
+.run .term pre{white-space:pre-wrap;overflow-wrap:anywhere}.run .term .ln{padding-left:4ch;text-indent:-4ch}
+h1,h2{text-wrap:balance}
 
 .run .lbl,.close .fine,.close .src-pending,.run .shot figcaption{color:#5A5044}
 .b1-tape{display:grid;gap:6px;margin-top:6px}.b1-tape .tape{height:34px}.b1-tape .data{font-size:12.5px;color:var(--muted)}
@@ -349,7 +353,7 @@ h1{font-size:clamp(40px,4.2vw,60px);line-height:1.03;max-width:none}
   .cmd code{font-size:13px}
   .foot-in{flex-direction:column}
 }
-@media (max-width:420px){.rc b{white-space:normal;font-size:28px}.cmd{flex-wrap:wrap}.cmd code{white-space:normal;overflow-wrap:anywhere}.top nav .nav-strong:first-of-type{display:none}.brand span{font-size:20px}}
+@media (max-width:420px){.hero-in>*,.ex-grid>*{min-width:0}.reg-stamp,.slam{font-size:11px;letter-spacing:.12em;white-space:normal;max-width:100%}.rc b{white-space:normal;font-size:28px}.cmd{flex-wrap:wrap}.cmd code{white-space:normal;overflow-wrap:anywhere}.top nav .nav-strong:first-of-type{display:none}.brand span{font-size:20px}}
 @media print{body::after{display:none}.top{position:static}.replay,.t-play,.copy,#pull-all{display:none}.term pre{max-height:none}.reg-stamp{opacity:1}*{transition:none!important;animation:none!important}}
 
 </style>
@@ -468,7 +472,6 @@ h1{font-size:clamp(40px,4.2vw,60px);line-height:1.03;max-width:none}
   <div class="wrap">
     <p class="lbl">Exhibit A <span>·</span> pull a tag</p>
     <h2 id="ex-h">Pull any tag. <em>The answer moves.</em></h2>
-    <p class="lede">The agent's question: <q>Which airports of MX have no direct flight to MEX, yet would still reach it in two flights if any one hub closed?</q> The answer is four airports. Each red tag is one relationship of the witness; pull it to see what Relate returned without it.</p>
     <div class="ex-grid">
       <div class="ex-left">
         <div class="ex-draw"><svg class="inst" viewBox="56 22 552 312" role="img" aria-labelledby="x-t">
@@ -523,6 +526,7 @@ h1{font-size:clamp(40px,4.2vw,60px);line-height:1.03;max-width:none}
         </div>
       </div>
       <div class="ex-right">
+        <p class="lede">The agent's question: <q>Which airports of MX have no direct flight to MEX, yet would still reach it in two flights if any one hub closed?</q> The answer is four airports. Each red tag is one relationship of the witness; pull it to see what Relate returned without it.</p>
         <div class="reg-head"><span class="lbl">The register</span><span class="lbl">pull it and</span></div>
         <ol class="reg" id="reg"><li data-n="1"><button type="button" class="pull" data-n="1" aria-pressed="false"><span class="no">1</span><code>(ACA)-[:HAS_ROUTE]-&gt;(MEX)</code><span class="fx">TLC drops out</span></button></li>
 <li data-n="2"><button type="button" class="pull" data-n="2" aria-pressed="false"><span class="no">2</span><code>(ACA)-[:IN_COUNTRY]-&gt;(MX)</code><span class="fx">TLC loses MX</span></button></li>
@@ -752,11 +756,11 @@ h1{font-size:clamp(40px,4.2vw,60px);line-height:1.03;max-width:none}
     file.classList.add("armed");
     place(0); setTrial(0);
     // trial 1–2: the empty-graph sanity trial, then the EXPLAIN plan step
-    later(700, function () { setTrial(MS[1][0]); note.classList.add("on"); });
+    later(450, function () { setTrial(MS[1][0]); note.classList.add("on"); });
     // trials 3..end of the node pass: the map thins, far from MEX first
-    var a0 = MS[1][0], a1 = MS[2][0], t0 = 1500, t1 = 4300;
+    var a0 = MS[1][0], a1 = MS[2][0], t0 = 1000, t1 = 3000;
     later(t0, function () { note.classList.remove("on"); });
-    [0, 1, 2, 3].forEach(function (i) { later(t0 + i * 650, function () { var w = $('.wave[data-w="' + i + '"]', hero); if (w) w.classList.add("gone"); }); });
+    [0, 1, 2, 3].forEach(function (i) { later(t0 + i * 450, function () { var w = $('.wave[data-w="' + i + '"]', hero); if (w) w.classList.add("gone"); }); });
     var start = 0;
     function stepA(ts) {
       if (!start) start = ts;
@@ -766,21 +770,21 @@ h1{font-size:clamp(40px,4.2vw,60px);line-height:1.03;max-width:none}
     }
     later(t0, function () { start = 0; raf = requestAnimationFrame(stepA); });
     // trials after the node pass: the 13 routes light, one by one
-    var b1 = N, t2 = t1 + 1300;
+    var b1 = N, t2 = t1 + 900;
     later(t1, function () {
       var s2 = 0;
       (function stepB(ts) { if (!s2) s2 = ts; var f = Math.min(1, (ts - s2) / (t2 - t1)); setTrial(Math.round(a1 + (b1 - a1) * f)); if (f < 1) raf = requestAnimationFrame(stepB); })(performance.now());
-      $$(".ed", hero).forEach(function (e, i) { later(i * 80, function () { e.classList.add("lit"); }); });
+      $$(".ed", hero).forEach(function (e, i) { later(i * 55, function () { e.classList.add("lit"); }); });
     });
     // move into the exhibit layout, label, tag, stamp
-    later(t2 + 150, function () {
-      var s3 = 0, dur = 1100;
+    later(t2 + 100, function () {
+      var s3 = 0, dur = 900;
       (function morph(ts) { if (!s3) s3 = ts; var f = Math.min(1, (ts - s3) / dur); place(ease(f)); if (f < 1) raf = requestAnimationFrame(morph); })(performance.now());
     });
-    later(t2 + 1000, function () { $$(".lb", hero).forEach(function (l) { l.classList.add("on"); }); });
-    $$(".tg", hero).forEach(function (g, i) { later(t2 + 1350 + i * 70, function () { g.classList.add("on"); }); });
-    later(t2 + 2450, function () { slam.classList.add("on"); });
-    later(t2 + 3300, function () { file.classList.remove("armed"); $$(".lb, .tg, .ed", hero).forEach(function (x) { x.classList.remove("on", "lit"); }); slam.classList.remove("on"); });
+    later(t2 + 800, function () { $$(".lb", hero).forEach(function (l) { l.classList.add("on"); }); });
+    $$(".tg", hero).forEach(function (g, i) { later(t2 + 1050 + i * 60, function () { g.classList.add("on"); }); });
+    later(t2 + 1950, function () { slam.classList.add("on"); });
+    later(t2 + 2700, function () { file.classList.remove("armed"); $$(".lb, .tg, .ed", hero).forEach(function (x) { x.classList.remove("on", "lit"); }); slam.classList.remove("on"); });
   }
   if (file && hero) {
     document.getElementById("play").addEventListener("click", play);

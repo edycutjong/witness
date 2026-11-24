@@ -76,11 +76,11 @@
     file.classList.add("armed");
     place(0); setTrial(0);
     // trial 1–2: the empty-graph sanity trial, then the EXPLAIN plan step
-    later(700, function () { setTrial(MS[1][0]); note.classList.add("on"); });
+    later(450, function () { setTrial(MS[1][0]); note.classList.add("on"); });
     // trials 3..end of the node pass: the map thins, far from MEX first
-    var a0 = MS[1][0], a1 = MS[2][0], t0 = 1500, t1 = 4300;
+    var a0 = MS[1][0], a1 = MS[2][0], t0 = 1000, t1 = 3000;
     later(t0, function () { note.classList.remove("on"); });
-    [0, 1, 2, 3].forEach(function (i) { later(t0 + i * 650, function () { var w = $('.wave[data-w="' + i + '"]', hero); if (w) w.classList.add("gone"); }); });
+    [0, 1, 2, 3].forEach(function (i) { later(t0 + i * 450, function () { var w = $('.wave[data-w="' + i + '"]', hero); if (w) w.classList.add("gone"); }); });
     var start = 0;
     function stepA(ts) {
       if (!start) start = ts;
@@ -90,21 +90,21 @@
     }
     later(t0, function () { start = 0; raf = requestAnimationFrame(stepA); });
     // trials after the node pass: the 13 routes light, one by one
-    var b1 = N, t2 = t1 + 1300;
+    var b1 = N, t2 = t1 + 900;
     later(t1, function () {
       var s2 = 0;
       (function stepB(ts) { if (!s2) s2 = ts; var f = Math.min(1, (ts - s2) / (t2 - t1)); setTrial(Math.round(a1 + (b1 - a1) * f)); if (f < 1) raf = requestAnimationFrame(stepB); })(performance.now());
-      $$(".ed", hero).forEach(function (e, i) { later(i * 80, function () { e.classList.add("lit"); }); });
+      $$(".ed", hero).forEach(function (e, i) { later(i * 55, function () { e.classList.add("lit"); }); });
     });
     // move into the exhibit layout, label, tag, stamp
-    later(t2 + 150, function () {
-      var s3 = 0, dur = 1100;
+    later(t2 + 100, function () {
+      var s3 = 0, dur = 900;
       (function morph(ts) { if (!s3) s3 = ts; var f = Math.min(1, (ts - s3) / dur); place(ease(f)); if (f < 1) raf = requestAnimationFrame(morph); })(performance.now());
     });
-    later(t2 + 1000, function () { $$(".lb", hero).forEach(function (l) { l.classList.add("on"); }); });
-    $$(".tg", hero).forEach(function (g, i) { later(t2 + 1350 + i * 70, function () { g.classList.add("on"); }); });
-    later(t2 + 2450, function () { slam.classList.add("on"); });
-    later(t2 + 3300, function () { file.classList.remove("armed"); $$(".lb, .tg, .ed", hero).forEach(function (x) { x.classList.remove("on", "lit"); }); slam.classList.remove("on"); });
+    later(t2 + 800, function () { $$(".lb", hero).forEach(function (l) { l.classList.add("on"); }); });
+    $$(".tg", hero).forEach(function (g, i) { later(t2 + 1050 + i * 60, function () { g.classList.add("on"); }); });
+    later(t2 + 1950, function () { slam.classList.add("on"); });
+    later(t2 + 2700, function () { file.classList.remove("armed"); $$(".lb, .tg, .ed", hero).forEach(function (x) { x.classList.remove("on", "lit"); }); slam.classList.remove("on"); });
   }
   if (file && hero) {
     document.getElementById("play").addEventListener("click", play);

@@ -138,6 +138,8 @@ body{overflow:hidden;background:#D9CBAE}
 .s1-top{grid-column:1/-1}
 .s1 h1{font-size:96px;line-height:1.06;max-width:none;margin:22px 0 0}
 .big-sub{font:400 38px/1.35 var(--font-body);margin:16px 0 0;color:#2C241C}
+.s1-lbl{display:flex;align-items:center;gap:18px}.s1-lbl img{border-radius:11px;box-shadow:0 8px 20px -10px rgba(31,26,20,.45)}.s1-lbl .chip{font-size:18px;padding:7px 12px;letter-spacing:0;text-transform:none;margin-left:6px}
+.cover-ex{margin-top:22px;background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:14px 20px;box-shadow:var(--shadow)}.cover-ex .inst{width:100%;height:auto}
 .cover-meta{display:flex;align-items:center;gap:22px;margin:34px 0 0}
 .cover-meta img{border-radius:14px;box-shadow:0 10px 26px -10px rgba(31,26,20,.45)}
 .cover-meta .chip{font-size:20px;padding:8px 14px}
@@ -300,12 +302,53 @@ body.ov .frame.on{box-shadow:0 0 0 10px var(--ink)}
 
 <section class="frame s1" data-n="1" aria-label="Slide 1 of 10: cover">
   <div class="s1-top">
-    <p class="lbl">Relate by Neo4j hackathon</p>
+    <p class="lbl s1-lbl"><img src="/icon.svg" alt="" width="48" height="48">Relate by Neo4j hackathon<a class="chip" id="ver" href="https://github.com/edycutjong/witness/releases/latest" title="Latest release">v0.1.0</a></p>
     <h1>Witness cross-examines the graph until <em>only the evidence remains.</em></h1>
   </div>
   <div class="cover-copy">
     <p class="big-sub">22 of 57,645 relationships, each proven needed.</p>
-    <p class="cover-meta"><img src="/icon.svg" alt="" width="64" height="64"><a class="chip" id="ver" href="https://github.com/edycutjong/witness/releases/latest" title="Latest release">v0.1.0</a></p>
+    <div class="cover-ex"><svg class="inst" viewBox="56 22 552 312" role="img" aria-labelledby="c-t">
+<title id="c-t">The witness: 22 relationships among 12 nodes (10 airports, 2 countries), each tagged with its exhibit number</title>
+<g class="edges">
+<path class="ed" data-n="1" data-s="ACA" data-e="MEX" d="M336.0 312.0Q445.9 258.2 540.0 180.0"/>
+<path class="ed" data-n="3" data-s="DFW" data-e="MEX" d="M336.0 180.0Q438.0 192.2 540.0 180.0"/>
+<path class="ed" data-n="5" data-s="LAS" data-e="MEX" d="M336.0 246.0Q442.0 225.2 540.0 180.0"/>
+<path class="ed" data-n="7" data-s="LAX" data-e="MEX" d="M336.0 48.0Q430.1 126.2 540.0 180.0"/>
+<path class="ed" data-n="9" data-s="PBC" data-e="DFW" d="M118.0 220.0Q229.4 213.1 336.0 180.0"/>
+<path class="ed" data-n="10" data-s="PBC" data-e="TIJ" d="M118.0 220.0Q233.4 180.1 336.0 114.0"/>
+<path class="ed" data-n="12" data-s="QRO" data-e="DFW" d="M118.0 148.0Q225.1 177.1 336.0 180.0"/>
+<path class="ed" data-n="13" data-s="QRO" data-e="TIJ" d="M118.0 148.0Q229.0 144.1 336.0 114.0"/>
+<path class="ed" data-n="15" data-s="TIJ" data-e="MEX" d="M336.0 114.0Q434.0 159.2 540.0 180.0"/>
+<path class="ed" data-n="17" data-s="TLC" data-e="ACA" d="M118.0 292.0Q225.8 315.1 336.0 312.0"/>
+<path class="ed" data-n="18" data-s="TLC" data-e="LAS" d="M118.0 292.0Q229.8 282.1 336.0 246.0"/>
+<path class="ed" data-n="20" data-s="UPN" data-e="LAX" d="M118.0 76.0Q228.7 75.1 336.0 48.0"/>
+<path class="ed" data-n="21" data-s="UPN" data-e="TIJ" d="M118.0 76.0Q224.7 108.1 336.0 114.0"/>
+</g><g class="nodes">
+<g class="nd" data-c="UPN" transform="translate(118 76)"><circle r="5"/><text class="lb" x="-14" y="6" text-anchor="end">UPN<tspan class="cc" data-n="22" dx="5">MX</tspan></text></g>
+<g class="nd" data-c="QRO" transform="translate(118 148)"><circle r="5"/><text class="lb" x="-14" y="6" text-anchor="end">QRO<tspan class="cc" data-n="14" dx="5">MX</tspan></text></g>
+<g class="nd" data-c="PBC" transform="translate(118 220)"><circle r="5"/><text class="lb" x="-14" y="6" text-anchor="end">PBC<tspan class="cc" data-n="11" dx="5">MX</tspan></text></g>
+<g class="nd" data-c="TLC" transform="translate(118 292)"><circle r="5"/><text class="lb" x="-14" y="6" text-anchor="end">TLC<tspan class="cc" data-n="19" dx="5">MX</tspan></text></g>
+<g class="nd" data-c="LAX" transform="translate(336 48)"><circle r="5"/><text class="lb" x="0" y="-14" text-anchor="middle">LAX<tspan class="cc" data-n="8" dx="5">US</tspan></text></g>
+<g class="nd" data-c="TIJ" transform="translate(336 114)"><circle r="5"/><text class="lb" x="0" y="-14" text-anchor="middle">TIJ<tspan class="cc" data-n="16" dx="5">MX</tspan></text></g>
+<g class="nd" data-c="DFW" transform="translate(336 180)"><circle r="5"/><text class="lb" x="0" y="-14" text-anchor="middle">DFW<tspan class="cc" data-n="4" dx="5">US</tspan></text></g>
+<g class="nd" data-c="LAS" transform="translate(336 246)"><circle r="5"/><text class="lb" x="0" y="-14" text-anchor="middle">LAS<tspan class="cc" data-n="6" dx="5">US</tspan></text></g>
+<g class="nd" data-c="ACA" transform="translate(336 312)"><circle r="5"/><text class="lb" x="0" y="-14" text-anchor="middle">ACA<tspan class="cc" data-n="2" dx="5">MX</tspan></text></g>
+<g class="nd" data-c="MEX" transform="translate(540 180)"><circle r="5"/><text class="lb" x="14" y="6" text-anchor="start">MEX</text></g>
+</g><g class="tags">
+<g class="tg" data-n="1" transform="translate(442.0 252.1)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">1</text></g>
+<g class="tg" data-n="3" transform="translate(438.0 186.1)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">3</text></g>
+<g class="tg" data-n="5" transform="translate(440.0 219.1)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">5</text></g>
+<g class="tg" data-n="7" transform="translate(434.0 120.1)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">7</text></g>
+<g class="tg" data-n="9" transform="translate(197.6 211.6)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">9</text></g>
+<g class="tg" data-n="10" transform="translate(199.4 187.9)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">10</text></g>
+<g class="tg" data-n="12" transform="translate(195.6 165.5)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">12</text></g>
+<g class="tg" data-n="13" transform="translate(197.4 141.8)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">13</text></g>
+<g class="tg" data-n="15" transform="translate(436.0 153.1)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">15</text></g>
+<g class="tg" data-n="17" transform="translate(195.9 305.2)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">17</text></g>
+<g class="tg" data-n="18" transform="translate(197.8 281.5)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">18</text></g>
+<g class="tg" data-n="20" transform="translate(197.3 71.9)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">20</text></g>
+<g class="tg" data-n="21" transform="translate(195.4 95.7)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">21</text></g>
+</g></svg></div>
   </div>
   <figure class="term cover-term">
     <div class="bar"><i></i><i></i><i></i><span>uv run witness demo</span></div>
@@ -488,8 +531,8 @@ ORDER BY airport</pre>
     <h2>Remove Relate and the loop has <em>nothing to run on.</em></h2>
   </div>
   <div class="caps-lead"><span class="no">1</span><code>begin_transaction · rollback_transaction</code><span>the inner loop: 371 trials in the headline run</span></div>
-  <ol class="caps"><li class="big"><span class="no">2</span><code>QueryResult.query_type</code><span>refuse writes</span></li><li class="big"><span class="no">3</span><code>EXPLAIN</code><span>prune unreachable types</span></li><li class="big"><span class="no">4</span><code>read_only=True</code><span>reruns cannot write</span></li><li class="sm"><span class="no">5</span><code>single-file .rl</code><span>the evidence format</span></li><li class="sm"><span class="no">6</span><code>relate pull</code><span>fixture mode</span></li><li class="sm"><span class="no">7</span><code>relate query --mode json</code><span>independent re-check</span></li><li class="sm"><span class="no">8</span><code>MCP · why · check</code><span>agents ask why</span></li></ol>
-  <aside class="notes">Eight Relate capabilities, each in a named file. The inner loop is Relate's own transactions; Relate's query_type must report read-only after Witness's own token check; names from the query and its EXPLAIN plan prune; the single-file .rl is the evidence format; relate query on the CLI re-checks every probe independently.</aside>
+  <ol class="caps"><li class="big"><span class="no">2</span><code>QueryResult.query_type</code><span>refuse writes</span></li><li class="big"><span class="no">3</span><code>EXPLAIN</code><span>prune unreachable types</span></li><li class="big"><span class="no">4</span><code>read_only=True</code><span>reruns cannot write</span></li><li class="sm"><span class="no">5</span><code>single-file .rl</code><span>the evidence format</span></li><li class="sm"><span class="no">6</span><code>relate pull</code><span>fixture mode</span></li><li class="sm"><span class="no">7</span><code>relate query --mode json</code><span>independent re-check</span></li><li class="sm"><span class="no">8</span><code>MCP · why · check</code><span>Witness's own tools, beside relate serve --mcp</span></li></ol>
+  <aside class="notes">Seven Relate capabilities plus Witness's own MCP tools beside Relate's MCP server; the README names the file that uses each. The inner loop is Relate's own transactions; Relate's query_type must report read-only after Witness's own token check; names from the query and its EXPLAIN plan prune; the single-file .rl is the evidence format; relate query on the CLI re-checks every probe independently.</aside>
 <div class="pfoot"><span><b>Witness</b> · v0.1.0 · witness-wheat.vercel.app</span><span>6 / 10</span></div>
 </section>
 
@@ -500,10 +543,10 @@ ORDER BY airport</pre>
   </div>
   <div class="proofs">
     <div class="pf"><b><em>22</em><i>of</i>22</b><span>change the answer, on relate-db and on the Relate CLI</span><code>witnesses/two-hub.manifest.json</code></div>
-    <div class="pf"><b>2<i>runs</i></b><span>byte-identical witness from the same query and seed</span><code>evidence/determinism.json</code></div>
+    <div class="pf"><b>2<i>runs</i></b><span>byte-identical rebuild script (.cypher) from the same query and seed</span><code>evidence/determinism.json</code></div>
     <div class="pf"><b>499</b><span>tests on real Relate, 100% line and branch coverage</span><code>evidence/pytest-2026-11-24.txt</code></div>
   </div>
-  <aside class="notes">witness check re-proves sufficiency and every necessity probe on the Python API and again through the Relate CLI. Determinism is claimed only because two runs gave byte-identical files. The test suite runs on real Relate; relate pull is stood in because it needs a Neo4j server.</aside>
+  <aside class="notes">witness check re-proves sufficiency and every necessity probe on the Python API and again through the Relate CLI. Determinism is claimed only because two runs gave a byte-identical .cypher rebuild script. The test suite runs on real Relate; relate pull is stood in because it needs a Neo4j server.</aside>
 <div class="pfoot"><span><b>Witness</b> · v0.1.0 · witness-wheat.vercel.app</span><span>7 / 10</span></div>
 </section>
 
@@ -540,7 +583,7 @@ ORDER BY airport</pre>
     <div class="bar"><span>witness · why · a write</span><span class="sec">1.076 s</span></div>
     <pre><span class="ln">// statement: MATCH (a:Airport) DETACH DELETE a RETURN 1</span><span class="ln">{</span><span class="ln">  &quot;error&quot;: {</span><span class="ln">    &quot;kind&quot;: &quot;query&quot;,</span><span class="ln">    &quot;message&quot;: &quot;write keyword DETACH (read-only queries only)&quot;</span><span class="ln">  },</span><span class="ln">  &quot;verified&quot;: false</span><span class="ln">}</span></pre>
   </figure>
-  <p class="src data">Verbatim from <code>evidence/mcp-transcript.md</code> · scripted MCP client, no model in the loop · recorded 2026-11-23 02:54 UTC</p>
+  <p class="src data">Excerpted from <code>evidence/mcp-transcript.md</code> (statement line from <code>mcp-transcript.json</code>; exhibit list omitted) · scripted MCP client, no model in the loop · recorded 2026-11-23 02:54 UTC</p>
   <aside class="notes">The agent sends its own question and answer to the why tool and gets the witness back, verified. A write statement is refused before anything runs. The check tool re-proves a witness file on demand.</aside>
 <div class="pfoot"><span><b>Witness</b> · v0.1.0 · witness-wheat.vercel.app</span><span>9 / 10</span></div>
 </section>

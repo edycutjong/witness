@@ -222,7 +222,11 @@ CAPS = [  # (code token as in README "Relate capabilities used", the deck's 2-3 
     ("single-file .rl", "the evidence format", "single-file `.rl`"),
     ("relate pull", "fixture mode", "`relate pull` for fixture mode"),
     ("relate query --mode json", "independent re-check", "relate query --mode json"),
-    ("MCP · why · check", "agents ask why", "MCP: Witness's own tools `why` and `check`"),
+    (
+        "MCP · why · check",
+        "Witness's own tools, beside relate serve --mcp",
+        "MCP: Witness's own tools `why` and `check`",
+    ),
 ]
 
 
@@ -364,6 +368,7 @@ def deck_page() -> str:
         "REFUSE_S": whys[1]["seconds"],
         "MCP_REFUSE": ref_html,
         "MCP_DATE": mcp_utc,
+        "COVER_SVG": sp.schematic("c", ghost=False),
         "REPO": REPO,
         "RUN_NOTE": (
             "Needs uv. The committed graph is copied, never modified."
@@ -476,7 +481,7 @@ RECEIPTS = [
     ),
     (
         "byte-identical",
-        f"the same query and seed give the same witness on {len(det['runs'])} runs (`evidence/determinism.json`)",
+        f"the same query and seed give a byte-identical rebuild script (`.cypher`) on {len(det['runs'])} runs (`evidence/determinism.json`)",
     ),
 ]
 REPRO = [

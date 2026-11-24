@@ -122,7 +122,11 @@ h1{font-size:clamp(40px,4.2vw,60px);line-height:1.03;max-width:none}
 .reg-stamp{display:inline-block;margin-top:18px;font-size:15px}
 .js .reg-stamp:not(.on){opacity:0}
 .reg-stamp.on{opacity:1;animation:flip .35s cubic-bezier(.2,1.6,.4,1)}
-.ex-src{font-size:12.5px;color:var(--muted);margin-top:30px}
+.ex-src{font-size:12.5px;color:var(--muted);margin-top:18px}
+.ex-right .lede{margin:0 0 26px}
+.ex-ahead{padding-right:8px}
+.run .term pre{white-space:pre-wrap;overflow-wrap:anywhere}.run .term .ln{padding-left:4ch;text-indent:-4ch}
+h1,h2{text-wrap:balance}
 
 .run .lbl,.close .fine,.close .src-pending,.run .shot figcaption{color:#5A5044}
 .b1-tape{display:grid;gap:6px;margin-top:6px}.b1-tape .tape{height:34px}.b1-tape .data{font-size:12.5px;color:var(--muted)}
@@ -236,5 +240,5 @@ h1{font-size:clamp(40px,4.2vw,60px);line-height:1.03;max-width:none}
   .cmd code{font-size:13px}
   .foot-in{flex-direction:column}
 }
-@media (max-width:420px){.rc b{white-space:normal;font-size:28px}.cmd{flex-wrap:wrap}.cmd code{white-space:normal;overflow-wrap:anywhere}.top nav .nav-strong:first-of-type{display:none}.brand span{font-size:20px}}
+@media (max-width:420px){.hero-in>*,.ex-grid>*{min-width:0}.reg-stamp,.slam{font-size:11px;letter-spacing:.12em;white-space:normal;max-width:100%}.rc b{white-space:normal;font-size:28px}.cmd{flex-wrap:wrap}.cmd code{white-space:normal;overflow-wrap:anywhere}.top nav .nav-strong:first-of-type{display:none}.brand span{font-size:20px}}
 @media print{body::after{display:none}.top{position:static}.replay,.t-play,.copy,#pull-all{display:none}.term pre{max-height:none}.reg-stamp{opacity:1}*{transition:none!important;animation:none!important}}

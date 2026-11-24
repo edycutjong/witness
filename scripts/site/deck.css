@@ -28,6 +28,8 @@ body{overflow:hidden;background:#D9CBAE}
 .s1-top{grid-column:1/-1}
 .s1 h1{font-size:96px;line-height:1.06;max-width:none;margin:22px 0 0}
 .big-sub{font:400 38px/1.35 var(--font-body);margin:16px 0 0;color:#2C241C}
+.s1-lbl{display:flex;align-items:center;gap:18px}.s1-lbl img{border-radius:11px;box-shadow:0 8px 20px -10px rgba(31,26,20,.45)}.s1-lbl .chip{font-size:18px;padding:7px 12px;letter-spacing:0;text-transform:none;margin-left:6px}
+.cover-ex{margin-top:22px;background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:14px 20px;box-shadow:var(--shadow)}.cover-ex .inst{width:100%;height:auto}
 .cover-meta{display:flex;align-items:center;gap:22px;margin:34px 0 0}
 .cover-meta img{border-radius:14px;box-shadow:0 10px 26px -10px rgba(31,26,20,.45)}
 .cover-meta .chip{font-size:20px;padding:8px 14px}

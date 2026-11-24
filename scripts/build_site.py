@@ -78,7 +78,7 @@ for q, _ in QUOTES:
 FAQ = [
     (
         "Is the witness the smallest subgraph that gives the answer?",
-        "No, and Witness never says so. It is deletion-minimal: no single remaining relationship can be removed without changing the answer. A smaller witness may exist; finding the smallest is a much harder search.",
+        "No. It is deletion-minimal: no single remaining relationship can be removed without changing the answer. A smaller witness may exist.",
     ),
     (
         "What counts as changing the answer?",
@@ -86,11 +86,11 @@ FAQ = [
     ),
     (
         "Does Witness ever write to my graph?",
-        "No. The source <code>.rl</code> is copied byte for byte and never opened for writing; its SHA-256 is checked unchanged after every run. Queries Relate does not report as read-only are refused. Fixture mode pulls from Neo4j once and never pushes back.",
+        "No. The source <code>.rl</code> is copied byte for byte and never opened for writing; every reduction checks its SHA-256 unchanged afterwards. Fixture mode pulls from Neo4j once and never pushes back.",
     ),
     (
         "Is anything mocked?",
-        "Not the judged path: the graph store, transactions, rollback and queries are real Relate in every test. In tests, <code>relate pull</code> (it needs a Neo4j server) is stood in, and a few tests substitute timers, process calls or a failing CLI to reach rare branches. The committed fixture run used a real Neo4j in Docker.",
+        "Not the judged path: the graph store, transactions, rollback and queries are real Relate in every test. In tests, <code>relate pull</code> (it needs a Neo4j server) is stood in, and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach rare branches. The committed fixture run pulled from a real Neo4j server (<code>fixtures/mex-foreign.report.json</code>).",
     ),
     (
         "Why Relate rather than a Neo4j server?",

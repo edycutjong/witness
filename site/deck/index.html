@@ -469,7 +469,7 @@ ORDER BY airport</pre>
     <h2>Remove Relate and the loop has <em>nothing to run on.</em></h2>
   </div>
   <ol class="caps"><li><span class="no">1</span><div><code>begin_transaction · rollback_transaction</code><span>the inner loop</span></div></li><li><span class="no">2</span><div><code>QueryResult.query_type</code><span>refuse writes</span></div></li><li><span class="no">3</span><div><code>EXPLAIN</code><span>prune unreachable types</span></div></li><li><span class="no">4</span><div><code>read_only=True</code><span>reruns cannot write</span></div></li><li><span class="no">5</span><div><code>single-file .rl</code><span>the evidence format</span></div></li><li><span class="no">6</span><div><code>relate pull</code><span>fixture mode</span></div></li><li><span class="no">7</span><div><code>relate query --mode json</code><span>independent re-check</span></div></li><li><span class="no">8</span><div><code>MCP · why · check</code><span>agents ask why</span></div></li></ol>
-  <aside class="notes">Eight Relate capabilities, each in a named file. The inner loop is Relate's own transactions; Relate's query_type decides what is read-only; its EXPLAIN plan prunes; the single-file .rl is the evidence format; relate query on the CLI re-checks every probe independently.</aside>
+  <aside class="notes">Eight Relate capabilities, each in a named file. The inner loop is Relate's own transactions; Relate's query_type must report read-only after Witness's own token check; names from the query and its EXPLAIN plan prune; the single-file .rl is the evidence format; relate query on the CLI re-checks every probe independently.</aside>
 <div class="pfoot"><span><b>Witness</b> · v0.1.0 · witness-wheat.vercel.app</span><span>6 / 10</span></div>
 </section>
 

@@ -47,8 +47,9 @@ answer" on the Python API and on the Relate CLI (`witnesses/two-hub.manifest.jso
 answer. It does not mean "smallest possible". Because Relate's query semantics are not monotone, a witness proves its own
 answer on its own file; it does not prove that every superset of it gives the same answer.
 
-**What it refuses (exit 2):** anything outside a read-only, deterministic subset. Relate's own `query_type` must be `"r"`, so
-no writes, procedures, `LOAD CSV`, clocks, randomness or store ids, plus a heuristic check for storage-order dependence. Witness never writes to the source.
+**What it refuses (exit 2):** anything outside a read-only, deterministic subset. Witness's own token check refuses writes,
+procedures, `LOAD CSV`, clocks, randomness and store ids, then Relate's own `query_type` must be `"r"`; plus a heuristic check
+for storage-order dependence. Witness never writes to the source.
 
 ### How it uses Relate
 

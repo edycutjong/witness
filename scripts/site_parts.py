@@ -1,6 +1,6 @@
 """Drawn parts of the landing and the deck, built only from committed files (imported by build_site.py).
 
-- the real air-routes frame (airports + HAS_ROUTE pairs inside lon -122..-92, lat 14..38) from data/air-routes.cypher
+- the real air-routes frame (airports + HAS_ROUTE pairs inside lon -125..-85, lat 14..45) from data/air-routes.cypher
 - the witness schematic (the 10 airports of witnesses/two-hub.rl, 13 HAS_ROUTE + 9 IN_COUNTRY exhibits)
 - the reduction milestones and per-trial outcomes from witnesses/two-hub.trace.json
 - the pull-a-tag answers from evidence/pull-each-tag.json

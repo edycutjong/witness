@@ -113,9 +113,7 @@ def tokenize(text: str) -> list[Tok]:
     toks: list[Tok] = []
     pos = 0
     while pos < len(text):
-        m = _TOKEN.match(text, pos)
-        if m is None:  # an unterminated string or comment
-            raise Refused("unterminated string, identifier or comment")
+        m = _TOKEN.match(text, pos)  # never None: the punct alternative takes any char the others did not
         kind = m.lastgroup
         s = m.group(0)
         if kind in ("ws", "lc", "bc"):
@@ -449,9 +447,6 @@ def strip_comments(text: str) -> str:
     pos = 0
     while pos < len(text):
         m = _TOKEN.match(text, pos)
-        if m is None:
-            out.append(text[pos:])
-            break
         if m.lastgroup in ("lc", "bc", "ws"):
             if out and out[-1] != " ":
                 out.append(" ")

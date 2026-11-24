@@ -167,7 +167,7 @@ def request_from(args, statement: str, source: Path, params: dict) -> Request:
     )
 
 
-def print_outcome(o, verbose_exhibits: bool = True, extra: str | None = None) -> None:
+def print_outcome(o, extra: str | None = None) -> None:
     fc = o.run["final_counts"]
     print(f"\nWITNESS  {fc[1]} relationships · {fc[0]} nodes, out of {o.source_counts[1]:,} · {o.source_counts[0]:,}")
     print(
@@ -176,13 +176,12 @@ def print_outcome(o, verbose_exhibits: bool = True, extra: str | None = None) ->
     )
     if extra:
         print(f"  {extra}")
-    if verbose_exhibits:
-        note = "every one is needed" if o.verified else "necessity NOT verified"
-        print(f"\nEXHIBITS  (register order; {note})")
-        for x in o.exhibits:
-            print(f"  {x['n']:>2}  ({x['start']})-[:{x['type']}]->({x['end']})")
-        for n in o.isolated:
-            print(f"   ·  ({n})  isolated node")
+    note = "every one is needed" if o.verified else "necessity NOT verified"
+    print(f"\nEXHIBITS  (register order; {note})")
+    for x in o.exhibits:
+        print(f"  {x['n']:>2}  ({x['start']})-[:{x['type']}]->({x['end']})")
+    for n in o.isolated:
+        print(f"   ·  ({n})  isolated node")
     print(f"\nCHECK  {o.check.text}")
     print(f"  {o.check.cli_status}")
 
@@ -197,8 +196,7 @@ def verdict_line(o) -> None:
         print("\nNOT verified")
         for r in o.reasons:
             print(f"  - {r}")
-        if o.check is not None:
-            print(f"  necessity probes inconclusive: {o.check.inconclusive}")
+        print(f"  necessity probes inconclusive: {o.check.inconclusive}")
 
 
 # ---- commands ----------------------------------------------------------------------------------------------------

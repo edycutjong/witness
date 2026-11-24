@@ -265,8 +265,6 @@ class Reducer:
             swept = 0
             rank = {n: i for i, n in enumerate(self.node_order())}
             for r in self.rel_locality_order(rank):
-                if r not in self.sc.rel_keys:
-                    continue
                 if self.test([r], (), phase=phase) is True:
                     self.commit([r], ())
                     swept += 1

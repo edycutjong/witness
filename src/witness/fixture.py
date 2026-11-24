@@ -127,10 +127,9 @@ def build_fixture(
     # The slice lived in a temp dir: name it, not this machine's path (P1d QA r2: /var/folders/... was committed)
     o.manifest["source"]["path"] = "<slice.rl: temp store pulled from Neo4j>"
     man = Path(o.files["manifest"])
-    if man.exists():
-        m = json.loads(man.read_text())
-        m["source"]["path"] = o.manifest["source"]["path"]
-        man.write_text(json.dumps(m, indent=2, sort_keys=True) + "\n")
+    m = json.loads(man.read_text())
+    m["source"]["path"] = o.manifest["source"]["path"]
+    man.write_text(json.dumps(m, indent=2, sort_keys=True) + "\n")
     report = {
         "name": name,
         "slice": {"nodes": o.source_counts[0], "relationships": o.source_counts[1], "pull_seconds": pulled["seconds"]},

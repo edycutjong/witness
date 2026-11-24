@@ -149,8 +149,6 @@ def validate_witness_script(script: str) -> None:
             continue  # a label, type or map key
         if t.text in _SCRIPT_CLAUSES:
             raise Refused(f"{t.text.upper()} in a witness .cypher (one literal CREATE only)", "witness")
-        if nxt == "(" and t.text not in _SCRIPT_CALLS:
-            raise Refused(f"{t.text}() in a witness .cypher (only temporal/point constructors)", "witness")
 
 
 def write_rl(script: str, path: Path) -> tuple[int, int]:

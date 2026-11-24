@@ -114,9 +114,16 @@ def fill(tpl: str, vals: dict) -> str:
     return out
 
 
+DESC = f"When an agent answers from a graph, Witness hands back the {w_rels} of {fmt(src_rels)} relationships the answer rests on and proves each one is needed."
+DESC_OG = (
+    f"{fmt(src_rels)} relationships → the {w_rels} an agent's answer rests on. Delete any one and the answer changes."
+)
+assert 50 <= len(DESC) <= 160 and len(DESC_OG) <= 125, (len(DESC), len(DESC_OG))
+
+
 def landing_page() -> str:
     shot_w, shot_h = png_size(SITE / "media" / "exhibit-page.png")
-    og = hashlib.sha256((ROOT / "docs" / "assets" / "og-image.png").read_bytes()).hexdigest()[:10]
+    og = hashlib.sha256((ROOT / "docs" / "assets" / "og-image-1200.png").read_bytes()).hexdigest()[:10]
     question = (
         man["statement"]
         .splitlines()[0]
@@ -148,7 +155,8 @@ def landing_page() -> str:
         ),
     ]
     vals = {
-        "DESC": html.escape(CLAIM),
+        "DESC": html.escape(DESC),
+        "DESC_OG": html.escape(DESC_OG),
         "SITE": SITE_URL,
         "OGV": og,
         "CSS": (PARTS / "witness.css").read_text(),
@@ -223,7 +231,7 @@ def _ln(e: str, cls: str = "") -> str:
 
 
 def deck_page() -> str:
-    og = hashlib.sha256((ROOT / "docs" / "assets" / "og-image.png").read_bytes()).hexdigest()[:10]
+    og = hashlib.sha256((ROOT / "docs" / "assets" / "og-image-1200.png").read_bytes()).hexdigest()[:10]
     host = SITE_URL.split("://")[1]
     # cover terminal: lines selected from the recorded run, order kept, text never edited
     cover = []
@@ -415,8 +423,9 @@ page = landing_page()
 (SITE / "deck").mkdir(exist_ok=True)
 (SITE / "deck" / "index.html").write_text(deck_page())
 # favicon + social card: the judge-facing media from docs/assets (synced from the asset pipeline)
-for name in ("icon.svg", "og-image.png"):
-    shutil.copyfile(ROOT / "docs" / "assets" / name, SITE / name)
+shutil.copyfile(ROOT / "docs" / "assets" / "icon.svg", SITE / "icon.svg")
+# the social card at its exact 1x size (1200x630, under 1 MB); docs/assets/og-image.png is the @2x master
+shutil.copyfile(ROOT / "docs" / "assets" / "og-image-1200.png", SITE / "og-image.png")
 
 # ── /judge and JUDGE.md: one reader, one page, every number read from the committed files ───────────────────────────
 COMMITS = man["run"]["commits"]
@@ -528,7 +537,7 @@ JUDGE_PAGE = """<!doctype html>
 <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Old+Standard+TT:wght@400;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{{--paper:#F2E8D5;--ink:#1F1A14;--muted:#6F6555;--after:#B42318;--rule:#D9CBAE}}
-body{{margin:0;background:var(--paper);color:var(--ink);font:18px/1.55 "Source Sans 3",Arial,sans-serif}}
+body{{margin:0;background:var(--paper);color:var(--ink);font:18px/1.55 "Source Sans 3",Arial,sans-serif;overflow-wrap:anywhere}}html{{overflow-x:clip}}
 main{{max-width:760px;margin:0 auto;padding:40px 20px 72px}}
 h1{{font:700 34px/1.15 "Old Standard TT",Georgia,serif;margin:.2em 0 .5em}}
 h2{{font:600 13px/1.4 "Source Sans 3",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:40px 0 10px}}

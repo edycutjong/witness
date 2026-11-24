@@ -95,6 +95,7 @@ Relate capabilities used:
 
 ```bash
 git clone https://github.com/edycutjong/witness && cd witness
+uv sync              # optional: install the locked dependencies (uv run does this on first use)
 uv run witness demo
 ```
 

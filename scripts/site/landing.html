@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Witness · the relationships your agent's graph answer rests on</title>
 <meta name="description" content="{{DESC}}">
+<meta name="author" content="edycutjong">
 <meta name="theme-color" content="#F2E8D5">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="canonical" href="{{SITE}}/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Witness">
 <meta property="og:title" content="Witness · cross-examine the graph behind an agent's answer">
-<meta property="og:description" content="{{DESC}}">
+<meta property="og:description" content="{{DESC_OG}}">
 <meta property="og:url" content="{{SITE}}/">
 <meta property="og:image" content="{{SITE}}/og-image.png?v={{OGV}}">
 <meta property="og:image:width" content="1200">
@@ -19,7 +20,7 @@
 <meta property="og:image:alt" content="Witness: 57,645 relationships reduced to 22, each tagged as an exhibit; 22 of 22 change the answer">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Witness · cross-examine the graph behind an agent's answer">
-<meta name="twitter:description" content="{{DESC}}">
+<meta name="twitter:description" content="{{DESC_OG}}">
 <meta name="twitter:image" content="{{SITE}}/og-image.png?v={{OGV}}">
 <link rel="preload" href="/fonts/old-standard-tt-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
@@ -36,7 +37,7 @@
     <nav aria-label="Sections">
       <a href="#exhibit">Exhibit A</a><a href="#how">How it works</a><a href="#honest">Limits</a><a href="#faq">FAQ</a>
       <a class="nav-strong" href="/deck/">Pitch deck</a><a class="nav-strong" href="/judge/">For judges</a>
-      <a class="chip" id="ver" href="{{RELEASES}}" aria-label="Latest release"{{VER_LIVE}}>v{{VERSION}}</a>
+      <a class="chip" id="ver" href="{{RELEASES}}" title="Latest release"{{VER_LIVE}}>v{{VERSION}}</a>
     </nav>
   </div>
 </header>
@@ -47,9 +48,10 @@
     <div class="hero-copy">
       <p class="lbl eyebrow">Relate by Neo4j hackathon <span>·</span> Case <b>two-hub</b></p>
       <h1 id="h1">Witness cross-examines the graph until <em>only the evidence remains.</em></h1>
-      <p class="sub">When your agent answers from a graph, Witness hands back the <b>{{W_RELS}} relationships out of {{SRC_RELS}}</b> that the answer rests on, and proves that deleting <b>any one of the {{W_RELS}}</b> changes the answer. One <code>.rl</code> file, re-run with plain Relate.</p>
+      <p class="sub">Your agent answered from a graph of <b>{{SRC_RELS}} relationships</b>. Witness hands back the <b>{{W_RELS}}</b> the answer rests on, and proves each one is needed: delete any one and the answer changes. One <code>.rl</code> file, re-run with plain Relate.</p>
       <div class="ctas">
-        <a class="btn solid" href="/deck/"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v10H3zM7 17h6M10 14v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Pitch deck</a>
+        <a class="btn solid" href="#exhibit"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 10l5-6h11v12H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="7.5" cy="10" r="1.4" fill="currentColor"/></svg>Pull a tag yourself</a>
+        <a class="btn" href="/deck/"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v10H3zM7 17h6M10 14v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Pitch deck</a>
         <a class="btn" href="/judge/"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3h9l3 3v11H4zM7 9h6M7 12h6M7 15h4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>For judges</a>
       </div>
       <div class="cmd"><span class="lbl">Run it</span><code id="cmd">uv run witness demo</code><button type="button" class="copy" data-copy="git clone {{REPO}} &amp;&amp; cd witness &amp;&amp; uv run witness demo" aria-label="Copy the clone and run commands">copy</button></div>
@@ -75,7 +77,7 @@
         <button type="button" class="btn replay" id="play">Replay the reduction</button>
       </div>
       {{TAPE}}
-      <figcaption class="cap">One tick per trial: <span class="kk">tall</span> kept the answer, applied ({{APPLIED}}); <span class="kr">short</span> changed it, rolled back ({{ROLLED}}). Counters: the trace's milestones (<code>witnesses/two-hub.trace.json</code>). The map: the real air-routes frame ({{FRAME_PAIRS}} airport pairs), faded for the eye.</figcaption>
+      <figcaption class="cap">{{TRIALS}} trials · <span class="kk">tall</span> {{APPLIED}} kept the answer, applied · <span class="kr">short</span> {{ROLLED}} changed it, rolled back. Counters from <code>witnesses/two-hub.trace.json</code>; the map is the real air-routes frame ({{FRAME_PAIRS}} airport pairs), faded for the eye.</figcaption>
     </figure>
   </div>
 </section>
@@ -144,6 +146,7 @@
         <h3>Every trial is a transaction</h3>
         <p>Delete a set of relationships inside a Relate transaction, re-run your query, compare, roll back. Only deletions that keep the answer are applied, on a scratch copy; the source is never opened for writing.</p>
         <span class="chip">begin_transaction · rollback_transaction</span>
+        <div class="b1-tape"><span class="lbl">The headline run, one tick per trial</span>{{TAPE}}<span class="data">{{APPLIED}} applied · {{ROLLED}} rolled back · {{TRIALS}} trials</span></div>
         <div class="speed" aria-label="Trials per second, median of three runs">
           <div class="sp"><span class="data">Relate, in-process</span><i style="--w:100%"></i><b class="data">{{RELATE_TPS}}/s</b></div>
           <div class="sp"><span class="data">Neo4j {{NEO_V}}, Docker</span><i style="--w:{{NEO_W}}%"></i><b class="data">{{NEO_TPS}}/s</b></div>
@@ -209,7 +212,7 @@
 <section class="close" aria-labelledby="close-h">
   <div class="wrap close-in">
     <h2 id="close-h">File the evidence, <em>not the whole house.</em></h2>
-    <div class="cmd big"><code>git clone {{REPO}} &amp;&amp; cd witness &amp;&amp; uv run witness demo</code><button type="button" class="copy" data-copy="git clone {{REPO}} &amp;&amp; cd witness &amp;&amp; uv run witness demo" aria-label="Copy the clone and run commands">copy</button></div>
+    <div class="cmd big"><code>git clone {{REPO}} &amp;&amp; cd witness<br>uv run witness demo</code><button type="button" class="copy" data-copy="git clone {{REPO}} &amp;&amp; cd witness &amp;&amp; uv run witness demo" aria-label="Copy the clone and run commands">copy</button></div>
     <p class="fine">{{CMD_NOTE}}</p>
     <div class="ctas">{{SOURCE_CTA}}<a class="btn solid" href="/deck/">Pitch deck</a><a class="btn" href="/judge/">For judges</a></div>
   </div>

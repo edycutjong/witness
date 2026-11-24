@@ -13,12 +13,12 @@
 <meta property="og:title" content="Witness · pitch deck">
 <meta property="og:description" content="When an agent answers from a graph, Witness hands back the graph that reproduces the answer (57,645 relationships → 22) and proves each relationship in it is needed.">
 <meta property="og:url" content="https://witness-wheat.vercel.app/deck/">
-<meta property="og:image" content="https://witness-wheat.vercel.app/og-image.png?v=d997434690">
+<meta property="og:image" content="https://witness-wheat.vercel.app/og-image.png?v=4e6a2d4838">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Witness: 57,645 relationships reduced to 22, each tagged as an exhibit; 22 of 22 change the answer">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://witness-wheat.vercel.app/og-image.png?v=d997434690">
+<meta name="twitter:image" content="https://witness-wheat.vercel.app/og-image.png?v=4e6a2d4838">
 <link rel="preload" href="/fonts/old-standard-tt-700.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 @font-face{font-family:"Old Standard TT";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/old-standard-tt-400.woff2) format("woff2")}
@@ -69,7 +69,7 @@ img,svg{max-width:100%}
 .stamp.red{color:var(--after)}
 /* the drawn instrument (hero + exhibit share it) */
 .inst{display:block;width:100%;height:auto;overflow:visible}
-.inst .ghost path.wave{fill:none;stroke:var(--before);stroke-width:.55;opacity:.16}
+.inst .ghost path.wave{fill:none;stroke:var(--before);stroke-width:.6;opacity:.26}
 .inst .ghost path.dots{fill:none;stroke:var(--before);stroke-width:2.2;stroke-linecap:round;opacity:.3}
 .inst .ed{fill:none;stroke:var(--after);stroke-width:3;stroke-linecap:round}
 .inst .nd circle{fill:var(--ink)}
@@ -88,7 +88,7 @@ img,svg{max-width:100%}
 .tape .ta{stroke:var(--ink);stroke-width:1.3}
 .tape .tr{stroke:var(--before);stroke-width:1;opacity:.55}
 /* terminal (dark is the terminal's, not the page's) */
-.term{background:var(--ink);color:#EDE3CF;border-radius:6px;box-shadow:var(--shadow);overflow:hidden}
+.term{background:#15110D;color:#EDE3CF;border-radius:6px;box-shadow:var(--shadow);overflow:hidden}
 .term .bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(237,227,207,.12);font:12px/1.3 var(--font-data);color:#B9AE98}
 .term .bar i{width:9px;height:9px;border-radius:50%;background:#5A5146;display:inline-block}
 .term pre{margin:0;padding:16px 18px 18px;font:12.5px/1.6 var(--font-data);white-space:pre;overflow:auto;tab-size:2}
@@ -286,7 +286,7 @@ body.ov .frame.on{box-shadow:0 0 0 10px var(--after)}
     <p class="lbl">Relate by Neo4j hackathon</p>
     <h1>Witness cross-examines the graph until <em>only the evidence remains.</em></h1>
     <p class="big-sub">22 of 57,645 relationships, each proven needed.</p>
-    <p class="cover-meta"><img src="/icon.svg" alt="" width="64" height="64"><a class="chip" id="ver" href="https://github.com/edycutjong/witness/releases/latest" aria-label="Latest release">v0.1.0</a></p>
+    <p class="cover-meta"><img src="/icon.svg" alt="" width="64" height="64"><a class="chip" id="ver" href="https://github.com/edycutjong/witness/releases/latest" title="Latest release">v0.1.0</a></p>
   </div>
   <figure class="term cover-term">
     <div class="bar"><i></i><i></i><i></i><span>uv run witness demo</span></div>

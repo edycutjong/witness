@@ -4,23 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Witness · the relationships your agent's graph answer rests on</title>
-<meta name="description" content="When an agent answers from a graph, Witness hands back the graph that reproduces the answer (57,645 relationships → 22) and proves each relationship in it is needed.">
+<meta name="description" content="When an agent answers from a graph, Witness hands back the 22 of 57,645 relationships the answer rests on and proves each one is needed.">
+<meta name="author" content="edycutjong">
 <meta name="theme-color" content="#F2E8D5">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="canonical" href="https://witness-wheat.vercel.app/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Witness">
 <meta property="og:title" content="Witness · cross-examine the graph behind an agent's answer">
-<meta property="og:description" content="When an agent answers from a graph, Witness hands back the graph that reproduces the answer (57,645 relationships → 22) and proves each relationship in it is needed.">
+<meta property="og:description" content="57,645 relationships → the 22 an agent&#x27;s answer rests on. Delete any one and the answer changes.">
 <meta property="og:url" content="https://witness-wheat.vercel.app/">
-<meta property="og:image" content="https://witness-wheat.vercel.app/og-image.png?v=d997434690">
+<meta property="og:image" content="https://witness-wheat.vercel.app/og-image.png?v=4e6a2d4838">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Witness: 57,645 relationships reduced to 22, each tagged as an exhibit; 22 of 22 change the answer">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Witness · cross-examine the graph behind an agent's answer">
-<meta name="twitter:description" content="When an agent answers from a graph, Witness hands back the graph that reproduces the answer (57,645 relationships → 22) and proves each relationship in it is needed.">
-<meta name="twitter:image" content="https://witness-wheat.vercel.app/og-image.png?v=d997434690">
+<meta name="twitter:description" content="57,645 relationships → the 22 an agent&#x27;s answer rests on. Delete any one and the answer changes.">
+<meta name="twitter:image" content="https://witness-wheat.vercel.app/og-image.png?v=4e6a2d4838">
 <link rel="preload" href="/fonts/old-standard-tt-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
 <style>
@@ -72,7 +73,7 @@ img,svg{max-width:100%}
 .stamp.red{color:var(--after)}
 /* the drawn instrument (hero + exhibit share it) */
 .inst{display:block;width:100%;height:auto;overflow:visible}
-.inst .ghost path.wave{fill:none;stroke:var(--before);stroke-width:.55;opacity:.16}
+.inst .ghost path.wave{fill:none;stroke:var(--before);stroke-width:.6;opacity:.26}
 .inst .ghost path.dots{fill:none;stroke:var(--before);stroke-width:2.2;stroke-linecap:round;opacity:.3}
 .inst .ed{fill:none;stroke:var(--after);stroke-width:3;stroke-linecap:round}
 .inst .nd circle{fill:var(--ink)}
@@ -91,7 +92,7 @@ img,svg{max-width:100%}
 .tape .ta{stroke:var(--ink);stroke-width:1.3}
 .tape .tr{stroke:var(--before);stroke-width:1;opacity:.55}
 /* terminal (dark is the terminal's, not the page's) */
-.term{background:var(--ink);color:#EDE3CF;border-radius:6px;box-shadow:var(--shadow);overflow:hidden}
+.term{background:#15110D;color:#EDE3CF;border-radius:6px;box-shadow:var(--shadow);overflow:hidden}
 .term .bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(237,227,207,.12);font:12px/1.3 var(--font-data);color:#B9AE98}
 .term .bar i{width:9px;height:9px;border-radius:50%;background:#5A5146;display:inline-block}
 .term pre{margin:0;padding:16px 18px 18px;font:12.5px/1.6 var(--font-data);white-space:pre;overflow:auto;tab-size:2}
@@ -116,7 +117,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opa
 .skip:focus{position:fixed!important;left:12px;top:12px;width:auto;height:auto;clip:auto;z-index:99;background:var(--ink);color:var(--bg);padding:10px 14px}
 h1,h2,h3{font-family:var(--font-display);font-weight:700;letter-spacing:-.01em;margin:0}
 h1 em,h2 em{font-style:italic;font-weight:400}
-h1 em{color:var(--after)}
+h1 em{color:var(--ink)}
 h2{font-size:clamp(30px,3.6vw,48px);line-height:1.08;margin:.25em 0 .45em;max-width:22ch}
 .lbl span{color:var(--rule);margin:0 .3em}
 .lede{max-width:66ch;color:#3B3229;margin:0 0 34px}
@@ -137,7 +138,7 @@ section{position:relative}
 .hero{padding:46px 0 54px}
 .hero-in{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:54px;align-items:start}
 .eyebrow{margin:0 0 22px}
-h1{font-size:clamp(40px,4.3vw,62px);line-height:1.03;max-width:14.5ch}
+h1{font-size:clamp(42px,4.6vw,66px);line-height:1.02;max-width:14.5ch}
 .sub{font-size:20px;line-height:1.5;margin:26px 0 30px;max-width:34em;color:#2C241C}
 .sub b{font-weight:700;color:var(--ink);background:linear-gradient(transparent 62%,rgba(217,203,174,.9) 62%)}
 .ctas{display:flex;flex-wrap:wrap;gap:12px}
@@ -149,7 +150,7 @@ h1{font-size:clamp(40px,4.3vw,62px);line-height:1.03;max-width:14.5ch}
 .copy:hover,.copy.done{background:var(--ink);color:var(--bg)}
 
 /* the case file (hero instrument) */
-.file{position:relative;margin:14px 0 0;background:var(--paper);border:1px solid var(--rule);border-radius:2px 8px 8px 8px;box-shadow:var(--shadow);padding:18px 22px 16px}
+.file{position:relative;overflow-x:clip;margin:14px 0 0;background:var(--paper);border:1px solid var(--rule);border-radius:2px 8px 8px 8px;box-shadow:var(--shadow);padding:18px 22px 16px}
 .file-tab{position:absolute;left:-1px;top:-30px;height:30px;padding:9px 18px 0;background:var(--paper);border:1px solid var(--rule);border-bottom:0;border-radius:8px 8px 0 0}
 .answer{display:flex;align-items:center;gap:16px;padding-bottom:12px;border-bottom:1.5px solid var(--ink)}
 .answer .ans{font-size:22px;letter-spacing:.06em;flex:1}
@@ -168,7 +169,7 @@ h1{font-size:clamp(40px,4.3vw,62px);line-height:1.03;max-width:14.5ch}
 .cap .kr{color:var(--muted)}
 
 /* replay states (JS adds .armed; the markup alone is the final, settled state) */
-.file.armed .ghost .wave{opacity:.85;transition:opacity .9s ease}
+.file.armed .ghost .wave{opacity:1;stroke-width:.85;transition:opacity .9s ease}
 .file.armed .ghost .wave.gone{opacity:.07}
 .file.armed .ghost .dots{opacity:.5}
 .file.armed .ed{stroke:var(--before);stroke-width:1.4}
@@ -236,6 +237,8 @@ h1{font-size:clamp(40px,4.3vw,62px);line-height:1.03;max-width:14.5ch}
 .reg-stamp.on{opacity:1;animation:flip .35s cubic-bezier(.2,1.6,.4,1)}
 .ex-src{font-size:12.5px;color:var(--muted);margin-top:30px}
 
+.run .lbl,.close .fine,.close .src-pending,.run .shot figcaption{color:#5A5044}
+.b1-tape{display:grid;gap:6px;margin-top:6px}.b1-tape .tape{height:34px}.b1-tape .data{font-size:12.5px;color:var(--muted)}
 /* ── the run ── */
 .run{padding:78px 0 86px;background:var(--deep);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
 .run-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start}
@@ -300,7 +303,7 @@ h1{font-size:clamp(40px,4.3vw,62px);line-height:1.03;max-width:14.5ch}
 .close{padding:86px 0 90px;background:var(--deep);border-top:1px solid var(--rule);text-align:center}
 .close-in{display:flex;flex-direction:column;align-items:center}
 .close h2{max-width:none;font-size:clamp(34px,4.4vw,60px)}
-.close h2 em{color:var(--after)}
+.close h2 em{color:var(--ink)}
 .cmd.big{max-width:760px;width:100%;margin:6px 0 0}
 .cmd.big code{font-size:15px;text-align:left;white-space:normal;overflow-wrap:anywhere}
 .close .fine{margin:12px auto 22px}
@@ -337,7 +340,8 @@ h1{font-size:clamp(40px,4.3vw,62px);line-height:1.03;max-width:14.5ch}
   .ctr b{font-size:24px}
   .slam{position:static;display:inline-block;margin:6px 0 4px 6px;font-size:12px}
   .note{position:static;margin:2px 0 0}
-  .inst .lb{font-size:19px}.inst .lb .cc{font-size:14px}
+  .inst .lb{font-size:21px}.inst .lb .cc{font-size:15px}
+  .inst .tg>*{transform:scale(1.15)}
   .bento{grid-template-columns:minmax(0,1fr)}.b1,.b2,.b3,.b4,.b5,.b6{grid-column:auto}
   .sp{grid-template-columns:minmax(0,1fr) 76px}.sp i{grid-column:1/-1;grid-row:2}
   .pull{grid-template-columns:44px minmax(0,1fr)}.pull .fx{grid-column:2;text-align:left}
@@ -345,7 +349,7 @@ h1{font-size:clamp(40px,4.3vw,62px);line-height:1.03;max-width:14.5ch}
   .cmd code{font-size:13px}
   .foot-in{flex-direction:column}
 }
-@media (max-width:420px){.top nav .nav-strong:first-of-type{display:none}.brand span{font-size:20px}}
+@media (max-width:420px){.rc b{white-space:normal;font-size:28px}.cmd{flex-wrap:wrap}.cmd code{white-space:normal;overflow-wrap:anywhere}.top nav .nav-strong:first-of-type{display:none}.brand span{font-size:20px}}
 @media print{body::after{display:none}.top{position:static}.replay,.t-play,.copy,#pull-all{display:none}.term pre{max-height:none}.reg-stamp{opacity:1}*{transition:none!important;animation:none!important}}
 
 </style>
@@ -358,7 +362,7 @@ h1{font-size:clamp(40px,4.3vw,62px);line-height:1.03;max-width:14.5ch}
     <nav aria-label="Sections">
       <a href="#exhibit">Exhibit A</a><a href="#how">How it works</a><a href="#honest">Limits</a><a href="#faq">FAQ</a>
       <a class="nav-strong" href="/deck/">Pitch deck</a><a class="nav-strong" href="/judge/">For judges</a>
-      <a class="chip" id="ver" href="https://github.com/edycutjong/witness/releases/latest" aria-label="Latest release">v0.1.0</a>
+      <a class="chip" id="ver" href="https://github.com/edycutjong/witness/releases/latest" title="Latest release">v0.1.0</a>
     </nav>
   </div>
 </header>
@@ -369,9 +373,10 @@ h1{font-size:clamp(40px,4.3vw,62px);line-height:1.03;max-width:14.5ch}
     <div class="hero-copy">
       <p class="lbl eyebrow">Relate by Neo4j hackathon <span>·</span> Case <b>two-hub</b></p>
       <h1 id="h1">Witness cross-examines the graph until <em>only the evidence remains.</em></h1>
-      <p class="sub">When your agent answers from a graph, Witness hands back the <b>22 relationships out of 57,645</b> that the answer rests on, and proves that deleting <b>any one of the 22</b> changes the answer. One <code>.rl</code> file, re-run with plain Relate.</p>
+      <p class="sub">Your agent answered from a graph of <b>57,645 relationships</b>. Witness hands back the <b>22</b> the answer rests on, and proves each one is needed: delete any one and the answer changes. One <code>.rl</code> file, re-run with plain Relate.</p>
       <div class="ctas">
-        <a class="btn solid" href="/deck/"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v10H3zM7 17h6M10 14v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Pitch deck</a>
+        <a class="btn solid" href="#exhibit"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 10l5-6h11v12H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="7.5" cy="10" r="1.4" fill="currentColor"/></svg>Pull a tag yourself</a>
+        <a class="btn" href="/deck/"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v10H3zM7 17h6M10 14v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Pitch deck</a>
         <a class="btn" href="/judge/"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3h9l3 3v11H4zM7 9h6M7 12h6M7 15h4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>For judges</a>
       </div>
       <div class="cmd"><span class="lbl">Run it</span><code id="cmd">uv run witness demo</code><button type="button" class="copy" data-copy="git clone https://github.com/edycutjong/witness &amp;&amp; cd witness &amp;&amp; uv run witness demo" aria-label="Copy the clone and run commands">copy</button></div>
@@ -444,7 +449,7 @@ h1{font-size:clamp(40px,4.3vw,62px);line-height:1.03;max-width:14.5ch}
         <button type="button" class="btn replay" id="play">Replay the reduction</button>
       </div>
       <svg class="tape" viewBox="0 0 742 18" preserveAspectRatio="none" aria-hidden="true"><path class="tr" d="M1 6v6M5 6v6M7 6v6M11 6v6M13 6v6M15 6v6M17 6v6M19 6v6M21 6v6M23 6v6M25 6v6M27 6v6M29 6v6M33 6v6M35 6v6M37 6v6M39 6v6M41 6v6M43 6v6M45 6v6M49 6v6M51 6v6M53 6v6M55 6v6M57 6v6M61 6v6M63 6v6M65 6v6M69 6v6M71 6v6M73 6v6M75 6v6M77 6v6M79 6v6M83 6v6M85 6v6M87 6v6M89 6v6M91 6v6M93 6v6M95 6v6M97 6v6M99 6v6M101 6v6M103 6v6M105 6v6M111 6v6M115 6v6M119 6v6M123 6v6M125 6v6M127 6v6M129 6v6M135 6v6M137 6v6M141 6v6M145 6v6M149 6v6M153 6v6M155 6v6M157 6v6M159 6v6M163 6v6M167 6v6M169 6v6M173 6v6M177 6v6M179 6v6M183 6v6M185 6v6M187 6v6M191 6v6M193 6v6M199 6v6M203 6v6M207 6v6M211 6v6M213 6v6M215 6v6M217 6v6M221 6v6M225 6v6M227 6v6M229 6v6M233 6v6M235 6v6M237 6v6M241 6v6M245 6v6M247 6v6M249 6v6M253 6v6M257 6v6M259 6v6M261 6v6M263 6v6M267 6v6M269 6v6M273 6v6M275 6v6M279 6v6M281 6v6M285 6v6M289 6v6M293 6v6M295 6v6M297 6v6M301 6v6M303 6v6M305 6v6M307 6v6M311 6v6M315 6v6M317 6v6M319 6v6M323 6v6M325 6v6M329 6v6M331 6v6M333 6v6M337 6v6M343 6v6M347 6v6M349 6v6M353 6v6M355 6v6M359 6v6M361 6v6M365 6v6M369 6v6M371 6v6M373 6v6M375 6v6M377 6v6M381 6v6M383 6v6M385 6v6M389 6v6M391 6v6M393 6v6M397 6v6M399 6v6M401 6v6M405 6v6M409 6v6M411 6v6M413 6v6M415 6v6M419 6v6M423 6v6M425 6v6M427 6v6M431 6v6M435 6v6M439 6v6M443 6v6M447 6v6M449 6v6M451 6v6M453 6v6M455 6v6M457 6v6M459 6v6M463 6v6M465 6v6M467 6v6M469 6v6M471 6v6M473 6v6M477 6v6M479 6v6M481 6v6M485 6v6M487 6v6M489 6v6M491 6v6M493 6v6M495 6v6M497 6v6M499 6v6M501 6v6M503 6v6M505 6v6M507 6v6M509 6v6M511 6v6M513 6v6M515 6v6M517 6v6M519 6v6M521 6v6M523 6v6M525 6v6M527 6v6M529 6v6M531 6v6M533 6v6M535 6v6M537 6v6M541 6v6M543 6v6M545 6v6M547 6v6M549 6v6M551 6v6M555 6v6M559 6v6M563 6v6M565 6v6M569 6v6M571 6v6M573 6v6M575 6v6M577 6v6M579 6v6M581 6v6M583 6v6M585 6v6M587 6v6M589 6v6M591 6v6M593 6v6M595 6v6M597 6v6M601 6v6M603 6v6M605 6v6M607 6v6M609 6v6M611 6v6M613 6v6M615 6v6M617 6v6M619 6v6M621 6v6M623 6v6M625 6v6M627 6v6M629 6v6M631 6v6M633 6v6M635 6v6M639 6v6M641 6v6M643 6v6M645 6v6M647 6v6M649 6v6M651 6v6M657 6v6M661 6v6M665 6v6M667 6v6M669 6v6M671 6v6M673 6v6M677 6v6M681 6v6M685 6v6M689 6v6M693 6v6M695 6v6M697 6v6M699 6v6M701 6v6M703 6v6M705 6v6M707 6v6M709 6v6M711 6v6M713 6v6M715 6v6M717 6v6M719 6v6M721 6v6M723 6v6M725 6v6M727 6v6M729 6v6M731 6v6M733 6v6M735 6v6M737 6v6M739 6v6M741 6v6"/><path class="ta" d="M3 2v14M9 2v14M31 2v14M47 2v14M59 2v14M67 2v14M81 2v14M107 2v14M109 2v14M113 2v14M117 2v14M121 2v14M131 2v14M133 2v14M139 2v14M143 2v14M147 2v14M151 2v14M161 2v14M165 2v14M171 2v14M175 2v14M181 2v14M189 2v14M195 2v14M197 2v14M201 2v14M205 2v14M209 2v14M219 2v14M223 2v14M231 2v14M239 2v14M243 2v14M251 2v14M255 2v14M265 2v14M271 2v14M277 2v14M283 2v14M287 2v14M291 2v14M299 2v14M309 2v14M313 2v14M321 2v14M327 2v14M335 2v14M339 2v14M341 2v14M345 2v14M351 2v14M357 2v14M363 2v14M367 2v14M379 2v14M387 2v14M395 2v14M403 2v14M407 2v14M417 2v14M421 2v14M429 2v14M433 2v14M437 2v14M441 2v14M445 2v14M461 2v14M475 2v14M483 2v14M539 2v14M553 2v14M557 2v14M561 2v14M567 2v14M599 2v14M637 2v14M653 2v14M655 2v14M659 2v14M663 2v14M675 2v14M679 2v14M683 2v14M687 2v14M691 2v14"/></svg>
-      <figcaption class="cap">One tick per trial: <span class="kk">tall</span> kept the answer, applied (86); <span class="kr">short</span> changed it, rolled back (285). Counters: the trace's milestones (<code>witnesses/two-hub.trace.json</code>). The map: the real air-routes frame (1,565 airport pairs), faded for the eye.</figcaption>
+      <figcaption class="cap">371 trials · <span class="kk">tall</span> 86 kept the answer, applied · <span class="kr">short</span> 285 changed it, rolled back. Counters from <code>witnesses/two-hub.trace.json</code>; the map is the real air-routes frame (1,565 airport pairs), faded for the eye.</figcaption>
     </figure>
   </div>
 </section>
@@ -581,6 +586,7 @@ h1{font-size:clamp(40px,4.3vw,62px);line-height:1.03;max-width:14.5ch}
         <h3>Every trial is a transaction</h3>
         <p>Delete a set of relationships inside a Relate transaction, re-run your query, compare, roll back. Only deletions that keep the answer are applied, on a scratch copy; the source is never opened for writing.</p>
         <span class="chip">begin_transaction · rollback_transaction</span>
+        <div class="b1-tape"><span class="lbl">The headline run, one tick per trial</span><svg class="tape" viewBox="0 0 742 18" preserveAspectRatio="none" aria-hidden="true"><path class="tr" d="M1 6v6M5 6v6M7 6v6M11 6v6M13 6v6M15 6v6M17 6v6M19 6v6M21 6v6M23 6v6M25 6v6M27 6v6M29 6v6M33 6v6M35 6v6M37 6v6M39 6v6M41 6v6M43 6v6M45 6v6M49 6v6M51 6v6M53 6v6M55 6v6M57 6v6M61 6v6M63 6v6M65 6v6M69 6v6M71 6v6M73 6v6M75 6v6M77 6v6M79 6v6M83 6v6M85 6v6M87 6v6M89 6v6M91 6v6M93 6v6M95 6v6M97 6v6M99 6v6M101 6v6M103 6v6M105 6v6M111 6v6M115 6v6M119 6v6M123 6v6M125 6v6M127 6v6M129 6v6M135 6v6M137 6v6M141 6v6M145 6v6M149 6v6M153 6v6M155 6v6M157 6v6M159 6v6M163 6v6M167 6v6M169 6v6M173 6v6M177 6v6M179 6v6M183 6v6M185 6v6M187 6v6M191 6v6M193 6v6M199 6v6M203 6v6M207 6v6M211 6v6M213 6v6M215 6v6M217 6v6M221 6v6M225 6v6M227 6v6M229 6v6M233 6v6M235 6v6M237 6v6M241 6v6M245 6v6M247 6v6M249 6v6M253 6v6M257 6v6M259 6v6M261 6v6M263 6v6M267 6v6M269 6v6M273 6v6M275 6v6M279 6v6M281 6v6M285 6v6M289 6v6M293 6v6M295 6v6M297 6v6M301 6v6M303 6v6M305 6v6M307 6v6M311 6v6M315 6v6M317 6v6M319 6v6M323 6v6M325 6v6M329 6v6M331 6v6M333 6v6M337 6v6M343 6v6M347 6v6M349 6v6M353 6v6M355 6v6M359 6v6M361 6v6M365 6v6M369 6v6M371 6v6M373 6v6M375 6v6M377 6v6M381 6v6M383 6v6M385 6v6M389 6v6M391 6v6M393 6v6M397 6v6M399 6v6M401 6v6M405 6v6M409 6v6M411 6v6M413 6v6M415 6v6M419 6v6M423 6v6M425 6v6M427 6v6M431 6v6M435 6v6M439 6v6M443 6v6M447 6v6M449 6v6M451 6v6M453 6v6M455 6v6M457 6v6M459 6v6M463 6v6M465 6v6M467 6v6M469 6v6M471 6v6M473 6v6M477 6v6M479 6v6M481 6v6M485 6v6M487 6v6M489 6v6M491 6v6M493 6v6M495 6v6M497 6v6M499 6v6M501 6v6M503 6v6M505 6v6M507 6v6M509 6v6M511 6v6M513 6v6M515 6v6M517 6v6M519 6v6M521 6v6M523 6v6M525 6v6M527 6v6M529 6v6M531 6v6M533 6v6M535 6v6M537 6v6M541 6v6M543 6v6M545 6v6M547 6v6M549 6v6M551 6v6M555 6v6M559 6v6M563 6v6M565 6v6M569 6v6M571 6v6M573 6v6M575 6v6M577 6v6M579 6v6M581 6v6M583 6v6M585 6v6M587 6v6M589 6v6M591 6v6M593 6v6M595 6v6M597 6v6M601 6v6M603 6v6M605 6v6M607 6v6M609 6v6M611 6v6M613 6v6M615 6v6M617 6v6M619 6v6M621 6v6M623 6v6M625 6v6M627 6v6M629 6v6M631 6v6M633 6v6M635 6v6M639 6v6M641 6v6M643 6v6M645 6v6M647 6v6M649 6v6M651 6v6M657 6v6M661 6v6M665 6v6M667 6v6M669 6v6M671 6v6M673 6v6M677 6v6M681 6v6M685 6v6M689 6v6M693 6v6M695 6v6M697 6v6M699 6v6M701 6v6M703 6v6M705 6v6M707 6v6M709 6v6M711 6v6M713 6v6M715 6v6M717 6v6M719 6v6M721 6v6M723 6v6M725 6v6M727 6v6M729 6v6M731 6v6M733 6v6M735 6v6M737 6v6M739 6v6M741 6v6"/><path class="ta" d="M3 2v14M9 2v14M31 2v14M47 2v14M59 2v14M67 2v14M81 2v14M107 2v14M109 2v14M113 2v14M117 2v14M121 2v14M131 2v14M133 2v14M139 2v14M143 2v14M147 2v14M151 2v14M161 2v14M165 2v14M171 2v14M175 2v14M181 2v14M189 2v14M195 2v14M197 2v14M201 2v14M205 2v14M209 2v14M219 2v14M223 2v14M231 2v14M239 2v14M243 2v14M251 2v14M255 2v14M265 2v14M271 2v14M277 2v14M283 2v14M287 2v14M291 2v14M299 2v14M309 2v14M313 2v14M321 2v14M327 2v14M335 2v14M339 2v14M341 2v14M345 2v14M351 2v14M357 2v14M363 2v14M367 2v14M379 2v14M387 2v14M395 2v14M403 2v14M407 2v14M417 2v14M421 2v14M429 2v14M433 2v14M437 2v14M441 2v14M445 2v14M461 2v14M475 2v14M483 2v14M539 2v14M553 2v14M557 2v14M561 2v14M567 2v14M599 2v14M637 2v14M653 2v14M655 2v14M659 2v14M663 2v14M675 2v14M679 2v14M683 2v14M687 2v14M691 2v14"/></svg><span class="data">86 applied · 285 rolled back · 371 trials</span></div>
         <div class="speed" aria-label="Trials per second, median of three runs">
           <div class="sp"><span class="data">Relate, in-process</span><i style="--w:100%"></i><b class="data">366.8/s</b></div>
           <div class="sp"><span class="data">Neo4j 2026.10.2, Docker</span><i style="--w:24.6%"></i><b class="data">90.2/s</b></div>
@@ -653,7 +659,7 @@ h1{font-size:clamp(40px,4.3vw,62px);line-height:1.03;max-width:14.5ch}
 <section class="close" aria-labelledby="close-h">
   <div class="wrap close-in">
     <h2 id="close-h">File the evidence, <em>not the whole house.</em></h2>
-    <div class="cmd big"><code>git clone https://github.com/edycutjong/witness &amp;&amp; cd witness &amp;&amp; uv run witness demo</code><button type="button" class="copy" data-copy="git clone https://github.com/edycutjong/witness &amp;&amp; cd witness &amp;&amp; uv run witness demo" aria-label="Copy the clone and run commands">copy</button></div>
+    <div class="cmd big"><code>git clone https://github.com/edycutjong/witness &amp;&amp; cd witness<br>uv run witness demo</code><button type="button" class="copy" data-copy="git clone https://github.com/edycutjong/witness &amp;&amp; cd witness &amp;&amp; uv run witness demo" aria-label="Copy the clone and run commands">copy</button></div>
     <p class="fine">Needs uv. The repository opens at submission; until then the clone does not resolve and the recorded run below is the output.</p>
     <div class="ctas"><span class="src-pending"><svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M7 5L2 10l5 5M13 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>Source on GitHub opens at submission</span><a class="btn solid" href="/deck/">Pitch deck</a><a class="btn" href="/judge/">For judges</a></div>
   </div>

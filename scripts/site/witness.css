@@ -82,3 +82,4 @@ img,svg{max-width:100%}
 .chip{display:inline-block;font:12px/1 var(--font-data);color:var(--muted);border:1px solid var(--rule);border-radius:99px;padding:5px 9px;text-decoration:none;background:var(--paper);transition:border-color .18s,color .18s}
 a.chip:hover{border-color:var(--ink);color:var(--ink)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+.term pre,.term .ln,.cy,.cmd10,.inst text{font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0}

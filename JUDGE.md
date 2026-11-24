@@ -18,7 +18,7 @@ Witness is built on Relate, the embedded graph database, for the Relate by Neo4j
 | **22 of 22** | deleting any one relationship changes the answer; checked on relate-db and on the Relate CLI (`22 of 22 change the answer`) |
 | **371 trials · 1.095 s** | delete, re-run, roll back; 86 deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`) |
 | **366.8 vs 90.2** | trials per second, Relate in-process vs Neo4j 2026.10.2 in Docker, median of 3 runs on one machine (`evidence/neo4j-compare-2026-11-24.md`) |
-| **499 tests · 100% coverage** | real Relate, no mocks of the graph store; the only stand-ins are `relate pull` (needs a Neo4j server) and injected faults (`evidence/pytest-2026-11-24.txt`, `pytest --cov=witness`, gate in `pyproject.toml`) |
+| **499 tests · 100% coverage** | real Relate; the graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls or a failing CLI to force rare branches (`evidence/pytest-2026-11-24.txt`, `pytest --cov=witness`, gate in `pyproject.toml`) |
 | **byte-identical** | the same query and seed give the same witness on 2 runs (`evidence/determinism.json`) |
 
 ## Reproduce it

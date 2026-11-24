@@ -269,7 +269,7 @@ RECEIPTS = [
     (f"{w_rels} of {w_rels}", f"deleting any one relationship changes the answer; checked on relate-db and on the Relate CLI (`{check}`)"),
     (f"{trials} trials · {secs} s", f"delete, re-run, roll back; {COMMITS} deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`)"),
     (f"{relate_tps} vs {neo_tps}", f"trials per second, Relate in-process vs Neo4j {cmp['neo4j']['components'][0]['v']} in Docker, median of 3 runs on one machine (`evidence/{cmp_path.with_suffix('.md').name}`)"),
-    (f"{TESTS} tests · 100% coverage", f"real Relate, no mocks of the graph store; the only stand-ins are `relate pull` (needs a Neo4j server) and injected faults (`evidence/{pytest_log.name}`, `pytest --cov=witness`, gate in `pyproject.toml`)"),
+    (f"{TESTS} tests · 100% coverage", f"real Relate; the graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls or a failing CLI to force rare branches (`evidence/{pytest_log.name}`, `pytest --cov=witness`, gate in `pyproject.toml`)"),
     ("byte-identical", f"the same query and seed give the same witness on {len(det['runs'])} runs (`evidence/determinism.json`)"),
 ]
 REPRO = [

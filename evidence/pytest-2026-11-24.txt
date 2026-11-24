@@ -2,4 +2,4 @@
 # local CI, 2026-11-24 07:34 +0700; Darwin arm64; relate Relate v1.0.1; Python 3.12.13
 499 passed in 110.58s (0:01:50)
 TOTAL 2556 statements, 826 branches, 0 missed: 100.00% (full output in evidence/ci-local-2026-11-24.txt)
-# re-run after raising requires-python to >=3.11 (the 3.10 lock entry pinned filelock 4.1.0, which has open advisories): 499 passed, 100.00% on Python 3.11.x and on 3.12.13 (2026-11-24 08:0x +0700)
+# re-run after raising requires-python to >=3.11 (the 3.10 lock entry pinned filelock 4.1.0, which has open advisories): 499 passed, 100.00% on Python 3.11 and on 3.12 (2026-11-24 08:03 +0700; Python 3.11.15, Python 3.12.13)

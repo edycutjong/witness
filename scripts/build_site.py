@@ -158,7 +158,7 @@ footer{{margin-top:56px;font-size:14px;color:var(--muted);max-width:70ch}}
 <p>Deletion-minimal means no single remaining relationship can be removed without changing the answer. It does not mean smallest possible.
 Numbers on this page are read from the committed files in the repository (<code>witnesses/two-hub.manifest.json</code>, <code>evidence/{cmp_name}</code>) by <code>scripts/build_site.py</code>.
 A work-in-progress page: the full write-up comes later. Apache-2.0.</p>
-<p><a class="chip" id="ver" href="{releases}" aria-label="Latest release">{version_tag}</a> <a class="chip" href="judge/">For judges</a></p>
+<p><a class="chip" id="ver" href="{releases}" title="Latest release">{version_tag}</a> <a class="chip" href="judge/">For judges</a></p>
 </footer>
 </main>
 <script>
@@ -257,37 +257,39 @@ CLAIM = (
 )
 LIVE = SITE_URL + "/"
 EXHIBIT = SITE_URL + "/exhibit/two-hub.html"
+OPENS = "" if REPO_PUBLIC else " (the repository opens at submission)"
+OPENS_LINE = "" if REPO_PUBLIC else "The repository opens at submission; until then use the live pages above."
 PATH30 = [
     ("Open the landing page", LIVE, f"the agent's answer, the {w_rels} relationships it rests on, and the check line; nothing to install"),
     ("Open the exhibit page", EXHIBIT, "the register of kept relationships, each tagged as one whose deletion changes the answer"),
-    ("Optional, one command", None, "`git clone " + REPO + " && cd witness && uv run witness demo` (needs uv; the repository opens at submission)"),
+    ("Optional, one command", None, "`git clone " + REPO + " && cd witness && uv run witness demo` (needs uv)" + OPENS),
 ]
 RECEIPTS = [
     (f"{fmt(src_rels)} → {w_rels}", f"relationships in the air-routes graph vs in the witness ({fmt(src_nodes)} nodes → {w_nodes} nodes in the witness graph; `witnesses/two-hub.manifest.json`)"),
     (f"{w_rels} of {w_rels}", f"deleting any one relationship changes the answer; checked on relate-db and on the Relate CLI (`{check}`)"),
     (f"{trials} trials · {secs} s", f"delete, re-run, roll back; {COMMITS} deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`)"),
     (f"{relate_tps} vs {neo_tps}", f"trials per second, Relate in-process vs Neo4j {cmp['neo4j']['components'][0]['v']} in Docker, median of 3 runs on one machine (`evidence/{cmp_path.with_suffix('.md').name}`)"),
-    (f"{TESTS} tests · 100% coverage", f"real Relate, no mocks of the graph store (`evidence/{pytest_log.name}`, `pytest --cov=witness --cov-fail-under=100`)"),
+    (f"{TESTS} tests · 100% coverage", f"real Relate, no mocks of the graph store; the only stand-ins are `relate pull` (needs a Neo4j server) and injected faults (`evidence/{pytest_log.name}`, `pytest --cov=witness`, gate in `pyproject.toml`)"),
     ("byte-identical", f"the same query and seed give the same witness on {len(det['runs'])} runs (`evidence/determinism.json`)"),
 ]
 REPRO = [
     "git clone " + REPO + " && cd witness",
     "uv run witness demo",
 ]
-REPLAY = "uv run pytest  # CI / deterministic replay of the whole suite against real Relate; not the product path"
+REPLAY = "CI / deterministic replay, not the product path: uv run pytest --cov=witness (the whole suite against real Relate)"
 LIMITS = [
     "Deletion-minimal, not smallest: no single remaining relationship can be removed without changing the answer; a smaller witness may exist.",
     "Read-only, deterministic Cypher only. Witness refuses writes, procedures, clocks and randomness (exit 2) rather than guess.",
     "One headline graph (a public air-routes dataset, Apache-2.0) and one headline query. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
 ]
-LINKS = [("Repository", REPO + " (opens at submission)"), ("Live site", LIVE), ("Exhibit page", EXHIBIT), ("Relate", "https://relatedb.ai")]
+LINKS = [("Repository", REPO + OPENS), ("Live site", LIVE), ("Exhibit page", EXHIBIT), ("Relate", "https://relatedb.ai")]
 
-md = ["# For judges", "", f"**The claim.** {CLAIM}", "", "## The 30-second path", ""]
+md = ["# For judges", "", f"**The claim.** {CLAIM}", "", "Witness is built on Relate, the embedded graph database, for the Relate by Neo4j hackathon.", "", "## The 30-second path", ""]
 for i, (t, u, d) in enumerate(PATH30, 1):
     md.append(f"{i}. {f'[{t}]({u})' if u else t}: {d}.")
 md += ["", "## The receipts", "", "| Number | What it is |", "|---|---|"]
 md += [f"| **{a}** | {b} |" for a, b in RECEIPTS]
-md += ["", "## Reproduce it", "", "```bash", *REPRO, "```", "", f"`{REPLAY}`", "", "## Honest limitations", ""]
+md += ["", "## Reproduce it", "", "```bash", *REPRO, "```", "", *([OPENS_LINE, ""] if OPENS_LINE else []), f"{REPLAY}", "", "## Honest limitations", ""]
 md += [f"- {x}" for x in LIMITS]
 md += ["", "## Links", ""] + [f"- {a}: {b}" for a, b in LINKS] + [""]
 (ROOT / "JUDGE.md").write_text("\n".join(md))
@@ -315,9 +317,10 @@ table{{border-collapse:collapse;width:100%}}td{{border-top:1px solid var(--rule)
 <p><a href="/">&larr; Witness</a></p>
 <h1>For judges</h1>
 <p class="claim" id="claim">{claim}</p>
+<p>Witness is built on Relate, the embedded graph database, for the Relate by Neo4j hackathon.</p>
 <h2>The 30-second path</h2><ol>{path}</ol>
 <h2>The receipts</h2><table>{receipts}</table>
-<h2>Reproduce it</h2><pre>{repro}</pre><p>{replay}</p>
+<h2>Reproduce it</h2><pre>{repro}</pre>{opens_line}<p>{replay}</p>
 <h2>Honest limitations</h2><ul>{limits}</ul>
 <h2>Links</h2><ul>{links}</ul>
 </main></body></html>
@@ -336,7 +339,8 @@ def _link(u):
         ),
         receipts="".join(f"<tr><td>{html.escape(a)}</td><td>{inline(b)}</td></tr>" for a, b in RECEIPTS),
         repro=html.escape("\n".join(REPRO)),
-        replay=inline(f"`{REPLAY}`"),
+        replay=inline(REPLAY),
+        opens_line=f"<p>{OPENS_LINE}</p>" if OPENS_LINE else "",
         limits="".join(f"<li>{inline(x)}</li>" for x in LIMITS),
         links="".join(f"<li>{html.escape(a)}: {_link(b)}</li>" for a, b in LINKS),
     )

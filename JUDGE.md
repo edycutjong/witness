@@ -2,11 +2,13 @@
 
 **The claim.** When an agent answers from a graph, Witness hands back the graph that reproduces the answer (57,645 relationships → 22) and proves each relationship in it is needed.
 
+Witness is built on Relate, the embedded graph database, for the Relate by Neo4j hackathon.
+
 ## The 30-second path
 
 1. [Open the landing page](https://witness-wheat.vercel.app/): the agent's answer, the 22 relationships it rests on, and the check line; nothing to install.
 2. [Open the exhibit page](https://witness-wheat.vercel.app/exhibit/two-hub.html): the register of kept relationships, each tagged as one whose deletion changes the answer.
-3. Optional, one command: `git clone https://github.com/edycutjong/witness && cd witness && uv run witness demo` (needs uv; the repository opens at submission).
+3. Optional, one command: `git clone https://github.com/edycutjong/witness && cd witness && uv run witness demo` (needs uv) (the repository opens at submission).
 
 ## The receipts
 
@@ -16,7 +18,7 @@
 | **22 of 22** | deleting any one relationship changes the answer; checked on relate-db and on the Relate CLI (`22 of 22 change the answer`) |
 | **371 trials · 1.095 s** | delete, re-run, roll back; 86 deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`) |
 | **366.8 vs 90.2** | trials per second, Relate in-process vs Neo4j 2026.10.2 in Docker, median of 3 runs on one machine (`evidence/neo4j-compare-2026-11-24.md`) |
-| **499 tests · 100% coverage** | real Relate, no mocks of the graph store (`evidence/pytest-2026-11-24.txt`, `pytest --cov=witness --cov-fail-under=100`) |
+| **499 tests · 100% coverage** | real Relate, no mocks of the graph store; the only stand-ins are `relate pull` (needs a Neo4j server) and injected faults (`evidence/pytest-2026-11-24.txt`, `pytest --cov=witness`, gate in `pyproject.toml`) |
 | **byte-identical** | the same query and seed give the same witness on 2 runs (`evidence/determinism.json`) |
 
 ## Reproduce it
@@ -26,7 +28,9 @@ git clone https://github.com/edycutjong/witness && cd witness
 uv run witness demo
 ```
 
-`uv run pytest  # CI / deterministic replay of the whole suite against real Relate; not the product path`
+The repository opens at submission; until then use the live pages above.
+
+CI / deterministic replay, not the product path: uv run pytest --cov=witness (the whole suite against real Relate)
 
 ## Honest limitations
 
@@ -36,7 +40,7 @@ uv run witness demo
 
 ## Links
 
-- Repository: https://github.com/edycutjong/witness (opens at submission)
+- Repository: https://github.com/edycutjong/witness (the repository opens at submission)
 - Live site: https://witness-wheat.vercel.app/
 - Exhibit page: https://witness-wheat.vercel.app/exhibit/two-hub.html
 - Relate: https://relatedb.ai

@@ -1,9 +1,10 @@
 name: gitleaks
 
+# Stage 2 of ci.yml already scans the full history on every push and PR. This workflow re-scans the whole history weekly
+# (new rules, old commits) and on demand, e.g. right before the repository goes public.
 on:
-  push:
-    branches: [main]
-  pull_request:
+  schedule:
+    - cron: '41 4 * * 1'
   workflow_dispatch:
 
 permissions:

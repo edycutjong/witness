@@ -18,8 +18,12 @@ witness = "witness.cli:main"
 
 [dependency-groups]
 dev = [
+    "coverage>=7.16.2",
     "mcp>=2.3,<3",
+    "mypy>=2.4.1",
+    "pip-audit>=2.10.1",
     "pytest>=8",
+    "pytest-cov>=7.1.0",
     "ruff>=0.6",
 ]
 
@@ -45,3 +49,13 @@ select = ["E", "F", "W", "I", "B", "UP"]
 [tool.ruff.lint.per-file-ignores]
 "scripts/build_site.py" = ["E501"]  # the inline HTML/CSS template of the landing page
 "src/witness/export.py" = ["E501"]  # the inline HTML/CSS template of the exhibit view
+
+[tool.coverage.run]
+source = ["witness"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+skip_covered = true
+exclude_also = ["if TYPE_CHECKING:"]

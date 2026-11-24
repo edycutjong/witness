@@ -23,6 +23,7 @@ section{position:relative}
 
 /* ── hero ── */
 .hero{padding:46px 0 54px}
+.hero .wrap{max-width:1360px}
 .hero-in{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:54px;align-items:start}
 .eyebrow{margin:0 0 22px}
 h1{font-size:clamp(40px,4.2vw,60px);line-height:1.03;max-width:none}
@@ -44,10 +45,10 @@ h1{font-size:clamp(40px,4.2vw,60px);line-height:1.03;max-width:none}
 .answer .stamp{font-size:12px;padding:7px 10px 6px}
 .stage{position:relative;margin:6px 0 0}
 .note{position:absolute;left:4px;bottom:2px;margin:0;font-size:12.5px;color:var(--muted);opacity:0;transition:opacity .3s}
-.slam{position:absolute;right:10px;bottom:10px;font-size:14px;background:rgba(250,244,232,.86)}
+.slam{position:absolute;right:10px;bottom:10px;font-size:16px;background:rgba(250,244,232,.86)}
 .meter{display:flex;align-items:end;gap:28px;padding:10px 0 8px;border-top:1px solid var(--rule)}
 .ctr{display:grid;grid-template-columns:auto;gap:2px}
-.ctr b{font-size:30px;line-height:1;font-weight:400;font-variant-numeric:tabular-nums;min-width:4.6ch}
+.ctr b{font-size:34px;line-height:1;font-weight:400;font-variant-numeric:tabular-nums;min-width:4.6ch}
 #c-rels.kept{color:var(--after)}
 .ctr .of{font-size:12px;color:var(--muted)}
 .replay{margin-left:auto;min-height:38px;font-size:14px;padding:0 14px}

@@ -142,7 +142,7 @@ def schematic(prefix: str, ghost: bool) -> str:
     out = [
         f'<svg class="inst" viewBox="{box}" role="img" aria-labelledby="{prefix}-t">',
         f'<title id="{prefix}-t">The witness: 22 relationships among 12 nodes (10 airports, 2 countries), '
-        f"each tagged with its exhibit number</title>",
+        f"the 13 routes carry numbered exhibit tags, the 9 country links show as country codes</title>",
     ]
     if ghost:
         # four waves, farthest from MEX first (the replay fades them in this order)

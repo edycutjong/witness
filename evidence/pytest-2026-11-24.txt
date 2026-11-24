@@ -1,4 +1,4 @@
-# uv run pytest, recorded 2026-11-24 (06:58 +0700)
-........................................................................ [ 74%]
-..................................................                       [100%]
-194 passed in 60.66s (0:01:00)
+# uv run pytest --cov=witness (100% line+branch gate), recorded 2026-11-24 (07:34 +0700), re-run in P3; supersedes the 194-test run
+# local CI, 2026-11-24 07:34 +0700; Darwin arm64; relate Relate v1.0.1; Python 3.12.13
+499 passed in 110.58s (0:01:50)
+TOTAL 2556 statements, 826 branches, 0 missed: 100.00% (full output in evidence/ci-local-2026-11-24.txt)

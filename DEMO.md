@@ -57,8 +57,10 @@ uv run --extra mcp python scripts/mcp_transcript.py
 
 Writes `evidence/mcp-transcript.md`: a real stdio session calling both tools.
 
-## 6. Tests: 194 pass
+## 6. Tests: 499 pass, 100% coverage
 
 ```bash
-uv run pytest
+uv run pytest --cov=witness   # fails below 100% line + branch coverage (pyproject.toml)
 ```
+
+The run is recorded in `evidence/pytest-2026-11-24.txt` and `evidence/ci-local-2026-11-24.txt` (ruff, mypy, pytest, pip-audit, gitleaks, build, performance gate on one machine).

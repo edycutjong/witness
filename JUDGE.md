@@ -16,7 +16,7 @@
 | **22 of 22** | deleting any one relationship changes the answer; checked on relate-db and on the Relate CLI (`22 of 22 change the answer`) |
 | **371 trials · 1.095 s** | delete, re-run, roll back; 86 deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`) |
 | **366.8 vs 90.2** | trials per second, Relate in-process vs Neo4j 2026.10.2 in Docker, median of 3 runs on one machine (`evidence/neo4j-compare-2026-11-24.md`) |
-| **194 tests · 100% coverage** | real Relate, no mocks of the graph store (`evidence/pytest-2026-11-24.txt`, `pytest --cov=witness --cov-fail-under=100`) |
+| **499 tests · 100% coverage** | real Relate, no mocks of the graph store (`evidence/pytest-2026-11-24.txt`, `pytest --cov=witness --cov-fail-under=100`) |
 | **byte-identical** | the same query and seed give the same witness on 2 runs (`evidence/determinism.json`) |
 
 ## Reproduce it

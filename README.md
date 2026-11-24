@@ -7,13 +7,16 @@
   <br/>
 
   [![Live Site](https://img.shields.io/badge/🚀_Live-Site-B42318?style=for-the-badge)](https://witness-wheat.vercel.app)
+  [![For judges](https://img.shields.io/badge/For_judges-open_%2Fjudge-1F1A14?style=for-the-badge)](https://witness-wheat.vercel.app/judge/)
   [![Relate by Neo4j Hackathon](https://img.shields.io/badge/Devpost-Relate_by_Neo4j_Hackathon-1F1A14?style=for-the-badge)](https://relate.devpost.com/)
 
   <br/>
 
+  [![CI](https://github.com/edycutjong/witness/actions/workflows/ci.yml/badge.svg)](https://github.com/edycutjong/witness/actions/workflows/ci.yml)
+  [![Release](https://img.shields.io/github/v/release/edycutjong/witness?sort=semver)](https://github.com/edycutjong/witness/releases/latest)
   ![Python](https://img.shields.io/badge/Python_3.12-3776AB?style=flat&logo=python&logoColor=white)
   ![Relate](https://img.shields.io/badge/Relate_1.0.1-1F1A14?style=flat)
-  ![Tests](https://img.shields.io/badge/tests-194-2ea043?style=flat)
+  ![Tests](https://img.shields.io/badge/tests-499-2ea043?style=flat)
   [![License](https://img.shields.io/badge/License-Apache_2.0-yellow)](LICENSE)
 
 </div>
@@ -145,11 +148,20 @@ rollback, which excludes it on both sides, is p50 2.54 vs 6.48 ms (median of the
 ## 🧪 Testing & CI
 
 ```bash
-uv run pytest        # 194 tests
+make ci                          # ruff, mypy, pytest with the 100% coverage gate, pip-audit, gitleaks
+uv run pytest --cov=witness      # 499 tests against real Relate, 100% line + branch coverage
 ```
 
 Reproduce every number in this README: [DEMO.md](DEMO.md). Raw evidence and the machine/version of each run:
-`evidence/`. GitHub Actions CI is defined in `.github/workflows/ci.yml`.
+`evidence/` (this suite's run: `evidence/ci-local-2026-11-24.txt`). The tests use real Relate, not mocks of the graph store.
+
+GitHub Actions (`.github/workflows/ci.yml`) runs six stages: **Quality** (ruff, mypy, tests with the coverage gate; Python 3.10
+and 3.12 on `main`) and **Security** (gitleaks over the full history, pip-audit) in parallel, then **Build** (wheel, sdist,
+the site checked against the committed evidence), **E2E** (the built wheel: `witness demo`, the plain Relate CLI re-running the
+committed witness, the site and `/judge/` with no credentials), **Performance** (a throughput floor) and a **Deploy Gate**.
+CodeQL and secret scanning run on their own; releases are cut from Angular-style commit messages
+(`.github/workflows/release.yml`); Dependabot proposes grouped minor and patch updates monthly and never a major.
+For judges: [JUDGE.md](JUDGE.md), also served at <https://witness-wheat.vercel.app/judge/>.
 
 ## 📽️ Demo Materials
 

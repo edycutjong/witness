@@ -1,0 +1,38 @@
+name: Install the Relate CLI
+description: Pinned, signature-checked install of the Relate CLI (steps of the Relate CI guide).
+inputs:
+  version:
+    description: Relate CLI version
+    default: '1.0.1'
+runs:
+  using: composite
+  steps:
+    - name: Restore the relate download
+      id: relate-cache
+      uses: actions/cache@v6
+      with:
+        path: relate-download
+        key: relate-${{ inputs.version }}-relate-linux-amd64
+
+    - name: Download relate
+      if: steps.relate-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        mkdir -p relate-download && cd relate-download
+        BASE="https://github.com/relatedb/relate/releases/download/v${{ inputs.version }}"
+        curl -sSfLO "$BASE/relate-linux-amd64"
+        curl -sSfLO "$BASE/SHA256SUMS"
+        curl -sSfLO "$BASE/SHA256SUMS.sig"
+
+    - name: Verify and install relate
+      shell: bash
+      working-directory: relate-download
+      run: |
+        SIGNER=relate-release
+        echo "$SIGNER ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHgv/GHY5mtv/HopH/J/T7KrTT7eOVFEG2ueT4iRKwbK $SIGNER" > allowed_signers
+        ssh-keygen -Y verify -f allowed_signers -I "$SIGNER" -n "$SIGNER" -s SHA256SUMS.sig < SHA256SUMS
+        test "$(head -n 1 SHA256SUMS)" = "# $SIGNER-version: v${{ inputs.version }}"
+        grep '  relate-linux-amd64$' SHA256SUMS | sha256sum -c -
+        mkdir -p "$HOME/.local/bin"
+        install -m 0755 relate-linux-amd64 "$HOME/.local/bin/relate"
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"

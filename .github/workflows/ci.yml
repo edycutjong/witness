@@ -1,77 +1,170 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   pull_request:
+    branches: [main]
   push:
     branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 env:
-  DO_NOT_TRACK: '1'
-  RELATE_VERSION: 1.0.1
-  RELATE_ASSET: relate-linux-amd64
-  RELATE_SIGNER: relate-release
+  DO_NOT_TRACK: '1'   # Relate telemetry is on by default
 
 jobs:
-  test:
+  # ── STAGE 1: Quality (parallel with Stage 2) ──────────────
+  quality:
+    name: "Stage 1 · Quality (py${{ matrix.python }})"
     runs-on: ubuntu-24.04
-    defaults:
-      run:
-        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both ends of the supported range on main, one interpreter on PRs
+        python: ${{ github.event_name == 'push' && fromJSON('["3.10", "3.12"]') || fromJSON('["3.12"]') }}
     steps:
       - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - uses: ./.github/actions/setup-relate
+      - name: Install
+        run: uv sync --locked
+      - name: Lint (ruff)
+        run: uv run ruff check --output-format=github .
+      - name: Typecheck (mypy)
+        run: uv run mypy src --ignore-missing-imports
+      - name: Tests + 100% coverage gate (real Relate, no mocks)
+        run: uv run pytest --cov=witness --cov-report=term-missing --cov-report=xml
+      - name: Upload coverage report
+        if: matrix.python == '3.12'
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage.xml
+          retention-days: 7
 
+  # ── STAGE 2: Security (parallel with Stage 1) ─────────────
+  secret-scan:
+    name: "Stage 2 · Secret scan (gitleaks, full history)"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dependency-audit:
+    name: "Stage 2 · Dependency audit (pip-audit)"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10
         with:
           python-version: '3.12'
+          enable-cache: true
+      - run: uv sync --locked
+      - name: pip-audit
+        run: uv run pip-audit --skip-editable
 
-      - name: Install
-        run: uv sync --locked
-
-      - name: Lint
-        run: uv run ruff check .
-
-      - name: Test (real Relate, no mocks)
-        run: uv run pytest
-
-      - name: witness --version
-        run: uv run witness --version
-
-      # Relate CLI 1.0.1 through the pinned, signature-checked steps of the Relate CI guide.
-      - name: Restore the relate download
-        id: relate-cache
-        uses: actions/cache@v6
+  # ── STAGE 3: Build ────────────────────────────────────────
+  build:
+    name: "Stage 3 · Build (wheel, sdist, site)"
+    needs: [quality, secret-scan, dependency-audit]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
         with:
-          path: relate-download
-          key: relate-${{ env.RELATE_VERSION }}-${{ env.RELATE_ASSET }}
-
-      - name: Download relate
-        if: steps.relate-cache.outputs.cache-hit != 'true'
+          python-version: '3.12'
+          enable-cache: true
+      - run: uv sync --locked
+      - name: Build wheel + sdist
+        run: uv build
+      - name: Installed wheel starts
         run: |
-          mkdir -p relate-download && cd relate-download
-          BASE="https://github.com/relatedb/relate/releases/download/v$RELATE_VERSION"
-          curl -sSfLO "$BASE/$RELATE_ASSET"
-          curl -sSfLO "$BASE/SHA256SUMS"
-          curl -sSfLO "$BASE/SHA256SUMS.sig"
-
-      - name: Verify and install relate
-        working-directory: relate-download
+          uv venv /tmp/wheel-check
+          uv pip install --python /tmp/wheel-check/bin/python dist/*.whl
+          /tmp/wheel-check/bin/witness --version
+      - name: Site and JUDGE.md are in sync with the committed evidence
         run: |
-          echo "$RELATE_SIGNER ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHgv/GHY5mtv/HopH/J/T7KrTT7eOVFEG2ueT4iRKwbK $RELATE_SIGNER" > allowed_signers
-          ssh-keygen -Y verify -f allowed_signers -I "$RELATE_SIGNER" -n "$RELATE_SIGNER" -s SHA256SUMS.sig < SHA256SUMS
-          test "$(head -n 1 SHA256SUMS)" = "# $RELATE_SIGNER-version: v$RELATE_VERSION"
-          grep "  $RELATE_ASSET\$" SHA256SUMS | sha256sum -c -
-          mkdir -p "$HOME/.local/bin"
-          install -m 0755 "$RELATE_ASSET" "$HOME/.local/bin/relate"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv run python scripts/build_site.py
+          git diff --exit-code -- site JUDGE.md
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
 
-      - name: Relate CLI re-runs the spike witness
+  # ── STAGE 4: E2E (the judge's path, from the built wheel) ─
+  e2e:
+    name: "Stage 4 · E2E (fresh install, demo, Relate CLI re-run, site)"
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version: '3.12'
+      - uses: ./.github/actions/setup-relate
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+      - name: witness demo from the built wheel
         run: |
-          relate --version
-          sed -e '/^\/\//d' -e "s/\$country/'MX'/g" -e "s/\$dest/'MEX'/g" queries/two-hub.cypher > /tmp/q.cypher
-          echo ';' >> /tmp/q.cypher
-          relate query --database evidence/spike-witness-two-hub.rl --read-only --mode json --max-rows 0 --timeout 30s \
-            < /tmp/q.cypher | tee /tmp/out.json
-          grep -q '"airport":"UPN"' /tmp/out.json
+          uv venv /tmp/e2e
+          uv pip install --python /tmp/e2e/bin/python "$(ls dist/*.whl)[mcp]"
+          /tmp/e2e/bin/witness demo --out /tmp/e2e-out | tee /tmp/demo.txt
+          grep -q "22 of 22 change the answer" /tmp/demo.txt
+      - name: Relate CLI re-runs the committed witness (plain relate, no witness code)
+        run: |
+          relate query --database witnesses/two-hub.rl --read-only --param country=MX --param dest=MEX \
+            < queries/two-hub.cypher | tee /tmp/relate-out.txt
+          grep -q UPN /tmp/relate-out.txt
+      - name: Landing, exhibit and /judge answer with no credentials
+        run: |
+          python3 -m http.server 8765 --directory site >/dev/null 2>&1 &
+          sleep 1
+          for p in / /judge/ /exhibit/two-hub.html; do
+            test "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8765$p")" = 200
+          done
+          curl -s http://127.0.0.1:8765/judge/ | grep -q "proves each relationship in it is needed"
+          curl -s http://127.0.0.1:8765/ | grep -q 'id="ver"'
+
+  # ── STAGE 5: Performance ──────────────────────────────────
+  performance:
+    name: "Stage 5 · Performance (reduction throughput floor)"
+    needs: e2e
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version: '3.12'
+          enable-cache: true
+      - uses: ./.github/actions/setup-relate
+      - run: uv sync --locked
+      - run: uv run python scripts/perf_gate.py
+
+  # ── STAGE 6: Deploy Gate ──────────────────────────────────
+  deploy-gate:
+    name: "Stage 6 · Deploy Gate"
+    needs: [quality, secret-scan, dependency-audit, build, e2e, performance]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Every stage must have succeeded
+        run: |
+          echo '${{ toJSON(needs) }}' | tee /tmp/needs.json
+          if grep -q '"result": "\(failure\|cancelled\|skipped\)"' /tmp/needs.json; then
+            echo "::error::a stage did not pass; do not deploy"; exit 1
+          fi
+          echo "All six stages passed. The Vercel site is deployed from the committed site/ directory by the owner." >> "$GITHUB_STEP_SUMMARY"

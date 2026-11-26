@@ -4,7 +4,8 @@ for all 371 trials instead of the counter's 50 ms samples.
 
 It re-runs the seed-0 reduction of `witness demo` with pass-through wrappers on `Reducer.test` and `Reducer.commit`
 (they only record; nothing about the reduction changes), then checks that its per-trial (n, phase, rels, nodes,
-holds) sequence is identical to the committed witnesses/two-hub.trace.json, and stops without writing if it is not.
+holds) sequence is identical to the committed witnesses/two-hub.trace.json and that it ends at the manifest's witness
+counts, and stops without writing if either is not. Start counts come from the manifest's source, never from literals.
 
     uv run python bench/trial_counters.py   -> evidence/trial-counters-2026-11-27.json
 """
@@ -22,6 +23,7 @@ os.environ.setdefault("DO_NOT_TRACK", "1")
 
 from witness import cli  # noqa: E402
 from witness import reduce as R  # noqa: E402
+from witness.pipeline import relate_version  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "evidence" / "trial-counters-2026-11-27.json"
@@ -57,13 +59,18 @@ def main() -> int:
         print("per-trial sequence differs from witnesses/two-hub.trace.json; nothing written", file=sys.stderr)
         return 1
     start = json.loads((ROOT / "witnesses" / "two-hub.manifest.json").read_text())
-    nodes, rels = 3748, 57645
+    nodes, rels = start["source"]["nodes"], start["source"]["relationships"]
     by_trial = {n: (a, b) for n, a, b in counts_after}
     rows = []
     for t in log:
         if t["n"] in by_trial:
             nodes, rels = by_trial[t["n"]]
         rows.append({**t, "nodes_left": nodes, "rels_left": rels})
+    last = rows[-1]
+    final = (last["rels_left"], last["nodes_left"])
+    if final != (start["witness"]["relationships"], start["witness"]["nodes"]):
+        print(f"final counts {final} differ from witnesses/two-hub.manifest.json; nothing written", file=sys.stderr)
+        return 1
     OUT.write_text(
         json.dumps(
             {
@@ -72,6 +79,7 @@ def main() -> int:
                 "matches": "witnesses/two-hub.trace.json, trial by trial (n, phase, rels, nodes, holds)",
                 "source_sha256": start["source"]["sha256"],
                 "machine": f"{platform.system()} {platform.machine()} · Python {platform.python_version()}",
+                "relate_db": relate_version(),
                 "trials": rows,
             },
             indent=1,
@@ -79,7 +87,6 @@ def main() -> int:
         + "\n"
     )
     kept = sum(1 for r in rows if r["holds"])
-    last = rows[-1]
     print(f"{len(rows)} trials, {kept} kept, final {last['rels_left']} rels / {last['nodes_left']} nodes -> {OUT.name}")
     return 0
 

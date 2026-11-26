@@ -3,6 +3,7 @@
  "matches": "witnesses/two-hub.trace.json, trial by trial (n, phase, rels, nodes, holds)",
  "source_sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734",
  "machine": "Darwin arm64 \u00b7 Python 3.12.13",
+ "relate_db": "1.0.1",
  "trials": [
   {
    "n": 1,

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Witness · pitch deck</title>
-<meta name="description" content="When an agent answers from a graph, Witness hands back the 22 of 57,645 relationships the answer rests on and proves each one is needed.">
+<meta name="description" content="When an agent answers from a graph, Witness hands back 22 of its 57,645 relationships that reproduce the answer, and proves deleting any one of them changes it.">
 <meta name="author" content="edycutjong">
 <meta name="theme-color" content="#F2E8D5">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
@@ -12,7 +12,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Witness">
 <meta property="og:title" content="Witness · pitch deck">
-<meta property="og:description" content="57,645 relationships → the 22 an agent&#x27;s answer rests on. Delete any one and the answer changes.">
+<meta property="og:description" content="57,645 relationships → 22 that reproduce an agent&#x27;s answer. Delete any one of the 22 and it changes.">
 <meta property="og:url" content="https://witness-wheat.vercel.app/deck/">
 <meta property="og:image" content="https://witness-wheat.vercel.app/og-image.png?v=4e6a2d4838">
 <meta property="og:image:width" content="1200">
@@ -355,7 +355,7 @@ body.ov .frame.on{box-shadow:0 0 0 10px var(--ink)}
     <pre><span class="ln"><b class="h">WITNESS</b>  22 relationships · 12 nodes, out of 57,645 · 3,748</span><span class="ln">  68 relationships match the answer rows; 22 of them suffice</span><span class="ln"><b class="k">CHECK  22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)</b></span><span class="ln">  relate CLI: sufficiency + 22 of 22 necessity probes cross-checked</span><span class="ln"><b class="h">PROVE ONE</b>  delete exhibit 9 (PBC)-[:HAS_ROUTE]-&gt;(DFW) from a copy of W, re-run</span><span class="ln">  CHANGED: 4 rows → 3 rows (PBC drops out)</span></pre>
     <figcaption class="t-cap data">Recorded 2026-11-24 00:58:52 UTC · <code>evidence/demo-2026-11-24.txt</code> · lines selected, order kept</figcaption>
   </figure>
-  <aside class="notes">Open on the claim: Witness takes a graph-backed answer and hands back only the relationships it rests on. The terminal is the real run a judge gets from one command; the numbers on every slide come from files in the repository.</aside>
+  <aside class="notes">Open on the claim: Witness takes a graph-backed answer and hands back a small set of relationships that still gives the same answer, each one needed. The terminal is the real run a judge gets from one command; the numbers on every slide come from files in the repository.</aside>
 <div class="pfoot"><span><b>Witness</b> · v0.1.0 · witness-wheat.vercel.app</span><span>1 / 10</span></div>
 </section>
 
@@ -544,7 +544,7 @@ ORDER BY airport</pre>
   <div class="proofs">
     <div class="pf"><b><em>22</em><i>of</i>22</b><span>change the answer, on relate-db and on the Relate CLI</span><code>witnesses/two-hub.manifest.json</code></div>
     <div class="pf"><b>2<i>runs</i></b><span>byte-identical rebuild script (.cypher) from the same query and seed</span><code>evidence/determinism.json</code></div>
-    <div class="pf"><b>499</b><span>tests on real Relate, 100% line and branch coverage</span><code>evidence/pytest-2026-11-24.txt</code></div>
+    <div class="pf"><b>505</b><span>tests on real Relate, 100% line and branch coverage</span><code>evidence/pytest-2026-11-26.txt</code></div>
   </div>
   <aside class="notes">witness check re-proves sufficiency and every necessity probe on the Python API and again through the Relate CLI. Determinism is claimed only because two runs gave a byte-identical .cypher rebuild script. The test suite runs on real Relate; relate pull is stood in because it needs a Neo4j server.</aside>
 <div class="pfoot"><span><b>Witness</b> · v0.1.0 · witness-wheat.vercel.app</span><span>7 / 10</span></div>
@@ -576,14 +576,14 @@ ORDER BY airport</pre>
     <h2>An agent asks why, <em>and gets the evidence.</em></h2>
   </div>
   <figure class="term mcp m1">
-    <div class="bar"><span>witness · why</span><span class="sec">6.566 s</span></div>
-    <pre><span class="ln">Answer (4 rows): PBC, [&#x27;MX&#x27;, &#x27;US&#x27;]; QRO, [&#x27;MX&#x27;, &#x27;US&#x27;]; TLC, [&#x27;MX&#x27;, &#x27;US&#x27;]; UPN, [&#x27;MX&#x27;, &#x27;US&#x27;]</span><span class="ln"><b class="k">Evidence: 22 relationships (of 57,645) reproduce it; 22 of 22 change the answer — verified deletion-minimal.</b></span><span class="ln">verified=True · trials=371 · reduction 1.891 s · ledger r-20261123-025404-031aeda2</span></pre>
+    <div class="bar"><span>witness · why</span><span class="sec">6.053 s</span></div>
+    <pre><span class="ln">Answer (4 rows): PBC, [&#x27;MX&#x27;, &#x27;US&#x27;]; QRO, [&#x27;MX&#x27;, &#x27;US&#x27;]; TLC, [&#x27;MX&#x27;, &#x27;US&#x27;]; UPN, [&#x27;MX&#x27;, &#x27;US&#x27;]</span><span class="ln"><b class="k">Evidence: 22 relationships (of 57,645) reproduce it; 22 of 22 change the answer — verified deletion-minimal.</b></span><span class="ln">verified=True · trials=371 · reduction 1.403 s · ledger r-20261126-165220-e2688a8f</span></pre>
   </figure>
   <figure class="term mcp m2">
-    <div class="bar"><span>witness · why · a write</span><span class="sec">1.076 s</span></div>
+    <div class="bar"><span>witness · why · a write</span><span class="sec">0.975 s</span></div>
     <pre><span class="ln">// statement: MATCH (a:Airport) DETACH DELETE a RETURN 1</span><span class="ln">{</span><span class="ln">  &quot;error&quot;: {</span><span class="ln">    &quot;kind&quot;: &quot;query&quot;,</span><span class="ln">    &quot;message&quot;: &quot;write keyword DETACH (read-only queries only)&quot;</span><span class="ln">  },</span><span class="ln">  &quot;verified&quot;: false</span><span class="ln">}</span></pre>
   </figure>
-  <p class="src data">Excerpted from <code>evidence/mcp-transcript.md</code> (the exhibit list and the re-run path line are omitted; the <code>// statement:</code> line is from <code>mcp-transcript.json</code>) · scripted MCP client, no model in the loop · recorded 2026-11-23 02:54 UTC</p>
+  <p class="src data">Excerpted from <code>evidence/mcp-transcript.md</code> (the exhibit list and the re-run path line are omitted; the <code>// statement:</code> line is from <code>mcp-transcript.json</code>) · scripted MCP client, no model in the loop, its own run (timings vary run to run) · recorded 2026-11-26 16:52 UTC · with a real model: <code>evidence/mcp-agent-session.md</code></p>
   <aside class="notes">The agent sends its own question and answer to the why tool and gets the witness back, verified. A write statement is refused before anything runs. The check tool re-proves a witness file on demand.</aside>
 <div class="pfoot"><span><b>Witness</b> · v0.1.0 · witness-wheat.vercel.app</span><span>9 / 10</span></div>
 </section>

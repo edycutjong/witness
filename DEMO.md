@@ -55,12 +55,29 @@ The committed result is checked offline by the test suite: `uv run pytest tests/
 uv run --extra mcp python scripts/mcp_transcript.py
 ```
 
-Writes `evidence/mcp-transcript.md`: a real stdio session calling both tools.
+Writes `evidence/mcp-transcript.md`: a real stdio session calling both tools from a scripted client.
 
-## 6. Tests: 499 pass, 100% coverage
+With a real model in the loop: `evidence/mcp-agent-session.md` records claude-sonnet-5-5 in Claude Code (headless, only the two
+MCP servers enabled) writing its own Cypher and attaching the witness; the exact command, `mcp.json` and prompt are in that file.
+It needs a Claude Code login, so it is a recorded run, not a step of the judge path.
+
+## 6. Tests: 505 pass, 100% coverage
 
 ```bash
 uv run pytest --cov=witness   # fails below 100% line + branch coverage (pyproject.toml)
 ```
 
-The run is recorded in `evidence/pytest-2026-11-24.txt` and `evidence/ci-local-2026-11-24.txt` (ruff, mypy, pytest, pip-audit, gitleaks, build, performance gate on one machine).
+The run is recorded in `evidence/pytest-2026-11-26.txt` (505 passed; the 2 fixture-pull tests need a local Neo4j in Docker and
+skip without it) and the last full local CI run in `evidence/ci-local-2026-11-24.txt` (ruff, mypy, pytest, pip-audit, gitleaks, build, performance gate on one machine).
+
+## 7. Two queries disagree: 57,645 → 5, "5 of 5 end the disagreement"
+
+```bash
+uv run python bench/disagree_scan.py      # 232 pairs, 6 disagree → evidence/disagree-scan.json
+uv run witness why -f queries/two-hub-agent.cypher --other queries/two-hub.cypher --predicate disagree \
+  --strict-lists --param country=IN --param dest=DEL --name direction-bug
+```
+
+Expect exit 0, `5 of 5 end the disagreement`, 139 trials (`witnesses/direction-bug.manifest.json`; recorded run:
+`evidence/direction-bug-run.txt`). Plain `relate` on `witnesses/direction-bug.rl` returns AGR for the agent's query and no rows
+for the headline query (`tests/test_committed.py`).

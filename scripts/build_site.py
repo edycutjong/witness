@@ -98,7 +98,7 @@ FAQ = [
     ),
     (
         "How does an agent use it?",
-        "Over MCP. The <code>why</code> tool returns the witness of the agent's own answer and <code>check</code> re-proves it. A recorded session is committed in <code>evidence/mcp-transcript.md</code>.",
+        "Over MCP. The <code>why</code> tool returns the witness of the agent's own answer and <code>check</code> re-proves it. Two recorded sessions are committed: <code>evidence/mcp-transcript.md</code> (a scripted client) and <code>evidence/mcp-agent-session.md</code> (a real model, claude-sonnet-5-5 in Claude Code, writing its own Cypher and attaching the witness).",
     ),
 ]
 
@@ -114,9 +114,9 @@ def fill(tpl: str, vals: dict) -> str:
     return out
 
 
-DESC = f"When an agent answers from a graph, Witness hands back the {w_rels} of {fmt(src_rels)} relationships the answer rests on and proves each one is needed."
+DESC = f"When an agent answers from a graph, Witness hands back {w_rels} of its {fmt(src_rels)} relationships that reproduce the answer, and proves deleting any one of them changes it."
 DESC_OG = (
-    f"{fmt(src_rels)} relationships → the {w_rels} an agent's answer rests on. Delete any one and the answer changes."
+    f"{fmt(src_rels)} relationships → {w_rels} that reproduce an agent's answer. Delete any one of the {w_rels} and it changes."
 )
 assert 50 <= len(DESC) <= 160 and len(DESC_OG) <= 125, (len(DESC), len(DESC_OG))
 
@@ -143,11 +143,11 @@ def landing_page() -> str:
         ),
         (
             f'<em>{w_rels}</em><span class="to">of</span>{w_rels}',
-            "deleting any one changes the answer, checked on relate-db and on the Relate CLI",
+            "deleting any one from the witness changes the answer, checked on relate-db and on the Relate CLI",
         ),
         (
-            f'<span data-count="{relate_tps}">{relate_tps}</span><span class="to">vs</span>{neo_tps}',
-            "trials per second, Relate in-process vs Neo4j in Docker, one machine",
+            f'<span data-count="{cmp["targeted_agreement"]["rels"]}">{cmp["targeted_agreement"]["rels"]}</span><span class="to">→</span><em>{w_rels}</em>',
+            f"relationships the answer rows bind, then the witness: deleted from the full graph, only {cmp['targeted_agreement']['relate_changed']} of the {cmp['targeted_agreement']['rels']} change the answer",
         ),
         (
             f'<span data-count="{TESTS}">{TESTS}</span><span class="to">·</span>100%',
@@ -440,6 +440,10 @@ shutil.copyfile(ROOT / "docs" / "assets" / "og-image-1200.png", SITE / "og-image
 
 # ── /judge and JUDGE.md: one reader, one page, every number read from the committed files ───────────────────────────
 COMMITS = man["run"]["commits"]
+TA = cmp["targeted_agreement"]
+_db = json.loads((ROOT / "witnesses" / "direction-bug.manifest.json").read_text())
+DB_RELS, DB_CHECK = _db["witness"]["relationships"], _db["check"]["check_text"].split(" (")[0]
+assert _db["verified"] and DB_CHECK.endswith("end the disagreement")
 det = json.loads((ROOT / "evidence" / "determinism.json").read_text())
 LIVE = SITE_URL + "/"
 EXHIBIT = SITE_URL + "/exhibit/two-hub.html"
@@ -449,7 +453,7 @@ PATH30 = [
     (
         "Open the landing page",
         LIVE,
-        f"the agent's answer, the {w_rels} relationships it rests on, and the check line; nothing to install",
+        f"the agent's answer, the {w_rels} relationships that reproduce it, and the check line; nothing to install",
     ),
     (
         "Open the exhibit page",
@@ -465,7 +469,15 @@ RECEIPTS = [
     ),
     (
         f"{w_rels} of {w_rels}",
-        f"deleting any one relationship changes the answer; checked on relate-db and on the Relate CLI (`{check}`)",
+        f"deleting any one of them from the witness changes the answer; checked on relate-db and on the Relate CLI (`{check}`)",
+    ),
+    (
+        f"{TA['rels']} → {w_rels}",
+        f"the answer rows bind {TA['rels']} relationships (`queries/two-hub-bindings.cypher`); deleted from the full graph, only {TA['relate_changed']} of them change the answer, because other routes back the rest up. The witness keeps {w_rels}, each needed (`evidence/{cmp_path.with_suffix('.md').name}`, targeted pass)",
+    ),
+    (
+        f"{fmt(src_rels)} → {DB_RELS}",
+        f"a second case: the agent's first try (first flight matched in either direction) and the headline query disagree on IN/DEL; `{DB_CHECK}` (`witnesses/direction-bug.manifest.json`)",
     ),
     (
         f"{trials} trials · {secs} s",
@@ -476,7 +488,7 @@ RECEIPTS = [
         f"trials per second, Relate in-process vs Neo4j {cmp['neo4j']['components'][0]['v']} in Docker, median of 3 runs on one machine (`evidence/{cmp_path.with_suffix('.md').name}`)",
     ),
     (
-        f"{TESTS} tests · 100% coverage",
+        f"{TESTS} tests pass · 100% coverage",
         f"real Relate; the graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls or a failing CLI to force rare branches (`evidence/{pytest_log.name}`, `pytest --cov=witness`, gate in `pyproject.toml`)",
     ),
     (
@@ -494,7 +506,7 @@ REPLAY = (
 LIMITS = [
     "Deletion-minimal, not smallest: no single remaining relationship can be removed without changing the answer; a smaller witness may exist.",
     "Read-only, deterministic Cypher only. Witness refuses writes, procedures, clocks and randomness (exit 2) rather than guess.",
-    "One headline graph (a public air-routes dataset, Apache-2.0) and one headline query. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
+    "One graph (a public air-routes dataset, Apache-2.0): the headline query and one disagreement case. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
 ]
 LINKS = [
     ("Repository", REPO + OPENS),

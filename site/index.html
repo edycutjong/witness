@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Witness · the relationships your agent's graph answer rests on</title>
-<meta name="description" content="When an agent answers from a graph, Witness hands back the 22 of 57,645 relationships the answer rests on and proves each one is needed.">
+<title>Witness · a small graph that reproduces your agent's answer, every relationship needed</title>
+<meta name="description" content="When an agent answers from a graph, Witness hands back 22 of its 57,645 relationships that reproduce the answer, and proves deleting any one of them changes it.">
 <meta name="author" content="edycutjong">
 <meta name="theme-color" content="#F2E8D5">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
@@ -12,7 +12,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Witness">
 <meta property="og:title" content="Witness · cross-examine the graph behind an agent's answer">
-<meta property="og:description" content="57,645 relationships → the 22 an agent&#x27;s answer rests on. Delete any one and the answer changes.">
+<meta property="og:description" content="57,645 relationships → 22 that reproduce an agent&#x27;s answer. Delete any one of the 22 and it changes.">
 <meta property="og:url" content="https://witness-wheat.vercel.app/">
 <meta property="og:image" content="https://witness-wheat.vercel.app/og-image.png?v=4e6a2d4838">
 <meta property="og:image:width" content="1200">
@@ -20,7 +20,7 @@
 <meta property="og:image:alt" content="Witness: 57,645 relationships reduced to 22, each tagged as an exhibit; 22 of 22 change the answer">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Witness · cross-examine the graph behind an agent's answer">
-<meta name="twitter:description" content="57,645 relationships → the 22 an agent&#x27;s answer rests on. Delete any one and the answer changes.">
+<meta name="twitter:description" content="57,645 relationships → 22 that reproduce an agent&#x27;s answer. Delete any one of the 22 and it changes.">
 <meta name="twitter:image" content="https://witness-wheat.vercel.app/og-image.png?v=4e6a2d4838">
 <link rel="preload" href="/fonts/old-standard-tt-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
@@ -378,7 +378,7 @@ h1,h2{text-wrap:balance}
     <div class="hero-copy">
       <p class="lbl eyebrow">Relate by Neo4j hackathon <span>·</span> Case <b>two-hub</b></p>
       <h1 id="h1">Witness cross-examines the graph until <em>only the evidence remains.</em></h1>
-      <p class="sub">Your agent answered from a graph of <b>57,645 relationships</b>. Witness hands back the <b>22</b> that the answer rests on, and proves each one is needed: delete any one and the answer changes. One <code>.rl</code> file, re-run with plain Relate.</p>
+      <p class="sub">Your agent answered from a graph of <b>57,645 relationships</b>. Witness hands back <b>22</b> that still give the same answer, and proves each one is needed: delete any one of them from the witness and the answer changes. One <code>.rl</code> file, re-run with plain Relate.</p>
       <div class="ctas">
         <a class="btn solid" href="#exhibit"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 10l5-6h11v12H7z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="7.5" cy="10" r="1.4" fill="currentColor"/></svg>Pull a tag yourself</a>
         <a class="btn" href="/deck/"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v10H3zM7 17h6M10 14v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Pitch deck</a>
@@ -462,11 +462,11 @@ h1,h2{text-wrap:balance}
 <section class="receipts" aria-label="Receipts">
   <div class="wrap rc-in">
     <div class="rc"><b><span data-count="57645">57,645</span><span class="to">→</span><em>22</em></b><span>relationships in the air-routes graph, then in its witness (3,748 → 12 nodes)</span></div>
-    <div class="rc"><b><em>22</em><span class="to">of</span>22</b><span>deleting any one changes the answer, checked on relate-db and on the Relate CLI</span></div>
-    <div class="rc"><b><span data-count="366.8">366.8</span><span class="to">vs</span>90.2</b><span>trials per second, Relate in-process vs Neo4j in Docker, one machine</span></div>
-    <div class="rc"><b><span data-count="499">499</span><span class="to">·</span>100%</b><span>tests against real Relate · line and branch coverage</span></div>
+    <div class="rc"><b><em>22</em><span class="to">of</span>22</b><span>deleting any one from the witness changes the answer, checked on relate-db and on the Relate CLI</span></div>
+    <div class="rc"><b><span data-count="68">68</span><span class="to">→</span><em>22</em></b><span>relationships the answer rows bind, then the witness: deleted from the full graph, only 20 of the 68 change the answer</span></div>
+    <div class="rc"><b><span data-count="505">505</span><span class="to">·</span>100%</b><span>tests against real Relate · line and branch coverage</span></div>
   </div>
-  <p class="wrap rc-src data">Read from <code>witnesses/two-hub.manifest.json</code>, <code>evidence/pull-each-tag.json</code>, <code>evidence/neo4j-compare-2026-11-24.md</code>, <code>evidence/pytest-2026-11-24.txt</code>. Relate 1.0.1 · Python 3.12.13.</p>
+  <p class="wrap rc-src data">Read from <code>witnesses/two-hub.manifest.json</code>, <code>evidence/pull-each-tag.json</code>, <code>evidence/neo4j-compare-2026-11-24.md</code>, <code>evidence/pytest-2026-11-26.txt</code>. Relate 1.0.1 · Python 3.12.13.</p>
 </section>
 
 <section class="exhibit" id="exhibit" aria-labelledby="ex-h">
@@ -656,7 +656,7 @@ h1,h2{text-wrap:balance}
       <details><summary>Does Witness ever write to my graph?</summary><p>No. The source <code>.rl</code> is copied byte for byte and never opened for writing; every reduction checks its SHA-256 unchanged afterwards. Fixture mode pulls from Neo4j once and never pushes back.</p></details>
       <details><summary>Is anything mocked?</summary><p>Not the judged path: the graph store, transactions, rollback and queries are real Relate in every test. In tests, <code>relate pull</code> (it needs a Neo4j server) is stood in, and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach rare branches. The committed fixture run pulled from a real Neo4j server (<code>fixtures/mex-foreign.report.json</code>).</p></details>
       <details><summary>Why Relate rather than a Neo4j server?</summary><p>The inner loop is one transaction per trial, in process, on a single file: 366.8 trials/s here against 90.2 over Bolt to Neo4j in Docker on the same machine. And a witness is a file you can commit, hand over and open with plain <code>relate</code>, with no server.</p></details>
-      <details><summary>How does an agent use it?</summary><p>Over MCP. The <code>why</code> tool returns the witness of the agent's own answer and <code>check</code> re-proves it. A recorded session is committed in <code>evidence/mcp-transcript.md</code>.</p></details>
+      <details><summary>How does an agent use it?</summary><p>Over MCP. The <code>why</code> tool returns the witness of the agent's own answer and <code>check</code> re-proves it. Two recorded sessions are committed: <code>evidence/mcp-transcript.md</code> (a scripted client) and <code>evidence/mcp-agent-session.md</code> (a real model, claude-sonnet-5-5 in Claude Code, writing its own Cypher and attaching the witness).</p></details>
     </div>
   </div>
 </section>

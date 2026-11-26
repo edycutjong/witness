@@ -1,0 +1,71 @@
+# recorded 2026-11-27 01:09 +0700 (the ledger id below is UTC) in a fresh clone of edycutjong/witness at 47fd006 on a terminal (TTY), Apple M1 Max · macOS 27.2.1 · the demo video's run
+# the 'reducing · trial …' lines are the live counter's updates (one per 50 ms, each overwritten on screen by the next)
+witness $ uv run witness demo
+Witness 0.1.0 · Python 3.13.13 · relate-db 1.0.1
+  relate CLI v1.0.1: answers are cross-checked on the CLI too
+  source data/air-routes.rl · 3,748 nodes · 57,645 relationships · air-routes (krlawrence/graph, Apache-2.0)
+QUESTION  Which airports of MX have no direct flight to MEX, yet would still reach it in two flights if any one hub closed?
+  queries/two-hub.cypher · aggregation, NOT EXISTS, OPTIONAL MATCH · params {"country": "MX", "dest": "MEX"}
+  reducing · trial     1 · phase empty-graph · 57,645 relationships, 3,748 nodes left
+  reducing · trial     3 · phase A           · 54,141 relationships, 3,741 nodes left
+  reducing · trial     6 · phase A           · 32,140 relationships, 2,806 nodes left
+  reducing · trial    11 · phase A           · 32,140 relationships, 2,806 nodes left
+  reducing · trial    17 · phase A           · 23,838 relationships, 2,455 nodes left
+  reducing · trial    25 · phase A           · 17,648 relationships, 2,148 nodes left
+  reducing · trial    33 · phase A           · 13,275 relationships, 1,879 nodes left
+  reducing · trial    42 · phase A           ·  7,884 relationships, 1,409 nodes left
+  reducing · trial    58 · phase A           ·  5,420 relationships, 1,145 nodes left
+  reducing · trial    75 · phase A           ·  1,882 relationships,   643 nodes left
+  reducing · trial   111 · phase A           ·    319 relationships,   232 nodes left
+  reducing · trial   168 · phase A           ·     83 relationships,    61 nodes left
+  reducing · trial   231 · phase A           ·     50 relationships,    15 nodes left
+  reducing · trial   333 · phase B           ·     27 relationships,    12 nodes left
+ANSWER  4 rows on the full graph · guard: read-only: Relate query_type 'r' · order check: same answer from a store built in reverse order
+  airport  hub_countries
+  PBC      [MX, US]
+  QRO      [MX, US]
+  TLC      [MX, US]
+  UPN      [MX, US]
+WITNESS  22 relationships · 12 nodes, out of 57,645 · 3,748
+  reduced in 0.91 s · 371 trials · 0 inconclusive · seed 0 (4.821 s end to end: copy, guard, order check, reduce, check)
+  68 relationships match the answer rows; 22 of them suffice
+EXHIBITS  (register order; every one is needed)
+   1  (ACA)-[:HAS_ROUTE]->(MEX)
+   2  (ACA)-[:IN_COUNTRY]->(MX)
+   3  (DFW)-[:HAS_ROUTE]->(MEX)
+   4  (DFW)-[:IN_COUNTRY]->(US)
+   5  (LAS)-[:HAS_ROUTE]->(MEX)
+   6  (LAS)-[:IN_COUNTRY]->(US)
+   7  (LAX)-[:HAS_ROUTE]->(MEX)
+   8  (LAX)-[:IN_COUNTRY]->(US)
+   9  (PBC)-[:HAS_ROUTE]->(DFW)
+  10  (PBC)-[:HAS_ROUTE]->(TIJ)
+  11  (PBC)-[:IN_COUNTRY]->(MX)
+  12  (QRO)-[:HAS_ROUTE]->(DFW)
+  13  (QRO)-[:HAS_ROUTE]->(TIJ)
+  14  (QRO)-[:IN_COUNTRY]->(MX)
+  15  (TIJ)-[:HAS_ROUTE]->(MEX)
+  16  (TIJ)-[:IN_COUNTRY]->(MX)
+  17  (TLC)-[:HAS_ROUTE]->(ACA)
+  18  (TLC)-[:HAS_ROUTE]->(LAS)
+  19  (TLC)-[:IN_COUNTRY]->(MX)
+  20  (UPN)-[:HAS_ROUTE]->(LAX)
+  21  (UPN)-[:HAS_ROUTE]->(TIJ)
+  22  (UPN)-[:IN_COUNTRY]->(MX)
+CHECK  22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)
+  relate CLI: sufficiency + 22 of 22 necessity probes cross-checked
+ABSENT  checked on the full graph, not part of the witness
+  airport  direct_flights  reaching_hubs
+  PBC      0               7
+  QRO      0               9
+  TLC      0               10
+  UPN      0               2
+PROVE ONE  delete exhibit 9 (PBC)-[:HAS_ROUTE]->(DFW) from a copy of W, re-run
+  CHANGED: 4 rows → 3 rows (PBC drops out)
+FILES  out/two-hub.rl (+ .cypher .manifest.json .html .trace.json)
+LEDGER  out/ledger.rl · r-20261126-180951-47cfdadd
+RE-RUN IT YOURSELF
+  uv run witness check out/two-hub.rl
+  uv run witness rerun out/two-hub.rl -f queries/two-hub.cypher --param country=MX --param dest=MEX
+  relate query --database out/two-hub.rl --read-only --param country=MX --param dest=MEX < queries/two-hub.cypher   # optional CLI
+VERIFIED · deletion-minimal: no single relationship can be removed without changing the answer · determinism claimed

@@ -325,7 +325,7 @@ def test_check_worker_reports_an_unexpected_failure_as_an_internal_error(tmp_pat
 def test_why_worker_returns_the_whole_evidence_object_and_records_the_ledger(tmp_path, tiny_rl, stay_in_this_session):
     kind, res = run_inline(_why_worker, why_args(tmp_path, tiny_rl))
     assert kind == "ok" and res["verified"] is True
-    assert res["answer"] == {"columns": ["hub"], "rows": [{"hub": "B"}, {"hub": "C"}]}
+    assert res["answer"] == {"columns": ["hub"], "rows": [{"hub": "B"}, {"hub": "C"}], "rows_total": 2}
     assert res["witness"] == {"relationships": 4, "nodes": 4, "deletion_minimal_verified": True}
     assert res["source_relationships"] == 6 and res["check"]["check_text"].startswith("4 of 4 change the answer")
     assert [e["n"] for e in res["exhibits"]] == [1, 2, 3, 4]

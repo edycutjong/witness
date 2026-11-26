@@ -20,6 +20,32 @@ from pathlib import Path
 
 DEFAULT_REQUEST_TIMEOUT = 300.0
 DEFAULT_TRIAL_TIMEOUT = 30.0
+# What crosses MCP stays small (a2a judge r5): a real client caps a tool result, and a recorded Claude Code session
+# could not read a 74,771-character `why` reply (68 exhibits, each with its full content key). Exhibits and rows are
+# trimmed to REPLY_ROWS and the per-probe list to the failures; the .manifest.json beside the witness keeps all of it.
+REPLY_ROWS = 50
+
+
+def lean_check(d: dict) -> dict:
+    """A check result without its per-probe list; `not_necessary` names the probes that failed (empty = all needed)."""
+    out = {k: v for k, v in d.items() if k != "probes"}
+    out["not_necessary"] = [p["element"] for p in d.get("probes", []) if not p.get("necessary")]
+    return out
+
+
+def compact_reply(res: dict) -> dict:
+    """The `why` reply as sent: exhibits as n/start/type/end, at most REPLY_ROWS exhibits and answer rows."""
+    ex = [{k: x[k] for k in ("n", "start", "type", "end")} for x in res["exhibits"]]
+    rows = res["answer"]["rows"]
+    return {
+        **res,
+        "answer": {**res["answer"], "rows": rows[:REPLY_ROWS], "rows_total": len(rows)},
+        "exhibits": ex[:REPLY_ROWS],
+        "exhibits_total": len(ex),
+        "check": lean_check(res["check"]),
+    }
+
+
 MAX_EVIDENCE_LINES = 25
 
 
@@ -165,7 +191,7 @@ def _check_worker(conn, args: dict) -> None:
         spec = spec_from_manifest(manifest)
         if args["statement"] is not None:
             spec = override_spec(manifest, args["statement"], args["parameters"])
-        conn.send(("ok", check(Path(args["witness"]), spec, use_cli=args["use_cli"]).to_dict()))
+        conn.send(("ok", lean_check(check(Path(args["witness"]), spec, use_cli=args["use_cli"]).to_dict())))
     except Refused as e:
         conn.send(("refused", {"kind": e.door, "message": e.reason}))
     except (ValueError, KeyError, TypeError) as e:
@@ -220,7 +246,7 @@ def _why_worker(conn, req_dict: dict) -> None:
             "warnings": o.warnings,
         }
         res["evidence_markdown"] = evidence_markdown(res)
-        conn.send(("ok", res))
+        conn.send(("ok", compact_reply(res)))
     except Refused as e:
         conn.send(("refused", {"kind": e.door, "message": e.reason}))
     except Exception as e:  # noqa: BLE001

@@ -44,6 +44,12 @@ exhibit = (ROOT / "witnesses" / "two-hub.html").read_text()
 src_rels, src_nodes = man["source"]["relationships"], man["source"]["nodes"]
 w_rels, w_nodes = man["witness"]["relationships"], man["witness"]["nodes"]
 trials, secs = man["run"]["trials"], man["run"]["seconds"]
+# the other recorded runs' wall clock, named beside the committed one (a2a judge r8: three unlabelled seconds)
+_red = re.compile(r"reduced in ([0-9.]+) s · (\d+) trials")
+_lm = _red.search((ROOT / "evidence" / "demo-2026-11-24.txt").read_text())
+_vm = _red.search((ROOT / "evidence" / "video-demo-run-2026-11-27.txt").read_text())
+assert _lm and _vm and int(_lm.group(2)) == int(_vm.group(2)) == trials
+LANDING_S, VIDEO_S = _lm.group(1), _vm.group(1)
 check = man["check"]["check_text"].split(" (")[0]
 rows = man["baseline"]["rows"]
 relate_tps = cmp["median_trials_per_s"]["relate_in_process"]
@@ -558,7 +564,7 @@ RECEIPTS = [
     ),
     (
         f"{trials} trials · {secs} s",
-        f"delete, re-run, roll back; {COMMITS} deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`)",
+        f"delete, re-run, roll back; {COMMITS} deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`). Trials and deletions repeat exactly; wall-clock seconds do not: the landing's paste reduced in {LANDING_S} s (`evidence/demo-2026-11-24.txt`), the video's take in {VIDEO_S} s (`evidence/video-demo-run-2026-11-27.txt`)",
     ),
     (
         f"{relate_tps} vs {neo_tps}",

@@ -247,7 +247,7 @@ uv run pytest --cov=witness      # 517 pass against real Relate (2 more need a l
 ```
 
 Reproduce every number in this README: [DEMO.md](DEMO.md). Raw evidence and the machine/version of each run:
-`evidence/` (this suite's run: `evidence/pytest-2026-11-27.txt`; the last full local CI run: `evidence/ci-local-2026-11-24.txt`). The tests use real Relate, not mocks of the graph store. The graph store, the rollback transactions and the queries are never mocked. `relate pull` is stood in for in the fixture-mode tests (it needs a running Neo4j server; the Neo4j side is exercised by `bench/neo4j_compare.py`), and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach a rare branch.
+`evidence/` (this suite's run: `evidence/pytest-2026-11-27.txt`; the last full local CI run: `evidence/ci-local-2026-11-27.txt`). The tests use real Relate, not mocks of the graph store. The graph store, the rollback transactions and the queries are never mocked. `relate pull` is stood in for in the fixture-mode tests (it needs a running Neo4j server; the Neo4j side is exercised by `bench/neo4j_compare.py`), and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach a rare branch.
 
 GitHub Actions (`.github/workflows/ci.yml`) runs six stages: **Quality** (ruff, mypy, tests with the coverage gate; Python 3.11
 and 3.12 on `main`) and **Security** (gitleaks over the full history, pip-audit) in parallel, then **Build** (wheel, sdist,

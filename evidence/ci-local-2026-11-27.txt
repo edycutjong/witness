@@ -1,0 +1,29 @@
+# local CI, 2026-11-27 02:48 +0700; Darwin arm64; relate Relate v1.0.1; Python 3.12.13
+## make ci (lint, typecheck, test-coverage, audit) + build + perf gate
+uv run ruff check .
+All checks passed!
+uv run mypy src --ignore-missing-imports
+Success: no issues found in 15 source files
+DO_NOT_TRACK=1 uv run pytest --cov=witness --cov-report=term-missing --cov-report=xml
+================================ tests coverage ================================
+______________ coverage: platform darwin, python 3.12.13-final-0 _______________
+Name    Stmts   Miss Branch BrPart  Cover   Missing
+---------------------------------------------------
+TOTAL    2592      0    832      0   100%
+15 files skipped due to complete coverage.
+Coverage XML written to file coverage.xml
+Required test coverage of 100.0% reached. Total coverage: 100.00%
+517 passed, 2 skipped in 89.91s (0:01:29)
+uv run pip-audit --skip-editable
+No known vulnerabilities found
+Name    Skip Reason
+------- -------------------------------
+witness distribution marked as editable
+2:50AM INF 107 commits scanned.
+2:50AM INF scanned ~7034099 bytes (7.03 MB) in 2.02s
+2:50AM INF no leaks found
+## build
+Successfully built /tmp/witness-p6b/dist2/witness-0.1.0.tar.gz
+Successfully built /tmp/witness-p6b/dist2/witness-0.1.0-py3-none-any.whl
+## perf gate
+371 trials in 0.91 s = 407.7 trials/s (floor 40.0)

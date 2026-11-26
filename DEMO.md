@@ -69,7 +69,7 @@ uv run pytest --cov=witness   # fails below 100% line + branch coverage (pyproje
 ```
 
 The run is recorded in `evidence/pytest-2026-11-27.txt` (517 passed; the 2 fixture-pull tests need a local Neo4j in Docker and
-skip without it) and the last full local CI run in `evidence/ci-local-2026-11-24.txt` (ruff, mypy, pytest, pip-audit, gitleaks, build, performance gate on one machine).
+skip without it) and the last full local CI run in `evidence/ci-local-2026-11-27.txt` (ruff, mypy, pytest, pip-audit, gitleaks, build, performance gate on one machine).
 
 ## 7. Two queries disagree: 57,645 → 5, "5 of 5 end the disagreement"
 

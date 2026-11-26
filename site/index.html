@@ -739,8 +739,16 @@ h1,h2{text-wrap:balance}
   $$(".copy").forEach(function (b) {
     b.addEventListener("click", function () {
       var t = b.getAttribute("data-copy");
-      var done = function () { b.textContent = "copied"; b.classList.add("done"); setTimeout(function () { b.textContent = "copy"; b.classList.remove("done"); }, 1600); };
-      if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, done); else done();
+      // say "copied" only when the text reached the clipboard; otherwise say so (no silent false success)
+      var show = function (ok) { b.textContent = ok ? "copied" : "copy failed: select the text"; b.classList.toggle("done", ok); setTimeout(function () { b.textContent = "copy"; b.classList.remove("done"); }, ok ? 1600 : 3200); };
+      var legacy = function () {
+        var ta = document.createElement("textarea"), ok = false;
+        ta.value = t; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+        document.body.removeChild(ta); show(ok);
+      };
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(function () { show(true); }, legacy); else legacy();
     });
   });
 

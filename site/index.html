@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Witness · a small graph that reproduces your agent's answer, every relationship needed</title>
+<title>Witness · a small graph that reproduces your agent's answer, every relationship in it needed</title>
 <meta name="description" content="When an agent answers from a graph, Witness hands back 22 of its 57,645 relationships that reproduce the answer, and proves deleting any one of them changes it.">
 <meta name="author" content="edycutjong">
 <meta name="theme-color" content="#F2E8D5">
@@ -638,7 +638,7 @@ h1,h2{text-wrap:balance}
     <h2 id="hon-h">Deletion-minimal. <em>Not smallest.</em></h2>
     <ol class="limits">
       <li><span class="ln-no">1</span><div><blockquote>Deletion-minimal means: no single remaining relationship (or kept isolated node) can be removed without changing the answer. It does not mean &quot;smallest possible&quot;.</blockquote><cite>README · The Solution</cite></div></li>
-      <li><span class="ln-no">2</span><div><blockquote>Because Relate&#x27;s query semantics are not monotone, a witness proves its own answer on its own file; it does not prove that every superset of it gives the same answer.</blockquote><cite>README · The Solution</cite></div></li>
+      <li><span class="ln-no">2</span><div><blockquote>Because a query with <code>NOT EXISTS</code> or aggregation is not monotone, a witness proves its own answer on its own file; it does not prove that every superset of it gives the same answer.</blockquote><cite>README · The Solution</cite></div></li>
       <li><span class="ln-no">3</span><div><blockquote>The gap mostly reflects an embedded engine versus a Dockerised server with a network round trip per statement; it says nothing about Neo4j&#x27;s query engine.</blockquote><cite>README · Measured against Neo4j</cite></div></li>
     </ol>
   </div>

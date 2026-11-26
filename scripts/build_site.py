@@ -43,8 +43,8 @@ ratio = cmp["ratio_trials_per_s"]
 
 fmt = lambda n: f"{n:,}"  # noqa: E731
 CLAIM = (
-    f"When an agent answers from a graph, Witness hands back the graph that reproduces the answer "
-    f"({fmt(src_rels)} relationships → {w_rels}) and proves each relationship in it is needed."
+    f"When an agent answers from a graph, Witness hands back a small graph that reproduces the answer "
+    f"({fmt(src_rels)} relationships → {w_rels}), and proves that deleting any one of its relationships changes the answer."
 )
 
 
@@ -65,7 +65,7 @@ QUOTES = [
         "README · The Solution",
     ),
     (
-        "Because Relate's query semantics are not monotone, a witness proves its own\nanswer on its own file; it does not prove that every superset of it gives the same answer.",
+        "Because a query with `NOT EXISTS` or aggregation is not monotone, a witness proves its own\nanswer on its own file; it does not prove that every superset of it gives the same answer.",
         "README · The Solution",
     ),
     (
@@ -108,6 +108,11 @@ def png_size(path: Path) -> tuple[int, int]:
     return int.from_bytes(b[:4], "big"), int.from_bytes(b[4:], "big")
 
 
+def code_ticks(t: str) -> str:
+    """`x` in a quoted README sentence renders as <code>x</code>."""
+    return re.sub(r"`([^`]+)`", r"<code>\1</code>", t)
+
+
 def fill(tpl: str, vals: dict) -> str:
     out = re.sub(r"\{\{([A-Z0-9_]+)\}\}", lambda m: str(vals[m.group(1)]), tpl)
     assert "{{" not in out, "unfilled slot"
@@ -115,9 +120,7 @@ def fill(tpl: str, vals: dict) -> str:
 
 
 DESC = f"When an agent answers from a graph, Witness hands back {w_rels} of its {fmt(src_rels)} relationships that reproduce the answer, and proves deleting any one of them changes it."
-DESC_OG = (
-    f"{fmt(src_rels)} relationships → {w_rels} that reproduce an agent's answer. Delete any one of the {w_rels} and it changes."
-)
+DESC_OG = f"{fmt(src_rels)} relationships → {w_rels} that reproduce an agent's answer. Delete any one of the {w_rels} and it changes."
 assert 50 <= len(DESC) <= 160 and len(DESC_OG) <= 125, (len(DESC), len(DESC_OG))
 
 
@@ -203,7 +206,7 @@ def landing_page() -> str:
         "FIX_FROM": fmt(fix["source"]["relationships"]),
         "FIX_TO": fix["witness"]["relationships"],
         "LIMITS": "\n      ".join(
-            f'<li><span class="ln-no">{i}</span><div><blockquote>{html.escape(" ".join(q.split()))}</blockquote><cite>{c}</cite></div></li>'
+            f'<li><span class="ln-no">{i}</span><div><blockquote>{code_ticks(html.escape(" ".join(q.split())))}</blockquote><cite>{c}</cite></div></li>'
             for i, (q, c) in enumerate(QUOTES, 1)
         ),
         "FAQ": "\n      ".join(f"<details><summary>{html.escape(q)}</summary><p>{a}</p></details>" for q, a in FAQ),
@@ -460,7 +463,15 @@ PATH30 = [
         EXHIBIT,
         "the register of kept relationships, each tagged as one whose deletion changes the answer",
     ),
-    ("Optional, one command", None, "`git clone " + REPO + " && cd witness && uv run witness demo` (needs uv)" + OPENS),
+    (
+        "Optional, one command",
+        None,
+        "`git clone "
+        + REPO
+        + " && cd witness && uv run witness demo` (needs uv"
+        + OPENS.replace(" (", "; ").rstrip(")")
+        + ")",
+    ),
 ]
 RECEIPTS = [
     (
@@ -477,7 +488,7 @@ RECEIPTS = [
     ),
     (
         f"{fmt(src_rels)} → {DB_RELS}",
-        f"a second case: the agent's first try (first flight matched in either direction) and the headline query disagree on IN/DEL; `{DB_CHECK}` (`witnesses/direction-bug.manifest.json`)",
+        f"a second case: a plausible agent mistake written for this case (the first flight matched in either direction) and the headline query disagree on IN/DEL; `{DB_CHECK}` (`witnesses/direction-bug.manifest.json`)",
     ),
     (
         f"{trials} trials · {secs} s",

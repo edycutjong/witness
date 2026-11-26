@@ -1,8 +1,8 @@
 # `witness mcp` with a model in the loop: one recorded agent session
 
-A real model, not a scripted client: **claude-sonnet-5-5** in Claude Code 2.1.325 headless (`claude -p`), recorded 2026-11-26 on Darwin arm64 with Relate v1.0.1 (relate-db 1.0.1). The model was given two MCP servers, Relate's own `relate serve --mcp` on `data/air-routes.rl` (read-only) and `witness mcp`, and no other tools (shell, file and web tools disabled). It chose its own Cypher; nothing below is edited except local paths (shown as `<repo>` and `<out>`). Raw event stream: `evidence/mcp-agent-session.jsonl`.
+A real model, not a scripted client: **claude-sonnet-5-5** in Claude Code 2.1.325 headless (`claude -p`), recorded 2026-11-26 on Darwin arm64 with Relate v1.0.1 (relate-db 1.0.1). The model was given two MCP servers, Relate's own `relate serve --mcp` on `data/air-routes.rl` (read-only) and `witness mcp`, with shell, file, web and agent tools disallowed and the four named MCP tools pre-approved; Claude Code's other built-in tools (scheduling, skills, the `ToolSearch` loader) stayed in its list, and the model used only `ToolSearch` and the MCP tools (the full tool list is in the init event, line 1 of the `.jsonl`). It chose its own Cypher; nothing below is edited except local paths (shown as `<repo>` and `<out>`). Raw event stream: `evidence/mcp-agent-session.jsonl`.
 
-Why the witness here is 68, not the headline's 22: the model's answer also reports each airport's hub count, so every hub is now part of the answer and all 68 relationships the answer rows bind are needed (the same 68 that `queries/two-hub-bindings.cypher` returns; the two sets were compared and are identical). Report only the hub countries, as `queries/two-hub.cypher` does, and 22 suffice. The evidence follows what the agent claimed.
+Why the witness here is 68, not the headline's 22: the model's answer also reports each airport's hub count, so every hub is now part of the answer and all 68 relationships the answer rows bind are needed (the same 68 that `queries/two-hub-bindings.cypher` returns: the session's full manifest, `evidence/mcp-agent-session-witness.manifest.json`, lists all 68 probes, and the two sets are identical). Report only the hub countries, as `queries/two-hub.cypher` does, and 22 suffice. The evidence follows what the agent claimed.
 
 ## Command
 
@@ -262,4 +262,4 @@ Re-run with plain `relate`: `<out>/mcp-1795711857-1/witness.rl` (+ `.cypher`). R
 
 ---
 
-5 turns, 40.3 s wall clock. The first attempt the same evening failed: the `why` reply was 74,771 characters (68 exhibits, each carrying its full content key) and Claude Code refused a tool result that large, so the model answered without evidence. `why` and `check` now send a bounded reply (`REPLY_ROWS` in `src/witness/mcp_server.py`; the manifest beside the witness keeps everything), and this session is the re-run.
+5 turns, 40.3 s wall clock. The first attempt the same evening failed (`evidence/mcp-agent-session-first-attempt.jsonl`): the `why` reply was 74,771 characters (68 exhibits, each carrying its full content key) and Claude Code refused a tool result that large, so the model answered without evidence. `why` and `check` now send a bounded reply (`REPLY_ROWS` in `src/witness/mcp_server.py`; the manifest beside the witness keeps everything), and this session is the re-run.

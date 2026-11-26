@@ -1,6 +1,6 @@
 # For judges
 
-**The claim.** When an agent answers from a graph, Witness hands back the graph that reproduces the answer (57,645 relationships → 22) and proves each relationship in it is needed.
+**The claim.** When an agent answers from a graph, Witness hands back a small graph that reproduces the answer (57,645 relationships → 22), and proves that deleting any one of its relationships changes the answer.
 
 Witness is built on Relate, the embedded graph database, for the Relate by Neo4j hackathon.
 
@@ -8,7 +8,7 @@ Witness is built on Relate, the embedded graph database, for the Relate by Neo4j
 
 1. [Open the landing page](https://witness-wheat.vercel.app/): the agent's answer, the 22 relationships that reproduce it, and the check line; nothing to install.
 2. [Open the exhibit page](https://witness-wheat.vercel.app/exhibit/two-hub.html): the register of kept relationships, each tagged as one whose deletion changes the answer.
-3. Optional, one command: `git clone https://github.com/edycutjong/witness && cd witness && uv run witness demo` (needs uv) (the repository opens at submission).
+3. Optional, one command: `git clone https://github.com/edycutjong/witness && cd witness && uv run witness demo` (needs uv; the repository opens at submission).
 
 ## The receipts
 
@@ -17,7 +17,7 @@ Witness is built on Relate, the embedded graph database, for the Relate by Neo4j
 | **57,645 → 22** | relationships in the air-routes graph vs in the witness (3,748 nodes → 12 nodes in the witness graph; `witnesses/two-hub.manifest.json`) |
 | **22 of 22** | deleting any one of them from the witness changes the answer; checked on relate-db and on the Relate CLI (`22 of 22 change the answer`) |
 | **68 → 22** | the answer rows bind 68 relationships (`queries/two-hub-bindings.cypher`); deleted from the full graph, only 20 of them change the answer, because other routes back the rest up. The witness keeps 22, each needed (`evidence/neo4j-compare-2026-11-24.md`, targeted pass) |
-| **57,645 → 5** | a second case: the agent's first try (first flight matched in either direction) and the headline query disagree on IN/DEL; `5 of 5 end the disagreement` (`witnesses/direction-bug.manifest.json`) |
+| **57,645 → 5** | a second case: a plausible agent mistake written for this case (the first flight matched in either direction) and the headline query disagree on IN/DEL; `5 of 5 end the disagreement` (`witnesses/direction-bug.manifest.json`) |
 | **371 trials · 1.095 s** | delete, re-run, roll back; 86 deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`) |
 | **366.8 vs 90.2** | trials per second, Relate in-process vs Neo4j 2026.10.2 in Docker, median of 3 runs on one machine (`evidence/neo4j-compare-2026-11-24.md`) |
 | **505 tests pass · 100% coverage** | real Relate; the graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls or a failing CLI to force rare branches (`evidence/pytest-2026-11-26.txt`, `pytest --cov=witness`, gate in `pyproject.toml`) |

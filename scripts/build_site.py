@@ -512,7 +512,7 @@ REPRO = [
     "uv run witness demo",
 ]
 REPLAY = (
-    "CI / deterministic replay, not the product path: uv run pytest --cov=witness (the whole suite against real Relate)"
+    "The whole suite against real Relate (CI and deterministic replay, not the product path): `uv run pytest --cov=witness`"
 )
 LIMITS = [
     "Deletion-minimal, not smallest: no single remaining relationship can be removed without changing the answer; a smaller witness may exist.",

@@ -32,7 +32,7 @@ uv run witness demo
 
 The repository opens at submission; until then use the live pages above.
 
-CI / deterministic replay, not the product path: uv run pytest --cov=witness (the whole suite against real Relate)
+The whole suite against real Relate (CI and deterministic replay, not the product path): `uv run pytest --cov=witness`
 
 ## Honest limitations
 

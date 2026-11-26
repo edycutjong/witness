@@ -25,7 +25,8 @@
 
 ## 💡 The Problem & Solution
 
-**Use case:** checking an agent's graph answer by reading 22 relationships instead of 57,645.
+**Use case:** checking an agent's graph answer by reading 22 relationships instead of 57,645 (an absence such as "no direct
+flight" is checked against the full graph's recorded answer; see [Absences](#how-the-reduction-works)).
 
 **Run it:** `git clone https://github.com/edycutjong/witness && cd witness && uv run witness demo` (needs [`uv`](https://docs.astral.sh/uv/)).
 Expect `22 of 22 change the answer` and exit 0; details in [Getting Started](#-getting-started-setup-and-run).
@@ -43,14 +44,15 @@ Witness takes a read-only query and its answer and deletes relationships, with R
 no single remaining relationship can go without changing the answer. What is left is a witness: a small `.rl` file anyone can
 re-run with plain `relate`.
 
-On the committed air-routes graph, the headline question (`queries/two-hub.cypher`: which Mexican airports have no direct flight to MEX, yet reach it in two flights through at least two different hubs, so they would still reach it if any one hub closed)
+On the committed air-routes graph, the headline question (`queries/two-hub.cypher`: which Mexican airports have no direct flight to MEX, yet reach it in two flights through at least two different hubs, so they would still reach it if any one hub closed; a hub is
+any intermediate airport)
 shrinks **57,645 relationships to 22** (12 nodes) in 371 trials and 1.1 s, and `witness check` confirms "22 of 22 change the
 answer" on the Python API and on the Relate CLI (`witnesses/two-hub.manifest.json`).
 
 **Against "show the path".** The answer rows bind 68 relationships (`queries/two-hub-bindings.cypher`). Deleting each of
 those 68 from the full graph changes the answer for only 20 of them; the other 48 change nothing, because other routes back
-them up (`evidence/neo4j-compare-2026-11-24.md`, targeted pass). The witness keeps 22, and deleting any one of them from the
-witness changes the answer. Necessity is proven inside the witness, not in the full graph: 11 of those 20 are in the witness,
+them up (`evidence/neo4j-compare-2026-11-24.md`, targeted pass). The witness keeps 22 of the 68, and deleting any one of them
+from the witness changes the answer. Necessity is proven inside the witness, not in the full graph: 11 of those 20 are in the witness,
 and each of the other 9 is a Mexican airport's own flight to MEX, whose deletion adds that airport to the answer (it no longer
 has a direct flight). The witness does not contain those airports, so it does not need them (`bench/full_graph_necessity.py`,
 `evidence/full-graph-necessity.json`).
@@ -64,6 +66,15 @@ facts the answer does not need: MEX has no country link in `witnesses/two-hub.rl
 procedures, `LOAD CSV`, clocks, randomness and store ids, then Relate's own `query_type` must be `"r"`; plus a heuristic check
 for storage-order dependence. Witness never writes to the source.
 
+### A second case: two queries disagree
+
+A plausible agent mistake, written for this case: the same question with the first
+flight matched in either direction (`queries/two-hub-agent.cypher`). On 6 of 232 country and busiest-airport pairs the two queries disagree
+(`bench/disagree_scan.py`, `evidence/disagree-scan.json`). For India and DEL, `witness why --predicate disagree` shrinks
+57,645 relationships to 5 in 139 trials, and `witness check` confirms "5 of 5 end the disagreement"
+(`witnesses/direction-bug.*`, `evidence/direction-bug-run.txt`). The five show the bug: the agent's query read the flight
+`(VNS)-[:HAS_ROUTE]->(AGR)` backwards, as if Agra flew to VNS, so VNS counted as an extra hub on Agra's way to DEL.
+
 ### How it uses Relate
 
 - **Mode:** single file (`.rl`). Reductions run on a file-backed scratch copy of the source in a temp dir; the committed
@@ -72,7 +83,8 @@ for storage-order dependence. Witness never writes to the source.
   reviewer with `relate` alone, with no server. A directory store is many files; `:memory:` disappears when the process ends
   and cannot be inspected.
 - **What the graph models:** the air-routes network (Kelvin Lawrence): 3,504 airports, 237 countries and 7 continents (3,748 nodes), and
-  57,645 relationships (`HAS_ROUTE`, `IN_COUNTRY`, `ON_CONTINENT`). The relationships that matter are the ones that carry a query's answer.
+  57,645 relationships: `(:Airport {iata})-[:HAS_ROUTE]->(:Airport)` for a scheduled route, `(:Airport)-[:IN_COUNTRY]->(:Country {code})`
+  and `(:Airport)-[:ON_CONTINENT]->(:Continent)`. The relationships that matter are the ones that carry a query's answer.
 - **Where the data lives:** `data/air-routes.rl` (source), `witnesses/two-hub.rl` (the committed witness), `witness.rl` (the
   ledger of reductions), `fixtures/` (fixture-mode stores).
 
@@ -89,8 +101,8 @@ Relate capabilities used:
 
 ### How the reduction works
 
-**How 371 trials remove 57,623 relationships.** The `EXPLAIN` plan shows `:ON_CONTINENT` cannot reach the answer, so trial 2
-drops its 3,504 relationships at once. Phase A runs ddmin (delta debugging) over nodes: one `DETACH DELETE` takes a node with
+**How 371 trials remove 57,623 relationships.** Trial 1 checks that the empty graph changes the answer. The `EXPLAIN` plan shows `:ON_CONTINENT`
+cannot reach the answer, so trial 2 drops its 3,504 relationships at once. Phase A runs ddmin (delta debugging) over nodes: one `DETACH DELETE` takes a node with
 all its relationships, and 69 of 253 trials keep the answer (3,729 nodes go; 54,141 → 50 relationships). Phase B runs ddmin over
 the 50 remaining relationships (16 of 116 trials keep it; 50 → 22). 86 deletions applied, 285 rolled back
 (`witnesses/two-hub.trace.json`).
@@ -99,13 +111,6 @@ the 50 remaining relationships (16 of 116 trials keep it; 50 → 22). 86 deletio
 row already required that absence in the full graph, the manifest records the full graph's answer (`baseline`), and the witness
 reproduces it. `witness demo` also prints the full graph's counts per airport (the ABSENT block); `witness why` on other
 queries reports the full graph's answer but not those per-clause counts.
-
-**A second case: two queries disagree.** A plausible agent mistake, written for this case: the same question with the first
-flight matched in either direction (`queries/two-hub-agent.cypher`). On 6 of 232 country and busiest-airport pairs the two queries disagree
-(`bench/disagree_scan.py`, `evidence/disagree-scan.json`). For India and DEL, `witness why --predicate disagree` shrinks
-57,645 relationships to 5 in 139 trials, and `witness check` confirms "5 of 5 end the disagreement"
-(`witnesses/direction-bug.*`, `evidence/direction-bug-run.txt`). The five show the bug: the agent's query read the flight
-`(VNS)-[:HAS_ROUTE]->(AGR)` backwards, as if Agra flew to VNS, so VNS counted as Agra's second hub.
 
 ## 🏗️ Architecture & Tech Stack
 
@@ -187,10 +192,13 @@ residue, not the proof.
   `keep` (default), `differs` (with `expected`: the expected rows) or `disagree` (with `other_statement`: the second query).
   Pass the rows you showed as `answer` (objects keyed by column): if they differ from the store's answer, nothing is attached.
   Stores must sit in `data/` or `witnesses/` by default; `--allow DIR` (repeatable) replaces that list, so pass
-  `--allow data --allow witnesses` too if you still want them.
+  `--allow data --allow witnesses` too if you still want them (`--allow` paths are relative to where `witness mcp` starts).
 - `check(witness_path, statement?, parameters?)` re-proves a witness from its `.rl` and manifest.
 - Replies are bounded (at most 50 exhibits and answer rows, with the totals) so a client can read them; the manifest beside
   the witness keeps everything.
+
+Abridged call and reply (`…` marks elided fields; `statement` carries the query text; full replies in
+`evidence/mcp-transcript.md`):
 
 ```text
 why {"statement": "<queries/two-hub.cypher>", "parameters": {"country": "MX", "dest": "MEX"},
@@ -204,7 +212,8 @@ why {"statement": "<queries/two-hub.cypher>", "parameters": {"country": "MX", "d
 
 Two recorded sessions: `evidence/mcp-transcript.md` (a scripted client: an answer, a refused write, a mismatched answer) and
 `evidence/mcp-agent-session.md` (a real model, claude-sonnet-5-5 in Claude Code, writing its own Cypher and attaching the
-witness: 68 of 68, the same 68 relationships the answer rows bind, because its answer also reports hub counts).
+witness for a different answer from the headline's: its rows also report hub counts, so all 68 relationships the answer rows
+bind are needed, 68 of 68).
 
 ### Measured against Neo4j
 

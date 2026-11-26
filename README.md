@@ -265,6 +265,7 @@ For judges: [JUDGE.md](JUDGE.md), also served at <https://witness-wheat.vercel.a
 - **Product capabilities:** Relate 1.0.1 (embedded engine, `relate` CLI, `relate serve --mcp`).
 - **Third-party tools:** `uv`, pytest, Neo4j 2026.10.2 in Docker (comparison and fixture source only), Vercel (landing hosting).
 - **AI use:** built with Claude Code as the coding agent, under the author's direction. The author is responsible for the result.
+  The demo video's voiceover is an AI voice (ElevenLabs) reading a script drafted by Claude Code under the author's direction; its music and sound are synthesized in code.
 - **Built during the contest period:** first commit 2026-11-15 (`git log --reverse`). No code from before the contest.
 - **Reused material:** the air-routes dataset by Kelvin Lawrence (Apache-2.0, commit `efd3b1a`), modified as stated in `NOTICE`.
 

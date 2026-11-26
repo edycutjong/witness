@@ -17,11 +17,11 @@
           "airport",
           "hub_countries"
         ],
-        "elapsed_ms": 8.08375,
+        "elapsed_ms": 2.9610410000000003,
         "error": null,
-        "execute_ms": 7.965458,
-        "lex_parse_ms": 0.015625,
-        "lower_ms": 0.025709,
+        "execute_ms": 2.8685,
+        "lex_parse_ms": 0.013833,
+        "lower_ms": 0.0245,
         "notifications": [
           {
             "category": "PERFORMANCE",
@@ -34,7 +34,7 @@
             "title": "Missing index"
           }
         ],
-        "parse_ms": 0.06525,
+        "parse_ms": 0.056208999999999995,
         "plan": {
           "profiled": false,
           "root": {
@@ -100,9 +100,9 @@
           "statement": "// Which airports of $country have no direct flight to $dest, yet would still reach it in two flights if any one hub closed? MATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country}) WHERE a.iata <> $dest AND NOT EXISTS { MATCH (a)-[:HAS_ROUTE]->(:Airport {iata: $dest}) } MATCH (a)-[:HAS_ROUTE]->(hub:Airport)-[:HAS_ROUTE]->(:Airport {iata: $dest}) OPTIONAL MATCH (hub)-[:IN_COUNTRY]->(hc:Country) WITH a, count(DISTINCT hub) AS hubs, coll.sort(collect(DISTINCT hc.code)) AS hub_countries WHERE hubs >= 2 RETURN a.iata AS airport, hub_countries ORDER BY airport"
         },
         "plan_cache": "miss",
-        "plan_ms": 0.032125,
+        "plan_ms": 0.025834,
         "result_generation_ms": 0.000375,
-        "rewrite_ms": 0.001167,
+        "rewrite_ms": 0.000916,
         "rows": [
           {
             "airport": "PBC",
@@ -147,7 +147,7 @@
           "relationships_deleted": 0
         }
       },
-      "seconds": 0.021,
+      "seconds": 0.005,
       "server": "relate",
       "tool": "read_cypher"
     },
@@ -196,7 +196,8 @@
               ]
             }
           ],
-          "rows_total": 4
+          "rows_total": 4,
+          "rows_truncated": false
         },
         "check": {
           "check_text": "22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)",
@@ -204,13 +205,17 @@
           "cli_used": false,
           "disagreements": [],
           "inconclusive": 0,
+          "inconclusive_probes": [],
+          "inconclusive_probes_total": 0,
           "not_necessary": [],
+          "not_necessary_total": 0,
+          "probes_total": 22,
           "reasons": [],
           "sufficient": true,
           "verified": true
         },
         "determinism_claimed": true,
-        "evidence_markdown": "**Answer** (4 rows): PBC, ['MX', 'US']; QRO, ['MX', 'US']; TLC, ['MX', 'US']; UPN, ['MX', 'US']\n**Evidence:** 22 relationships (of 57,645) reproduce it; 22 of 22 change the answer \u2014 verified deletion-minimal.\n```\n 1 (ACA)-[:HAS_ROUTE]->(MEX)    2 (ACA)-[:IN_COUNTRY]->(MX)\n 3 (DFW)-[:HAS_ROUTE]->(MEX)    4 (DFW)-[:IN_COUNTRY]->(US)\n 5 (LAS)-[:HAS_ROUTE]->(MEX)    6 (LAS)-[:IN_COUNTRY]->(US)\n 7 (LAX)-[:HAS_ROUTE]->(MEX)    8 (LAX)-[:IN_COUNTRY]->(US)\n 9 (PBC)-[:HAS_ROUTE]->(DFW)   10 (PBC)-[:HAS_ROUTE]->(TIJ)\n11 (PBC)-[:IN_COUNTRY]->(MX)   12 (QRO)-[:HAS_ROUTE]->(DFW)\n13 (QRO)-[:HAS_ROUTE]->(TIJ)   14 (QRO)-[:IN_COUNTRY]->(MX)\n15 (TIJ)-[:HAS_ROUTE]->(MEX)   16 (TIJ)-[:IN_COUNTRY]->(MX)\n17 (TLC)-[:HAS_ROUTE]->(ACA)   18 (TLC)-[:HAS_ROUTE]->(LAS)\n19 (TLC)-[:IN_COUNTRY]->(MX)   20 (UPN)-[:HAS_ROUTE]->(LAX)\n21 (UPN)-[:HAS_ROUTE]->(TIJ)   22 (UPN)-[:IN_COUNTRY]->(MX)\n```\nRe-run with plain `relate`: `<out>/mcp-1795711934-1/witness.rl` (+ `.cypher`). Relate 1.0.1.",
+        "evidence_markdown": "**Answer** (4 rows): PBC, ['MX', 'US']; QRO, ['MX', 'US']; TLC, ['MX', 'US']; UPN, ['MX', 'US']\n**Evidence:** 22 relationships (of 57,645) reproduce it; 22 of 22 change the answer \u2014 verified deletion-minimal.\n```\n 1 (ACA)-[:HAS_ROUTE]->(MEX)    2 (ACA)-[:IN_COUNTRY]->(MX)\n 3 (DFW)-[:HAS_ROUTE]->(MEX)    4 (DFW)-[:IN_COUNTRY]->(US)\n 5 (LAS)-[:HAS_ROUTE]->(MEX)    6 (LAS)-[:IN_COUNTRY]->(US)\n 7 (LAX)-[:HAS_ROUTE]->(MEX)    8 (LAX)-[:IN_COUNTRY]->(US)\n 9 (PBC)-[:HAS_ROUTE]->(DFW)   10 (PBC)-[:HAS_ROUTE]->(TIJ)\n11 (PBC)-[:IN_COUNTRY]->(MX)   12 (QRO)-[:HAS_ROUTE]->(DFW)\n13 (QRO)-[:HAS_ROUTE]->(TIJ)   14 (QRO)-[:IN_COUNTRY]->(MX)\n15 (TIJ)-[:HAS_ROUTE]->(MEX)   16 (TIJ)-[:IN_COUNTRY]->(MX)\n17 (TLC)-[:HAS_ROUTE]->(ACA)   18 (TLC)-[:HAS_ROUTE]->(LAS)\n19 (TLC)-[:IN_COUNTRY]->(MX)   20 (UPN)-[:HAS_ROUTE]->(LAX)\n21 (UPN)-[:HAS_ROUTE]->(TIJ)   22 (UPN)-[:IN_COUNTRY]->(MX)\n```\nRe-run with plain `relate`: `<out>/mcp-1795721777-1/witness.rl` (+ `.cypher`). Relate 1.0.1.",
         "exhibits": [
           {
             "end": "MEX",
@@ -347,21 +352,21 @@
         ],
         "exhibits_total": 22,
         "files": {
-          "cypher": "<out>/mcp-1795711934-1/witness.cypher",
-          "html": "<out>/mcp-1795711934-1/witness.html",
-          "manifest": "<out>/mcp-1795711934-1/witness.manifest.json",
-          "rl": "<out>/mcp-1795711934-1/witness.rl",
-          "trace": "<out>/mcp-1795711934-1/witness.trace.json"
+          "cypher": "<out>/mcp-1795721777-1/witness.cypher",
+          "html": "<out>/mcp-1795721777-1/witness.html",
+          "manifest": "<out>/mcp-1795721777-1/witness.manifest.json",
+          "rl": "<out>/mcp-1795721777-1/witness.rl",
+          "trace": "<out>/mcp-1795721777-1/witness.trace.json"
         },
         "inconclusive": 0,
-        "ledger_id": "r-20261126-165220-e2688a8f",
+        "ledger_id": "r-20261126-193623-ae64b5f6",
         "ledger_path": "<out>/ledger.rl",
-        "out_dir": "<out>/mcp-1795711934-1",
+        "out_dir": "<out>/mcp-1795721777-1",
         "reasons": [],
         "relate_version": "1.0.1",
-        "request_seconds": 6.033,
-        "seconds": 1.403,
-        "seconds_total": 5.947,
+        "request_seconds": 5.592,
+        "seconds": 1.359,
+        "seconds_total": 5.517,
         "source_relationships": 57645,
         "source_sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734",
         "trials": 371,
@@ -373,13 +378,13 @@
           "relationships": 22
         }
       },
-      "seconds": 6.053,
+      "seconds": 5.605,
       "server": "witness",
       "tool": "why"
     },
     {
       "arguments": {
-        "witness_path": "<out>/mcp-1795711934-1/witness.rl"
+        "witness_path": "<out>/mcp-1795721777-1/witness.rl"
       },
       "result": {
         "check_text": "22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)",
@@ -388,7 +393,7 @@
         "sufficient": true,
         "verified": true
       },
-      "seconds": 0.279,
+      "seconds": 0.28,
       "server": "witness",
       "tool": "check"
     },
@@ -404,7 +409,7 @@
         },
         "verified": false
       },
-      "seconds": 0.975,
+      "seconds": 0.951,
       "server": "witness",
       "tool": "why"
     },
@@ -432,13 +437,13 @@
         },
         "verified": false
       },
-      "seconds": 3.379,
+      "seconds": 2.994,
       "server": "witness",
       "tool": "why"
     }
   ],
   "machine": "macOS-27.2.1-arm64-arm-64bit arm64, Python 3.12.13",
-  "recorded": "2026-11-26T23:52:24+0700",
+  "recorded": "2026-11-27T02:36:27+0700",
   "relate_cli": "Relate v1.0.1",
   "tools": {
     "relate": [

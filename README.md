@@ -206,8 +206,10 @@ residue, not the proof.
 - `why` compares answers with the CLI's defaults: rows and lists as bags, floats to 12 significant digits, `differs` in its
   strict form. `--strict-lists` and `--loose` are CLI-only. Both tools cross-check on the Relate CLI unless `witness mcp`
   starts with `--no-cli`; that is a server flag, not a tool argument.
-- Replies are bounded (at most 50 exhibits, answer rows and failing probes, each with its total) so a client can read them;
-  the manifest beside the witness keeps everything.
+- Replies are bounded so a client can read them: at most 50 exhibits, 50 failing probes and 50 answer rows (whole rows,
+  20,000 characters at most, `rows_truncated` when some are left out), each with its total. `probes_total` says how many
+  necessity probes ran; a probe whose trial gave no verdict is listed under `inconclusive_probes`, never as
+  `not_necessary`. The manifest beside the witness keeps everything.
 
 Abridged call and reply (`…` marks elided fields; `statement` carries the query text; full replies in
 `evidence/mcp-transcript.md`):

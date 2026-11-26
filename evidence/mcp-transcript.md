@@ -4,7 +4,7 @@ scripted MCP client (no model in the loop) against Relate's own MCP server and `
 
 Tools: Relate `get_schema, read_cypher` · Witness `check, why`
 
-## 1. relate `read_cypher` (0.021 s)
+## 1. relate `read_cypher` (0.005 s)
 
 ```json
 {
@@ -45,7 +45,7 @@ Tools: Relate `get_schema, read_cypher` · Witness `check, why`
 }
 ```
 
-## 2. witness `why` (6.053 s)
+## 2. witness `why` (5.605 s)
 
 **Answer** (4 rows): PBC, ['MX', 'US']; QRO, ['MX', 'US']; TLC, ['MX', 'US']; UPN, ['MX', 'US']
 **Evidence:** 22 relationships (of 57,645) reproduce it; 22 of 22 change the answer — verified deletion-minimal.
@@ -62,11 +62,11 @@ Tools: Relate `get_schema, read_cypher` · Witness `check, why`
 19 (TLC)-[:IN_COUNTRY]->(MX)   20 (UPN)-[:HAS_ROUTE]->(LAX)
 21 (UPN)-[:HAS_ROUTE]->(TIJ)   22 (UPN)-[:IN_COUNTRY]->(MX)
 ```
-Re-run with plain `relate`: `<out>/mcp-1795711934-1/witness.rl` (+ `.cypher`). Relate 1.0.1.
+Re-run with plain `relate`: `<out>/mcp-1795721777-1/witness.rl` (+ `.cypher`). Relate 1.0.1.
 
-verified=True · trials=371 · reduction 1.403 s · ledger r-20261126-165220-e2688a8f
+verified=True · trials=371 · reduction 1.359 s · ledger r-20261126-193623-ae64b5f6
 
-## 3. witness `check` (0.279 s)
+## 3. witness `check` (0.28 s)
 
 ```json
 {
@@ -78,7 +78,7 @@ verified=True · trials=371 · reduction 1.403 s · ledger r-20261126-165220-e26
 }
 ```
 
-## 4. witness `why` (0.975 s)
+## 4. witness `why` (0.951 s)
 
 ```json
 {
@@ -90,7 +90,7 @@ verified=True · trials=371 · reduction 1.403 s · ledger r-20261126-165220-e26
 }
 ```
 
-## 5. witness `why` (3.379 s)
+## 5. witness `why` (2.994 s)
 
 ```json
 {

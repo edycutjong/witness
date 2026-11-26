@@ -24,26 +24,51 @@ DEFAULT_TRIAL_TIMEOUT = 30.0
 # could not read a 74,771-character `why` reply (68 exhibits, each with its full content key). Exhibits and rows are
 # trimmed to REPLY_ROWS and the per-probe list to the failures; the .manifest.json beside the witness keeps all of it.
 REPLY_ROWS = 50
+# Rows are bounded by size too (a2a arch r7): one row can hold a 3,000-element collect(). Rows are sent whole or not
+# at all, never edited, and `rows_truncated` says when the rest is only in the manifest.
+REPLY_ROW_CHARS = 20_000
+VALUE_CHARS = 80
 
 
 def lean_check(d: dict) -> dict:
-    """A check result without its per-probe list; `not_necessary` names the probes that failed (empty = all needed),
-    at most REPLY_ROWS of them, with `not_necessary_total` (a2a judge r6: a large failing witness was the unbounded
-    path)."""
+    """A check result without its per-probe list. `not_necessary` names the probes whose deletion kept the answer
+    (proven not needed); `inconclusive_probes` the probes whose trial gave no verdict (an error or a timeout: unknown,
+    never "not needed", a2a arch r7). Each holds at most REPLY_ROWS names, with its `_total`. `probes_total` counts the
+    probes that ran: 0 means the necessity check did not run, so an empty `not_necessary` proves nothing on its own;
+    `verified` is the verdict."""
     out = {k: v for k, v in d.items() if k != "probes"}
-    failed = [p["element"] for p in d.get("probes", []) if not p.get("necessary")]
+    probes = d.get("probes", [])
+    failed = [p["element"] for p in probes if p.get("necessary") is False]
+    unknown = [p["element"] for p in probes if p.get("necessary") is None]
+    out["probes_total"] = len(probes)
     out["not_necessary"] = failed[:REPLY_ROWS]
     out["not_necessary_total"] = len(failed)
+    out["inconclusive_probes"] = unknown[:REPLY_ROWS]
+    out["inconclusive_probes_total"] = len(unknown)
     return out
 
 
+def fit_rows(rows: list) -> list:
+    """The leading answer rows that fit REPLY_ROWS and REPLY_ROW_CHARS of JSON; whole rows only."""
+    kept: list = []
+    used = 0
+    for r in rows[:REPLY_ROWS]:
+        used += len(json.dumps(r, default=str))
+        if used > REPLY_ROW_CHARS:
+            break
+        kept.append(r)
+    return kept
+
+
 def compact_reply(res: dict) -> dict:
-    """The `why` reply as sent: exhibits as n/start/type/end, at most REPLY_ROWS exhibits and answer rows."""
+    """The `why` reply as sent: exhibits as n/start/type/end, at most REPLY_ROWS exhibits, answer rows bounded by count
+    and size (`rows_truncated` when some are only in the manifest)."""
     ex = [{k: x[k] for k in ("n", "start", "type", "end")} for x in res["exhibits"]]
     rows = res["answer"]["rows"]
+    sent = fit_rows(rows)
     return {
         **res,
-        "answer": {**res["answer"], "rows": rows[:REPLY_ROWS], "rows_total": len(rows)},
+        "answer": {**res["answer"], "rows": sent, "rows_total": len(rows), "rows_truncated": len(sent) < len(rows)},
         "exhibits": ex[:REPLY_ROWS],
         "exhibits_total": len(ex),
         "check": lean_check(res["check"]),
@@ -54,7 +79,10 @@ MAX_EVIDENCE_LINES = 25
 
 
 def package_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    """The repo root: the working directory if it holds the committed data (a wheel install started from a clone, as an
+    MCP client's `cwd` setting does), else the source checkout this module sits in (a2a arch r7; the CLI's rule)."""
+    cwd = Path.cwd()
+    return cwd if (cwd / "data" / "air-routes.rl").is_file() else Path(__file__).resolve().parents[2]
 
 
 class ToolError(Exception):
@@ -85,13 +113,19 @@ def resolve_store(store: str | None, allow: list[Path], default: Path) -> Path:
     return p
 
 
+def _short(v) -> str:
+    s = str(v)
+    return s if len(s) <= VALUE_CHARS else s[: VALUE_CHARS - 1] + "…"
+
+
 def evidence_markdown(res: dict) -> str:
     """What the agent pastes into its answer: <= 25 lines."""
     lines = []
     ans = res["answer"]
     shown_rows = ans["rows"][:6]
     lines.append(
-        f"**Answer** ({len(ans['rows'])} rows): " + "; ".join(", ".join(str(v) for v in r.values()) for r in shown_rows)
+        f"**Answer** ({len(ans['rows'])} rows): "
+        + "; ".join(", ".join(_short(v) for v in r.values()) for r in shown_rows)
     )
     if len(ans["rows"]) > len(shown_rows):
         lines[-1] += f"; … (+{len(ans['rows']) - len(shown_rows)} more)"
@@ -115,6 +149,8 @@ def evidence_markdown(res: dict) -> str:
     room = MAX_EVIDENCE_LINES - 6  # answer, evidence, 2 fences, re-run line, one spare for "not verified"
     per = 1 if len(ex) <= room else 2  # two per line when the register is long, so it still fits a chat reply
     rows = [ex[i : i + per] for i in range(0, len(ex), per)]
+    if len(rows) > room:
+        room -= 1  # the "… more lines" marker takes a line too, so the verdict line below is never cut (a2a arch r7)
     for r in rows[:room]:
         lines.append("   ".join(r))
     if len(rows) > room:
@@ -461,7 +497,9 @@ def main(argv: list[str] | None = None) -> int:
         import mcp  # noqa: F401
     except ImportError:
         print(
-            "witness mcp needs the MCP SDK: uv run --extra mcp witness mcp   (or pip install 'witness[mcp]')",
+            "witness mcp needs the MCP SDK. From the clone: uv run --extra mcp witness mcp"
+            "   (or pip install -e '.[mcp]')."
+            " Witness is not on PyPI: `pip install witness` installs an unrelated package.",
             file=sys.stderr,
         )
         return 2

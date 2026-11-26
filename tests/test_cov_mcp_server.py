@@ -92,6 +92,19 @@ def test_a_relative_store_path_resolves_against_the_package_root():
     assert p == (ROOT / "data" / "air-routes.rl").resolve()
 
 
+def test_the_package_root_is_the_working_directory_when_it_holds_the_committed_data(tmp_path, monkeypatch):
+    # a2a arch r7: from a wheel install, parents[2] of the module is the venv's lib dir; a clone as cwd is the root
+    (tmp_path / "data").mkdir()
+    (tmp_path / "data" / "air-routes.rl").write_bytes(b"")
+    monkeypatch.chdir(tmp_path)
+    assert mcp_server.package_root() == tmp_path
+
+
+def test_the_package_root_falls_back_to_the_source_checkout(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    assert mcp_server.package_root() == Path(mcp_server.__file__).resolve().parents[2]
+
+
 def test_a_tool_error_is_an_object_the_agent_can_read():
     assert ToolError("store", "nope").to_dict() == {"error": {"kind": "store", "message": "nope"}, "verified": False}
 
@@ -325,7 +338,12 @@ def test_check_worker_reports_an_unexpected_failure_as_an_internal_error(tmp_pat
 def test_why_worker_returns_the_whole_evidence_object_and_records_the_ledger(tmp_path, tiny_rl, stay_in_this_session):
     kind, res = run_inline(_why_worker, why_args(tmp_path, tiny_rl))
     assert kind == "ok" and res["verified"] is True
-    assert res["answer"] == {"columns": ["hub"], "rows": [{"hub": "B"}, {"hub": "C"}], "rows_total": 2}
+    assert res["answer"] == {
+        "columns": ["hub"],
+        "rows": [{"hub": "B"}, {"hub": "C"}],
+        "rows_total": 2,
+        "rows_truncated": False,
+    }
     assert res["witness"] == {"relationships": 4, "nodes": 4, "deletion_minimal_verified": True}
     assert res["source_relationships"] == 6 and res["check"]["check_text"].startswith("4 of 4 change the answer")
     assert [e["n"] for e in res["exhibits"]] == [1, 2, 3, 4]
@@ -556,4 +574,6 @@ def test_main_says_how_to_install_the_sdk_and_exits_2_when_mcp_is_missing(monkey
     got = capture_tools(monkeypatch)
     monkeypatch.setitem(sys.modules, "mcp", None)  # `import mcp` now raises ImportError
     assert mcp_server.main([]) == 2
-    assert "pip install 'witness[mcp]'" in capsys.readouterr().err and got == []
+    err = capsys.readouterr().err
+    assert "uv run --extra mcp witness mcp" in err and "pip install -e '.[mcp]'" in err and got == []
+    assert "not on PyPI" in err  # a2a arch r7: `pip install witness` is an unrelated PyPI package

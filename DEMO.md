@@ -61,13 +61,13 @@ With a real model in the loop: `evidence/mcp-agent-session.md` records claude-so
 MCP servers enabled) writing its own Cypher and attaching the witness; the exact command, `mcp.json` and prompt are in that file.
 It needs a Claude Code login, so it is a recorded run, not a step of the judge path.
 
-## 6. Tests: 508 pass, 100% coverage
+## 6. Tests: 517 pass, 100% coverage
 
 ```bash
 uv run pytest --cov=witness   # fails below 100% line + branch coverage (pyproject.toml)
 ```
 
-The run is recorded in `evidence/pytest-2026-11-27.txt` (508 passed; the 2 fixture-pull tests need a local Neo4j in Docker and
+The run is recorded in `evidence/pytest-2026-11-27.txt` (517 passed; the 2 fixture-pull tests need a local Neo4j in Docker and
 skip without it) and the last full local CI run in `evidence/ci-local-2026-11-24.txt` (ruff, mypy, pytest, pip-audit, gitleaks, build, performance gate on one machine).
 
 ## 7. Two queries disagree: 57,645 → 5, "5 of 5 end the disagreement"

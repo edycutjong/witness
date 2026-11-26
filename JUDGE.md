@@ -21,7 +21,7 @@ Witness is built on Relate, the embedded graph database, for the Relate by Neo4j
 | **57,645 → 92** | a third: `differs`, a smaller repro of a wrong answer; the same mistaken query returns 13 rows where the expected answer has 12, and the repro keeps that wrong answer; `92 of 92 change the answer` (`witnesses/wrong-answer.manifest.json`) |
 | **371 trials · 1.095 s** | delete, re-run, roll back; 86 deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`) |
 | **366.8 vs 90.2** | trials per second, Relate in-process vs Neo4j 2026.10.2 in Docker, median of 3 runs on one machine (`evidence/neo4j-compare-2026-11-24.md`) |
-| **508 tests pass · 100% coverage** | real Relate; the graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach rare branches (`evidence/pytest-2026-11-27.txt`, `pytest --cov=witness`, gate in `pyproject.toml`) |
+| **517 tests pass · 100% coverage** | real Relate; the graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach rare branches (`evidence/pytest-2026-11-27.txt`, `pytest --cov=witness`, gate in `pyproject.toml`) |
 | **byte-identical** | the same query and seed give a byte-identical rebuild script (`.cypher`) on 2 runs (`evidence/determinism.json`) |
 
 ## Reproduce it

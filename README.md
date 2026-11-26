@@ -16,7 +16,7 @@
   [![Release](https://img.shields.io/github/v/release/edycutjong/witness?sort=semver)](https://github.com/edycutjong/witness/releases/latest)
   ![Python](https://img.shields.io/badge/Python_3.11_|_3.12-3776AB?style=flat&logo=python&logoColor=white)
   ![Relate](https://img.shields.io/badge/Relate_1.0.1-1F1A14?style=flat)
-  ![Tests](https://img.shields.io/badge/tests-508_passed-2ea043?style=flat)
+  ![Tests](https://img.shields.io/badge/tests-517_passed-2ea043?style=flat)
   [![License](https://img.shields.io/badge/License-Apache_2.0-yellow)](LICENSE)
 
 </div>
@@ -243,7 +243,7 @@ rollback, which excludes it on both sides, is p50 2.54 vs 6.48 ms (median of the
 
 ```bash
 make ci                          # ruff, mypy, pytest with the 100% coverage gate, pip-audit, gitleaks
-uv run pytest --cov=witness      # 508 pass against real Relate (2 more need a local Neo4j), 100% line + branch coverage
+uv run pytest --cov=witness      # 517 pass against real Relate (2 more need a local Neo4j), 100% line + branch coverage
 ```
 
 Reproduce every number in this README: [DEMO.md](DEMO.md). Raw evidence and the machine/version of each run:

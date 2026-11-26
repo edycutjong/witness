@@ -30,6 +30,15 @@ TESTS = int(re.search(r"(\d+) passed", pytest_log.read_text()).group(1))
 man = json.loads((ROOT / "witnesses" / "two-hub.manifest.json").read_text())
 cmp_path = sorted((ROOT / "evidence").glob("neo4j-compare-*.json"))[-1]
 cmp = json.loads(cmp_path.read_text())
+# full-graph necessity of the 68 bound relationships (a2a judge r5/r6): how many change the answer there, how many of those
+# are in the witness; the rest are flights of airports outside the witness, whose deletion adds that airport
+fgn = json.loads((ROOT / "evidence" / "full-graph-necessity.json").read_text())
+assert (
+    fgn["bound"] == cmp["targeted_agreement"]["rels"]
+    and fgn["change_the_answer"] == cmp["targeted_agreement"]["relate_changed"]
+)
+FGN_IN = fgn["change_and_in_witness"]
+FGN_OUT = fgn["change_the_answer"] - FGN_IN
 exhibit = (ROOT / "witnesses" / "two-hub.html").read_text()
 
 src_rels, src_nodes = man["source"]["relationships"], man["source"]["nodes"]
@@ -119,6 +128,38 @@ def fill(tpl: str, vals: dict) -> str:
     return out
 
 
+def cases_vals() -> dict:
+    """Exhibits B and C on the landing (a2a judge r6): the disagree and differs receipts, every number read from the
+    committed manifests and the scan."""
+    db = json.loads((ROOT / "witnesses" / "direction-bug.manifest.json").read_text())
+    wa = json.loads((ROOT / "witnesses" / "wrong-answer.manifest.json").read_text())
+    scan = json.loads((ROOT / "evidence" / "disagree-scan.json").read_text())
+    assert (
+        db["verified"]
+        and db["predicate"]["kind"] == "disagree"
+        and wa["verified"]
+        and wa["predicate"]["kind"] == "differs"
+    )
+    assert db["source"]["relationships"] == wa["source"]["relationships"] == src_rels
+    wa_rows = {r["airport"] for r in wa["baseline"]["rows"]}
+    exp_rows = {r["airport"] for r in wa["predicate"]["expected_rows"]}
+    extra = sorted(wa_rows - exp_rows)
+    assert extra == ["AGR"] and exp_rows <= wa_rows, extra
+    return {
+        "C_SRC": fmt(src_rels),
+        "DB_RELS": db["witness"]["relationships"],
+        "DB_TRIALS": fmt(db["run"]["trials"]),
+        "DB_CHECK": db["check"]["check_text"].split(" (")[0],
+        "SCAN_DIFFER": scan["pairs_differ"],
+        "SCAN_PAIRS": scan["pairs_scanned"],
+        "WA_RELS": wa["witness"]["relationships"],
+        "WA_TRIALS": fmt(wa["run"]["trials"]),
+        "WA_CHECK": wa["check"]["check_text"].split(" (")[0],
+        "WA_ROWS": len(wa_rows),
+        "WA_EXP": len(exp_rows),
+    }
+
+
 DESC = f"When an agent answers from a graph, Witness hands back {w_rels} of its {fmt(src_rels)} relationships that reproduce the answer, and proves deleting any one of them changes it."
 DESC_OG = f"{fmt(src_rels)} relationships → {w_rels} that reproduce an agent's answer. Delete any one of the {w_rels} and it changes."
 assert 50 <= len(DESC) <= 160 and len(DESC_OG) <= 125, (len(DESC), len(DESC_OG))
@@ -150,7 +191,7 @@ def landing_page() -> str:
         ),
         (
             f'<span data-count="{cmp["targeted_agreement"]["rels"]}">{cmp["targeted_agreement"]["rels"]}</span><span class="to">→</span><em>{w_rels}</em>',
-            f"relationships the answer rows bind, then the witness: deleted from the full graph, only {cmp['targeted_agreement']['relate_changed']} of the {cmp['targeted_agreement']['rels']} change the answer",
+            f"relationships the answer rows bind, then the witness: deleted from the full graph, only {cmp['targeted_agreement']['relate_changed']} of the {cmp['targeted_agreement']['rels']} change the answer ({FGN_IN} of them in the witness); deleted from the witness, all {w_rels} do",
         ),
         (
             f'<span data-count="{TESTS}">{TESTS}</span><span class="to">·</span>100%',
@@ -213,6 +254,7 @@ def landing_page() -> str:
         "SOURCE_FOOT": f'<a href="{REPO}">source</a>' if REPO_PUBLIC else "source opens at submission",
         "DATA": sp.page_json(),
         "JS": (PARTS / "landing.js").read_text(),
+        **cases_vals(),
     }
     return fill((PARTS / "landing.html").read_text(), vals)
 
@@ -447,6 +489,10 @@ TA = cmp["targeted_agreement"]
 _db = json.loads((ROOT / "witnesses" / "direction-bug.manifest.json").read_text())
 DB_RELS, DB_CHECK = _db["witness"]["relationships"], _db["check"]["check_text"].split(" (")[0]
 assert _db["verified"] and DB_CHECK.endswith("end the disagreement")
+_wa = json.loads((ROOT / "witnesses" / "wrong-answer.manifest.json").read_text())
+WA_RELS, WA_CHECK = _wa["witness"]["relationships"], _wa["check"]["check_text"].split(" (")[0]
+WA_ROWS, WA_EXP = len(_wa["baseline"]["rows"]), len(_wa["predicate"]["expected_rows"])
+assert _wa["verified"] and _wa["predicate"]["kind"] == "differs" and WA_CHECK.endswith("change the answer")
 det = json.loads((ROOT / "evidence" / "determinism.json").read_text())
 LIVE = SITE_URL + "/"
 EXHIBIT = SITE_URL + "/exhibit/two-hub.html"
@@ -484,11 +530,15 @@ RECEIPTS = [
     ),
     (
         f"{TA['rels']} → {w_rels}",
-        f"the answer rows bind {TA['rels']} relationships (`queries/two-hub-bindings.cypher`); deleted from the full graph, only {TA['relate_changed']} of them change the answer, because other routes back the rest up. The witness keeps {w_rels}, each needed (`evidence/{cmp_path.with_suffix('.md').name}`, targeted pass)",
+        f"the answer rows bind {TA['rels']} relationships (`queries/two-hub-bindings.cypher`); deleted from the full graph, only {TA['relate_changed']} of them change the answer, because other routes back the rest up (`evidence/{cmp_path.with_suffix('.md').name}`, targeted pass). {FGN_IN} of those {TA['relate_changed']} are in the witness; the other {FGN_OUT} are flights of Mexican airports outside it, whose deletion adds that airport to the answer (`evidence/full-graph-necessity.json`). The witness keeps {w_rels}, each needed in the witness (`witnesses/two-hub.manifest.json`)",
     ),
     (
         f"{fmt(src_rels)} → {DB_RELS}",
         f"a second case: a plausible agent mistake written for this case (the first flight matched in either direction) and the headline query disagree on IN/DEL; `{DB_CHECK}` (`witnesses/direction-bug.manifest.json`)",
+    ),
+    (
+        f"{fmt(src_rels)} → {WA_RELS}",
+        f"a third: `differs`, a smaller repro of a wrong answer; the same mistaken query returns {WA_ROWS} rows where the expected answer has {WA_EXP}, and the repro keeps that wrong answer; `{WA_CHECK}` (`witnesses/wrong-answer.manifest.json`)",
     ),
     (
         f"{trials} trials · {secs} s",
@@ -500,7 +550,7 @@ RECEIPTS = [
     ),
     (
         f"{TESTS} tests pass · 100% coverage",
-        f"real Relate; the graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls or a failing CLI to force rare branches (`evidence/{pytest_log.name}`, `pytest --cov=witness`, gate in `pyproject.toml`)",
+        f"real Relate; the graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach rare branches (`evidence/{pytest_log.name}`, `pytest --cov=witness`, gate in `pyproject.toml`)",
     ),
     (
         "byte-identical",
@@ -515,7 +565,7 @@ REPLAY = "The whole suite against real Relate (CI and deterministic replay, not 
 LIMITS = [
     "Deletion-minimal, not smallest: no single remaining relationship can be removed without changing the answer; a smaller witness may exist.",
     "Read-only, deterministic Cypher only. Witness refuses writes, procedures, clocks and randomness (exit 2) rather than guess.",
-    "One graph (a public air-routes dataset, Apache-2.0): the headline query and one disagreement case. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
+    "One graph (a public air-routes dataset, Apache-2.0): the headline query, one disagreement case and one wrong-answer repro. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
 ]
 LINKS = [
     ("Repository", REPO + OPENS),

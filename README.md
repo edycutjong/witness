@@ -16,7 +16,7 @@
   [![Release](https://img.shields.io/github/v/release/edycutjong/witness?sort=semver)](https://github.com/edycutjong/witness/releases/latest)
   ![Python](https://img.shields.io/badge/Python_3.11_|_3.12-3776AB?style=flat&logo=python&logoColor=white)
   ![Relate](https://img.shields.io/badge/Relate_1.0.1-1F1A14?style=flat)
-  ![Tests](https://img.shields.io/badge/tests-505_passed-2ea043?style=flat)
+  ![Tests](https://img.shields.io/badge/tests-508_passed-2ea043?style=flat)
   [![License](https://img.shields.io/badge/License-Apache_2.0-yellow)](LICENSE)
 
 </div>
@@ -25,8 +25,7 @@
 
 ## 💡 The Problem & Solution
 
-**Use case:** checking an agent's graph answer by reading 22 relationships instead of 57,645 (an absence such as "no direct
-flight" is checked against the full graph's recorded answer; see [Absences](#how-the-reduction-works)).
+**Use case:** checking an agent's graph answer by reading 22 relationships instead of 57,645.
 
 **Run it:** `git clone https://github.com/edycutjong/witness && cd witness && uv run witness demo` (needs [`uv`](https://docs.astral.sh/uv/)).
 Expect `22 of 22 change the answer` and exit 0; details in [Getting Started](#-getting-started-setup-and-run).
@@ -53,8 +52,9 @@ answer" on the Python API and on the Relate CLI (`witnesses/two-hub.manifest.jso
 those 68 from the full graph changes the answer for only 20 of them; the other 48 change nothing, because other routes back
 them up (`evidence/neo4j-compare-2026-11-24.md`, targeted pass). The witness keeps 22 of the 68, and deleting any one of them
 from the witness changes the answer. Necessity is proven inside the witness, not in the full graph: 11 of those 20 are in the witness,
-and each of the other 9 is a Mexican airport's own flight to MEX, whose deletion adds that airport to the answer (it no longer
-has a direct flight). The witness does not contain those airports, so it does not need them (`bench/full_graph_necessity.py`,
+and each of the other 9 is the direct flight to MEX of a Mexican airport outside the witness (CUN, DGO, GDL, MTY, MZT, PVR,
+SJD, TGZ, ZIH), whose deletion adds that airport to the answer (it no longer has a direct flight). The witness does not contain
+those nine airports, so it does not need their flights (`bench/full_graph_necessity.py`,
 `evidence/full-graph-necessity.json`).
 
 **Deletion-minimal** means: no single remaining relationship (or kept isolated node) can be removed without changing the
@@ -74,6 +74,13 @@ flight matched in either direction (`queries/two-hub-agent.cypher`). On 6 of 232
 57,645 relationships to 5 in 139 trials, and `witness check` confirms "5 of 5 end the disagreement"
 (`witnesses/direction-bug.*`, `evidence/direction-bug-run.txt`). The five show the bug: the agent's query read the flight
 `(VNS)-[:HAS_ROUTE]->(AGR)` backwards, as if Agra flew to VNS, so VNS counted as an extra hub on Agra's way to DEL.
+
+**The third predicate, `differs`: a smaller repro of a wrong answer.** Give Witness the answer you expected (here, the
+reference query's 12 rows for India and DEL, `evidence/wrong-answer-expected.json`) and the query that gets it wrong (the
+same agent query returns 13: the 12 plus AGR). `--predicate differs` keeps that same wrong answer while it deletes:
+57,645 relationships → 92 (45 nodes) in 2,099 trials, "92 of 92 change the answer", cross-checked on the Relate CLI
+(`witnesses/wrong-answer.*`, `evidence/wrong-answer-run.txt`). The repro is larger than the disagreement witness because it
+must reproduce all 13 wrong rows, not only the one that disagrees.
 
 ### How it uses Relate
 
@@ -102,8 +109,8 @@ Relate capabilities used:
 ### How the reduction works
 
 **How 371 trials remove 57,623 relationships.** Trial 1 checks that the empty graph changes the answer. The `EXPLAIN` plan shows `:ON_CONTINENT`
-cannot reach the answer, so trial 2 drops its 3,504 relationships at once. Phase A runs ddmin (delta debugging) over nodes: one `DETACH DELETE` takes a node with
-all its relationships, and 69 of 253 trials keep the answer (3,729 nodes go; 54,141 → 50 relationships). Phase B runs ddmin over
+cannot reach the answer, so trial 2 drops its 3,504 relationships and the 7 `:Continent` nodes at once (3,748 → 3,741 nodes). Phase A runs ddmin (delta debugging) over nodes: one `DETACH DELETE` takes a node with
+all its relationships, and 69 of 253 trials keep the answer (3,729 nodes go, 3,741 → 12; 54,141 → 50 relationships). Phase B runs ddmin over
 the 50 remaining relationships (16 of 116 trials keep it; 50 → 22). 86 deletions applied, 285 rolled back
 (`witnesses/two-hub.trace.json`).
 
@@ -193,9 +200,13 @@ residue, not the proof.
   Pass the rows you showed as `answer` (objects keyed by column): if they differ from the store's answer, nothing is attached.
   Stores must sit in `data/` or `witnesses/` by default; `--allow DIR` (repeatable) replaces that list, so pass
   `--allow data --allow witnesses` too if you still want them (`--allow` paths are relative to where `witness mcp` starts).
-- `check(witness_path, statement?, parameters?)` re-proves a witness from its `.rl` and manifest.
-- Replies are bounded (at most 50 exhibits and answer rows, with the totals) so a client can read them; the manifest beside
-  the witness keeps everything.
+- `check(witness_path, statement?, parameters?)` re-proves a witness from its `.rl` and manifest, under the comparison
+  settings the manifest records (so the committed `--strict-lists` witnesses are re-proved strictly).
+- `why` compares answers with the CLI's defaults: rows and lists as bags, floats to 12 significant digits, `differs` in its
+  strict form. `--strict-lists` and `--loose` are CLI-only. Both tools cross-check on the Relate CLI unless `witness mcp`
+  starts with `--no-cli`; that is a server flag, not a tool argument.
+- Replies are bounded (at most 50 exhibits, answer rows and failing probes, each with its total) so a client can read them;
+  the manifest beside the witness keeps everything.
 
 Abridged call and reply (`…` marks elided fields; `statement` carries the query text; full replies in
 `evidence/mcp-transcript.md`):
@@ -229,11 +240,11 @@ rollback, which excludes it on both sides, is p50 2.54 vs 6.48 ms (median of the
 
 ```bash
 make ci                          # ruff, mypy, pytest with the 100% coverage gate, pip-audit, gitleaks
-uv run pytest --cov=witness      # 505 pass against real Relate (2 more need a local Neo4j), 100% line + branch coverage
+uv run pytest --cov=witness      # 508 pass against real Relate (2 more need a local Neo4j), 100% line + branch coverage
 ```
 
 Reproduce every number in this README: [DEMO.md](DEMO.md). Raw evidence and the machine/version of each run:
-`evidence/` (this suite's run: `evidence/pytest-2026-11-26.txt`; the last full local CI run: `evidence/ci-local-2026-11-24.txt`). The tests use real Relate, not mocks of the graph store. The graph store, the rollback transactions and the queries are never mocked. `relate pull` is stood in for in the fixture-mode tests (it needs a running Neo4j server; the Neo4j side is exercised by `bench/neo4j_compare.py`), and a few tests substitute timers, process calls, a failing CLI or one reducer phase to force a rare branch.
+`evidence/` (this suite's run: `evidence/pytest-2026-11-27.txt`; the last full local CI run: `evidence/ci-local-2026-11-24.txt`). The tests use real Relate, not mocks of the graph store. The graph store, the rollback transactions and the queries are never mocked. `relate pull` is stood in for in the fixture-mode tests (it needs a running Neo4j server; the Neo4j side is exercised by `bench/neo4j_compare.py`), and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach a rare branch.
 
 GitHub Actions (`.github/workflows/ci.yml`) runs six stages: **Quality** (ruff, mypy, tests with the coverage gate; Python 3.11
 and 3.12 on `main`) and **Security** (gitleaks over the full history, pip-audit) in parallel, then **Build** (wheel, sdist,

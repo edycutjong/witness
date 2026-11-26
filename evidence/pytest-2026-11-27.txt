@@ -1,0 +1,5 @@
+# uv run pytest --cov=witness (100% line+branch gate), recorded 2026-11-27 (00:58 +0700) after a2a judge r6 (the committed wrong-answer witness for the differs predicate, the bounded not_necessary list in MCP replies); supersedes the 505-test run
+# Darwin arm64; relate-db 1.0.1, Relate CLI v1.0.1; Python 3.12.13; local Neo4j in Docker NOT running, so its 2 fixture-pull tests skip (they passed in evidence/pytest-2026-11-24.txt)
+508 passed, 2 skipped in 89.78s (0:01:29)
+TOTAL 2569 statements, 826 branches, 0 missed: 100.00%
+# skipped: tests/test_fixture.py:105 and :131 "local Neo4j (Docker) is not running" (510 tests in total)

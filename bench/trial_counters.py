@@ -2,9 +2,9 @@
 `uv run witness demo` prints (`reducing · trial N · … relationships, … nodes left`) and the demo video's replay shows,
 for all 371 trials instead of the counter's 50 ms samples.
 
-It re-runs the seed-0 reduction of `witness demo` with a read-only wrapper on `Reducer.test` (nothing about the
-reduction changes), then checks that its per-trial (n, phase, rels, nodes, holds) sequence is identical to the committed
-witnesses/two-hub.trace.json, and stops without writing if it is not.
+It re-runs the seed-0 reduction of `witness demo` with pass-through wrappers on `Reducer.test` and `Reducer.commit`
+(they only record; nothing about the reduction changes), then checks that its per-trial (n, phase, rels, nodes,
+holds) sequence is identical to the committed witnesses/two-hub.trace.json, and stops without writing if it is not.
 
     uv run python bench/trial_counters.py   -> evidence/trial-counters-2026-11-27.json
 """

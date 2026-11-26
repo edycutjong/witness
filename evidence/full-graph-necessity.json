@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-27 02:17:09 +0700",
+ "generated": "2026-11-27 02:35:38 +0700",
  "relate_db": "1.0.1",
  "machine": "Darwin 27.2.0 arm64, Python 3.12.13",
  "query": "queries/two-hub.cypher",
@@ -7,6 +7,7 @@
   "country": "MX",
   "dest": "MEX"
  },
+ "method": "one relationship deleted per trial by elementId (count asserted == 1), rolled back; compared with canon_rows (manifest comparison settings)",
  "bound": 68,
  "change_the_answer": 20,
  "change_and_in_witness": 11,
@@ -18,70 +19,80 @@
    "in_witness": true,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(TLC)-[:HAS_ROUTE]->(ZIH)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(TLC)-[:HAS_ROUTE]->(SJD)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(TLC)-[:HAS_ROUTE]->(GDL)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(TLC)-[:HAS_ROUTE]->(MTY)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(TLC)-[:HAS_ROUTE]->(PVR)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(TLC)-[:HAS_ROUTE]->(CUN)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(TLC)-[:HAS_ROUTE]->(SAT)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(TLC)-[:HAS_ROUTE]->(LAS)",
    "in_witness": true,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(TLC)-[:HAS_ROUTE]->(FLL)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(ACA)-[:HAS_ROUTE]->(MEX)",
@@ -90,7 +101,8 @@
     "ACA"
    ],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(ZIH)-[:HAS_ROUTE]->(MEX)",
@@ -99,7 +111,8 @@
     "ZIH"
    ],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(SJD)-[:HAS_ROUTE]->(MEX)",
@@ -108,7 +121,8 @@
     "SJD"
    ],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(GDL)-[:HAS_ROUTE]->(MEX)",
@@ -117,7 +131,8 @@
     "GDL"
    ],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(MTY)-[:HAS_ROUTE]->(MEX)",
@@ -126,7 +141,8 @@
     "MTY"
    ],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(PVR)-[:HAS_ROUTE]->(MEX)",
@@ -135,7 +151,8 @@
     "PVR"
    ],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(CUN)-[:HAS_ROUTE]->(MEX)",
@@ -144,98 +161,112 @@
     "CUN"
    ],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(SAT)-[:HAS_ROUTE]->(MEX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(LAS)-[:HAS_ROUTE]->(MEX)",
    "in_witness": true,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(FLL)-[:HAS_ROUTE]->(MEX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(ACA)-[:IN_COUNTRY]->(MX)",
    "in_witness": true,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(ZIH)-[:IN_COUNTRY]->(MX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(SJD)-[:IN_COUNTRY]->(MX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(GDL)-[:IN_COUNTRY]->(MX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(MTY)-[:IN_COUNTRY]->(MX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(PVR)-[:IN_COUNTRY]->(MX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(CUN)-[:IN_COUNTRY]->(MX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(SAT)-[:IN_COUNTRY]->(US)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(LAS)-[:IN_COUNTRY]->(US)",
    "in_witness": true,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(FLL)-[:IN_COUNTRY]->(US)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(TLC)-[:IN_COUNTRY]->(MX)",
@@ -244,7 +275,8 @@
    "dropped": [
     "TLC"
    ],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(UPN)-[:HAS_ROUTE]->(TIJ)",
@@ -253,7 +285,8 @@
    "dropped": [
     "UPN"
    ],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(UPN)-[:HAS_ROUTE]->(LAX)",
@@ -262,7 +295,8 @@
    "dropped": [
     "UPN"
    ],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(TIJ)-[:HAS_ROUTE]->(MEX)",
@@ -273,7 +307,8 @@
    "dropped": [
     "UPN"
    ],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(LAX)-[:HAS_ROUTE]->(MEX)",
@@ -282,7 +317,8 @@
    "dropped": [
     "UPN"
    ],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(TIJ)-[:IN_COUNTRY]->(MX)",
@@ -291,7 +327,8 @@
    "dropped": [],
    "lists_changed": [
     "UPN"
-   ]
+   ],
+   "changes_the_answer": true
   },
   {
    "relationship": "(LAX)-[:IN_COUNTRY]->(US)",
@@ -300,7 +337,8 @@
    "dropped": [],
    "lists_changed": [
     "UPN"
-   ]
+   ],
+   "changes_the_answer": true
   },
   {
    "relationship": "(UPN)-[:IN_COUNTRY]->(MX)",
@@ -309,70 +347,80 @@
    "dropped": [
     "UPN"
    ],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(QRO)-[:HAS_ROUTE]->(TIJ)",
    "in_witness": true,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(QRO)-[:HAS_ROUTE]->(ACA)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(QRO)-[:HAS_ROUTE]->(DGO)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(QRO)-[:HAS_ROUTE]->(MZT)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(QRO)-[:HAS_ROUTE]->(MTY)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(QRO)-[:HAS_ROUTE]->(CUN)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(QRO)-[:HAS_ROUTE]->(IAH)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(QRO)-[:HAS_ROUTE]->(DFW)",
    "in_witness": true,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(QRO)-[:HAS_ROUTE]->(ATL)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(DGO)-[:HAS_ROUTE]->(MEX)",
@@ -381,7 +429,8 @@
     "DGO"
    ],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(MZT)-[:HAS_ROUTE]->(MEX)",
@@ -390,63 +439,72 @@
     "MZT"
    ],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(IAH)-[:HAS_ROUTE]->(MEX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(DFW)-[:HAS_ROUTE]->(MEX)",
    "in_witness": true,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(ATL)-[:HAS_ROUTE]->(MEX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(DGO)-[:IN_COUNTRY]->(MX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(MZT)-[:IN_COUNTRY]->(MX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(IAH)-[:IN_COUNTRY]->(US)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(DFW)-[:IN_COUNTRY]->(US)",
    "in_witness": true,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(ATL)-[:IN_COUNTRY]->(US)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(QRO)-[:IN_COUNTRY]->(MX)",
@@ -455,56 +513,64 @@
    "dropped": [
     "QRO"
    ],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(PBC)-[:HAS_ROUTE]->(TGZ)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(PBC)-[:HAS_ROUTE]->(TIJ)",
    "in_witness": true,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(PBC)-[:HAS_ROUTE]->(GDL)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(PBC)-[:HAS_ROUTE]->(MTY)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(PBC)-[:HAS_ROUTE]->(CUN)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(PBC)-[:HAS_ROUTE]->(IAH)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(PBC)-[:HAS_ROUTE]->(DFW)",
    "in_witness": true,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(TGZ)-[:HAS_ROUTE]->(MEX)",
@@ -513,14 +579,16 @@
     "TGZ"
    ],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   },
   {
    "relationship": "(TGZ)-[:IN_COUNTRY]->(MX)",
    "in_witness": false,
    "added": [],
    "dropped": [],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": false
   },
   {
    "relationship": "(PBC)-[:IN_COUNTRY]->(MX)",
@@ -529,7 +597,8 @@
    "dropped": [
     "PBC"
    ],
-   "lists_changed": []
+   "lists_changed": [],
+   "changes_the_answer": true
   }
  ]
 }

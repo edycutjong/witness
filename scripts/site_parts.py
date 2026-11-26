@@ -51,6 +51,14 @@ MILESTONES = [  # (trial, relationships after it, label)
 assert ph["start_counts"][1] - ph["after_plan"][1] == trace["plan"]["dropped_rels"]
 assert MILESTONES[-1][1] == man["witness"]["relationships"] and MILESTONES[0][1] == man["source"]["relationships"]
 HOLDS = "".join("1" if t["holds"] else "0" for t in TR)
+# Relationships left after EVERY trial, for the hero counter (a2a arch r7: it stepped between 4 milestones). Read from
+# evidence/trial-counters-*.json (bench/trial_counters.py) and bound here to the trace and the milestones, so the page,
+# the video's counter and the committed trace cannot drift apart.
+_tc = json.loads(sorted((ROOT / "evidence").glob("trial-counters-*.json"))[-1].read_text())["trials"]
+_k = ("n", "phase", "rels", "nodes", "holds")
+assert [tuple(t[k] for k in _k) for t in _tc] == [tuple(t[k] for k in _k) for t in TR], "trial counters != trace"
+LEFT = [t["rels_left"] for t in _tc]
+assert all(LEFT[n - 1] == r for n, r, _ in MILESTONES if n > 0), "trial counters != milestones"
 
 # ── the real air-routes frame ──────────────────────────────────────────────────────────────────────────────────────
 _src = (ROOT / "data" / "air-routes.cypher").read_text()
@@ -96,6 +104,9 @@ for s, e, t in EDGES:
 ROUTES = [(i + 1, s, e) for i, (s, e, t) in enumerate(EDGES) if t == "HAS_ROUTE"]
 assert set(SCH) == {s for s, _, _ in EDGES} | {e for _, e, t in EDGES if t == "HAS_ROUTE"}, "schematic != witness nodes"
 assert len(ROUTES) == 13 and len(COUNTRY) == 9 and set(COUNTRY) | {"MEX"} == set(SCH)
+# the schematic's <title> numbers, all derived and asserted (a2a arch r7: "2 countries" was the one left unchecked)
+N_COUNTRIES = len(set(COUNTRY.values()))
+assert (len(EDGES), len(SCH), N_COUNTRIES) == (22, 10, 2)
 # MEX's own country is not in the witness (the query binds $dest by code); its label carries no country tag
 TAG_T = {"MEX": 0.5}
 
@@ -141,8 +152,9 @@ def schematic(prefix: str, ghost: bool) -> str:
     box = "56 16 552 392" if ghost else "56 22 552 312"  # the drawing's own extent (map frame x 112-528, labels 60-600)
     out = [
         f'<svg class="inst" viewBox="{box}" role="img" aria-labelledby="{prefix}-t">',
-        f'<title id="{prefix}-t">The witness: 22 relationships among 12 nodes (10 airports, 2 countries), '
-        f"the 13 routes carry numbered exhibit tags, the 9 country links show as country codes</title>",
+        f'<title id="{prefix}-t">The witness: {len(EDGES)} relationships among {len(SCH) + N_COUNTRIES} nodes '
+        f"({len(SCH)} airports, {N_COUNTRIES} countries), the {len(ROUTES)} routes carry numbered exhibit tags, "
+        f"the {len(COUNTRY)} country links show as country codes</title>",
     ]
     if ghost:
         # four waves, farthest from MEX first (the replay fades them in this order)
@@ -218,6 +230,7 @@ PAGE_DATA = {
     "geo": {c: [round(v, 1) for v in geo(c)] for c in SCH},
     "sch": SCH,
     "ms": [[a, b, c] for a, b, c in MILESTONES],
+    "left": LEFT,
     "holds": HOLDS,
 }
 
@@ -249,11 +262,17 @@ def register_rows() -> str:
     return "\n".join(rows)
 
 
+def _e(v) -> str:
+    """Every string from evidence is escaped before it becomes HTML (a2a arch r7)."""
+    return html.escape(str(v), quote=True)
+
+
 def answer_rows() -> str:
-    return "\n".join(
-        f'<tr data-a="{r["airport"]}"><td>{r["airport"]}</td><td>[{", ".join(r["hub_countries"])}]</td></tr>'
-        for r in pulls["baseline_rows"]
-    )
+    out = []
+    for r in pulls["baseline_rows"]:
+        a, cs = _e(r["airport"]), _e(", ".join(r["hub_countries"]))
+        out.append(f'<tr data-a="{a}"><td>{a}</td><td>[{cs}]</td></tr>')
+    return "\n".join(out)
 
 
 def terminal_lines(limit: int | None = None) -> str:

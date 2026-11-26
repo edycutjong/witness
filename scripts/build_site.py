@@ -91,7 +91,7 @@ FAQ = [
     ),
     (
         "What counts as changing the answer?",
-        "The answer is compared exactly: types matter, rows are a bag (order is not part of the answer), floats to 12 significant digits, and this headline run compares lists strictly (<code>--strict-lists</code>). Pulling exhibit 4 keeps all four airports but drops US from two rows, and that is a change.",
+        f"The answer is compared exactly: types matter, rows are a bag (order is not part of the answer), floats to {man['comparison']['float_digits']} significant digits, and this headline run compares lists strictly (<code>--strict-lists</code>). Pulling exhibit 4 keeps all four airports but drops US from two rows, and that is a change.",
     ),
     (
         "Does Witness ever write to my graph?",
@@ -128,6 +128,17 @@ def fill(tpl: str, vals: dict) -> str:
     return out
 
 
+_t4 = next(t for t in sp.pulls["tags"] if t["n"] == 4)
+_us_dropped = sum(
+    "US" in b["hub_countries"] and "US" not in a["hub_countries"]
+    for b, a in zip(sp.pulls["baseline_rows"], _t4["rows"], strict=True)
+)
+assert (_t4["drops"], _t4["rows_after"], _us_dropped) == ([], 4, 2), (
+    "FAQ: 'exhibit 4 keeps all four airports but drops US from two rows'"
+)
+assert man["comparison"]["strict_lists"] is True, "FAQ: 'this headline run compares lists strictly'"
+
+
 def cases_vals() -> dict:
     """Exhibits B and C on the landing (a2a judge r6): the disagree and differs receipts, every number read from the
     committed manifests and the scan."""
@@ -145,6 +156,11 @@ def cases_vals() -> dict:
     exp_rows = {r["airport"] for r in wa["predicate"]["expected_rows"]}
     extra = sorted(wa_rows - exp_rows)
     assert extra == ["AGR"] and exp_rows <= wa_rows, extra
+    # the scan and the disagree receipt are about the same two queries and the same pair (a2a arch r7)
+    q = {(ROOT / p).read_text().strip() for p in scan["queries"]}
+    assert q == {db["statement"].strip(), db["predicate"]["other_statement"].strip()}, "scan queries != receipt queries"
+    pair = (db["params"]["country"], db["params"]["dest"])
+    assert pair in {(d["country"], d["dest"]) for d in scan["differ"]}, pair
     return {
         "C_SRC": fmt(src_rels),
         "DB_RELS": db["witness"]["relationships"],
@@ -217,7 +233,7 @@ def landing_page() -> str:
             if REPO_PUBLIC
             else "Needs uv. The repository opens at submission; until then the clone does not resolve and the recorded run below is the output."
         ),
-        "ANSWER": " ".join(r["airport"] for r in rows),
+        "ANSWER": html.escape(" ".join(r["airport"] for r in rows)),
         "HERO_SVG": sp.schematic("h", ghost=True),
         "PLAN_DROP": fmt(sp.trace["plan"]["dropped_rels"]),
         "TRIALS": trials,
@@ -320,9 +336,9 @@ def deck_page() -> str:
     after = {r["airport"]: r["hub_countries"] for r in fin["rows"]}
     frows = "".join(
         (
-            f'<tr class="out"><td>{r["airport"]}</td><td>[{", ".join(r["hub_countries"])}]</td></tr>'
+            f'<tr class="out"><td>{html.escape(r["airport"])}</td><td>[{html.escape(", ".join(r["hub_countries"]))}]</td></tr>'
             if r["airport"] not in after
-            else f"<tr><td>{r['airport']}</td><td>[{', '.join(c if c in after[r['airport']] else f'<s>{c}</s>' for c in r['hub_countries'])}]</td></tr>"
+            else f"<tr><td>{html.escape(r['airport'])}</td><td>[{', '.join(html.escape(c) if c in after[r['airport']] else f'<s>{html.escape(c)}</s>' for c in r['hub_countries'])}]</td></tr>"
         )
         for r in sp.pulls["baseline_rows"]
     )
@@ -534,7 +550,7 @@ RECEIPTS = [
     ),
     (
         f"{fmt(src_rels)} → {DB_RELS}",
-        f"a second case: a plausible agent mistake written for this case (the first flight matched in either direction) and the headline query disagree on IN/DEL; `{DB_CHECK}` (`witnesses/direction-bug.manifest.json`)",
+        f"a second case: a plausible agent mistake written for this case (the first flight matched in either direction) and the headline query disagree on {_db['params']['country']}/{_db['params']['dest']}; `{DB_CHECK}` (`witnesses/direction-bug.manifest.json`)",
     ),
     (
         f"{fmt(src_rels)} → {WA_RELS}",

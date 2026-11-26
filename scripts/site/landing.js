@@ -45,7 +45,7 @@
   var rels = document.getElementById("c-rels"), trial = document.getElementById("c-trial");
   var note = document.getElementById("note"), slam = document.getElementById("nofn");
   var tapeWrap = file && $(".tape", file);
-  var timers = [], raf = 0;
+  var timers = [], raf = 0, gen = 0; // gen: a settle() or a new play() retires every loop still scheduled
   var later = function (ms, f) { timers.push(setTimeout(f, ms)); };
   var MS = D.ms; // [trial, relationships, label]
   var N = MS[MS.length - 1][0];
@@ -63,13 +63,14 @@
   function setTrial(n) {
     trial.textContent = fmt(n);
     var r = MS[0][1];
-    for (var i = 0; i < MS.length; i++) if (n >= MS[i][0]) r = MS[i][1];
+    if (D.left && n > 0) r = D.left[n - 1]; // relationships left after trial n, measured (evidence/trial-counters)
+    else for (var i = 0; i < MS.length; i++) if (n >= MS[i][0]) r = MS[i][1];
     rels.textContent = fmt(r);
     rels.classList.toggle("kept", n >= N);
     if (tapeWrap) tapeWrap.style.clipPath = "inset(0 " + (100 - 100 * n / N).toFixed(2) + "% 0 0)";
   }
   function settle() {
-    timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf);
+    gen++; timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf);
     file.classList.remove("armed");
     $$(".wave", hero).forEach(function (w) { w.classList.add("gone"); });
     place(1); setTrial(N);
@@ -78,6 +79,8 @@
   }
   function play() {
     settle();
+    if (RM) return; // reduced motion: the settled exhibit is the replay's end state, shown at once
+    var my = gen;
     $$(".wave", hero).forEach(function (w) { w.classList.remove("gone"); });
     $$(".lb, .tg, .ed", hero).forEach(function (x) { x.classList.remove("on", "lit"); });
     slam.classList.remove("on");
@@ -91,6 +94,7 @@
     [0, 1, 2, 3].forEach(function (i) { later(t0 + i * 450, function () { var w = $('.wave[data-w="' + i + '"]', hero); if (w) w.classList.add("gone"); }); });
     var start = 0;
     function stepA(ts) {
+      if (my !== gen) return;
       if (!start) start = ts;
       var f = Math.min(1, (ts - start) / (t1 - t0));
       setTrial(Math.round(a0 + 1 + (a1 - a0 - 1) * f));
@@ -101,13 +105,13 @@
     var b1 = N, t2 = t1 + 900;
     later(t1, function () {
       var s2 = 0;
-      (function stepB(ts) { if (!s2) s2 = ts; var f = Math.min(1, (ts - s2) / (t2 - t1)); setTrial(Math.round(a1 + (b1 - a1) * f)); if (f < 1) raf = requestAnimationFrame(stepB); })(performance.now());
+      (function stepB(ts) { if (my !== gen) return; if (!s2) s2 = ts; var f = Math.min(1, (ts - s2) / (t2 - t1)); setTrial(Math.round(a1 + (b1 - a1) * f)); if (f < 1) raf = requestAnimationFrame(stepB); })(performance.now());
       $$(".ed", hero).forEach(function (e, i) { later(i * 55, function () { e.classList.add("lit"); }); });
     });
     // move into the exhibit layout, label, tag, stamp
     later(t2 + 100, function () {
       var s3 = 0, dur = 900;
-      (function morph(ts) { if (!s3) s3 = ts; var f = Math.min(1, (ts - s3) / dur); place(ease(f)); if (f < 1) raf = requestAnimationFrame(morph); })(performance.now());
+      (function morph(ts) { if (my !== gen) return; if (!s3) s3 = ts; var f = Math.min(1, (ts - s3) / dur); place(ease(f)); if (f < 1) raf = requestAnimationFrame(morph); })(performance.now());
     });
     later(t2 + 800, function () { $$(".lb", hero).forEach(function (l) { l.classList.add("on"); }); });
     $$(".tg", hero).forEach(function (g, i) { later(t2 + 1050 + i * 60, function () { g.classList.add("on"); }); });
@@ -138,10 +142,11 @@
   function renderRows(t) {
     var after = {}; if (t) t.rows.forEach(function (r) { after[r.airport] = r.hub_countries; });
     rows.innerHTML = D.base.map(function (r) {
-      if (!t) return "<tr><td>" + r.airport + "</td><td>[" + r.hub_countries.join(", ") + "]</td></tr>";
-      if (!after[r.airport]) return '<tr class="out"><td>' + r.airport + "</td><td>[" + r.hub_countries.join(", ") + "]</td></tr>";
-      var cs = r.hub_countries.map(function (c) { return after[r.airport].indexOf(c) < 0 ? "<s>" + c + "</s>" : c; });
-      return "<tr><td>" + r.airport + "</td><td>[" + cs.join(", ") + "]</td></tr>";
+      var a = esc(r.airport);
+      if (!t) return "<tr><td>" + a + "</td><td>[" + esc(r.hub_countries.join(", ")) + "]</td></tr>";
+      if (!after[r.airport]) return '<tr class="out"><td>' + a + "</td><td>[" + esc(r.hub_countries.join(", ")) + "]</td></tr>";
+      var cs = r.hub_countries.map(function (c) { return after[r.airport].indexOf(c) < 0 ? "<s>" + esc(c) + "</s>" : esc(c); });
+      return "<tr><td>" + a + "</td><td>[" + cs.join(", ") + "]</td></tr>";
     }).join("");
   }
   function clearPulled() {
@@ -155,7 +160,7 @@
     if (cur === n) { cur = 0; renderRows(null); exn.textContent = "none"; mark.textContent = "Unchanged"; proof.innerHTML = "Exhibit " + n + " put back: the answer is the four rows again."; return; }
     cur = n;
     var m = t.rel.match(/\((\w+)\)-\[:(\w+)\]->\((\w+)\)/);
-    if (m[2] === "HAS_ROUTE") { var e = $('.ed[data-n="' + n + '"]', ex), g = $('.tg[data-n="' + n + '"]', ex); if (e) e.classList.add("pulled"); if (g) g.classList.add("pulled"); }
+    if (m && m[2] === "HAS_ROUTE") { var e = $('.ed[data-n="' + n + '"]', ex), g = $('.tg[data-n="' + n + '"]', ex); if (e) e.classList.add("pulled"); if (g) g.classList.add("pulled"); }
     else { var cc = $('.cc[data-n="' + n + '"]', ex); if (cc) cc.classList.add("pulled"); }
     t.drops.forEach(function (a) { var nd = $('.nd[data-c="' + a + '"]', ex); if (nd) nd.classList.add("out"); });
     renderRows(t);
@@ -189,10 +194,14 @@
 
   // ── terminal: type the recorded run out, line by line, the first time it is seen ──
   var term = document.getElementById("term");
+  var tt = []; // the typing timers, so a second click restarts instead of stacking runs
   function typeOut() {
-    var ls = $$(".ln", term); term.classList.add("typing"); ls.forEach(function (l) { l.classList.remove("on"); });
+    tt.forEach(clearTimeout); tt = [];
+    var ls = $$(".ln", term);
+    if (RM) { ls.forEach(function (l) { l.classList.add("on"); }); term.classList.remove("typing"); return; }
+    term.classList.add("typing"); ls.forEach(function (l) { l.classList.remove("on"); });
     var pre = $("pre", term); pre.scrollTop = 0;
-    ls.forEach(function (l, i) { setTimeout(function () { l.classList.add("on"); if (i === ls.length - 1) term.classList.remove("typing"); }, i * 38); });
+    ls.forEach(function (l, i) { tt.push(setTimeout(function () { l.classList.add("on"); if (i === ls.length - 1) term.classList.remove("typing"); }, i * 38)); });
   }
   if (term) {
     document.getElementById("t-play").addEventListener("click", typeOut);

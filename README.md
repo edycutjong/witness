@@ -147,7 +147,7 @@ uv run witness demo
 `demo` copies the committed source graph (`data/air-routes.rl`, never modified), asks the headline question
 (`queries/two-hub.cypher`), reduces the answer to a deletion-minimal witness, re-proves it with `witness check`, and writes
 `out/two-hub.{rl,cypher,manifest.json,html,trace.json}` plus a ledger row in `out/ledger.rl`. Nothing it runs changes a
-committed file. The committed result of the same run is in `witnesses/two-hub.*`, `answers/two-hub.json` and `witness.rl`.
+committed file. The committed result of the same command is in `witnesses/two-hub.*`, `answers/two-hub.json` and `witness.rl`.
 
 Then re-run the witness yourself with plain `relate`:
 

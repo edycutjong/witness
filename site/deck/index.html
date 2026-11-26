@@ -528,7 +528,7 @@ ORDER BY airport</pre>
 <section class="frame s6" data-n="6" aria-label="Slide 6 of 10: Relate is the engine">
   <div class="s6-head">
     <p class="lbl">Relate is the engine</p>
-    <h2>Remove Relate and the loop has <em>nothing to run on.</em></h2>
+    <h2>The loop runs inside Relate, <em>and the proof is a Relate file.</em></h2>
   </div>
   <div class="caps-lead"><span class="no">1</span><code>begin_transaction · rollback_transaction</code><span>the inner loop: 371 trials in the headline run</span></div>
   <ol class="caps"><li class="big"><span class="no">2</span><code>QueryResult.query_type</code><span>refuse writes</span></li><li class="big"><span class="no">3</span><code>EXPLAIN</code><span>prune unreachable types</span></li><li class="big"><span class="no">4</span><code>read_only=True</code><span>reruns cannot write</span></li><li class="sm"><span class="no">5</span><code>single-file .rl</code><span>the evidence format</span></li><li class="sm"><span class="no">6</span><code>relate pull</code><span>fixture mode</span></li><li class="sm"><span class="no">7</span><code>relate query --mode json</code><span>independent re-check</span></li><li class="sm"><span class="no">8</span><code>MCP · why · check</code><span>Witness's own tools, beside relate serve --mcp</span></li></ol>

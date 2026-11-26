@@ -12,8 +12,9 @@ DO_NOT_TRACK=1 uv run witness demo
 
 Expect exit 0 and a check line `22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)`.
 Trials (371) and reduction seconds (about 1.1 s; machine dependent) are in `out/two-hub.manifest.json` under `run`. The committed
-copy of the same run is `witnesses/two-hub.manifest.json` (`run.trials` 371, `run.seconds` 1.095, `witness.relationships` 22,
-`witness.nodes` 12, `source.relationships` 57,645). Raw spike rows: `evidence/spike-2026-11-15.md`, `evidence/headline-raw.json`.
+run of the same command is `witnesses/two-hub.manifest.json` (`run.trials` 371, `run.seconds` 1.095, `witness.relationships` 22,
+`witness.nodes` 12, `source.relationships` 57,645). Trials, deletions and the witness repeat exactly (seed 0); wall-clock seconds
+do not (0.91 to 1.36 s across the committed runs on this machine), so every page quotes the seconds of the run it names. Raw spike rows: `evidence/spike-2026-11-15.md`, `evidence/headline-raw.json`.
 
 Re-run the witness with plain `relate` (needs the Relate CLI):
 

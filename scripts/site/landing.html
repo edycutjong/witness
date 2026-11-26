@@ -142,18 +142,18 @@
     <h2 id="cases-h">When the agent's query is wrong, <em>the evidence still shrinks.</em></h2>
     <div class="case-grid">
       <article class="case">
-        <p class="case-k data">--predicate disagree · India, DEL</p>
+        <p class="case-k data">Two queries disagree · India, DEL</p>
         <p class="case-n"><span>{{C_SRC}}</span><span class="to">→</span><em>{{DB_RELS}}</em></p>
-        <p>An agent's version of the question matches the first flight in either direction. It disagrees with the reference query on {{SCAN_DIFFER}} of {{SCAN_PAIRS}} country and busiest-airport pairs. For India and DEL, {{DB_RELS}} relationships keep the two disagreeing, and one of them is the bug: the agent read <code>(VNS)-[:HAS_ROUTE]-&gt;(AGR)</code> backwards, as if Agra flew to VNS.</p>
+        <p>An agent's version of the question matches the first flight in either direction. It disagrees with the reference query on {{SCAN_DIFFER}} of {{SCAN_PAIRS}} country and busiest-airport pairs. For India and DEL, {{DB_RELS}} relationships keep the two disagreeing, and one of them is the flight the agent's query read backwards: <code class="rel">(VNS)-[:HAS_ROUTE]-&gt;(AGR)</code>, as if Agra flew to VNS.</p>
         <p class="case-stamp">{{DB_CHECK}}</p>
-        <p class="cap">{{DB_TRIALS}} trials. On the witness, plain <code>relate</code> returns AGR for the agent's query and no rows for the reference. <code>witnesses/direction-bug.manifest.json</code></p>
+        <p class="cap"><code>--predicate disagree</code> · {{DB_TRIALS}} trials. On the witness, plain <code>relate</code> returns AGR for the agent's query and no rows for the reference. <code>witnesses/direction-bug.manifest.json</code></p>
       </article>
       <article class="case">
-        <p class="case-k data">--predicate differs · a smaller repro</p>
+        <p class="case-k data">A wrong answer, reproduced smaller · India, DEL</p>
         <p class="case-n"><span>{{C_SRC}}</span><span class="to">→</span><em>{{WA_RELS}}</em></p>
-        <p>Hand Witness the answer you expected (the reference query's {{WA_EXP}} rows) and the query that gets it wrong ({{WA_ROWS}} rows: the {{WA_EXP}} plus AGR). It keeps that same wrong answer while it deletes, so the repro holds all {{WA_ROWS}} wrong rows and every relationship in it is needed.</p>
+        <p>Hand Witness the answer you expected (the reference query's {{WA_EXP}} rows) and the query that gets it wrong ({{WA_ROWS}} rows: the {{WA_EXP}} plus AGR). It keeps that same wrong answer while it deletes; deleting any one of the {{WA_RELS}} relationships left changes that wrong answer. The repro is {{WA_RELS}}, not {{DB_RELS}}, because it must reproduce all {{WA_ROWS}} wrong rows, not only the one that disagrees.</p>
         <p class="case-stamp">{{WA_CHECK}}</p>
-        <p class="cap">{{WA_TRIALS}} trials, cross-checked on the Relate CLI. <code>witnesses/wrong-answer.manifest.json</code></p>
+        <p class="cap"><code>--predicate differs</code> · {{WA_TRIALS}} trials, cross-checked on the Relate CLI. <code>witnesses/wrong-answer.manifest.json</code></p>
       </article>
     </div>
   </div>

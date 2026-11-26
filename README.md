@@ -72,8 +72,8 @@ A plausible agent mistake, written for this case: the same question with the fir
 flight matched in either direction (`queries/two-hub-agent.cypher`). On 6 of 232 country and busiest-airport pairs the two queries disagree
 (`bench/disagree_scan.py`, `evidence/disagree-scan.json`). For India and DEL, `witness why --predicate disagree` shrinks
 57,645 relationships to 5 in 139 trials, and `witness check` confirms "5 of 5 end the disagreement"
-(`witnesses/direction-bug.*`, `evidence/direction-bug-run.txt`). The five show the bug: the agent's query read the flight
-`(VNS)-[:HAS_ROUTE]->(AGR)` backwards, as if Agra flew to VNS, so VNS counted as an extra hub on Agra's way to DEL.
+(`witnesses/direction-bug.*`, `evidence/direction-bug-run.txt`). The five include the flight the agent's query read backwards,
+`(VNS)-[:HAS_ROUTE]->(AGR)`, as if Agra flew to VNS, so VNS counted as an extra hub on Agra's way to DEL.
 
 **The third predicate, `differs`: a smaller repro of a wrong answer.** Give Witness the answer you expected (here, the
 reference query's 12 rows for India and DEL, `evidence/wrong-answer-expected.json`) and the query that gets it wrong (the
@@ -201,7 +201,8 @@ residue, not the proof.
   Stores must sit in `data/` or `witnesses/` by default; `--allow DIR` (repeatable) replaces that list, so pass
   `--allow data --allow witnesses` too if you still want them (`--allow` paths are relative to where `witness mcp` starts).
 - `check(witness_path, statement?, parameters?)` re-proves a witness from its `.rl` and manifest, under the comparison
-  settings the manifest records (so the committed `--strict-lists` witnesses are re-proved strictly).
+  settings the manifest records (so the committed `--strict-lists` witnesses are re-proved strictly). With `statement`, the
+  agent's own query is compared as `keep` against the manifest's baseline answer.
 - `why` compares answers with the CLI's defaults: rows and lists as bags, floats to 12 significant digits, `differs` in its
   strict form. `--strict-lists` and `--loose` are CLI-only. Both tools cross-check on the Relate CLI unless `witness mcp`
   starts with `--no-cli`; that is a server flag, not a tool argument.

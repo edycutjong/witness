@@ -368,6 +368,7 @@ h1,h2{text-wrap:balance}
 .case-n em{font-style:normal;color:var(--after)}
 .case p{max-width:58ch}
 .case code{overflow-wrap:anywhere}
+.case code.rel{white-space:nowrap}
 .case-stamp{display:inline-block;margin:14px 0 4px;padding:6px 12px;border:2px solid var(--after);color:var(--after);font:700 13px/1.2 var(--font-display);letter-spacing:.14em;text-transform:uppercase}
 @media (max-width:820px){.case-grid{grid-template-columns:minmax(0,1fr)}.case{padding:24px 0;border-left:0;border-top:1.5px solid var(--rule)}.case:first-child{border-top:0;padding-top:0}}
 
@@ -601,18 +602,18 @@ h1,h2{text-wrap:balance}
     <h2 id="cases-h">When the agent's query is wrong, <em>the evidence still shrinks.</em></h2>
     <div class="case-grid">
       <article class="case">
-        <p class="case-k data">--predicate disagree · India, DEL</p>
+        <p class="case-k data">Two queries disagree · India, DEL</p>
         <p class="case-n"><span>57,645</span><span class="to">→</span><em>5</em></p>
-        <p>An agent's version of the question matches the first flight in either direction. It disagrees with the reference query on 6 of 232 country and busiest-airport pairs. For India and DEL, 5 relationships keep the two disagreeing, and one of them is the bug: the agent read <code>(VNS)-[:HAS_ROUTE]-&gt;(AGR)</code> backwards, as if Agra flew to VNS.</p>
+        <p>An agent's version of the question matches the first flight in either direction. It disagrees with the reference query on 6 of 232 country and busiest-airport pairs. For India and DEL, 5 relationships keep the two disagreeing, and one of them is the flight the agent's query read backwards: <code class="rel">(VNS)-[:HAS_ROUTE]-&gt;(AGR)</code>, as if Agra flew to VNS.</p>
         <p class="case-stamp">5 of 5 end the disagreement</p>
-        <p class="cap">139 trials. On the witness, plain <code>relate</code> returns AGR for the agent's query and no rows for the reference. <code>witnesses/direction-bug.manifest.json</code></p>
+        <p class="cap"><code>--predicate disagree</code> · 139 trials. On the witness, plain <code>relate</code> returns AGR for the agent's query and no rows for the reference. <code>witnesses/direction-bug.manifest.json</code></p>
       </article>
       <article class="case">
-        <p class="case-k data">--predicate differs · a smaller repro</p>
+        <p class="case-k data">A wrong answer, reproduced smaller · India, DEL</p>
         <p class="case-n"><span>57,645</span><span class="to">→</span><em>92</em></p>
-        <p>Hand Witness the answer you expected (the reference query's 12 rows) and the query that gets it wrong (13 rows: the 12 plus AGR). It keeps that same wrong answer while it deletes, so the repro holds all 13 wrong rows and every relationship in it is needed.</p>
+        <p>Hand Witness the answer you expected (the reference query's 12 rows) and the query that gets it wrong (13 rows: the 12 plus AGR). It keeps that same wrong answer while it deletes; deleting any one of the 92 relationships left changes that wrong answer. The repro is 92, not 5, because it must reproduce all 13 wrong rows, not only the one that disagrees.</p>
         <p class="case-stamp">92 of 92 change the answer</p>
-        <p class="cap">2,099 trials, cross-checked on the Relate CLI. <code>witnesses/wrong-answer.manifest.json</code></p>
+        <p class="cap"><code>--predicate differs</code> · 2,099 trials, cross-checked on the Relate CLI. <code>witnesses/wrong-answer.manifest.json</code></p>
       </article>
     </div>
   </div>

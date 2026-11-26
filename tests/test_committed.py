@@ -99,3 +99,42 @@ def test_plain_relate_shows_the_two_queries_disagree_on_the_witness():
         {"airport": "AGR", "hub_countries": []}
     ]  # hub countries are not needed to disagree
     assert rows("two-hub.cypher") == []
+
+
+# ---- the third committed example: a smaller repro of a wrong answer, `differs` (a2a judge r6) ----------------------
+WA = ROOT / "witnesses" / "wrong-answer.rl"
+
+
+def test_committed_wrong_answer_witness_checks():
+    m = json.loads((ROOT / "witnesses" / "wrong-answer.manifest.json").read_text())
+    assert m["verified"] and m["witness"]["relationships"] == 92 and m["predicate"]["kind"] == "differs"
+    assert not m["predicate"]["loose"] and m["source"]["relationships"] == 57645
+    res = check(WA, spec_from_manifest(m), use_cli=False)
+    assert res.verified and res.text.startswith("92 of 92 change the answer")
+
+
+@pytest.mark.skipif(relate_cli()[0] is None, reason="pinned relate CLI not on PATH")
+def test_plain_relate_reproduces_the_same_wrong_answer_on_the_witness():
+    cli = relate_cli()[0]
+    r = subprocess.run(
+        [
+            cli,
+            "query",
+            "--database",
+            str(WA),
+            "--read-only",
+            "--mode",
+            "json",
+            *cli_param_args({"country": "IN", "dest": "DEL"}),
+        ],
+        input=(ROOT / "queries" / "two-hub-agent.cypher").read_text(),
+        capture_output=True,
+        text=True,
+        timeout=60,
+        env={**os.environ, "DO_NOT_TRACK": "1"},
+    )
+    assert r.returncode == 0, r.stderr
+    got = {row["airport"] for row in json.loads(r.stdout.splitlines()[0])["data"]}
+    expected = {row["airport"] for row in json.loads((ROOT / "evidence" / "wrong-answer-expected.json").read_text())}
+    # the same wrong answer: the 12 expected rows plus AGR
+    assert len(got) == 13 and got - expected == {"AGR"} and expected <= got

@@ -1,0 +1,908 @@
+{
+  "baseline": {
+    "columns": [
+      "airport",
+      "hub_countries"
+    ],
+    "rows": [
+      {
+        "airport": "AGR",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "AJL",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "CCJ",
+        "hub_countries": [
+          "AE",
+          "BH",
+          "IN",
+          "KW",
+          "OM",
+          "QA",
+          "SA"
+        ]
+      },
+      {
+        "airport": "CNN",
+        "hub_countries": [
+          "AE",
+          "BH",
+          "IN",
+          "KW",
+          "OM",
+          "QA",
+          "SA"
+        ]
+      },
+      {
+        "airport": "DIB",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "HBX",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "IXA",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "IXE",
+        "hub_countries": [
+          "AE",
+          "IN",
+          "QA"
+        ]
+      },
+      {
+        "airport": "IXG",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "IXM",
+        "hub_countries": [
+          "AE",
+          "IN",
+          "LK",
+          "SG"
+        ]
+      },
+      {
+        "airport": "IXS",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "TIR",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "TRZ",
+        "hub_countries": [
+          "AE",
+          "IN",
+          "LK",
+          "MY",
+          "SG",
+          "TH"
+        ]
+      }
+    ],
+    "sha256": "1f9bb45513cd8e312f58e3b222e6a4e1921a46944d9e97fa719a0a82548bf845"
+  },
+  "check": {
+    "check_text": "92 of 92 change the answer (92 of 92 relationships, 0 of 0 isolated nodes)",
+    "cli": "relate CLI: sufficiency + 92 of 92 necessity probes cross-checked",
+    "cli_used": true,
+    "disagreements": [],
+    "inconclusive": 0,
+    "probes": [
+      {
+        "cli_necessary": true,
+        "element": "(DOH)-[:HAS_ROUTE]->(DEL)",
+        "i": 1,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CJB)-[:HAS_ROUTE]->(DEL)",
+        "i": 2,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(AJL)-[:HAS_ROUTE]->(CCU)",
+        "i": 3,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(AJL)-[:HAS_ROUTE]->(GAU)",
+        "i": 4,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CCU)-[:HAS_ROUTE]->(DEL)",
+        "i": 5,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(GAU)-[:HAS_ROUTE]->(DEL)",
+        "i": 6,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IDR)-[:HAS_ROUTE]->(DEL)",
+        "i": 7,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(HYD)-[:HAS_ROUTE]->(DEL)",
+        "i": 8,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(RUH)-[:HAS_ROUTE]->(DEL)",
+        "i": 9,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(KWI)-[:HAS_ROUTE]->(DEL)",
+        "i": 10,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(HBX)-[:HAS_ROUTE]->(BLR)",
+        "i": 11,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(HBX)-[:HAS_ROUTE]->(MAA)",
+        "i": 12,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SIN)-[:HAS_ROUTE]->(DEL)",
+        "i": 13,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXG)-[:HAS_ROUTE]->(IDR)",
+        "i": 14,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXG)-[:HAS_ROUTE]->(BLR)",
+        "i": 15,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(VNS)-[:HAS_ROUTE]->(AGR)",
+        "i": 16,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(VNS)-[:HAS_ROUTE]->(DEL)",
+        "i": 17,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TRZ)-[:HAS_ROUTE]->(SIN)",
+        "i": 18,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TRZ)-[:HAS_ROUTE]->(CMB)",
+        "i": 19,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TRZ)-[:HAS_ROUTE]->(MAA)",
+        "i": 20,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TRZ)-[:HAS_ROUTE]->(DXB)",
+        "i": 21,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TRZ)-[:HAS_ROUTE]->(KUL)",
+        "i": 22,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TRZ)-[:HAS_ROUTE]->(DMK)",
+        "i": 23,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CMB)-[:HAS_ROUTE]->(DEL)",
+        "i": 24,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(BLR)-[:HAS_ROUTE]->(DEL)",
+        "i": 25,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXE)-[:HAS_ROUTE]->(DOH)",
+        "i": 26,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXE)-[:HAS_ROUTE]->(MAA)",
+        "i": 27,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXE)-[:HAS_ROUTE]->(AUH)",
+        "i": 28,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CCJ)-[:HAS_ROUTE]->(DOH)",
+        "i": 29,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CCJ)-[:HAS_ROUTE]->(RUH)",
+        "i": 30,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CCJ)-[:HAS_ROUTE]->(KWI)",
+        "i": 31,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CCJ)-[:HAS_ROUTE]->(MCT)",
+        "i": 32,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CCJ)-[:HAS_ROUTE]->(MAA)",
+        "i": 33,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CCJ)-[:HAS_ROUTE]->(BAH)",
+        "i": 34,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CCJ)-[:HAS_ROUTE]->(AUH)",
+        "i": 35,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CNN)-[:HAS_ROUTE]->(DOH)",
+        "i": 36,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CNN)-[:HAS_ROUTE]->(RUH)",
+        "i": 37,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CNN)-[:HAS_ROUTE]->(KWI)",
+        "i": 38,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CNN)-[:HAS_ROUTE]->(MCT)",
+        "i": 39,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CNN)-[:HAS_ROUTE]->(MAA)",
+        "i": 40,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CNN)-[:HAS_ROUTE]->(BAH)",
+        "i": 41,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CNN)-[:HAS_ROUTE]->(AUH)",
+        "i": 42,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TIR)-[:HAS_ROUTE]->(CJB)",
+        "i": 43,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TIR)-[:HAS_ROUTE]->(HYD)",
+        "i": 44,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXS)-[:HAS_ROUTE]->(CCU)",
+        "i": 45,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXS)-[:HAS_ROUTE]->(GAU)",
+        "i": 46,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DIB)-[:HAS_ROUTE]->(CCU)",
+        "i": 47,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DIB)-[:HAS_ROUTE]->(GAU)",
+        "i": 48,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(BOM)-[:HAS_ROUTE]->(DEL)",
+        "i": 49,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXM)-[:HAS_ROUTE]->(SIN)",
+        "i": 50,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXM)-[:HAS_ROUTE]->(CMB)",
+        "i": 51,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXM)-[:HAS_ROUTE]->(MAA)",
+        "i": 52,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXM)-[:HAS_ROUTE]->(DXB)",
+        "i": 53,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXA)-[:HAS_ROUTE]->(CCU)",
+        "i": 54,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXA)-[:HAS_ROUTE]->(GAU)",
+        "i": 55,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MCT)-[:HAS_ROUTE]->(DEL)",
+        "i": 56,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MAA)-[:HAS_ROUTE]->(DEL)",
+        "i": 57,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(AGR)-[:HAS_ROUTE]->(BOM)",
+        "i": 58,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(BAH)-[:HAS_ROUTE]->(DEL)",
+        "i": 59,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DXB)-[:HAS_ROUTE]->(DEL)",
+        "i": 60,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(KUL)-[:HAS_ROUTE]->(DEL)",
+        "i": 61,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(AUH)-[:HAS_ROUTE]->(DEL)",
+        "i": 62,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DMK)-[:HAS_ROUTE]->(DEL)",
+        "i": 63,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DOH)-[:IN_COUNTRY]->(QA)",
+        "i": 64,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CJB)-[:IN_COUNTRY]->(IN)",
+        "i": 65,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(AJL)-[:IN_COUNTRY]->(IN)",
+        "i": 66,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CCU)-[:IN_COUNTRY]->(IN)",
+        "i": 67,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IDR)-[:IN_COUNTRY]->(IN)",
+        "i": 68,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(RUH)-[:IN_COUNTRY]->(SA)",
+        "i": 69,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(KWI)-[:IN_COUNTRY]->(KW)",
+        "i": 70,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(HBX)-[:IN_COUNTRY]->(IN)",
+        "i": 71,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(SIN)-[:IN_COUNTRY]->(SG)",
+        "i": 72,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXG)-[:IN_COUNTRY]->(IN)",
+        "i": 73,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(VNS)-[:IN_COUNTRY]->(IN)",
+        "i": 74,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TRZ)-[:IN_COUNTRY]->(IN)",
+        "i": 75,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CMB)-[:IN_COUNTRY]->(LK)",
+        "i": 76,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXE)-[:IN_COUNTRY]->(IN)",
+        "i": 77,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CCJ)-[:IN_COUNTRY]->(IN)",
+        "i": 78,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(CNN)-[:IN_COUNTRY]->(IN)",
+        "i": 79,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(TIR)-[:IN_COUNTRY]->(IN)",
+        "i": 80,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXS)-[:IN_COUNTRY]->(IN)",
+        "i": 81,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DIB)-[:IN_COUNTRY]->(IN)",
+        "i": 82,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXM)-[:IN_COUNTRY]->(IN)",
+        "i": 83,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(IXA)-[:IN_COUNTRY]->(IN)",
+        "i": 84,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MCT)-[:IN_COUNTRY]->(OM)",
+        "i": 85,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MAA)-[:IN_COUNTRY]->(IN)",
+        "i": 86,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(AGR)-[:IN_COUNTRY]->(IN)",
+        "i": 87,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(BAH)-[:IN_COUNTRY]->(BH)",
+        "i": 88,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DXB)-[:IN_COUNTRY]->(AE)",
+        "i": 89,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(KUL)-[:IN_COUNTRY]->(MY)",
+        "i": 90,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(AUH)-[:IN_COUNTRY]->(AE)",
+        "i": 91,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DMK)-[:IN_COUNTRY]->(TH)",
+        "i": 92,
+        "kind": "rel",
+        "necessary": true
+      }
+    ],
+    "reasons": [],
+    "sufficient": true,
+    "verified": true
+  },
+  "comparison": {
+    "float_digits": 12,
+    "rows": "bag",
+    "strict_lists": true
+  },
+  "determinism_claimed": true,
+  "name": "wrong-answer",
+  "params": {
+    "country": "IN",
+    "dest": "DEL"
+  },
+  "predicate": {
+    "expected_rows": [
+      {
+        "airport": "AJL",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "CCJ",
+        "hub_countries": [
+          "AE",
+          "BH",
+          "IN",
+          "KW",
+          "OM",
+          "QA",
+          "SA"
+        ]
+      },
+      {
+        "airport": "CNN",
+        "hub_countries": [
+          "AE",
+          "BH",
+          "IN",
+          "KW",
+          "OM",
+          "QA",
+          "SA"
+        ]
+      },
+      {
+        "airport": "DIB",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "HBX",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "IXA",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "IXE",
+        "hub_countries": [
+          "AE",
+          "IN",
+          "QA"
+        ]
+      },
+      {
+        "airport": "IXG",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "IXM",
+        "hub_countries": [
+          "AE",
+          "IN",
+          "LK",
+          "SG"
+        ]
+      },
+      {
+        "airport": "IXS",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "TIR",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "TRZ",
+        "hub_countries": [
+          "AE",
+          "IN",
+          "LK",
+          "MY",
+          "SG",
+          "TH"
+        ]
+      }
+    ],
+    "expected_sha256": "5ba36c037c015377ba72a45b8abf5bb8a2a6a059bbbc9cdd410ce3276343cf74",
+    "kind": "differs",
+    "loose": false
+  },
+  "reasons": [],
+  "run": {
+    "capped": null,
+    "commits": 224,
+    "inconclusive": 0,
+    "seconds": 6.268,
+    "ties": 0,
+    "trials": 2099
+  },
+  "schema": "witness.manifest/v1",
+  "seed": 0,
+  "source": {
+    "nodes": 3748,
+    "path": "data/air-routes.rl",
+    "relationships": 57645,
+    "sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+  },
+  "statement": "// The agent's first try at queries/two-hub.cypher: the first hop is matched in either direction (a realistic mistake).\nMATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\nWHERE a.iata <> $dest\n  AND NOT EXISTS { MATCH (a)-[:HAS_ROUTE]->(:Airport {iata: $dest}) }\nMATCH (a)-[:HAS_ROUTE]-(hub:Airport)-[:HAS_ROUTE]->(:Airport {iata: $dest})\nOPTIONAL MATCH (hub)-[:IN_COUNTRY]->(hc:Country)\nWITH a, count(DISTINCT hub) AS hubs, coll.sort(collect(DISTINCT hc.code)) AS hub_countries\nWHERE hubs >= 2\nRETURN a.iata AS airport, hub_countries\nORDER BY airport\n",
+  "verified": true,
+  "versions": {
+    "python": "3.12.13",
+    "relate_db": "1.0.1",
+    "witness": "0.1.0"
+  },
+  "witness": {
+    "isolated_nodes": 0,
+    "nodes": 45,
+    "relationships": 92
+  }
+}

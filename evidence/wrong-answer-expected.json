@@ -1,0 +1,96 @@
+[
+ {
+  "airport": "AJL",
+  "hub_countries": [
+   "IN"
+  ]
+ },
+ {
+  "airport": "CCJ",
+  "hub_countries": [
+   "AE",
+   "BH",
+   "IN",
+   "KW",
+   "OM",
+   "QA",
+   "SA"
+  ]
+ },
+ {
+  "airport": "CNN",
+  "hub_countries": [
+   "AE",
+   "BH",
+   "IN",
+   "KW",
+   "OM",
+   "QA",
+   "SA"
+  ]
+ },
+ {
+  "airport": "DIB",
+  "hub_countries": [
+   "IN"
+  ]
+ },
+ {
+  "airport": "HBX",
+  "hub_countries": [
+   "IN"
+  ]
+ },
+ {
+  "airport": "IXA",
+  "hub_countries": [
+   "IN"
+  ]
+ },
+ {
+  "airport": "IXE",
+  "hub_countries": [
+   "AE",
+   "IN",
+   "QA"
+  ]
+ },
+ {
+  "airport": "IXG",
+  "hub_countries": [
+   "IN"
+  ]
+ },
+ {
+  "airport": "IXM",
+  "hub_countries": [
+   "AE",
+   "IN",
+   "LK",
+   "SG"
+  ]
+ },
+ {
+  "airport": "IXS",
+  "hub_countries": [
+   "IN"
+  ]
+ },
+ {
+  "airport": "TIR",
+  "hub_countries": [
+   "IN"
+  ]
+ },
+ {
+  "airport": "TRZ",
+  "hub_countries": [
+   "AE",
+   "IN",
+   "LK",
+   "MY",
+   "SG",
+   "TH"
+  ]
+ }
+]

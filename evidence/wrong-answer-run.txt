@@ -1,0 +1,123 @@
+# Recorded 2026-11-27 00:38 +0700 on Darwin arm64, relate-db 1.0.1, Relate CLI v1.0.1. Command (from the repo root):
+# DO_NOT_TRACK=1 uv run witness why -f queries/two-hub-agent.cypher --predicate differs --expected "$(cat evidence/wrong-answer-expected.json)" --strict-lists --param country=IN --param dest=DEL --name wrong-answer --store data/air-routes.rl --out <temp dir> --no-ledger
+# The expected rows (evidence/wrong-answer-expected.json) are the reference query's answer on the same graph, from plain relate:
+#   relate query --database data/air-routes.rl --read-only --mode json --param country=IN --param dest=DEL < queries/two-hub.cypher The five files were then copied to witnesses/.
+ANSWER  13 rows on the full graph
+  airport  hub_countries
+  AGR      [IN]
+  AJL      [IN]
+  CCJ      [AE, BH, IN, KW, OM, QA, SA]
+  CNN      [AE, BH, IN, KW, OM, QA, SA]
+  DIB      [IN]
+  HBX      [IN]
+  IXA      [IN]
+  IXE      [AE, IN, QA]
+  IXG      [IN]
+  IXM      [AE, IN, LK, SG]
+  IXS      [IN]
+  TIR      [IN]
+  TRZ      [AE, IN, LK, MY, SG, TH]
+
+WITNESS  92 relationships · 45 nodes, out of 57,645 · 3,748
+  reduced in 6.268 s · 2099 trials · 0 inconclusive · seed 0 (13.225 s end to end: copy, guard, order check, reduce, check)
+
+EXHIBITS  (register order; every one is needed)
+   1  (AGR)-[:HAS_ROUTE]->(BOM)
+   2  (AGR)-[:IN_COUNTRY]->(IN)
+   3  (AJL)-[:HAS_ROUTE]->(CCU)
+   4  (AJL)-[:HAS_ROUTE]->(GAU)
+   5  (AJL)-[:IN_COUNTRY]->(IN)
+   6  (AUH)-[:HAS_ROUTE]->(DEL)
+   7  (AUH)-[:IN_COUNTRY]->(AE)
+   8  (BAH)-[:HAS_ROUTE]->(DEL)
+   9  (BAH)-[:IN_COUNTRY]->(BH)
+  10  (BLR)-[:HAS_ROUTE]->(DEL)
+  11  (BOM)-[:HAS_ROUTE]->(DEL)
+  12  (CCJ)-[:HAS_ROUTE]->(AUH)
+  13  (CCJ)-[:HAS_ROUTE]->(BAH)
+  14  (CCJ)-[:HAS_ROUTE]->(DOH)
+  15  (CCJ)-[:HAS_ROUTE]->(KWI)
+  16  (CCJ)-[:HAS_ROUTE]->(MAA)
+  17  (CCJ)-[:HAS_ROUTE]->(MCT)
+  18  (CCJ)-[:HAS_ROUTE]->(RUH)
+  19  (CCJ)-[:IN_COUNTRY]->(IN)
+  20  (CCU)-[:HAS_ROUTE]->(DEL)
+  21  (CCU)-[:IN_COUNTRY]->(IN)
+  22  (CJB)-[:HAS_ROUTE]->(DEL)
+  23  (CJB)-[:IN_COUNTRY]->(IN)
+  24  (CMB)-[:HAS_ROUTE]->(DEL)
+  25  (CMB)-[:IN_COUNTRY]->(LK)
+  26  (CNN)-[:HAS_ROUTE]->(AUH)
+  27  (CNN)-[:HAS_ROUTE]->(BAH)
+  28  (CNN)-[:HAS_ROUTE]->(DOH)
+  29  (CNN)-[:HAS_ROUTE]->(KWI)
+  30  (CNN)-[:HAS_ROUTE]->(MAA)
+  31  (CNN)-[:HAS_ROUTE]->(MCT)
+  32  (CNN)-[:HAS_ROUTE]->(RUH)
+  33  (CNN)-[:IN_COUNTRY]->(IN)
+  34  (DIB)-[:HAS_ROUTE]->(CCU)
+  35  (DIB)-[:HAS_ROUTE]->(GAU)
+  36  (DIB)-[:IN_COUNTRY]->(IN)
+  37  (DMK)-[:HAS_ROUTE]->(DEL)
+  38  (DMK)-[:IN_COUNTRY]->(TH)
+  39  (DOH)-[:HAS_ROUTE]->(DEL)
+  40  (DOH)-[:IN_COUNTRY]->(QA)
+  41  (DXB)-[:HAS_ROUTE]->(DEL)
+  42  (DXB)-[:IN_COUNTRY]->(AE)
+  43  (GAU)-[:HAS_ROUTE]->(DEL)
+  44  (HBX)-[:HAS_ROUTE]->(BLR)
+  45  (HBX)-[:HAS_ROUTE]->(MAA)
+  46  (HBX)-[:IN_COUNTRY]->(IN)
+  47  (HYD)-[:HAS_ROUTE]->(DEL)
+  48  (IDR)-[:HAS_ROUTE]->(DEL)
+  49  (IDR)-[:IN_COUNTRY]->(IN)
+  50  (IXA)-[:HAS_ROUTE]->(CCU)
+  51  (IXA)-[:HAS_ROUTE]->(GAU)
+  52  (IXA)-[:IN_COUNTRY]->(IN)
+  53  (IXE)-[:HAS_ROUTE]->(AUH)
+  54  (IXE)-[:HAS_ROUTE]->(DOH)
+  55  (IXE)-[:HAS_ROUTE]->(MAA)
+  56  (IXE)-[:IN_COUNTRY]->(IN)
+  57  (IXG)-[:HAS_ROUTE]->(BLR)
+  58  (IXG)-[:HAS_ROUTE]->(IDR)
+  59  (IXG)-[:IN_COUNTRY]->(IN)
+  60  (IXM)-[:HAS_ROUTE]->(CMB)
+  61  (IXM)-[:HAS_ROUTE]->(DXB)
+  62  (IXM)-[:HAS_ROUTE]->(MAA)
+  63  (IXM)-[:HAS_ROUTE]->(SIN)
+  64  (IXM)-[:IN_COUNTRY]->(IN)
+  65  (IXS)-[:HAS_ROUTE]->(CCU)
+  66  (IXS)-[:HAS_ROUTE]->(GAU)
+  67  (IXS)-[:IN_COUNTRY]->(IN)
+  68  (KUL)-[:HAS_ROUTE]->(DEL)
+  69  (KUL)-[:IN_COUNTRY]->(MY)
+  70  (KWI)-[:HAS_ROUTE]->(DEL)
+  71  (KWI)-[:IN_COUNTRY]->(KW)
+  72  (MAA)-[:HAS_ROUTE]->(DEL)
+  73  (MAA)-[:IN_COUNTRY]->(IN)
+  74  (MCT)-[:HAS_ROUTE]->(DEL)
+  75  (MCT)-[:IN_COUNTRY]->(OM)
+  76  (RUH)-[:HAS_ROUTE]->(DEL)
+  77  (RUH)-[:IN_COUNTRY]->(SA)
+  78  (SIN)-[:HAS_ROUTE]->(DEL)
+  79  (SIN)-[:IN_COUNTRY]->(SG)
+  80  (TIR)-[:HAS_ROUTE]->(CJB)
+  81  (TIR)-[:HAS_ROUTE]->(HYD)
+  82  (TIR)-[:IN_COUNTRY]->(IN)
+  83  (TRZ)-[:HAS_ROUTE]->(CMB)
+  84  (TRZ)-[:HAS_ROUTE]->(DMK)
+  85  (TRZ)-[:HAS_ROUTE]->(DXB)
+  86  (TRZ)-[:HAS_ROUTE]->(KUL)
+  87  (TRZ)-[:HAS_ROUTE]->(MAA)
+  88  (TRZ)-[:HAS_ROUTE]->(SIN)
+  89  (TRZ)-[:IN_COUNTRY]->(IN)
+  90  (VNS)-[:HAS_ROUTE]->(AGR)
+  91  (VNS)-[:HAS_ROUTE]->(DEL)
+  92  (VNS)-[:IN_COUNTRY]->(IN)
+
+CHECK  92 of 92 change the answer (92 of 92 relationships, 0 of 0 isolated nodes)
+  relate CLI: sufficiency + 92 of 92 necessity probes cross-checked
+
+FILES  <temp dir>/wrong-answer.rl (+ .cypher .manifest.json .html .trace.json)
+
+VERIFIED · deletion-minimal: no single relationship can be removed without changing the answer · determinism claimed

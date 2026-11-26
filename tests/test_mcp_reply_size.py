@@ -46,4 +46,12 @@ def test_a_small_reply_keeps_everything_an_agent_reads():
 def test_lean_check_names_the_probes_that_failed():
     out = lean_check(_res(5, 1, failing=2)["check"])
     assert out["not_necessary"] == ["e1", "e2"] and "probes" not in out
-    assert lean_check({"check_text": "x"}) == {"check_text": "x", "not_necessary": []}
+    assert out["not_necessary_total"] == 2
+    assert lean_check({"check_text": "x"}) == {"check_text": "x", "not_necessary": [], "not_necessary_total": 0}
+
+
+def test_a_large_failing_witness_reply_is_bounded_too():
+    out = compact_reply(_res(5000, 1, failing=4000))
+    assert len(out["check"]["not_necessary"]) == REPLY_ROWS and out["check"]["not_necessary_total"] == 4000
+    assert out["check"]["not_necessary"][:2] == ["e1", "e2"]
+    assert len(json.dumps(out)) < 10_000

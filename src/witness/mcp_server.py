@@ -27,9 +27,13 @@ REPLY_ROWS = 50
 
 
 def lean_check(d: dict) -> dict:
-    """A check result without its per-probe list; `not_necessary` names the probes that failed (empty = all needed)."""
+    """A check result without its per-probe list; `not_necessary` names the probes that failed (empty = all needed),
+    at most REPLY_ROWS of them, with `not_necessary_total` (a2a judge r6: a large failing witness was the unbounded
+    path)."""
     out = {k: v for k, v in d.items() if k != "probes"}
-    out["not_necessary"] = [p["element"] for p in d.get("probes", []) if not p.get("necessary")]
+    failed = [p["element"] for p in d.get("probes", []) if not p.get("necessary")]
+    out["not_necessary"] = failed[:REPLY_ROWS]
+    out["not_necessary_total"] = len(failed)
     return out
 
 

@@ -3,6 +3,7 @@ manifest, and that plain `relate` re-runs to the same answer (a separate asserti
 
 import json
 import os
+import re
 import subprocess
 from pathlib import Path
 
@@ -138,3 +139,23 @@ def test_plain_relate_reproduces_the_same_wrong_answer_on_the_witness():
     expected = {row["airport"] for row in json.loads((ROOT / "evidence" / "wrong-answer-expected.json").read_text())}
     # the same wrong answer: the 12 expected rows plus AGR
     assert len(got) == 13 and got - expected == {"AGR"} and expected <= got
+
+
+def test_every_site_grep_in_ci_matches_the_committed_site():
+    # a2a arch r7: Stage 4 grepped /judge/ for a sentence the generator never wrote, so the stage could not pass
+    ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text()
+    greps = re.findall(r"curl -s http://127\.0\.0\.1:8765(\S*) \| grep -q (\"[^\"]*\"|'[^']*')", ci)
+    assert len(greps) >= 2
+    n = json.loads((ROOT / "witnesses" / "two-hub.manifest.json").read_text())["witness"]["relationships"]
+    for path, quoted in greps:
+        needle = quoted[1:-1].replace("$N", str(n))
+        page = ROOT / "site" / path.strip("/") / "index.html" if path.endswith("/") else ROOT / "site" / path
+        assert needle in page.read_text(), (path, needle)
+
+
+def test_every_third_party_action_is_pinned_to_a_commit():
+    # a2a arch r7: a mutable tag (and astral-sh/setup-uv@v10, a tag that does not exist) is not a pin
+    gh = ROOT / ".github"
+    files = [*(gh / "workflows").glob("*.yml"), gh / "actions" / "setup-relate" / "action.yml"]
+    uses = [u for f in files for u in re.findall(r"uses:\s*(\S+)", f.read_text()) if not u.startswith("./")]
+    assert uses and all(re.fullmatch(r"[\w.-]+/[\w./-]+@[0-9a-f]{40}", u) for u in uses), uses

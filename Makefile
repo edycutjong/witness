@@ -22,7 +22,8 @@ test-coverage: ## pytest with the 100% coverage gate (config in pyproject.toml)
 # ── Security ────────────────────────────────────────────────
 audit: ## pip-audit + gitleaks over the full history
 	uv run pip-audit --skip-editable
-	gitleaks detect --no-banner --redact
+	@if command -v gitleaks >/dev/null 2>&1; then gitleaks detect --no-banner --redact; \
+	else echo "gitleaks is not installed (not a Python package): skipped here; CI runs it on every push"; fi
 
 # ── Performance and site ────────────────────────────────────
 perf: ## throughput floor (CI uses the same script)

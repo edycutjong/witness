@@ -511,9 +511,7 @@ REPRO = [
     "git clone " + REPO + " && cd witness",
     "uv run witness demo",
 ]
-REPLAY = (
-    "The whole suite against real Relate (CI and deterministic replay, not the product path): `uv run pytest --cov=witness`"
-)
+REPLAY = "The whole suite against real Relate (CI and deterministic replay, not the product path): `uv run pytest --cov=witness`"
 LIMITS = [
     "Deletion-minimal, not smallest: no single remaining relationship can be removed without changing the answer; a smaller witness may exist.",
     "Read-only, deterministic Cypher only. Witness refuses writes, procedures, clocks and randomness (exit 2) rather than guess.",

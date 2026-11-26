@@ -1,0 +1,203 @@
+{
+  "baseline": {
+    "columns": [
+      "airport",
+      "hub_countries"
+    ],
+    "rows": [
+      {
+        "airport": "AGR",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "AJL",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "CCJ",
+        "hub_countries": [
+          "AE",
+          "BH",
+          "IN",
+          "KW",
+          "OM",
+          "QA",
+          "SA"
+        ]
+      },
+      {
+        "airport": "CNN",
+        "hub_countries": [
+          "AE",
+          "BH",
+          "IN",
+          "KW",
+          "OM",
+          "QA",
+          "SA"
+        ]
+      },
+      {
+        "airport": "DIB",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "HBX",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "IXA",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "IXE",
+        "hub_countries": [
+          "AE",
+          "IN",
+          "QA"
+        ]
+      },
+      {
+        "airport": "IXG",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "IXM",
+        "hub_countries": [
+          "AE",
+          "IN",
+          "LK",
+          "SG"
+        ]
+      },
+      {
+        "airport": "IXS",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "TIR",
+        "hub_countries": [
+          "IN"
+        ]
+      },
+      {
+        "airport": "TRZ",
+        "hub_countries": [
+          "AE",
+          "IN",
+          "LK",
+          "MY",
+          "SG",
+          "TH"
+        ]
+      }
+    ],
+    "sha256": "1f9bb45513cd8e312f58e3b222e6a4e1921a46944d9e97fa719a0a82548bf845"
+  },
+  "check": {
+    "check_text": "5 of 5 end the disagreement (5 of 5 relationships, 0 of 0 isolated nodes)",
+    "cli": "relate CLI: sufficiency + 5 of 5 necessity probes cross-checked",
+    "cli_used": true,
+    "disagreements": [],
+    "inconclusive": 0,
+    "probes": [
+      {
+        "cli_necessary": true,
+        "element": "(VNS)-[:HAS_ROUTE]->(AGR)",
+        "i": 1,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(VNS)-[:HAS_ROUTE]->(DEL)",
+        "i": 2,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(BOM)-[:HAS_ROUTE]->(DEL)",
+        "i": 3,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(AGR)-[:HAS_ROUTE]->(BOM)",
+        "i": 4,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(AGR)-[:IN_COUNTRY]->(IN)",
+        "i": 5,
+        "kind": "rel",
+        "necessary": true
+      }
+    ],
+    "reasons": [],
+    "sufficient": true,
+    "verified": true
+  },
+  "comparison": {
+    "float_digits": 12,
+    "rows": "bag",
+    "strict_lists": true
+  },
+  "determinism_claimed": true,
+  "name": "direction-bug",
+  "params": {
+    "country": "IN",
+    "dest": "DEL"
+  },
+  "predicate": {
+    "kind": "disagree",
+    "other_baseline_sha256": "5ba36c037c015377ba72a45b8abf5bb8a2a6a059bbbc9cdd410ce3276343cf74",
+    "other_statement": "// Which airports of $country have no direct flight to $dest, yet would still reach it in two flights if any one hub closed?\nMATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\nWHERE a.iata <> $dest\n  AND NOT EXISTS { MATCH (a)-[:HAS_ROUTE]->(:Airport {iata: $dest}) }\nMATCH (a)-[:HAS_ROUTE]->(hub:Airport)-[:HAS_ROUTE]->(:Airport {iata: $dest})\nOPTIONAL MATCH (hub)-[:IN_COUNTRY]->(hc:Country)\nWITH a, count(DISTINCT hub) AS hubs, coll.sort(collect(DISTINCT hc.code)) AS hub_countries\nWHERE hubs >= 2\nRETURN a.iata AS airport, hub_countries\nORDER BY airport"
+  },
+  "reasons": [],
+  "run": {
+    "capped": null,
+    "commits": 47,
+    "inconclusive": 0,
+    "seconds": 0.864,
+    "ties": 0,
+    "trials": 139
+  },
+  "schema": "witness.manifest/v1",
+  "seed": 0,
+  "source": {
+    "nodes": 3748,
+    "path": "data/air-routes.rl",
+    "relationships": 57645,
+    "sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+  },
+  "statement": "// The agent's first try at queries/two-hub.cypher: the first hop is matched in either direction (a realistic mistake).\nMATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\nWHERE a.iata <> $dest\n  AND NOT EXISTS { MATCH (a)-[:HAS_ROUTE]->(:Airport {iata: $dest}) }\nMATCH (a)-[:HAS_ROUTE]-(hub:Airport)-[:HAS_ROUTE]->(:Airport {iata: $dest})\nOPTIONAL MATCH (hub)-[:IN_COUNTRY]->(hc:Country)\nWITH a, count(DISTINCT hub) AS hubs, coll.sort(collect(DISTINCT hc.code)) AS hub_countries\nWHERE hubs >= 2\nRETURN a.iata AS airport, hub_countries\nORDER BY airport\n",
+  "verified": true,
+  "versions": {
+    "python": "3.12.13",
+    "relate_db": "1.0.1",
+    "witness": "0.1.0"
+  },
+  "witness": {
+    "isolated_nodes": 0,
+    "nodes": 5,
+    "relationships": 5
+  }
+}

@@ -57,3 +57,45 @@ def test_plain_relate_rerun_returns_the_same_answer():
     )
     assert r.returncode == 0, r.stderr
     assert json.loads(r.stdout.splitlines()[0])["data"] == m["baseline"]["rows"]
+
+
+# ---- the second committed example: two queries disagree (a2a judge r5) ------------------------------------------
+DB = ROOT / "witnesses" / "direction-bug.rl"
+
+
+def test_committed_disagreement_witness_checks():
+    m = json.loads((ROOT / "witnesses" / "direction-bug.manifest.json").read_text())
+    assert m["verified"] and m["witness"]["relationships"] == 5 and m["predicate"]["kind"] == "disagree"
+    res = check(DB, spec_from_manifest(m), use_cli=False)
+    assert res.verified and res.text.startswith("5 of 5 end the disagreement")
+
+
+@pytest.mark.skipif(relate_cli()[0] is None, reason="pinned relate CLI not on PATH")
+def test_plain_relate_shows_the_two_queries_disagree_on_the_witness():
+    cli = relate_cli()[0]
+
+    def rows(query: str) -> list:
+        r = subprocess.run(
+            [
+                cli,
+                "query",
+                "--database",
+                str(DB),
+                "--read-only",
+                "--mode",
+                "json",
+                *cli_param_args({"country": "IN", "dest": "DEL"}),
+            ],
+            input=(ROOT / "queries" / query).read_text(),
+            capture_output=True,
+            text=True,
+            timeout=60,
+            env={**os.environ, "DO_NOT_TRACK": "1"},
+        )
+        assert r.returncode == 0, r.stderr
+        return json.loads(r.stdout.splitlines()[0])["data"]
+
+    assert rows("two-hub-agent.cypher") == [
+        {"airport": "AGR", "hub_countries": []}
+    ]  # hub countries are not needed to disagree
+    assert rows("two-hub.cypher") == []

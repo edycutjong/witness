@@ -187,12 +187,15 @@ def print_outcome(o, extra: str | None = None) -> None:
     print(f"  {o.check.cli_status}")
 
 
+# The verdict names what a deletion would end, in the predicate's own words (CHECK says "end the disagreement").
+WITHOUT = {"end the disagreement": "ending the disagreement", "end the mismatch": "ending the mismatch"}
+
+
 def verdict_line(o) -> None:
     if o.verified:
         det = "determinism claimed" if o.manifest.get("determinism_claimed") else "determinism not claimed"
-        print(
-            f"\nVERIFIED · deletion-minimal: no single relationship can be removed without changing the answer · {det}"
-        )
+        without = next((v for k, v in WITHOUT.items() if k in o.check.text), "changing the answer")
+        print(f"\nVERIFIED · deletion-minimal: no single relationship can be removed without {without} · {det}")
     else:
         print("\nNOT verified")
         for r in o.reasons:

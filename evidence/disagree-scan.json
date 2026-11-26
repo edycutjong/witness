@@ -1,0 +1,234 @@
+{
+ "generated": "2026-11-26 23:32:44 +0700",
+ "relate_db": "1.0.1",
+ "machine": "Darwin 27.2.0 arm64, Python 3.12.13",
+ "source": "data/air-routes.rl",
+ "queries": [
+  "queries/two-hub.cypher",
+  "queries/two-hub-agent.cypher"
+ ],
+ "pairs_scanned": 232,
+ "pairs_differ": 6,
+ "differ": [
+  {
+   "country": "IN",
+   "dest": "DEL",
+   "rows_headline": 12,
+   "rows_agent": 13,
+   "only_agent": [
+    {
+     "airport": "AGR",
+     "hub_countries": [
+      "IN"
+     ]
+    }
+   ],
+   "only_headline": []
+  },
+  {
+   "country": "BR",
+   "dest": "GRU",
+   "rows_headline": 19,
+   "rows_agent": 20,
+   "only_agent": [
+    {
+     "airport": "ERM",
+     "hub_countries": [
+      "BR"
+     ]
+    }
+   ],
+   "only_headline": []
+  },
+  {
+   "country": "NL",
+   "dest": "AMS",
+   "rows_headline": 4,
+   "rows_agent": 4,
+   "only_agent": [
+    {
+     "airport": "EIN",
+     "hub_countries": [
+      "AT",
+      "BG",
+      "DE",
+      "DK",
+      "ES",
+      "FR",
+      "GR",
+      "HU",
+      "IE",
+      "IL",
+      "IT",
+      "LT",
+      "LV",
+      "MA",
+      "MT",
+      "NO",
+      "PL",
+      "PT",
+      "RO",
+      "RS",
+      "SE",
+      "TR",
+      "UK"
+     ]
+    }
+   ],
+   "only_headline": [
+    {
+     "airport": "EIN",
+     "hub_countries": [
+      "AT",
+      "BG",
+      "DE",
+      "DK",
+      "ES",
+      "FR",
+      "GR",
+      "HU",
+      "IE",
+      "IL",
+      "IT",
+      "LT",
+      "LV",
+      "MA",
+      "MT",
+      "PL",
+      "PT",
+      "RO",
+      "RS",
+      "SE",
+      "TR",
+      "UK"
+     ]
+    }
+   ]
+  },
+  {
+   "country": "AR",
+   "dest": "EZE",
+   "rows_headline": 8,
+   "rows_agent": 8,
+   "only_agent": [
+    {
+     "airport": "TUC",
+     "hub_countries": [
+      "AR",
+      "CL",
+      "PE"
+     ]
+    }
+   ],
+   "only_headline": [
+    {
+     "airport": "TUC",
+     "hub_countries": [
+      "CL",
+      "PE"
+     ]
+    }
+   ]
+  },
+  {
+   "country": "DE",
+   "dest": "FRA",
+   "rows_headline": 12,
+   "rows_agent": 12,
+   "only_agent": [
+    {
+     "airport": "FKB",
+     "hub_countries": [
+      "BG",
+      "DE",
+      "ES",
+      "GR",
+      "HR",
+      "IL",
+      "IT",
+      "MA",
+      "PT",
+      "RO",
+      "RU",
+      "UA",
+      "UK"
+     ]
+    }
+   ],
+   "only_headline": [
+    {
+     "airport": "FKB",
+     "hub_countries": [
+      "BG",
+      "DE",
+      "ES",
+      "GR",
+      "HR",
+      "IL",
+      "IT",
+      "MA",
+      "PT",
+      "RU",
+      "UA",
+      "UK"
+     ]
+    }
+   ]
+  },
+  {
+   "country": "UK",
+   "dest": "LGW",
+   "rows_headline": 27,
+   "rows_agent": 27,
+   "only_agent": [
+    {
+     "airport": "LCY",
+     "hub_countries": [
+      "CH",
+      "CZ",
+      "DE",
+      "ES",
+      "FR",
+      "HU",
+      "IE",
+      "IM",
+      "IS",
+      "IT",
+      "JE",
+      "LU",
+      "NL",
+      "PL",
+      "PT",
+      "SE",
+      "UK",
+      "US"
+     ]
+    }
+   ],
+   "only_headline": [
+    {
+     "airport": "LCY",
+     "hub_countries": [
+      "CH",
+      "CZ",
+      "DE",
+      "ES",
+      "FR",
+      "HU",
+      "IE",
+      "IM",
+      "IS",
+      "IT",
+      "JE",
+      "LU",
+      "NL",
+      "PL",
+      "PT",
+      "SE",
+      "UK"
+     ]
+    }
+   ]
+  }
+ ]
+}

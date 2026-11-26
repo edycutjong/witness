@@ -1,0 +1,35 @@
+# Recorded 2026-11-26 23:34 +0700 on Darwin arm64, relate-db 1.0.1, Relate CLI v1.0.1. Command (from the repo root):
+# DO_NOT_TRACK=1 uv run witness why -f queries/two-hub-agent.cypher --other queries/two-hub.cypher --predicate disagree --strict-lists --param country=IN --param dest=DEL --name direction-bug --store data/air-routes.rl --out <temp dir> --no-ledger
+# The five files were then copied to witnesses/ (the CLI writes witnesses/ itself only for the headline build). Pair found by bench/disagree_scan.py (evidence/disagree-scan.json).
+ANSWER  13 rows on the full graph
+  airport  hub_countries
+  AGR      [IN]
+  AJL      [IN]
+  CCJ      [AE, BH, IN, KW, OM, QA, SA]
+  CNN      [AE, BH, IN, KW, OM, QA, SA]
+  DIB      [IN]
+  HBX      [IN]
+  IXA      [IN]
+  IXE      [AE, IN, QA]
+  IXG      [IN]
+  IXM      [AE, IN, LK, SG]
+  IXS      [IN]
+  TIR      [IN]
+  TRZ      [AE, IN, LK, MY, SG, TH]
+
+WITNESS  5 relationships · 5 nodes, out of 57,645 · 3,748
+  reduced in 0.864 s · 139 trials · 0 inconclusive · seed 0 (4.395 s end to end: copy, guard, order check, reduce, check)
+
+EXHIBITS  (register order; every one is needed)
+   1  (AGR)-[:HAS_ROUTE]->(BOM)
+   2  (AGR)-[:IN_COUNTRY]->(IN)
+   3  (BOM)-[:HAS_ROUTE]->(DEL)
+   4  (VNS)-[:HAS_ROUTE]->(AGR)
+   5  (VNS)-[:HAS_ROUTE]->(DEL)
+
+CHECK  5 of 5 end the disagreement (5 of 5 relationships, 0 of 0 isolated nodes)
+  relate CLI: sufficiency + 5 of 5 necessity probes cross-checked
+
+FILES  <temp dir>/direction-bug.rl (+ .cypher .manifest.json .html .trace.json)
+
+VERIFIED · deletion-minimal: no single relationship can be removed without ending the disagreement · determinism claimed

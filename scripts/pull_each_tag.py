@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
 from witness import __version__  # noqa: E402
+from witness.canon import canon_rows, same_answer  # noqa: E402
 from witness.check import plain  # noqa: E402
 from witness.export import exhibits  # noqa: E402
 from witness.store import Scratch  # noqa: E402
@@ -37,7 +38,13 @@ def main() -> int:
     sc = Scratch.open_copy(W)
     try:
         counts = sc.counts()
+        cmp = man["comparison"]
+
+        def canon(rows: list) -> tuple:  # the comparator `check` uses (a2a arch r7): rows a bag, manifest settings
+            return canon_rows(rows, strict_lists=cmp["strict_lists"], digits=cmp["float_digits"])
+
         base = plain(sc.run(statement, params).data)
+        base_canon = canon(base)
         base_names = sorted(str(r[col]) for r in base)
         assert base_names == sorted(str(r[col]) for r in man["baseline"]["rows"]), (
             "witness no longer gives the baseline"
@@ -58,7 +65,7 @@ def main() -> int:
                     "rows": [{k: r[k] for k in sorted(r)} for r in sorted(after, key=lambda r: str(r[col]))],
                     "drops": sorted(set(base_names) - set(names)),
                     "appears": sorted(set(names) - set(base_names)),
-                    "changed": after != base,
+                    "changed": not same_answer(canon(after), base_canon),
                     "ms": round(t.ms, 3),
                 }
             )

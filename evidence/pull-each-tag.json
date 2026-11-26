@@ -1,6 +1,6 @@
 {
   "schema": "witness.pull-each-tag/v1",
-  "what": "each of the witness's relationships deleted alone in a Relate transaction, the query re-run, then rolled back",
+  "what": "each witness relationship deleted alone in a Relate transaction, the query re-run, rolled back",
   "witness": "witnesses/two-hub.rl",
   "query": "queries/two-hub.cypher",
   "params": {
@@ -87,7 +87,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.655
+      "ms": 0.656
     },
     {
       "n": 2,
@@ -131,7 +131,7 @@
       "drops": [],
       "appears": [],
       "changed": true,
-      "ms": 0.289
+      "ms": 0.27
     },
     {
       "n": 3,
@@ -163,7 +163,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.251
+      "ms": 0.243
     },
     {
       "n": 4,
@@ -206,7 +206,7 @@
       "drops": [],
       "appears": [],
       "changed": true,
-      "ms": 0.318
+      "ms": 0.241
     },
     {
       "n": 5,
@@ -245,7 +245,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.266
+      "ms": 0.247
     },
     {
       "n": 6,
@@ -289,7 +289,7 @@
       "drops": [],
       "appears": [],
       "changed": true,
-      "ms": 0.262
+      "ms": 0.234
     },
     {
       "n": 7,
@@ -328,7 +328,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.243
+      "ms": 0.226
     },
     {
       "n": 8,
@@ -372,7 +372,7 @@
       "drops": [],
       "appears": [],
       "changed": true,
-      "ms": 0.245
+      "ms": 0.23
     },
     {
       "n": 9,
@@ -411,7 +411,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.228
+      "ms": 0.222
     },
     {
       "n": 10,
@@ -450,7 +450,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.227
+      "ms": 0.223
     },
     {
       "n": 11,
@@ -489,7 +489,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.21
+      "ms": 0.207
     },
     {
       "n": 12,
@@ -528,7 +528,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.223
+      "ms": 0.228
     },
     {
       "n": 13,
@@ -567,7 +567,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.229
+      "ms": 0.244
     },
     {
       "n": 14,
@@ -606,7 +606,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.229
+      "ms": 0.216
     },
     {
       "n": 15,
@@ -631,7 +631,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.235
+      "ms": 0.317
     },
     {
       "n": 16,
@@ -673,7 +673,7 @@
       "drops": [],
       "appears": [],
       "changed": true,
-      "ms": 0.243
+      "ms": 0.27
     },
     {
       "n": 17,
@@ -712,7 +712,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.235
+      "ms": 0.241
     },
     {
       "n": 18,
@@ -751,7 +751,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.241
+      "ms": 0.239
     },
     {
       "n": 19,
@@ -790,7 +790,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.214
+      "ms": 0.216
     },
     {
       "n": 20,
@@ -829,7 +829,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.232
+      "ms": 0.228
     },
     {
       "n": 21,
@@ -868,7 +868,7 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.236
+      "ms": 0.229
     },
     {
       "n": 22,
@@ -907,11 +907,11 @@
       ],
       "appears": [],
       "changed": true,
-      "ms": 0.663
+      "ms": 0.263
     }
   ],
   "run": {
-    "utc": "2026-11-24T00:57:18Z",
+    "utc": "2026-11-26T19:35:48Z",
     "witness": "0.1.0",
     "relate_db": "1.0.1",
     "python": "3.12.13",

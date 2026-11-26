@@ -1,5 +1,6 @@
 {
- "generated": "2026-11-27 00:06:30 +0700",
+ "generated": "2026-11-27 02:17:09 +0700",
+ "relate_db": "1.0.1",
  "machine": "Darwin 27.2.0 arm64, Python 3.12.13",
  "query": "queries/two-hub.cypher",
  "params": {

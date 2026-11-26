@@ -63,6 +63,7 @@ def main() -> None:
     changed = [r for r in rows if r["added"] or r["dropped"] or r["lists_changed"]]
     out = {
         "generated": time.strftime("%Y-%m-%d %H:%M:%S %z"),
+        "relate_db": getattr(relate, "__version__", "unknown"),
         "machine": f"{platform.system()} {platform.release()} {platform.machine()}, Python {platform.python_version()}",
         "query": "queries/two-hub.cypher",
         "params": P,

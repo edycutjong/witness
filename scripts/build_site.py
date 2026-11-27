@@ -30,7 +30,7 @@ TESTS = int(re.search(r"(\d+) passed", pytest_log.read_text()).group(1))
 man = json.loads((ROOT / "witnesses" / "two-hub.manifest.json").read_text())
 cmp_path = sorted((ROOT / "evidence").glob("neo4j-compare-*.json"))[-1]
 cmp = json.loads(cmp_path.read_text())
-# full-graph necessity of the 68 bound relationships (a2a judge r5/r6): how many change the answer there, how many of those
+# full-graph necessity of the 68 bound relationships (judge review r5/r6): how many change the answer there, how many of those
 # are in the witness; the rest are flights of airports outside the witness, whose deletion adds that airport
 fgn = json.loads((ROOT / "evidence" / "full-graph-necessity.json").read_text())
 assert (
@@ -44,7 +44,7 @@ exhibit = (ROOT / "witnesses" / "two-hub.html").read_text()
 src_rels, src_nodes = man["source"]["relationships"], man["source"]["nodes"]
 w_rels, w_nodes = man["witness"]["relationships"], man["witness"]["nodes"]
 trials, secs = man["run"]["trials"], man["run"]["seconds"]
-# the other recorded runs' wall clock, named beside the committed one (a2a judge r8: three unlabelled seconds)
+# the other recorded runs' wall clock, named beside the committed one (judge review r8: three unlabelled seconds)
 _red = re.compile(r"reduced in ([0-9.]+) s · (\d+) trials")
 _lm = _red.search((ROOT / "evidence" / "demo-2026-11-24.txt").read_text())
 _vm = _red.search((ROOT / "evidence" / "video-demo-run-2026-11-27.txt").read_text())
@@ -146,7 +146,7 @@ assert man["comparison"]["strict_lists"] is True, "FAQ: 'this headline run compa
 
 
 def cases_vals() -> dict:
-    """Exhibits B and C on the landing (a2a judge r6): the disagree and differs receipts, every number read from the
+    """Exhibits B and C on the landing (judge review r6): the disagree and differs receipts, every number read from the
     committed manifests and the scan."""
     db = json.loads((ROOT / "witnesses" / "direction-bug.manifest.json").read_text())
     wa = json.loads((ROOT / "witnesses" / "wrong-answer.manifest.json").read_text())
@@ -162,7 +162,7 @@ def cases_vals() -> dict:
     exp_rows = {r["airport"] for r in wa["predicate"]["expected_rows"]}
     extra = sorted(wa_rows - exp_rows)
     assert extra == ["AGR"] and exp_rows <= wa_rows, extra
-    # the scan and the disagree receipt are about the same two queries and the same pair (a2a arch r7)
+    # the scan and the disagree receipt are about the same two queries and the same pair (arch review r7)
     q = {(ROOT / p).read_text().strip() for p in scan["queries"]}
     assert q == {db["statement"].strip(), db["predicate"]["other_statement"].strip()}, "scan queries != receipt queries"
     pair = (db["params"]["country"], db["params"]["dest"])

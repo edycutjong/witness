@@ -20,11 +20,11 @@ from pathlib import Path
 
 DEFAULT_REQUEST_TIMEOUT = 300.0
 DEFAULT_TRIAL_TIMEOUT = 30.0
-# What crosses MCP stays small (a2a judge r5): a real client caps a tool result, and a recorded Claude Code session
+# What crosses MCP stays small (judge review r5): a real client caps a tool result, and a recorded Claude Code session
 # could not read a 74,771-character `why` reply (68 exhibits, each with its full content key). Exhibits and rows are
 # trimmed to REPLY_ROWS and the per-probe list to the failures; the .manifest.json beside the witness keeps all of it.
 REPLY_ROWS = 50
-# Rows are bounded by size too (a2a arch r7): one row can hold a 3,000-element collect(). Rows are sent whole or not
+# Rows are bounded by size too (arch review r7): one row can hold a 3,000-element collect(). Rows are sent whole or not
 # at all, never edited, and `rows_truncated` says when the rest is only in the manifest.
 REPLY_ROW_CHARS = 20_000
 VALUE_CHARS = 80
@@ -33,8 +33,8 @@ VALUE_CHARS = 80
 def lean_check(d: dict) -> dict:
     """A check result without its per-probe list. `not_necessary` names the probes whose deletion kept the answer
     (proven not needed); `inconclusive_probes` the probes whose trial gave no verdict (an error or a timeout: unknown,
-    never "not needed", a2a arch r7). Each holds at most REPLY_ROWS names, with its `_total`. `probes_total` counts the
-    probes that ran: 0 means the necessity check did not run, so an empty `not_necessary` proves nothing on its own;
+    never "not needed", arch review r7). Each holds at most REPLY_ROWS names, with its `_total`. `probes_total` counts
+    the probes that ran: 0 means the necessity check did not run, so an empty `not_necessary` proves nothing on its own;
     `verified` is the verdict."""
     out = {k: v for k, v in d.items() if k != "probes"}
     probes = d.get("probes", [])
@@ -80,7 +80,7 @@ MAX_EVIDENCE_LINES = 25
 
 def package_root() -> Path:
     """The repo root: the working directory if it holds the committed data (a wheel install started from a clone, as an
-    MCP client's `cwd` setting does), else the source checkout this module sits in (a2a arch r7; the CLI's rule)."""
+    MCP client's `cwd` setting does), else the source checkout this module sits in (arch review r7; the CLI's rule)."""
     cwd = Path.cwd()
     return cwd if (cwd / "data" / "air-routes.rl").is_file() else Path(__file__).resolve().parents[2]
 
@@ -150,7 +150,7 @@ def evidence_markdown(res: dict) -> str:
     per = 1 if len(ex) <= room else 2  # two per line when the register is long, so it still fits a chat reply
     rows = [ex[i : i + per] for i in range(0, len(ex), per)]
     if len(rows) > room:
-        room -= 1  # the "… more lines" marker takes a line too, so the verdict line below is never cut (a2a arch r7)
+        room -= 1  # the "… more lines" marker takes a line too, so the verdict line below is never cut (arch review r7)
     for r in rows[:room]:
         lines.append("   ".join(r))
     if len(rows) > room:
@@ -163,7 +163,7 @@ def evidence_markdown(res: dict) -> str:
 
 
 def _own_group() -> None:
-    """Lead a new process group: a request kill then reaches the isolate trial child too (a2a arch r1)."""
+    """Lead a new process group: a request kill then reaches the isolate trial child too (arch review r1)."""
     if hasattr(os, "setsid"):
         try:
             os.setsid()
@@ -183,13 +183,13 @@ def _kill_group(proc) -> None:
 
 def override_spec(manifest: dict, statement: str, parameters: dict | None):
     """`check` with an agent's own statement: keep-compared against W's baseline rows, the way W was compared
-    (its manifest's strict_lists / float_digits, not hard-coded defaults; a2a arch r1)."""
+    (its manifest's strict_lists / float_digits, not hard-coded defaults; arch review r1)."""
     from .check import CheckSpec
     from .guard import static_checks
 
     cmp_ = manifest.get("comparison", {})
     # Against the baseline's own sha256, not rows re-parsed from JSON: rows that hold nodes or relationships are
-    # display dicts and could never match a canonical node again (P1d QA r2).
+    # display dicts and could never match a canonical node again (QA r2).
     return CheckSpec(
         queries=[static_checks(statement, dict(parameters or {}), "check")],
         kind="keep",
@@ -201,7 +201,7 @@ def override_spec(manifest: dict, statement: str, parameters: dict | None):
 
 def _recv_within(conn, timeout: float):
     """poll() only says a reply has started; recv() can still block on the rest of the frame. Receive under the
-    request deadline instead (a2a arch r2): TimeoutError when it does not complete in time."""
+    request deadline instead (arch review r2): TimeoutError when it does not complete in time."""
     box: dict = {}
 
     def run():
@@ -386,7 +386,7 @@ class WitnessTools:
                 _kill_group(proc)
                 proc.join(5)
                 return ToolError("timeout", f"the reply did not complete within {self.request_timeout:g} s").to_dict()
-            except Exception as e:  # noqa: BLE001 - EOFError (worker died) or an unreadable reply (a2a arch r2)
+            except Exception as e:  # noqa: BLE001 - EOFError (worker died) or an unreadable reply (arch review r2)
                 if not isinstance(e, EOFError):
                     _kill_group(proc)
                     return ToolError("internal", f"unreadable reply from the worker: {type(e).__name__}").to_dict()
@@ -426,7 +426,7 @@ class WitnessTools:
                 "parameters": dict(parameters or {}),
                 "use_cli": self.use_cli,
             }
-            # Same supervision as `why` (a2a arch r1): an agent-written override query is killed at the request
+            # Same supervision as `why` (arch review r1): an agent-written override query is killed at the request
             # deadline, and one request runs at a time.
             with self._lock:
                 d = self._supervise(_check_worker, args)

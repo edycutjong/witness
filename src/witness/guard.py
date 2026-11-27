@@ -25,7 +25,7 @@ WRITE_KEYWORDS = {"create", "merge", "set", "delete", "detach", "remove", "forea
 # Schema/administration commands open the statement (DROP INDEX, ALTER DATABASE, START DATABASE, GRANT ...).
 # The engine's query_type catches them on the main path; the fixture slice runs on Neo4j with only these static checks.
 ADMIN_STARTS = {"drop", "alter", "grant", "revoke", "deny", "rename", "start", "stop", "terminate", "enable", "show"}
-REFUSED_CALL_HEADS = {"apoc", "gds", "dbms", "db", "graph", "genai"}  # plugin / server namespaces (a2a arch r2)
+REFUSED_CALL_HEADS = {"apoc", "gds", "dbms", "db", "graph", "genai"}  # plugin / server namespaces (arch review r2)
 REFUSED_FUNCTIONS = {
     "rand": "rand() is random",
     "randomuuid": "randomUUID() is random",
@@ -121,7 +121,7 @@ def tokenize(text: str) -> list[Tok]:
         if kind in ("ws", "lc", "bc"):
             pass
         elif kind == "bt":
-            # a2a arch r2: `{` and `:` as identifiers matched the punctuation checks (`AS `{` LIMIT 2` hid the LIMIT)
+            # arch review r2: `{` and `:` as identifiers matched the punctuation checks (`AS `{` LIMIT 2` hid the LIMIT)
             name = s[1:-1].replace("``", "`").lower()
             toks.append(Tok("ident", "`" + name, m.start(), m.end(), quoted=True, name=name))
         elif kind == "ident":
@@ -210,7 +210,7 @@ def _check_temporal(call: Call) -> str | None:
     if head and base in TEMPORALS and tail in CLOCKS:
         return f"{call.name}() reads the clock"
     # date.truncate(unit, input = DEFAULT_TEMPORAL_ARGUMENT, ...): without an input it truncates "now" (Relate 1.0.1:
-    # datetime.truncate('second') returned two different values 2 s apart, a2a arch r1).
+    # datetime.truncate('second') returned two different values 2 s apart, arch review r1).
     if head and base in TEMPORALS and tail == "truncate" and len(call.args) < 2:
         return f"{call.name}() without an input temporal reads the clock"
     if head:
@@ -454,6 +454,6 @@ def strip_comments(text: str) -> str:
             if out and out[-1] != " ":
                 out.append(" ")
         else:
-            out.append(m.group(0))  # string literals stay byte-exact ('a  b' is not 'a b'; a2a arch r1)
+            out.append(m.group(0))  # string literals stay byte-exact ('a  b' is not 'a b'; arch review r1)
         pos = m.end()
     return "".join(out).strip().rstrip(";").strip()

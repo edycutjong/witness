@@ -56,7 +56,7 @@ def cli_param_args(params: dict) -> list[str]:
     for k, v in params.items():
         if isinstance(v, str):
             try:
-                json.loads(v)  # '"MX"', 'true', '1': the CLI would read the JSON value, not this string (a2a r2)
+                json.loads(v)  # '"MX"', 'true', '1': the CLI would read the JSON value, not this string (review r2)
                 bare_ok = False
             except ValueError:
                 bare_ok = v != "" and v == v.strip()
@@ -75,7 +75,7 @@ def plain(v):
     if isinstance(v, dict):
         return {str(k): plain(x) for k, x in v.items()}
     # Graph values by content, never by store id: Node(id=0, ...) put the source store's ids into manifests and the
-    # MCP evidence, which a copy of the store need not share (a2a arch r2).
+    # MCP evidence, which a copy of the store need not share (arch review r2).
     if hasattr(v, "nodes") and hasattr(v, "relationships"):
         return {"nodes": [plain(n) for n in v.nodes], "relationships": [plain(r) for r in v.relationships]}
     if hasattr(v, "start_node") and hasattr(v, "type") and hasattr(v, "properties"):
@@ -207,14 +207,14 @@ class CheckResult:
         rels = [p for p in self.probes if p["kind"] == "rel"]
         nodes = [p for p in self.probes if p["kind"] == "node"]
         n = len(self.probes)
-        if self.sufficient is not True:  # every probe "changes" an answer W never reproduced: count nothing (a2a r1)
+        if self.sufficient is not True:  # every probe "changes" an answer W never reproduced: count nothing (review r1)
             why = "W does not reproduce the answer" if self.sufficient is False else "sufficiency inconclusive"
             return f"NOT SUFFICIENT: {why}; {n} necessity probes not counted"
         if n == 0 or self.inconclusive or self.necessary != n or self.disagreements or self.reasons:
             why = "; ".join(self.disagreements + self.reasons) or (
                 "no necessity probes ran" if n == 0 else f"{n - self.necessary} not proven necessary"
             )
-            return f"NOT VERIFIED: {self.necessary} of {n} {self.change_phrase}; {why}"  # a2a arch r2
+            return f"NOT VERIFIED: {self.necessary} of {n} {self.change_phrase}; {why}"  # arch review r2
         t = f"{self.necessary} of {n} {self.change_phrase}"
         t += f" ({sum(p['necessary'] is True for p in rels)} of {len(rels)} relationships"
         t += f", {sum(p['necessary'] is True for p in nodes)} of {len(nodes)} isolated nodes)"

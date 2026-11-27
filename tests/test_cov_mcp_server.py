@@ -93,7 +93,7 @@ def test_a_relative_store_path_resolves_against_the_package_root():
 
 
 def test_the_package_root_is_the_working_directory_when_it_holds_the_committed_data(tmp_path, monkeypatch):
-    # a2a arch r7: from a wheel install, parents[2] of the module is the venv's lib dir; a clone as cwd is the root
+    # arch review r7: from a wheel install, parents[2] of the module is the venv's lib dir; a clone as cwd is the root
     (tmp_path / "data").mkdir()
     (tmp_path / "data" / "air-routes.rl").write_bytes(b"")
     monkeypatch.chdir(tmp_path)
@@ -576,4 +576,4 @@ def test_main_says_how_to_install_the_sdk_and_exits_2_when_mcp_is_missing(monkey
     assert mcp_server.main([]) == 2
     err = capsys.readouterr().err
     assert "uv run --extra mcp witness mcp" in err and "pip install -e '.[mcp]'" in err and got == []
-    assert "not on PyPI" in err  # a2a arch r7: `pip install witness` is an unrelated PyPI package
+    assert "not on PyPI" in err  # arch review r7: `pip install witness` is an unrelated PyPI package

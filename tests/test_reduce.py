@@ -108,6 +108,6 @@ def test_determinism_byte_identical_cypher(tmp_path):
     )
     a = reduce_request(Request(**common, out_dir=tmp_path / "a"))
     b = reduce_request(Request(**common, out_dir=tmp_path / "b", order_check=False))
-    # a2a arch r1: the claim needs the storage-order check; skipping it withdraws the claim, not the bytes
+    # arch review r1: the claim needs the storage-order check; skipping it withdraws the claim, not the bytes
     assert a.manifest["determinism_claimed"] and not b.manifest["determinism_claimed"]
     assert Path(a.files["cypher"]).read_bytes() == Path(b.files["cypher"]).read_bytes()

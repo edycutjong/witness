@@ -1,4 +1,4 @@
-"""What crosses MCP stays small enough for a real client to read (a2a judge r5: a recorded Claude Code session could
+"""What crosses MCP stays small enough for a real client to read (judge review r5: a recorded Claude Code session could
 not read a 74,771-character `why` reply)."""
 
 import json
@@ -51,7 +51,7 @@ def test_lean_check_names_the_probes_that_failed():
 
 
 def test_a_check_that_did_not_run_is_not_shaped_like_all_needed():
-    # a2a arch r7: an empty not_necessary beside probes_total 0 says nothing was probed, not "every one is needed"
+    # arch review r7: an empty not_necessary beside probes_total 0 says nothing was probed, not "every one is needed"
     assert lean_check({"check_text": "x"}) == {
         "check_text": "x",
         "probes_total": 0,
@@ -63,7 +63,7 @@ def test_a_check_that_did_not_run_is_not_shaped_like_all_needed():
 
 
 def test_an_inconclusive_probe_is_never_reported_as_not_necessary():
-    # a2a arch r7: necessary None (an errored or timed-out trial) is unknown, not "not needed"
+    # arch review r7: necessary None (an errored or timed-out trial) is unknown, not "not needed"
     probes = [
         {"i": 1, "kind": "rel", "element": "e1", "necessary": True},
         {"i": 2, "kind": "rel", "element": "e2", "necessary": None},
@@ -101,7 +101,7 @@ def _md_res(n_ex: int, value: str = "v") -> dict:
 
 
 def test_the_not_verified_reason_survives_a_long_register():
-    # a2a arch r7: with 40+ exhibits the overflow marker pushed the reasons line past the 25-line cut
+    # arch review r7: with 40+ exhibits the overflow marker pushed the reasons line past the 25-line cut
     for n_ex in (5, 19, 38, 39, 40, 200):
         md = evidence_markdown(_md_res(n_ex)).splitlines()
         assert len(md) <= 25 and md[-1] == "Not verified: capped at 10 trials", n_ex

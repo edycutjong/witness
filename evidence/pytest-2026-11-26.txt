@@ -1,4 +1,4 @@
-# uv run pytest --cov=witness (100% line+branch gate), recorded 2026-11-26 (23:55 +0700) after a2a judge r5 (verdict wording, the committed direction-bug witness, the bounded MCP reply); supersedes the 499-test run
+# uv run pytest --cov=witness (100% line+branch gate), recorded 2026-11-26 (23:55 +0700) after judge review r5 (verdict wording, the committed direction-bug witness, the bounded MCP reply); supersedes the 499-test run
 # Darwin arm64; relate-db 1.0.1, Relate CLI v1.0.1; Python 3.12.13; local Neo4j in Docker NOT running, so its 2 fixture-pull tests skip (they passed in evidence/pytest-2026-11-24.txt)
 505 passed, 2 skipped in 91.51s (0:01:31)
 TOTAL 2567 statements, 826 branches, 0 missed: 100.00%

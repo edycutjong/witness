@@ -58,7 +58,7 @@ def _ident(name: str) -> str:
 
 def pull_slice(creds: Path, slice_query: str, dest: Path, params: dict | None = None) -> dict:
     # The slice runs on the user's Neo4j over the Query API: the same static guard as every other statement, so a
-    # write, a procedure call or a ';' list never reaches the remote (a2a arch r1).
+    # write, a procedure call or a ';' list never reaches the remote (arch review r1).
     static_checks(slice_query, params or {}, "--slice")
     try:
         names_a_file = slice_query.strip() == "-" or Path(slice_query.strip()).exists()
@@ -124,7 +124,7 @@ def build_fixture(
                     "fixture",
                 ) from e
             raise
-    # The slice lived in a temp dir: name it, not this machine's path (P1d QA r2: /var/folders/... was committed)
+    # The slice lived in a temp dir: name it, not this machine's path (QA r2: /var/folders/... was committed)
     o.manifest["source"]["path"] = "<slice.rl: temp store pulled from Neo4j>"
     man = Path(o.files["manifest"])
     m = json.loads(man.read_text())

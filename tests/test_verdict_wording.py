@@ -1,4 +1,4 @@
-"""The VERIFIED line names what a deletion would end, in the predicate's own words (a2a judge r5)."""
+"""The VERIFIED line names what a deletion would end, in the predicate's own words (judge review r5)."""
 
 from types import SimpleNamespace
 

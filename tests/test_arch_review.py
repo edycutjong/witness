@@ -1,4 +1,4 @@
-"""Regressions from the /a2a arch review (round 1): each test pins one defect the review or its verification found."""
+"""Regressions from the architecture review (round 1): each test pins one defect the review or its checks found."""
 
 import shutil
 
@@ -124,7 +124,7 @@ def test_request_kill_reaches_the_grandchild(tmp_path):
         "CREATE (n0:`A`);\nMATCH (n) DETACH DELETE n",
         "MATCH (n) RETURN n",
         "CREATE (n0:`A` {`v`: $secret})",
-        # a2a arch r2: calls in map values, namespaced clocks, constructors without a literal argument
+        # arch review r2: calls in map values, namespaced clocks, constructors without a literal argument
         "CREATE (n0:`N` {p: rand()})",
         "CREATE (n0:`N` {p: datetime.realtime()})",
         "CREATE (n0:`N` {p: datetime()})",
@@ -337,7 +337,7 @@ def test_mcp_reply_receive_has_a_deadline():
 
 
 def test_partial_temporal_maps_relate_accepts_are_fixed_values():
-    """a2a r2 (grok P0, rejected with these values): Relate 1.0.1 refuses a date-bearing map without `year`, and
+    """review r2 (grok P0, rejected with these values): Relate 1.0.1 refuses a date-bearing map without `year`, and
     time-only maps are fixed values, so the map rule reads no clock. Pinned: a later Relate must keep this."""
     import time
 

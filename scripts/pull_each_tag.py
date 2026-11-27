@@ -40,7 +40,7 @@ def main() -> int:
         counts = sc.counts()
         cmp = man["comparison"]
 
-        def canon(rows: list) -> tuple:  # the comparator `check` uses (a2a arch r7): rows a bag, manifest settings
+        def canon(rows: list) -> tuple:  # the comparator `check` uses (arch review r7): rows a bag, manifest settings
             return canon_rows(rows, strict_lists=cmp["strict_lists"], digits=cmp["float_digits"])
 
         base = plain(sc.run(statement, params).data)

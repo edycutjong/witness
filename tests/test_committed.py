@@ -60,7 +60,7 @@ def test_plain_relate_rerun_returns_the_same_answer():
     assert json.loads(r.stdout.splitlines()[0])["data"] == m["baseline"]["rows"]
 
 
-# ---- the second committed example: two queries disagree (a2a judge r5) ------------------------------------------
+# ---- the second committed example: two queries disagree (judge review r5) ------------------------------------------
 DB = ROOT / "witnesses" / "direction-bug.rl"
 
 
@@ -102,7 +102,7 @@ def test_plain_relate_shows_the_two_queries_disagree_on_the_witness():
     assert rows("two-hub.cypher") == []
 
 
-# ---- the third committed example: a smaller repro of a wrong answer, `differs` (a2a judge r6) ----------------------
+# ---- the third committed example: a smaller repro of a wrong answer, `differs` (judge review r6) --------------------
 WA = ROOT / "witnesses" / "wrong-answer.rl"
 
 
@@ -142,7 +142,7 @@ def test_plain_relate_reproduces_the_same_wrong_answer_on_the_witness():
 
 
 def test_every_site_grep_in_ci_matches_the_committed_site():
-    # a2a arch r7: Stage 4 grepped /judge/ for a sentence the generator never wrote, so the stage could not pass
+    # arch review r7: Stage 4 grepped /judge/ for a sentence the generator never wrote, so the stage could not pass
     ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text()
     greps = re.findall(r"curl -s http://127\.0\.0\.1:8765(\S*) \| grep -q (\"[^\"]*\"|'[^']*')", ci)
     assert len(greps) >= 2
@@ -154,8 +154,9 @@ def test_every_site_grep_in_ci_matches_the_committed_site():
 
 
 def test_every_third_party_action_is_pinned_to_a_commit():
-    # a2a arch r7: a mutable tag (and astral-sh/setup-uv@v10, a tag that does not exist) is not a pin
+    # arch review r7: a mutable tag (and astral-sh/setup-uv@v10, a tag that does not exist) is not a pin
     gh = ROOT / ".github"
     files = [*(gh / "workflows").glob("*.yml"), gh / "actions" / "setup-relate" / "action.yml"]
     uses = [u for f in files for u in re.findall(r"uses:\s*(\S+)", f.read_text()) if not u.startswith("./")]
     assert uses and all(re.fullmatch(r"[\w.-]+/[\w./-]+@[0-9a-f]{40}", u) for u in uses), uses
+

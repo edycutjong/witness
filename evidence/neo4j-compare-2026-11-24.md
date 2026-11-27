@@ -4,7 +4,7 @@ Raw: `neo4j-compare-2026-11-24.json` (3 runs × 1,000 trials, per-run summaries,
 (per-trial ms + whether the answer changed, run 1). Reproduce: `uv run --with neo4j python bench/neo4j_compare.py`
 (needs the local Neo4j container; the graph in it is `data/air-routes.cypher`).
 
-_Correction 2026-11-24 (a2a arch r1): the Relate column first said "`:memory:` copy". The bench ran Relate on a file-backed
+_Correction 2026-11-24 (arch review r1): the Relate column first said "`:memory:` copy". The bench ran Relate on a file-backed
 scratch copy in a temp dir (`Scratch.open_copy`, the reducer's own path). The label is fixed; no number changed._
 
 **Loop, identical on both sides:** begin → delete one relationship → run the headline query (`queries/two-hub.cypher`,

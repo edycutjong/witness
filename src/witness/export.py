@@ -112,7 +112,7 @@ def validate_witness_script(script: str) -> None:
 
     `check` rebuilds W from the `.cypher` beside a `.rl`, so a hand-edited script (LOAD CSV, CALL, MATCH, a second
     statement, a parameter, a function other than a temporal/point constructor) is refused before it runs
-    (a2a arch r1)."""
+    (arch review r1)."""
     from .guard import Refused, _split_args, tokenize
 
     toks = tokenize(script)
@@ -128,7 +128,7 @@ def validate_witness_script(script: str) -> None:
         if t.text == ";" and k != len(toks) - 1:
             raise Refused("a witness .cypher must be one CREATE statement", "witness")
         if k > 0 and t.kind == "ident" and nxt == "(":
-            # Every call, wherever it sits: a map value follows ":" ({p: rand()} slipped past the label skip, a2a r2).
+            # Every call, wherever it sits: a map value follows ":" ({p: rand()} slipped past the label skip, review r2).
             # Only the constructors cypher_script() writes, un-namespaced, with literal arguments.
             if prev == "." or t.quoted or t.text not in _SCRIPT_CALLS:
                 raise Refused(f"{t.name}() in a witness .cypher (only temporal/point constructors)", "witness")

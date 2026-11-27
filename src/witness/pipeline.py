@@ -105,7 +105,7 @@ OUT_SUFFIXES = (".rl", ".cypher", ".manifest.json", ".html", ".trace.json")
 
 def _refuse_aliased_outputs(req: Request, source: Path) -> None:
     """No output may land on the source store: write_rl() unlinks its target first, and the source SHA-256 is only
-    compared after the export (`why -f g.cypher --store g.rl --out .` would otherwise replace g.rl; a2a arch r1)."""
+    compared after the export (`why -f g.cypher --store g.rl --out .` would otherwise replace g.rl; arch review r1)."""
     name = req.name
     if not name or name in (".", "..") or "/" in name or "\\" in name or bad_name(name) or "\x00" in name:
         raise Refused(f"the output name must be a plain file stem, got {name!r}", "out")
@@ -119,7 +119,7 @@ def _refuse_aliased_outputs(req: Request, source: Path) -> None:
         if o.resolve() == src or (o.exists() and os.path.samefile(o, src)):
             raise Refused(f"{o} would overwrite the source store; choose another --out or --name", "out")
     # ... nor on each other: `--name ledger --out out` made the witness out/ledger.rl, the ledger's own file, and a
-    # symlinked x.html -> x.rl would overwrite the checked witness after the check (a2a arch r2)
+    # symlinked x.html -> x.rl would overwrite the checked witness after the check (arch review r2)
     seen: dict[Path, Path] = {}
     for o in outs:
         r = Path(os.path.normcase(str(o.resolve())).casefold())  # macOS/Windows: Out/W.RL is out/w.rl

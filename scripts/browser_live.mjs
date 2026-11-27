@@ -88,7 +88,7 @@ const report = {
   write: { refused: /^REFUSED/i.test(write.meta), meta: write.meta },
   stop: { ms: stop.ms, stopped: /^STOPPED/i.test(stop.meta), meta: stop.meta, next_run: after.meta },
   engine_case: engineCase,
-  third_party_requests: requests.filter((u) => !u.startsWith(origin) && !u.startsWith("data:") && !/fonts\.(googleapis|gstatic)\.com|api\.github\.com/.test(u)),
+  third_party_requests: requests.filter((u) => !u.startsWith(origin) && !u.startsWith("data:") && !/^https:\/\/api\.github\.com\//.test(u)),
   console_errors: consoleErrors,
   failed_responses: failed,
 };

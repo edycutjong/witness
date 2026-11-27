@@ -249,6 +249,7 @@ is installed and requires the committed evidence to match the fresh run. `script
 in headless Chrome (puppeteer is not a dependency of this repository) and records what it showed: in the committed run,
 all 22 pulls live and the same as the recording, the four example queries answered (on the witness with the last tag
 pulled), a write refused, a runaway query stopped after 4 s and the next one answered, and both engine releases live with
-their recorded rows; no engine worker before the visitor reaches the exhibit; no request to a third party other than the
+their recorded rows; no engine worker at page load (the strip says ready; the engine starts once the visitor is near the
+exhibit and has scrolled, tapped or typed, or pulls a tag or runs a query); no request to a third party other than the
 version chip's call to GitHub's releases API, and no console error. The run records the SHA-256 of the served page and
 of `site/relate/live.js` and `worker.js`; the site build refuses a browser run older than the live steps it ships.

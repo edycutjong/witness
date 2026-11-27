@@ -376,6 +376,8 @@ def landing_page() -> str:
         "SOURCE_FOOT": f'<a href="{REPO}">source</a>' if REPO_PUBLIC else "source opens at submission",
         "DATA": json.dumps({**sp.PAGE_DATA, "live": LIVE}, separators=(",", ":")).replace("</", "<\\/"),
         "PIN": LIVE_PIN,
+        "N_ROUTES": sum(1 for t in sp.pulls["tags"] if ":HAS_ROUTE]" in t["rel"]),
+        "N_CC": sum(1 for t in sp.pulls["tags"] if ":IN_COUNTRY]" in t["rel"]),
         "ASK_Q": html.escape(_Q.split("\n", 1)[1].rstrip("\n")),
         "ASK_P": html.escape(json.dumps(sp.pulls["params"]), quote=True),
         "FIX": LIVE_FIX_V,

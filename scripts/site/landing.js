@@ -150,7 +150,7 @@
         var m = ev.data || {}, p = self.wait[m.id];
         if (!p) return;
         delete self.wait[m.id]; clearTimeout(p.t);
-        if (m.ok) p.res(m.value); else { p.rej(new Error(m.trap ? "WebAssembly trap: " + m.error : m.error)); if (m.trap) self.stop("the engine stopped (a WebAssembly trap); it restarts on the next run"); }
+        if (m.ok) p.res(m.value); else { p.rej(new Error(m.trap ? "WebAssembly trap: " + m.error : m.error)); if (m.trap) self.stop("the engine stopped (a WebAssembly trap); it restarts on the next run", m.id); }
       };
       self.w.onerror = function (e) { if (e && e.preventDefault) e.preventDefault(); self.stop((e && e.message) || "the engine worker did not load"); };
       self.call("boot", [self.v], 30000).then(function (i) { self.info = i; res(i); }, rej);
@@ -163,7 +163,7 @@
       if (!CAN || self.fails >= 2) self.dead = why; // one retry, then the recorded run for good
     });
     if (self.onstart) self.onstart();
-    b.then(function (i) { if (self.onready) self.onready(i); }, function (e) { if (self.onfail) self.onfail(e); });
+    b.then(function (i) { self.fails = 0; if (self.onready) self.onready(i); }, function (e) { if (self.onfail) self.onfail(e); });
     return b;
   };
   Engine.prototype.call = function (op, args, ms) {
@@ -197,7 +197,7 @@
   function meter() {
     if (!stM) return;
     var lv = Object.keys(live).length, ls = Object.keys(liveSame).length;
-    stM.innerHTML = lastMs === null || st.getAttribute("data-state") !== "live" ? "" : "last pull: delete + query <b>" + lastMs.toFixed(1) + " ms</b> · " + ls + " of " + lv + " live pulls = the recording";
+    stM.innerHTML = lastMs === null || st.getAttribute("data-state") !== "live" ? "" : "last pull <b>" + lastMs.toFixed(1) + "&nbsp;ms</b> (delete + query)<br>" + ls + " of " + lv + " live " + (lv === 1 ? "pull" : "pulls") + " = the recording";
   }
   var CLONE = "On a clone, <code>relate query --database witnesses/two-hub.rl --read-only</code> runs the same queries.";
   A.onstop = function (why) { status("off", "Engine stopped", esc(why) + ". Relate restarts on the next pull or query."); };
@@ -253,6 +253,7 @@
     $$(".pulled", ex).forEach(function (x) { x.classList.remove("pulled"); });
     $$(".out", ex).forEach(function (x) { x.classList.remove("out"); });
     $$(".pull").forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+    $$(".tg[role]", ex).forEach(function (g) { g.setAttribute("aria-pressed", "false"); });
   }
   function pull(n, keep) {
     var t = byN[n]; if (!t) return;
@@ -270,8 +271,9 @@
     mark.textContent = "Changed"; mark.classList.remove("flip"); void mark.offsetWidth; mark.classList.add("flip");
     var recorded = "Exhibit " + n + " pulled: <b>" + esc(t.rel) + "</b>. " + D.base.length + " rows → " + t.rows.length + " · " + esc(t.fx) + ". ";
     var b = $('.pull[data-n="' + n + '"]'); if (b) { b.setAttribute("aria-pressed", "true"); b.classList.add("done"); }
-    if (A.dead) { proof.innerHTML = '<span class="pk rec">Recorded</span> ' + recorded + "Relate transaction, rolled back, " + t.ms.toFixed(2) + " ms."; showPar("rec"); bar(n, { rows: t.rows.length, rec: true }); tick(n); return; }
-    proof.innerHTML = '<span class="pk run">Running</span> ' + recorded + "Relate " + esc(LV.pin) + " in this tab is rebuilding the witness without it…";
+    var tg = $('.tg[role][data-n="' + n + '"]', ex); if (tg) tg.setAttribute("aria-pressed", "true");
+    if (A.dead) { proof.innerHTML = '<span class="pk rec">Recorded</span> ' + recorded + "Relate transaction, rolled back, " + t.ms.toFixed(2) + " ms."; showPar("rec"); bar(n, { rows: t.rows.length, rec: true }); if (!(allT && allT.length)) say("Exhibit " + n + " pulled, recorded run: " + D.base.length + " rows to " + t.rows.length + "."); tick(n); return; }
+    proof.innerHTML = '<span class="pk run">Running</span> ' + recorded + "Relate " + esc(LV.pin) + " in this tab is rebuilding the witness, then deleting that relationship…";
     bar(n, null);
     var go = function () { return warm().then(function () { return A.call("pull", [LV.script, LV.query, LV.params, t.rel], 5000); }); };
     go().catch(function (e) { if (e && e.collateral && my === pg) return go(); throw e; }).then(function (r) {
@@ -284,7 +286,7 @@
         $$(".out", ex).forEach(function (x) { x.classList.remove("out"); });
         D.base.forEach(function (row) { if (!r.rows.some(function (q) { return q.airport === row.airport; })) { var nd = $('.nd[data-c="' + row.airport + '"]', ex); if (nd) nd.classList.add("out"); } });
       }
-      proof.innerHTML = '<span class="pk live">Live</span> Exhibit ' + n + " pulled: <b>" + esc(t.rel) + "</b>. Relate " + esc(A.info ? A.info.reported : LV.pin) + " rebuilt the witness (" + r.build_ms.toFixed(1) + " ms), deleted it and re-ran the query in " + r.ms.toFixed(1) + " ms: " + D.base.length + " rows → " + r.rows.length + (ok ? " · " + esc(t.fx) + ". <b>Same rows as the recorded run.</b>" : '. <b class="bad">Not the recorded run</b> (' + t.rows.length + " rows there).");
+      proof.innerHTML = '<span class="pk live">Live</span> Exhibit ' + n + " pulled: <b>" + esc(t.rel) + "</b>. Relate " + esc(A.info ? A.info.reported : LV.pin) + " rebuilt the witness (" + r.build_ms.toFixed(1) + " ms), deleted that relationship and re-ran the query in " + r.ms.toFixed(1) + " ms: " + D.base.length + " rows → " + r.rows.length + (ok ? " · " + esc(t.fx) + ". <b>Same rows as the recorded run.</b>" : '. <b class="bad">Not the recorded run</b> (' + t.rows.length + " rows there).");
       showPar(ok ? "same" : "diff");
       bar(n, { rows: r.rows.length, ok: ok });
       if (!(allT && allT.length)) say("Exhibit " + n + " pulled, live: " + D.base.length + " rows to " + r.rows.length + (ok ? ", same as the recording." : ", not the recording."));
@@ -292,8 +294,9 @@
     }, function (e) {
       tick(n); // the recorded run says this deletion changes the answer
       if (my !== pg) return;
-      proof.innerHTML = '<span class="pk rec">Recorded</span> ' + recorded + "Relate transaction, rolled back, " + t.ms.toFixed(2) + " ms. (Live run unavailable: " + why(e, A)[1] + ")";
+      proof.innerHTML = '<span class="pk rec">Recorded</span> ' + recorded + "Relate transaction, rolled back, " + t.ms.toFixed(2) + " ms. (Live run unavailable: " + why(e, A)[1].replace(" " + CLONE, "") + ")";
       showPar("rec"); bar(n, { rows: t.rows.length, rec: true });
+      if (!(allT && allT.length)) say("Exhibit " + n + " pulled, recorded run: " + D.base.length + " rows to " + t.rows.length + ".");
     }).catch(function () {});
   }
   var exBar = document.getElementById("ex-bar"), exBarT = document.getElementById("ex-bar-t");
@@ -313,7 +316,7 @@
     meter();
   }
   if (ex && CAN) {
-    status("ready", "Relate " + esc(LV.pin) + " · ready to run in this tab", "Compiled to WebAssembly and served from this site; it starts when you reach this exhibit or pull a tag.");
+    status("ready", "Relate " + esc(LV.pin) + " · ready to run in this tab", "Compiled to WebAssembly and served from this site; it starts when you reach this exhibit, pull a tag or run a query.");
     // start the engine once a visitor is near the exhibit AND has scrolled, tapped or typed: a page load alone (or a
     // crawler resizing the viewport) never fetches it; a pull or the query box starts it at once
     var near = false, acted = false, go = function () { if (near && acted) warm().catch(function () {}); };
@@ -364,7 +367,7 @@
     var el = document.getElementById("ask-on"), bk = document.getElementById("ask-back"); if (!el) return;
     var t = cur && byN[cur];
     el.innerHTML = t ? "Runs on: the witness with exhibit " + t.n + " pulled, " + (D.tags.length - 1) + " relationships: <code>" + esc(t.rel) + "</code> deleted." : "Runs on: the witness, " + D.tags.length + " relationships.";
-    if (bk) { var had = document.activeElement === bk; bk.hidden = !t; if (had && !t && askRun) askRun.focus(); }
+    if (bk) { var had = document.activeElement === bk; bk.hidden = !t; if (had && !t && askRun) (askRun.disabled ? askQ : askRun).focus(); }
     if (askTbl && askTbl.innerHTML && !askTbl.classList.contains("stale")) {
       askTbl.classList.add("stale");
       askMeta.insertAdjacentHTML("afterbegin", '<b class="stl">The graph above changed since this result: run it again.</b> ');

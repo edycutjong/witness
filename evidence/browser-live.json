@@ -1,9 +1,9 @@
 {
   "schema": "witness.browser-live/v1",
   "what": "the landing in headless Chrome: what the page showed for each live pull, the query box, a write, a runaway query and the engine case",
-  "url": "http://127.0.0.1:8797/",
+  "url": "https://witness.edycu.dev/",
   "run": {
-    "utc": "2026-11-27T22:22:54Z",
+    "utc": "2026-11-27T22:28:56Z",
     "browser": "Chrome/158.0.8127.38",
     "node": "v22.22.0",
     "machine": "Darwin arm64"
@@ -11,7 +11,7 @@
   "wasm_requests_at_load": 0,
   "engine": {
     "state": "live",
-    "plate": "LIVE · RELATE 1.0.1 IN THIS TAB Compiled to WebAssembly and served from this site; no server. Started in 71 ms; the version is the engine's own report."
+    "plate": "LIVE · RELATE 1.0.1 IN THIS TAB Compiled to WebAssembly and served from this site; no server. Started in 978 ms; the version is the engine's own report."
   },
   "pulls": {
     "of": 22,
@@ -23,13 +23,13 @@
         "n": 1,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 1 pulled: (ACA)-[:HAS_ROUTE]->(MEX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 14.1 ms: 4 rows → 3 · TLC drops out. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 1 pulled: (ACA)-[:HAS_ROUTE]->(MEX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 13.8 ms: 4 rows → 3 · TLC drops out. Same rows as the recorded run."
       },
       {
         "n": 2,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 2 pulled: (ACA)-[:IN_COUNTRY]->(MX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.6 ms: 4 rows → 4 · TLC loses MX. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 2 pulled: (ACA)-[:IN_COUNTRY]->(MX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.5 ms: 4 rows → 4 · TLC loses MX. Same rows as the recorded run."
       },
       {
         "n": 3,
@@ -41,13 +41,13 @@
         "n": 4,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 4 pulled: (DFW)-[:IN_COUNTRY]->(US). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.9 ms: 4 rows → 4 · PBC and QRO lose US. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 4 pulled: (DFW)-[:IN_COUNTRY]->(US). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.5 ms: 4 rows → 4 · PBC and QRO lose US. Same rows as the recorded run."
       },
       {
         "n": 5,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 5 pulled: (LAS)-[:HAS_ROUTE]->(MEX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.4 ms: 4 rows → 3 · TLC drops out. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 5 pulled: (LAS)-[:HAS_ROUTE]->(MEX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.6 ms: 4 rows → 3 · TLC drops out. Same rows as the recorded run."
       },
       {
         "n": 6,
@@ -71,25 +71,25 @@
         "n": 9,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 9 pulled: (PBC)-[:HAS_ROUTE]->(DFW). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.4 ms: 4 rows → 3 · PBC drops out. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 9 pulled: (PBC)-[:HAS_ROUTE]->(DFW). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.6 ms: 4 rows → 3 · PBC drops out. Same rows as the recorded run."
       },
       {
         "n": 10,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 10 pulled: (PBC)-[:HAS_ROUTE]->(TIJ). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.4 ms: 4 rows → 3 · PBC drops out. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 10 pulled: (PBC)-[:HAS_ROUTE]->(TIJ). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.2 ms: 4 rows → 3 · PBC drops out. Same rows as the recorded run."
       },
       {
         "n": 11,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 11 pulled: (PBC)-[:IN_COUNTRY]->(MX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.2 ms: 4 rows → 3 · PBC drops out. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 11 pulled: (PBC)-[:IN_COUNTRY]->(MX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.3 ms: 4 rows → 3 · PBC drops out. Same rows as the recorded run."
       },
       {
         "n": 12,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 12 pulled: (QRO)-[:HAS_ROUTE]->(DFW). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.4 ms: 4 rows → 3 · QRO drops out. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 12 pulled: (QRO)-[:HAS_ROUTE]->(DFW). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.3 ms: 4 rows → 3 · QRO drops out. Same rows as the recorded run."
       },
       {
         "n": 13,
@@ -107,31 +107,31 @@
         "n": 15,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 15 pulled: (TIJ)-[:HAS_ROUTE]->(MEX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.1 ms: 4 rows → 1 · PBC, QRO and UPN drop out. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 15 pulled: (TIJ)-[:HAS_ROUTE]->(MEX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.2 ms: 4 rows → 1 · PBC, QRO and UPN drop out. Same rows as the recorded run."
       },
       {
         "n": 16,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 16 pulled: (TIJ)-[:IN_COUNTRY]->(MX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.2 ms: 4 rows → 4 · PBC, QRO and UPN lose MX. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 16 pulled: (TIJ)-[:IN_COUNTRY]->(MX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.3 ms: 4 rows → 4 · PBC, QRO and UPN lose MX. Same rows as the recorded run."
       },
       {
         "n": 17,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 17 pulled: (TLC)-[:HAS_ROUTE]->(ACA). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.0 ms: 4 rows → 3 · TLC drops out. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 17 pulled: (TLC)-[:HAS_ROUTE]->(ACA). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.1 ms: 4 rows → 3 · TLC drops out. Same rows as the recorded run."
       },
       {
         "n": 18,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 18 pulled: (TLC)-[:HAS_ROUTE]->(LAS). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.1 ms: 4 rows → 3 · TLC drops out. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 18 pulled: (TLC)-[:HAS_ROUTE]->(LAS). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.0 ms: 4 rows → 3 · TLC drops out. Same rows as the recorded run."
       },
       {
         "n": 19,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 19 pulled: (TLC)-[:IN_COUNTRY]->(MX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.1 ms: 4 rows → 3 · TLC drops out. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 19 pulled: (TLC)-[:IN_COUNTRY]->(MX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.2 ms: 4 rows → 3 · TLC drops out. Same rows as the recorded run."
       },
       {
         "n": 20,
@@ -149,7 +149,7 @@
         "n": 22,
         "live": true,
         "same_rows": true,
-        "proof": "LIVE Exhibit 22 pulled: (UPN)-[:IN_COUNTRY]->(MX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.0 ms: 4 rows → 3 · UPN drops out. Same rows as the recorded run."
+        "proof": "LIVE Exhibit 22 pulled: (UPN)-[:IN_COUNTRY]->(MX). Relate 1.0.1 rebuilt the witness without it and re-ran the query in 1.1 ms: 4 rows → 3 · UPN drops out. Same rows as the recorded run."
       }
     ]
   },
@@ -161,17 +161,17 @@
     },
     {
       "example": "Two hubs each",
-      "meta": "LIVE 3 rows from the witness with exhibit 22 pulled (21 relationships) in 1.0 ms.",
+      "meta": "LIVE 3 rows from the witness with exhibit 22 pulled (21 relationships) in 0.9 ms.",
       "rows": 3
     },
     {
       "example": "Every relationship",
-      "meta": "LIVE 21 rows from the witness with exhibit 22 pulled (21 relationships) in 1.2 ms.",
+      "meta": "LIVE 21 rows from the witness with exhibit 22 pulled (21 relationships) in 1.3 ms.",
       "rows": 21
     },
     {
       "example": "EXPLAIN it",
-      "meta": "LIVE The plan Relate would run on the witness with exhibit 22 pulled (21 relationships) (relate.plan/v1), 3.8 ms. Witness reads these plans to drop relationship types a query cannot reach.",
+      "meta": "LIVE The plan Relate would run on the witness with exhibit 22 pulled (21 relationships) (relate.plan/v1), 3.7 ms. Witness reads these plans to drop relationship types a query cannot reach.",
       "rows": 0
     }
   ],

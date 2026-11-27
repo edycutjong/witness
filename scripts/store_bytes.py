@@ -29,6 +29,7 @@ STORES = [
     "witnesses/two-hub.rl",
     "witnesses/direction-bug.rl",
     "witnesses/wrong-answer.rl",
+    "witnesses/exists-count.rl",
     "fixtures/mex-foreign.rl",
     "witness.rl",
 ]

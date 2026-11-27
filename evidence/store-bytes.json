@@ -22,6 +22,11 @@
    "sha256": "74961d8df2ed8cb404b07edcf0e0142d44122a60ff372183ff765e6fbae1a8fc"
   },
   {
+   "path": "witnesses/exists-count.rl",
+   "bytes": 36864,
+   "sha256": "98d9f06ef312beeee7fb7a4abee7bec2fc9aee425ec58a4480ffa6061e330290"
+  },
+  {
    "path": "fixtures/mex-foreign.rl",
    "bytes": 90112,
    "sha256": "544a9a747d21c1437508861ed88cec82cfd82e718260b6d70f17d648d8a8fca0"
@@ -42,10 +47,10 @@
   "verified": true,
   "cypher_sha256": "6df99e7d6a7a4b35925ec25792c58ab93e3d5191d2a69db396fba8e9bdd9b015",
   "cypher_byte_identical": true,
-  "rl_sha256": "a6024c1eb5e48768ba7d2037678873743e0b73a5db40c01ee63cb9beae7309de",
+  "rl_sha256": "1e85dbca3c19753ea63bfc4bd68b54bd957004299a22f36bdd2aaf03e320d69f",
   "rl_bytes": 45056,
   "rl_byte_identical": false,
-  "rl_bytes_that_differ": 336,
+  "rl_bytes_that_differ": 319,
   "rl_same_graph": true
  },
  "witness": "0.1.0",

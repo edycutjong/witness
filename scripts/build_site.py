@@ -561,6 +561,38 @@ VER_AGREE = [v["relate_db"] for v in _vers if v["the_two_forms_agree"]]
 assert VER_DISAGREE[0] == man["versions"]["relate_db"] and VER_AGREE == ["1.3.0"], (VER_DISAGREE, VER_AGREE)
 assert all(v["relationships"] == EC_RELS and v["count-two-match"] and not (v["exists-two-match"] and v["relate_db"] in VER_DISAGREE) for v in _vers)
 _and = lambda xs: ", ".join(xs[:-1]) + " and " + xs[-1] if len(xs) > 1 else xs[0]  # noqa: E731
+# Relate's release notes as regression fixtures (--other-engine against the release that fixed each one)
+_rn = json.loads((ROOT / "evidence" / "release-notes-fixes.json").read_text())
+RN_ENTRIES = _rn["entries"]
+RN_CHANGE = sum(1 for f in _rn["fixes"] if f["status"].startswith("reproduced"))
+RN_SHRUNK = sum(1 for f in _rn["fixes"] if f["status"].startswith("reproduced, shrunk"))
+_rg = [json.loads(p.read_text()) for p in sorted((ROOT / "witnesses" / "regress").glob("*.manifest.json"))]
+assert _rg and all(m["verified"] and m["predicate"].get("other_engine_spec") for m in _rg)
+assert all(m["source"]["relationships"] == src_rels for m in _rg)
+RG_N = len(_rg)
+RG_SIZES = sorted((m["witness"]["relationships"], m["witness"]["isolated_nodes"]) for m in _rg)
+RG_MAX_RELS = max(r for r, _ in RG_SIZES)
+_rv = [json.loads(ln) for ln in (ROOT / "evidence" / "regression-releases.jsonl").read_text().splitlines()]
+RV_RELEASES = sorted({r["relate_db"] for r in _rv}, key=lambda v: tuple(map(int, v.split("."))))
+for _m in _rg:  # each witness changes its answer exactly once, at the release it was reduced against
+    _fix = _m["predicate"]["other_engine_spec"].split("==")[1]
+    _digs = [next(r["digest"] for r in _rv if r["witness"].endswith("/" + _m["name"]) and r["relate_db"] == v) for v in RV_RELEASES]
+    _flips = [RV_RELEASES[i] for i in range(1, len(_digs)) if _digs[i] != _digs[i - 1]]
+    assert _flips == [_fix], (_m["name"], _flips, _fix)
+# the differential run (agent-written queries, relate-db 1.0.1 vs 1.3.0; Neo4j when it was reachable)
+_df = json.loads((ROOT / "evidence" / "differential.json").read_text())
+DF_Q, DF_T = _df["queries"], _df["tally"]["relate_1_0_1_vs_1_3_0"]
+DF_SAME, DF_DIFF, DF_BOTH_ERR = DF_T.get("same", 0), DF_T.get("differ", 0), DF_T.get("both-error", 0)
+DF_ONLY_130 = DF_T.get("error:first", 0)
+DF_NEO = "relate_1_0_1_vs_neo4j" in _df["tally"]
+assert DF_SAME + DF_DIFF + DF_BOTH_ERR + DF_ONLY_130 + DF_T.get("error:second", 0) == DF_Q
+DF_RED = [r for r in _df.get("reductions", []) if r.get("verified")]
+# a slowdown still present on 1.3.0, measured on small graphs (ANY SHORTEST + an inline relationship predicate)
+_as = [json.loads(ln) for ln in (ROOT / "evidence" / "any-shortest-inline.jsonl").read_text().splitlines()]
+_as13 = [r for r in _as if r["relate_db"] == "1.3.0"]
+AS_LAST_OK = max((r for r in _as13 if r["form"] == "inline" and "ms" in r), key=lambda r: r["nodes"])
+AS_HANG = min((r for r in _as13 if r["form"] == "inline" and "ms" not in r), key=lambda r: r["nodes"])
+AS_PLAIN_MAX = max(r["ms"] for r in _as13 if r["form"] == "plain")
 # every relationship of the full graph deleted alone: supports (drop or alter a row) and guards (add one)
 sens = json.loads((ROOT / "evidence" / "full-graph-sensitivity.json").read_text())
 assert sens["relationships_tried"] == src_rels and sens["supports"] + sens["guards"] == sens["change_the_answer"]
@@ -633,7 +665,7 @@ assert (
 )
 _demo_md = (ROOT / "DEMO.md").read_text()
 DEMO_SECTIONS = re.findall(r"^## \d+\. (.+)$", _demo_md, re.M)
-assert len(DEMO_SECTIONS) == 12 and [s.split(":")[0].split(",")[0] for s in DEMO_SECTIONS] == [
+assert len(DEMO_SECTIONS) == 14 and [s.split(":")[0].split(",")[0] for s in DEMO_SECTIONS] == [
     "Headline",
     "Determinism",
     "Relate vs Neo4j",
@@ -646,6 +678,8 @@ assert len(DEMO_SECTIONS) == 12 and [s.split(":")[0].split(",")[0] for s in DEMO
     "An engine disagreement",
     "Other query shapes",
     "Re-proved on a second engine",
+    "One query on two engines",
+    "The differential run",
 ], DEMO_SECTIONS
 _e2e = re.search(r"\(([\d.]+) s end to end", sp.demo)
 assert _e2e
@@ -744,6 +778,31 @@ RECEIPTS = [
             ("evidence/exists-count-run.txt", "the run"),
             ("evidence/relate-versions.jsonl", "the releases"),
         ],
+    ),
+    (
+        f"{RN_ENTRIES} → {RN_CHANGE} → {RN_SHRUNK}",
+        _nb.format(RN_ENTRIES) + _to.format("→") + _nb.format(RN_CHANGE) + _to.format("→") + f"<em>{RN_SHRUNK}</em>",
+        "Relate's own release notes, as regression fixtures.",
+        f"Every read-path fix entry from v1.0.2 to v1.3.0 ({RN_ENTRIES}) was tried on air-routes against the pinned release: {RN_CHANGE} change an answer, and {RN_SHRUNK} of those fixes shrink with `--other-engine` against the release that fixed them, to {RG_N} witnesses of at most {RG_MAX_RELS} relationships. Rebuilt on {_and(RV_RELEASES)}, each changes its answer exactly at the release its notes name.",
+        [
+            ("evidence/release-notes-fixes.json", "all the entries"),
+            ("evidence/regress-runs.txt", "the runs"),
+            ("evidence/regression-releases.jsonl", "the releases"),
+        ],
+    ),
+    (
+        f"{DF_Q} queries",
+        f"<em>{DF_Q}</em>" + _to.format("queries"),
+        "A differential run of agent-written queries.",
+        f"{DF_Q} read queries written by an AI agent from the schema alone, on relate-db 1.0.1 and 1.3.0: {DF_SAME} agree, {DF_BOTH_ERR} are refused by both, {DF_ONLY_130} answer only on 1.3.0, {DF_DIFF} disagrees on the data and shrinks to {DF_RED[0]['nodes']} node." + ("" if DF_NEO else " The Neo4j leg is not in the committed run."),
+        [("evidence/differential.json", ""), ("queries/differential.jsonl", "the queries")],
+    ),
+    (
+        f"{AS_LAST_OK['ms']:,} ms",
+        f"<em>{AS_LAST_OK['ms']:,}</em>" + _to.format("ms"),
+        "A slowdown still present on Relate 1.3.0, found by that run.",
+        f"`ANY SHORTEST` over `->+` with an inline relationship predicate that every relationship satisfies: {AS_LAST_OK['ms']:,} ms on {AS_LAST_OK['rels']} relationships, no answer within 8 s on {AS_HANG['nodes'] * 2}; without the predicate, at most {AS_PLAIN_MAX} ms. The same on 1.0.1.",
+        [("evidence/any-shortest-inline.jsonl", ""), ("bench/any_shortest_inline.py", "re-records it")],
     ),
     (
         f"{fmt(src_rels)} → {DB_RELS}",
@@ -905,6 +964,11 @@ CRITERIA = [
                 "A real engine disagreement, shrunk to a repro.",
                 f"On Relate {man['versions']['relate_db']} two ways of writing one condition return {EC_ROWS} and 0 rows on the air-routes graph (the v{VER_AGREE[0]} release notes list the fix). Witness hands back the {EC_RELS} relationships that still show it, and that script tells the releases apart: {_and(VER_DISAGREE)} disagree, {VER_AGREE[0]} agrees",
                 ["witnesses/exists-count.manifest.json", "evidence/relate-versions.jsonl"],
+            ),
+            (
+                "For the people who maintain the engine, and anyone moving a query between releases.",
+                f"`--other-engine` shrinks what makes two engines answer one query differently. Relate's own release notes became {RG_N} regression fixtures of at most {RG_MAX_RELS} relationships, each changing its answer exactly at the release that fixed it, and a differential run of {DF_Q} agent-written queries found a slowdown still present on 1.3.0",
+                ["evidence/release-notes-fixes.json", "evidence/regression-releases.jsonl", "evidence/differential.json"],
             ),
             (
                 "An agent attached the evidence itself.",

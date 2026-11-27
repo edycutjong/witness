@@ -16,7 +16,7 @@
   [![Release](https://img.shields.io/github/v/release/edycutjong/witness?sort=semver)](https://github.com/edycutjong/witness/releases/latest)
   ![Python](https://img.shields.io/badge/Python_3.11_|_3.12-3776AB?style=flat&logo=python&logoColor=white)
   ![Relate](https://img.shields.io/badge/Relate_1.0.1-1F1A14?style=flat)
-  ![Tests](https://img.shields.io/badge/tests-525_passed-2ea043?style=flat)
+  ![Tests](https://img.shields.io/badge/tests-553_passed-2ea043?style=flat)
   [![License](https://img.shields.io/badge/License-Apache_2.0-yellow)](LICENSE)
 
 </div>
@@ -144,6 +144,52 @@ The two-relationship script then separates the releases: the two forms disagree 
 agree on 1.3.0 (`bench/relate_versions.py`, `evidence/relate-versions.jsonl`). The fix is Relate's; the two-relationship
 repro, and the answer to "which release changed this", is what Witness adds.
 
+**One query, two engines (`--other-engine`).** The same disagreement, without writing the query twice: `witness why -f
+queries/exists-two-match.cypher --param country=MX --other-engine relate-db==1.3.0` runs the query on the pinned 1.0.1 in
+process and on relate-db 1.3.0 in a worker (`uv run --with relate-db==1.3.0`), deletes the same relationships on both
+sides in every trial, and keeps what makes the two releases answer differently: 57,645 relationships to the same 2, in 49
+trials. The other engine can be any relate-db release (`relate-db==X.Y.Z`, or `python:/path/to/python` for an interpreter
+that has one) or Neo4j over Bolt (`neo4j`; an empty database, the graph is loaded once and removed afterwards).
+Deletions cross to the other engine as content keys (labels, type, properties, endpoints), never as element ids.
+`witness check W.rl --other-engine relate-db==1.2.0` re-proves a witness against another release: on 1.2.0 the
+predicate no longer holds, because 1.2.0 still answers like 1.0.1.
+
+**Relate's changelog, as regression fixtures.** Every read-path fix entry in Relate's release notes from v1.0.2 to v1.3.0
+(72 entries, `evidence/release-notes-fixes.json`, each with its status) was tried on air-routes against 1.0.1. Seven change
+an answer on this graph; the rest are spellings 1.0.1 refuses (23), new rejections (10), or not about answers on this data.
+Five of the seven fixes shrink with `--other-engine` against the release that fixed them (`queries/regress/`,
+`witnesses/regress/`, `evidence/regress-runs.txt`), each verified "N of N end the disagreement":
+
+| Fix (release) | On 1.0.1, full graph | Witness |
+|---|---|---|
+| a WHERE over the path of a keyword shortest selector post-filters the selected paths (v1.0.2) | 548 airports | 3 relationships: MZT→LAX, MZT→IAH, LAX→IAH |
+| a parenthesized projection item is its plain form (v1.2.0) | one column, `null` | 1 node |
+| a node variable repeated in a cycle checks every occurrence (v1.3.0) | 122 cycles | 3 relationships |
+| a variable an `OPTIONAL MATCH` bound to null matches nothing later (v1.3.0) | 1,699 paths | 2 relationships |
+| a subquery reusing a name a `DISTINCT` dropped binds fresh (v1.3.0) | 18 regions | 2 nodes |
+| `percentileDisc` returns the input value exactly (v1.3.0) | `1.0`, a float | 1 node |
+
+Each witness, rebuilt in `:memory:` on 1.0.1, 1.0.2, 1.1.0, 1.2.0 and 1.3.0, changes its answer exactly at the release the
+notes name and at no other (`bench/regression_table.py`, `evidence/regression-releases.jsonl`). Two of the seven do not
+shrink, and Witness says why: an `EXISTS { … NEXT … }` whose answer does not depend on the data (refused: the predicate
+holds on the empty graph), and a change that moves the same rows as another fix of the same release. One case of a
+scope fix, a `CALL { }` subquery (60 Mexican airports on 1.0.1, 3,504 on 1.3.0), is refused at the read-only door because
+relate-db 1.0.1 reports `query_type` `'rw'` for it.
+
+**A differential run.** 219 read queries, written by an AI agent from the air-routes schema before any engine compared
+them (`queries/differential.jsonl`; none was changed to make engines agree), on relate-db 1.0.1 and 1.3.0
+(`bench/differential.py`, `evidence/differential.json`): 207 agree, 9 are refused by both, two `SHORTEST` queries answer
+only on 1.3.0 (1.0.1 gives no answer within 20 s), and one disagrees on the data: `percentileDisc` over airport
+altitudes, shrunk to 1 node (`witnesses/differential/`). The same script compares Neo4j over Bolt and shrinks each
+disagreement with `--other-engine neo4j`; that leg is not in the committed run (the local Neo4j was not available).
+
+**Found on the current release.** One differential query gave no answer on 1.3.0 either. Narrowed down: `ANY SHORTEST`
+over `->+` with an inline relationship predicate, even one every relationship satisfies, takes 85.8 ms on a 24-relationship
+graph, 649.9 ms on 32, 5,389.4 ms on 36 and gives no answer within 8 s on 40; without the predicate each answers in under
+1 ms. The same on 1.0.1 (`bench/any_shortest_inline.py`, `evidence/any-shortest-inline.jsonl`). On air-routes the process
+passed 16 GB within 2 s (`evidence/any-shortest-air-routes.txt`). Witness cannot shrink a query that never answers; the
+measurement is the repro.
+
 **A query mistake.** A plausible agent mistake, written for this case: the headline question with the first
 flight matched in either direction (`queries/two-hub-agent.cypher`). On 6 of 232 country and busiest-airport pairs the two queries disagree
 (`bench/disagree_scan.py`, `evidence/disagree-scan.json`). For India and DEL, `witness why --predicate disagree` shrinks
@@ -227,7 +273,8 @@ relate query --database witnesses/two-hub.rl --read-only --param country=MX --pa
 |---|---|
 | `witness demo` | the whole path on the committed graph |
 | `witness why -f Q.cypher [--store G.rl] [--param k=v] [--predicate keep\|differs\|disagree]` | reduce any read-only query's answer, on the committed graph or on your own `.rl` (`--store`: it is byte-copied, never written). Stops at 20,000 trials by default (`--max-trials`, `--max-seconds`; exit 3) |
-| `witness check W.rl` | re-prove a witness from its manifest: "N of N change the answer" (exit 0/1) |
+| `witness why -f Q.cypher --other-engine relate-db==1.3.0\|python:PATH\|neo4j` | shrink what makes two engines answer the same query differently |
+| `witness check W.rl [--other-engine E]` | re-prove a witness from its manifest: "N of N change the answer" (exit 0/1); `--other-engine` re-checks an engine witness against another release |
 | `witness rerun W.rl -f Q.cypher [--param k=v] [--print-cli]` | re-run the query on a witness, read-only, no CLI needed |
 | `witness export <ledger-id\|out-dir\|W.rl> --to DIR` | copy a reduction's files |
 | `witness review [ID] [--accept\|--dispute REASON]` | list unreviewed reductions, or record a verdict |
@@ -327,11 +374,11 @@ rolled-back transaction: 22 of 22, 5 of 5 and 92 of 92, each verdict the same as
 
 ```bash
 make ci                          # ruff, mypy, pytest with the 100% coverage gate, pip-audit, gitleaks
-uv run pytest --cov=witness      # 525 pass against real Relate (2 more need a local Neo4j), 100% line + branch coverage
+uv run pytest --cov=witness      # 553 pass against real Relate (2 more need a local Neo4j), 100% line + branch coverage
 ```
 
 Reproduce every number in this README: [DEMO.md](DEMO.md). Raw evidence and the machine/version of each run:
-`evidence/` (this suite's run: `evidence/pytest-2026-11-27.txt`; CI runs the same suite on every push). The tests use real Relate, not mocks of the graph store. The graph store, the rollback transactions and the queries are never mocked. `relate pull` is stood in for in the fixture-mode tests (it needs a running Neo4j server; the Neo4j side is exercised by `bench/neo4j_compare.py`), and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach a rare branch.
+`evidence/` (this suite's run: `evidence/pytest-2026-11-28.txt`; CI runs the same suite on every push). The tests use real Relate, not mocks of the graph store. The graph store, the rollback transactions and the queries are never mocked. `relate pull` is stood in for in the fixture-mode tests (it needs a running Neo4j server; the Neo4j side is exercised by `bench/neo4j_compare.py`), and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach a rare branch.
 
 GitHub Actions (`.github/workflows/ci.yml`) runs six stages: **Quality** (ruff, mypy, tests with the coverage gate; Python 3.11
 and 3.12 on `main`) and **Security** (gitleaks over the full history, pip-audit) in parallel, then **Build** (wheel, sdist,
@@ -351,8 +398,9 @@ For judges: [JUDGE.md](JUDGE.md), also served at <https://witness.edycu.dev/judg
 ## 🧰 Tools and AI use
 
 - **Product capabilities:** Relate 1.0.1 (embedded engine, `relate` CLI, `relate serve --mcp`).
-- **Third-party tools:** `uv`, pytest, Neo4j 2026.10.2 in Docker (comparison and fixture source only), Vercel (landing hosting).
+- **Third-party tools:** `uv`, pytest, Neo4j 2026.10.2 in Docker (comparison and fixture source only), Vercel (landing hosting). Relate 1.0.2, 1.1.0, 1.2.0 and 1.3.0 (through `uv`) as other engines and for the release tables.
 - **AI use:** built with Claude Code as the coding agent, under the author's direction. The author is responsible for the result.
+  The 219 queries of the differential run were written by an AI agent (Claude) from the graph's schema, before any comparison.
   The demo video's voiceover is an AI voice (ElevenLabs) reading a script drafted by Claude Code under the author's direction; its music and sound are synthesized in code.
 - **Built during the contest period:** first commit 2026-11-15 (`git log --reverse`). No code from before the contest.
 - **Reused material:** the air-routes dataset by Kelvin Lawrence (Apache-2.0, commit `efd3b1a`), modified as stated in `NOTICE`.

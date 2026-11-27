@@ -89,13 +89,13 @@ With a real model in the loop: `evidence/mcp-agent-session.md` records claude-so
 MCP servers enabled) writing its own Cypher and attaching the witness; the exact command, `mcp.json` and prompt are in that file.
 It needs a Claude Code login, so it is a recorded run, not a step of the judge path.
 
-## 6. Tests: 525 pass, 100% coverage
+## 6. Tests: 553 pass, 100% coverage
 
 ```bash
 uv run pytest --cov=witness   # fails below 100% line + branch coverage (pyproject.toml)
 ```
 
-The run is recorded in `evidence/pytest-2026-11-27.txt` (525 passed; the 2 fixture-pull tests need a local Neo4j in Docker and
+The run is recorded in `evidence/pytest-2026-11-28.txt` (553 passed; the 2 fixture-pull tests need a local Neo4j in Docker and
 skip without it). GitHub Actions runs the same suite on every push, on Linux under Python 3.11 and 3.12, with ruff, mypy,
 pip-audit, gitleaks, the wheel build and a throughput floor (`.github/workflows/ci.yml`).
 
@@ -188,3 +188,35 @@ checks that the predicate holds, then deletes every relationship alone in a roll
 with the one the manifest records for Relate (`evidence/neo4j-recheck.json`). The only statement difference is dialect:
 Neo4j has no `coll.sort()`, so the hub countries are ordered before `collect()`. The engine-disagreement witness of section 10
 is not part of this: its claim is about Relate 1.0.1.
+
+## 13. One query on two engines, and Relate's changelog as regression fixtures
+
+```bash
+uv run witness why -f queries/exists-two-match.cypher --param country=MX --other-engine relate-db==1.3.0 \
+  --name exists-engines --out /tmp/w --no-ledger                     # 57,645 -> 2 in 49 trials, "2 of 2 end the disagreement"
+uv run witness check witnesses/regress/cycle-repeated-variable.rl    # 3 of 3, against relate-db 1.3.0 (from the manifest)
+uv run witness check witnesses/regress/cycle-repeated-variable.rl --other-engine relate-db==1.2.0   # NOT verified: 1.2.0 answers like 1.0.1
+for v in 1.0.1 1.0.2 1.1.0 1.2.0 1.3.0; do
+  uv run --no-project --with relate-db==$v python bench/regression_table.py
+done                                                                 # = evidence/regression-releases.jsonl (one row per witness and release)
+```
+
+The six regression witnesses and how each was made: `evidence/regress-runs.txt` (one `witness why --other-engine` per
+query in `queries/regress/`, against the release that fixed it). The triage of all 72 read-path fix entries in the v1.0.2
+to v1.3.0 release notes, with the status of each: `evidence/release-notes-fixes.json`. `uv` fetches each Relate release
+once; the worker opens its own byte copy of the store.
+
+## 14. The differential run, and a slowdown still on Relate 1.3.0
+
+```bash
+uv run --with neo4j python bench/differential.py --reduce           # = evidence/differential.json + differential-answers.jsonl
+for v in 1.0.1 1.3.0; do
+  uv run --no-project --with relate-db==$v python bench/any_shortest_inline.py
+done                                                                 # = evidence/any-shortest-inline.jsonl
+```
+
+`bench/differential.py` runs the 219 queries of `queries/differential.jsonl` on relate-db 1.0.1, relate-db 1.3.0 and,
+when `NEO4J_BOLT` / `NEO4J_USER` / `NEO4J_PASSWORD` point at an empty Neo4j, Neo4j; each query has a 20 s watchdog. The
+committed run has no Neo4j leg (`"neo4j": "not run: ..."` in `evidence/differential.json`). `bench/any_shortest_inline.py`
+runs each size in its own process with an 8 s watchdog, because the slow form does not return on 40 relationships.
+

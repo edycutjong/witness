@@ -77,3 +77,15 @@ def test_empty_graph_predicate_is_refused(tiny_rl, tmp_path):
 def test_empty_answer_is_refused(tiny_rl, tmp_path):
     with pytest.raises(Refused, match="nothing to witness"):
         reduce_request(req(tiny_rl, tmp_path, "MATCH (n:Nope) RETURN n.name AS x"))
+
+
+def test_disagree_holds_when_the_first_query_returns_nothing(tiny_rl, tmp_path):
+    """Two queries disagree just as much when it is the first one that returns no rows: only keep and differs need
+    an answer to hold on to (the order of -f and --other must not decide whether a disagreement can be shrunk)."""
+    none = "MATCH (a:P {name: 'A'})-[:NOPE]->(h) RETURN h.name AS hub"
+    some = "MATCH (a:P {name: 'A'})-[:R]->(h) RETURN h.name AS hub"
+    o = reduce_request(req(tiny_rl, tmp_path, none, predicate="disagree", other=some))
+    assert o.verified and o.answer_rows == [] and o.run["final_counts"] == (2, 1)
+    assert o.check.text.startswith("1 of 1 end the disagreement")
+    with pytest.raises(Refused, match="same answer"):  # both empty: nothing to disagree about
+        reduce_request(req(tiny_rl, tmp_path, none, predicate="disagree", other=none, name="both"))

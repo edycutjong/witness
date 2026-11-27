@@ -589,11 +589,13 @@ DF_BOTH_TIMEOUT = sum(1 for r in _dfa if r["relate_1_0_1_vs_1_3_0"] == "both-err
 DF_BOTH_REFUSED = DF_BOTH_ERR - DF_BOTH_TIMEOUT
 DF_NEO = "relate_1_0_1_vs_neo4j" in _df["tally"]
 assert DF_SAME + DF_DIFF + DF_BOTH_ERR + DF_ONLY_130 + DF_T.get("error:second", 0) == DF_Q
+DF_NEO_NOTE = "" if DF_NEO else "; the Neo4j leg was not run"
 DF_RED = [r for r in _df.get("reductions", []) if r.get("verified")]
 # a slowdown still present on 1.3.0, measured on small graphs (ANY SHORTEST + an inline relationship predicate)
 _as = [json.loads(ln) for ln in (ROOT / "evidence" / "any-shortest-inline.jsonl").read_text().splitlines()]
 _as13 = [r for r in _as if r["relate_db"] == "1.3.0"]
 AS_LAST_OK = max((r for r in _as13 if r["form"] == "inline" and "ms" in r), key=lambda r: r["nodes"])
+AS_OTHER = _and(sorted({r["relate_db"] for r in _as} - {"1.3.0"}))
 AS_HANG = min((r for r in _as13 if r["form"] == "inline" and "ms" not in r), key=lambda r: r["nodes"])
 # every relationship of the full graph deleted alone: supports (drop or alter a row) and guards (add one)
 sens = json.loads((ROOT / "evidence" / "full-graph-sensitivity.json").read_text())
@@ -803,7 +805,7 @@ RECEIPTS = [
         f"{AS_LAST_OK['ms']:,} ms",
         f"<em>{AS_LAST_OK['ms']:,}</em>" + _to.format("ms"),
         "A slowdown still present on Relate 1.3.0, found by that run.",
-        f"`ANY SHORTEST` over `->+` with an inline relationship predicate that every relationship satisfies: {AS_LAST_OK['ms']:,} ms on {AS_LAST_OK['rels']} relationships, no answer within 8 s on {AS_HANG['nodes'] * 2}; without the predicate, under 1 ms. The same on {_and(sorted({r["relate_db"] for r in _as} - {"1.3.0"}))}.",
+        f"`ANY SHORTEST` over `->+` with an inline relationship predicate that every relationship satisfies: {AS_LAST_OK['ms']:,} ms on {AS_LAST_OK['rels']} relationships, no answer within 8 s on {AS_HANG['nodes'] * 2}; without the predicate, under 1 ms. The same on {AS_OTHER}.",
         [("evidence/any-shortest-inline.jsonl", ""), ("bench/any_shortest_inline.py", "re-records it")],
     ),
     (
@@ -969,7 +971,7 @@ CRITERIA = [
             ),
             (
                 "For the people who maintain the engine, and anyone moving a query between releases.",
-                f"`--other-engine` shrinks what makes two engines answer one query differently. Relate's own release notes became {RG_N} regression fixtures of at most {RG_MAX_RELS} relationships, each changing its answer exactly at the release that fixed it, and a differential run of {DF_Q} agent-written queries (Relate 1.0.1 against 1.3.0{"" if DF_NEO else "; the Neo4j leg was not run"}) found a slowdown still present on 1.3.0",
+                f"`--other-engine` shrinks what makes two engines answer one query differently. Relate's own release notes became {RG_N} regression fixtures of at most {RG_MAX_RELS} relationships, each changing its answer exactly at the release that fixed it, and a differential run of {DF_Q} agent-written queries (Relate 1.0.1 against 1.3.0{DF_NEO_NOTE}) found a slowdown still present on 1.3.0",
                 ["evidence/release-notes-fixes.json", "evidence/regression-releases.jsonl", "evidence/differential.json"],
             ),
             (

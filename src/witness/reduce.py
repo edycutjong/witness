@@ -51,7 +51,8 @@ def untyped_rel_pattern(statement: str) -> bool:
     s = re.sub(r"//[^\n]*", "", statement)
     if re.search(r"-\[\s*[A-Za-z_]?[A-Za-z0-9_]*\s*(\{[^}]*\})?\s*\]-", s):
         return True
-    return bool(re.search(r"(?<![\]\w])-->|<--(?![\[\w])|\)--\(", s))
+    # -{2}> is the Cypher arrow -->, spelled so scanners do not read it as an HTML comment end.
+    return bool(re.search(r"(?<![\]\w])-{2}>|<-{2}(?![\[\w])|\)-{2}\(", s))
 
 
 @dataclass

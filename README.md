@@ -49,8 +49,8 @@ shrinks **57,645 relationships to 22** (12 nodes) in 371 trials and 1.1 s, and `
 answer" on the Python API and on the Relate CLI (`witnesses/two-hub.manifest.json`).
 
 **Against "show the path".** The answer rows bind 68 relationships (`queries/two-hub-bindings.cypher`). Deleting each of
-those 68 from the full graph changes the answer for only 20 of them; the other 48 change nothing, because other routes back
-them up (`evidence/neo4j-compare-2026-11-24.md`, targeted pass). The witness keeps 22 of the 68, and deleting any one of them
+those 68 from the full graph changes the answer for only 20 of them; the other 48 change nothing
+on their own (`evidence/neo4j-compare-2026-11-24.md`, targeted pass). The witness keeps 22 of the 68, and deleting any one of them
 from the witness changes the answer. Necessity is proven inside the witness, not in the full graph: 11 of those 20 are in the witness,
 and each of the other 9 is the direct flight to MEX of a Mexican airport outside the witness (CUN, DGO, GDL, MTY, MZT, PVR,
 SJD, TGZ, ZIH), whose deletion adds that airport to the answer (it no longer has a direct flight). The witness does not contain
@@ -121,7 +121,7 @@ queries reports the full graph's answer but not those per-clause counts.
 
 ## 🏗️ Architecture & Tech Stack
 
-<p align="center"><img src="docs/assets/architecture.png" alt="Witness architecture: a read-only Cypher query from the witness CLI or the MCP tools (why, check) passes a fail-closed guard. The reducer byte-copies the air-routes source graph (57,645 relationships, 3,748 nodes; SHA-256 checked unchanged) into a scratch store and runs Relate transactions: begin, delete a chunk, re-run the query; same answer commits the deletion, a changed answer rolls it back, until 1-minimal (371 trials, 86 deletions applied). The 22 surviving relationships and 12 nodes are exported as witnesses/two-hub.rl; witness check re-proves it from the files alone, cross-checked on the pinned relate CLI: 22 of 22 change the answer." width="100%"></p>
+<p align="center"><img src="docs/assets/architecture.png" alt="Witness architecture: a read-only Cypher query from the witness CLI or the MCP tools (why, check) passes a fail-closed guard. The reducer byte-copies the air-routes source graph (57,645 relationships, 3,748 nodes; SHA-256 checked unchanged) into a scratch store and runs Relate transactions: begin, delete a chunk, re-run the query, roll back; a deletion that keeps the answer is then re-applied and committed, one that changes it stays out, until 1-minimal (371 trials, 86 deletions applied). The 22 surviving relationships and 12 nodes are exported as witnesses/two-hub.rl; witness check re-proves it from the files alone, cross-checked on the pinned relate CLI: 22 of 22 change the answer." width="100%"></p>
 
 | Layer | Choice |
 |---|---|

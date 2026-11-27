@@ -17,9 +17,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
 REPO = "https://github.com/edycutjong/witness"
-# Absolute base for og:image. Switch to https://witness.edycu.dev once its DNS record resolves (HUMAN-TODO #3).
+# Absolute base for og:image. Switch to https://witness.edycu.dev (the custom domain is live).
 SITE_URL = "https://witness-wheat.vercel.app"
-# Set True when the repository is public (HUMAN-TODO: the flip at submission), then rebuild and redeploy.
+# Set True when the repository is public (the public flip at submission), then rebuild and redeploy.
 REPO_PUBLIC = False
 VERSION = re.search(r'^version = "([^"]+)"', (ROOT / "pyproject.toml").read_text(), re.M).group(1)
 RELEASES = f"{REPO}/releases/latest"

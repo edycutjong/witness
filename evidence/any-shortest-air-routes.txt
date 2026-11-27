@@ -1,0 +1,18 @@
+# Recorded 2026-11-28 on Darwin arm64 (34 GB RAM), relate-db 1.3.0 in a uv environment, on a byte copy of data/air-routes.rl.
+# Each query ran in its own process with a watchdog; the watchdog kills the process group.
+
+## the differential query d162 (queries/differential.jsonl)
+MATCH p = ANY SHORTEST (a:Airport {iata:'ZQN'})-[r:HAS_ROUTE WHERE r.dist < 5000]->+(b:Airport {iata:'AUS'}) RETURN length(p) AS l
+  relate-db 1.0.1: no answer within 20 s (watchdog)        relate-db 1.3.0: no answer within 20 s (watchdog)
+  relate-db 1.3.0, watchdog 120 s: the process was killed by the system (exit 137) before the watchdog fired
+  relate-db 1.3.0, resident memory sampled once a second: 15,391,168 KB at 1 s, 16,264,832 KB at 2 s, then paged out
+
+## the same query with a predicate every route satisfies (dist < 50000), and with none
+MATCH p = ANY SHORTEST (a:Airport {iata:'ZQN'})-[r:HAS_ROUTE WHERE r.dist < 50000]->+(b:Airport {iata:'AUS'}) RETURN length(p) AS l
+  relate-db 1.3.0: no answer within 8 s (watchdog)
+MATCH p = ANY SHORTEST (a:Airport {iata:'ZQN'})-[r:HAS_ROUTE]->+(b:Airport {iata:'AUS'}) RETURN length(p) AS l
+  relate-db 1.3.0: [{"l": 3}] in 12.6 ms
+MATCH p = ANY SHORTEST (a:Airport {iata:'ZQN'})-[r:HAS_ROUTE WHERE r.dist < 5000]->{1,4}(b:Airport {iata:'AUS'}) RETURN length(p) AS l
+  relate-db 1.3.0: [{"l": 3}] in 735.6 ms
+
+# The small-graph measurement (both releases, 12 to 20 nodes) is evidence/any-shortest-inline.jsonl (bench/any_shortest_inline.py).

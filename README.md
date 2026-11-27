@@ -259,6 +259,7 @@ For judges: [JUDGE.md](JUDGE.md), also served at <https://witness-wheat.vercel.a
 
 ## 📽️ Demo Materials
 
+- Demo video (1:55): https://youtu.be/GYbci7TseJw
 - Landing page: https://witness-wheat.vercel.app (`site/`)
 - Reproduce steps: [DEMO.md](DEMO.md)
 

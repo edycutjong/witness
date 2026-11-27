@@ -150,13 +150,16 @@ process and on relate-db 1.3.0 in a worker (`uv run --with relate-db==1.3.0`), d
 sides in every trial, and keeps what makes the two releases answer differently: 57,645 relationships to the same 2, in 49
 trials (`evidence/exists-engines-run.txt`). The other engine can be any relate-db release (`relate-db==X.Y.Z`, or
 `python:/path/to/python`) or Neo4j over Bolt (`neo4j`: an empty database; the graph is loaded once and removed
-afterwards). Each deletion is sent to the other engine as the relationship's type, properties and end nodes, never as an
-internal id. `witness check W.rl --other-engine relate-db==1.2.0` re-checks a witness against another release.
+afterwards; implemented and tested against a stand-in driver, not yet run against a real Neo4j). Each deletion is sent to
+the other engine as the relationship's type, properties and end nodes, never as an internal id (`TwoEngines` in
+`src/witness/engines.py`). `witness check W.rl --other-engine relate-db==1.2.0` re-checks a witness against another release.
 
 **Relate's changelog, as regression fixtures.** Every read-path fix entry in Relate's release notes from v1.0.2 to v1.3.0
 (72 entries, each with its status in `evidence/release-notes-fixes.json`) was tried on air-routes against 1.0.1. Seven
-change an answer on this graph; most of the rest are spellings 1.0.1 refuses (23) or new rejections (10). Five of the seven
-fixes shrink with `--other-engine` against the release that fixed them, to six witnesses (one scope fix has two cases),
+change an answer on this graph. Of the other 65, 23 are spellings 1.0.1 refuses, 10 are new rejections, 27 are not about
+answers on this data (indexes, writes, admin commands, expressions that read no graph) and 5 did not reproduce. Five of
+the seven fixes shrink with `--other-engine` against the release that fixed them, to the six witnesses in
+`witnesses/regress/` (one scope fix has two cases),
 each verified "N of N end the disagreement" (`queries/regress/`, `witnesses/regress/`, `evidence/regress-runs.txt`):
 
 | Fix (release) | On 1.0.1, full graph | Witness |
@@ -176,12 +179,18 @@ Witness refuses it), and a change to the same rows as the scope fix in the same 
 `CALL { }` subquery (60 Mexican airports on 1.0.1, 3,504 on 1.3.0), is refused at the read-only door: relate-db 1.0.1
 reports `query_type` `'rw'` for it.
 
-**A differential run, Relate 1.0.1 against 1.3.0.** 219 read queries, written by an AI agent from the air-routes schema
-before any engine compared them (`queries/differential.jsonl`, prompt in `evidence/differential-prompt.md`; no query was
-edited afterwards), on relate-db 1.0.1 and 1.3.0 (`bench/differential.py`, `evidence/differential.json`): 207 agree, 8 are
-refused by both, 1 gives no answer within 20 s on either, two `SHORTEST` queries answer only on 1.3.0 (1.0.1 gives no answer within 20 s), and one disagrees on the data: `percentileDisc` over airport
-altitudes, shrunk to 1 node (`witnesses/differential/`). The script also has a Neo4j leg that shrinks each disagreement
-with `--other-engine neo4j`; that leg was not run (the local Neo4j was not available), so there is no Neo4j comparison yet.
+**A differential run, Relate 1.0.1 against 1.3.0 (Neo4j not run yet).** 219 read queries, written by an AI agent from
+the air-routes schema, with a copy of the store to check that each one runs on 1.0.1, before the two releases were
+compared (`queries/differential.jsonl`, the prompt in `evidence/differential-prompt.md`; no query was edited afterwards).
+On relate-db 1.0.1 and 1.3.0 (`bench/differential.py`, `evidence/differential.json`):
+
+- 207 give the same answer, 8 are refused by both, 1 gives no answer within 20 s on either;
+- 2 `SHORTEST` queries answer only on 1.3.0 (1.0.1 gives no answer within 20 s); a run that never answers cannot be shrunk,
+  so these two stay as recorded timeouts;
+- 1 disagrees on the data: `percentileDisc` over airport altitudes, shrunk to 1 node (`witnesses/differential/`).
+
+The script also has a Neo4j leg that shrinks each disagreement with `--other-engine neo4j`; the local Neo4j was not
+available, so there is no Neo4j comparison in the committed run.
 
 **Found on the current release.** One differential query gave no answer on 1.3.0 either. Narrowed down: `ANY SHORTEST`
 over `->+` with an inline relationship predicate, even one every relationship satisfies, takes 85.8 ms on a 24-relationship

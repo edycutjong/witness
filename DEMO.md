@@ -195,7 +195,7 @@ is not part of this: its claim is about Relate 1.0.1.
 uv run witness why -f queries/exists-two-match.cypher --param country=MX --other-engine relate-db==1.3.0 \
   --name exists-engines --out /tmp/w --no-ledger                     # 57,645 -> 2 in 49 trials (evidence/exists-engines-run.txt)
 uv run witness check witnesses/regress/cycle-repeated-variable.rl    # 3 of 3, against relate-db 1.3.0 (from the manifest)
-uv run witness check witnesses/regress/cycle-repeated-variable.rl --other-engine relate-db==1.2.0   # NOT verified: 1.2.0 answers like 1.0.1
+uv run witness check witnesses/regress/cycle-repeated-variable.rl --other-engine relate-db==1.2.0   # NOT verified: on this witness 1.2.0 gives 1.0.1's row (evidence/regression-releases.jsonl)
 for v in 1.0.1 1.0.2 1.1.0 1.2.0 1.3.0; do
   uv run --no-project --with relate-db==$v python bench/regression_table.py
 done                                                                 # = evidence/regression-releases.jsonl (one row per witness and release)
@@ -210,7 +210,7 @@ once; the worker opens its own byte copy of the store.
 
 ```bash
 uv run --with neo4j python bench/differential.py --reduce           # = evidence/differential.json + differential-answers.jsonl
-for v in 1.0.1 1.3.0; do
+for v in 1.0.1 1.3.0 1.2.0; do
   uv run --no-project --with relate-db==$v python bench/any_shortest_inline.py
 done                                                                 # = evidence/any-shortest-inline.jsonl
 ```

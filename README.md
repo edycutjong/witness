@@ -121,7 +121,7 @@ queries reports the full graph's answer but not those per-clause counts.
 
 ## 🏗️ Architecture & Tech Stack
 
-<p align="center"><img src="docs/architecture.svg" alt="Architecture: entry points (CLI, MCP) feed a guard; the reducer copies the read-only source into a scratch store and runs delete, query, keep-or-rollback trials; survivors become a witness .rl with a manifest; witness check re-proves each relationship on a fresh copy and on the relate CLI." width="100%"></p>
+<p align="center"><img src="docs/assets/architecture.png" alt="Witness architecture: a read-only Cypher query from the witness CLI or the MCP tools (why, check) passes a fail-closed guard. The reducer byte-copies the air-routes source graph (57,645 relationships, 3,748 nodes; SHA-256 checked unchanged) into a scratch store and runs Relate transactions: begin, delete a chunk, re-run the query; same answer commits the deletion, a changed answer rolls it back, until 1-minimal (371 trials, 86 deletions applied). The 22 surviving relationships and 12 nodes are exported as witnesses/two-hub.rl; witness check re-proves it from the files alone, cross-checked on the pinned relate CLI: 22 of 22 change the answer." width="100%"></p>
 
 | Layer | Choice |
 |---|---|

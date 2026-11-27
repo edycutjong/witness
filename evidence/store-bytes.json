@@ -1,0 +1,55 @@
+{
+ "schema": "witness.store-bytes/v1",
+ "stores": [
+  {
+   "path": "data/air-routes.rl",
+   "bytes": 11079680,
+   "sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+  },
+  {
+   "path": "witnesses/two-hub.rl",
+   "bytes": 45056,
+   "sha256": "53bc598296bcd4d15bb3824eed7cc7b8f6ca695c29b8f43b117519167f80790c"
+  },
+  {
+   "path": "witnesses/direction-bug.rl",
+   "bytes": 36864,
+   "sha256": "d43db31c4360dd1df2b4092fc568c55183cb4202d593820e9efdf9a9c6502b72"
+  },
+  {
+   "path": "witnesses/wrong-answer.rl",
+   "bytes": 65536,
+   "sha256": "74961d8df2ed8cb404b07edcf0e0142d44122a60ff372183ff765e6fbae1a8fc"
+  },
+  {
+   "path": "fixtures/mex-foreign.rl",
+   "bytes": 90112,
+   "sha256": "544a9a747d21c1437508861ed88cec82cfd82e718260b6d70f17d648d8a8fca0"
+  },
+  {
+   "path": "witness.rl",
+   "bytes": 40960,
+   "sha256": "5ef90f40a58e7978f0fdb74bb4aaad9dbe497b8888b01f510f124f253fe5fbb3"
+  }
+ ],
+ "headline_script": {
+  "path": "witnesses/two-hub.cypher",
+  "bytes": 3653,
+  "sha256": "6df99e7d6a7a4b35925ec25792c58ab93e3d5191d2a69db396fba8e9bdd9b015"
+ },
+ "rerun": {
+  "what": "the headline reduction run again (same query, parameters and seed), compared with the committed files",
+  "verified": true,
+  "cypher_sha256": "6df99e7d6a7a4b35925ec25792c58ab93e3d5191d2a69db396fba8e9bdd9b015",
+  "cypher_byte_identical": true,
+  "rl_sha256": "a6024c1eb5e48768ba7d2037678873743e0b73a5db40c01ee63cb9beae7309de",
+  "rl_bytes": 45056,
+  "rl_byte_identical": false,
+  "rl_bytes_that_differ": 336,
+  "rl_same_graph": true
+ },
+ "witness": "0.1.0",
+ "relate_db": "1.0.1",
+ "python": "3.12.13",
+ "machine": "arm64 Darwin 27.2.0"
+}

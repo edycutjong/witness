@@ -225,7 +225,9 @@ runs each size in its own process with an 8 s watchdog, because the slow form do
 
 ```bash
 uv run python scripts/vendor_relate_wasm.py --check   # the self-hosted engines match their pinned checksums (offline)
-node scripts/wasm_parity.mjs --out /tmp/wasm-parity.json   # = evidence/wasm-parity.json, timings aside
+node scripts/wasm_parity.mjs --out /tmp/wasm-parity.json   # = evidence/wasm-parity.json, timings and run header aside
+PUPPETEER_MODULE=<path to puppeteer's ESM entry> CHROME=<path to Chrome> \
+  node scripts/browser_live.mjs https://witness.edycu.dev/ --out /tmp/browser-live.json   # = evidence/browser-live.json
 ```
 
 The landing (https://witness.edycu.dev/#exhibit) runs `@relate/relate-wasm` 1.0.1, the release the witness was reduced
@@ -239,8 +241,12 @@ writes is refused (it ran on a throwaway copy, and its write counters are shown 
 running after 4 s is stopped by ending the worker (the browser build has no statement timeout). The engine case
 (section 10) runs both forms on 1.0.1 and on 1.3.0, each its own engine.
 
-`scripts/wasm_parity.mjs` imports the page's own steps (`site/relate/live.js`) and the same engine files under Node, as
-Relate's browser guide allows (`initSync` with the engine's bytes), and checks: all 22 pulls give the recorded rows; the
+`scripts/wasm_parity.mjs` imports the page's own steps (`site/relate/live.js`) and the same engine files under Node,
+loading the engine with `initSync` and its bytes (Relate's WebAssembly API reference), and checks: all 22 pulls give the recorded rows; the
 unpulled witness gives the manifest's answer; the engine case gives the recorded rows on 1.0.1 (the forms disagree) and
 1.3.0 (they agree); a `CREATE` in the query box is refused. `tests/test_wasm_parity.py` runs it under pytest when Node
-is installed and requires the committed evidence to match the fresh run.
+is installed and requires the committed evidence to match the fresh run. `scripts/browser_live.mjs` drives the page itself
+in headless Chrome (puppeteer is not a dependency of this repository) and records what it showed: in the committed run,
+all 22 pulls live and the same as the recording, the four example queries answered, a write refused, a runaway query
+stopped after 4 s and the next one answered, and both engine releases live with their recorded rows; no request to a
+third party, and no console error other than the version chip's call to GitHub's API when it is rate-limited.

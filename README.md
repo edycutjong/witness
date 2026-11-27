@@ -85,7 +85,7 @@ Relate capabilities used:
 6. `relate pull` for fixture mode: one pull from Neo4j, then shrink; never pushed back (`fixture.py`)
 7. `relate query --mode json` on the CLI as a second surface for every probe (`check.py`): it rules out a mistake in Witness's Python path, not one in the engine; for that, the witnesses are re-proved on Neo4j ([below](#measured-against-neo4j))
 8. MCP: Witness's own tools `why` and `check` (`mcp_server.py`) run beside Relate's `relate serve --mcp`; the pairing is exercised in `scripts/mcp_transcript.py` and `evidence/mcp-transcript.md`, and with a real model in `evidence/mcp-agent-session.md`
-9. the WebAssembly build, `@relate/relate-wasm` 1.0.1 (and 1.3.0 for the engine case), self-hosted on the landing: each pull of a tag, the reader's own read queries and both engine releases run in the reader's browser tab, checked against the recorded run (`scripts/site/live.js`, `scripts/wasm_parity.mjs`, `evidence/wasm-parity.json`; DEMO.md section 15)
+9. the WebAssembly build, `@relate/relate-wasm` 1.0.1 (and 1.3.0 for the engine case), self-hosted on the landing: each pull of a tag, the reader's own read queries and both engine releases run in the reader's browser tab, checked against the recorded run (`scripts/site/live.js`; `evidence/browser-live.json` from headless Chrome, `evidence/wasm-parity.json` under Node; DEMO.md section 15)
 
 ### What a witness shows, and what it does not
 
@@ -404,8 +404,9 @@ For judges: [JUDGE.md](JUDGE.md), also served at <https://witness.edycu.dev/judg
 - Demo video (1:55): https://youtu.be/GYbci7TseJw
 - Landing page: https://witness.edycu.dev (`site/`). Relate runs in the tab there: pull any of the 22 tags and Relate 1.0.1,
   compiled to WebAssembly and served from the site, rebuilds the witness without it and re-runs the query; each answer is
-  compared on screen with the recorded run (22 of 22 match, `evidence/wasm-parity.json`). A query box takes your own read
-  queries on the witness, and the engine disagreement runs on 1.0.1 and on 1.3.0 side by side.
+  compared on screen with the recorded run (in headless Chrome, 22 of 22 live and the same: `evidence/browser-live.json`;
+  the page's steps under Node: `evidence/wasm-parity.json`). A query box takes your own read queries on the witness, and
+  the engine disagreement runs on 1.0.1 and on 1.3.0 side by side.
 - Reproduce steps: [DEMO.md](DEMO.md)
 
 ## 🧰 Tools and AI use

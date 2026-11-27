@@ -5,8 +5,8 @@
 //
 // Checks: (1) all 22 pulls on Relate 1.0.1 against evidence/pull-each-tag.json, row for row; (2) the unpulled witness
 // gives the manifest's baseline answer; (3) the engine case on 1.0.1 and on 1.3.0 against evidence/relate-versions.jsonl;
-// (4) a write in the query box is refused. Exit 1 on any mismatch. Node runs the browser build as the Relate docs say
-// (initSync with the engine's bytes); nothing here is a mock.
+// (4) a write in the query box is refused. Exit 1 on any mismatch. Node loads the browser build with initSync and the
+// engine's bytes (Relate's WebAssembly API reference); nothing here is a mock.
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";

@@ -81,6 +81,12 @@ assert WASM["ok"] and WASM["engine"]["version"] == WASM["engine"]["reported"] ==
 assert WASM["pulls"]["same_rows"] == WASM["pulls"]["of"] == WASM["pulls"]["changed"] == sp.pulls["of"], WASM["pulls"]
 assert WASM["baseline_same"] and WASM["write_refused"] and all(e["same_as_recorded"] for e in WASM["engine_case"])
 assert LIVE_PIN in ENGINES and len(LIVE_FIX) == 1, sorted(ENGINES)
+# the page itself in a browser (scripts/browser_live.mjs, headless Chrome): every pull live and the same as the recording
+BL = json.loads((ROOT / "evidence" / "browser-live.json").read_text())
+assert BL["ok"] and BL["pulls"]["live"] == BL["pulls"]["same_rows"] == BL["pulls"]["of"] == sp.pulls["of"], BL["pulls"]
+assert BL["write"]["refused"] and BL["stop"]["stopped"] and all(e["live"] and e["same_as_recorded"] for e in BL["engine_case"])
+assert not BL["third_party_requests"] and not BL["console_errors_not_from_the_version_chip"] and BL["wasm_requests_at_load"] == 0
+BL_CHROME = BL["run"]["browser"].replace("/", " ")
 assert WASM["live_js_sha256"] == hashlib.sha256((PARTS / "live.js").read_bytes()).hexdigest(), "evidence/wasm-parity.json is older than scripts/site/live.js: run node scripts/wasm_parity.mjs --out evidence/wasm-parity.json"
 LIVE_FIX_V = LIVE_FIX[0]
 LIVE_FILES = ("live.js", "worker.js")
@@ -826,11 +832,11 @@ RECEIPTS = [
         [(_MAN, ""), ("evidence/pull-each-tag.json", "what each deletion does to the answer")],
     ),
     (
-        f"{WASM['pulls']['same_rows']} of {WASM['pulls']['of']} live",
-        f"<em>{WASM['pulls']['same_rows']}</em>" + _to.format("of") + f"{WASM['pulls']['of']}" + _u.format("live"),
-        f"The same pulls, run by Relate {LIVE_PIN} compiled to WebAssembly, in the reader's browser tab.",
-        f"The landing's pull-a-tag runs `@relate/relate-wasm` {LIVE_PIN}, pinned and served from the site, in a module worker: it rebuilds the witness from `witnesses/two-hub.cypher`, deletes the tag and re-runs the query, where the Python run rolls back a transaction (the browser build has none). `scripts/wasm_parity.mjs` runs the page's own steps (`site/relate/live.js`) on the same engine files under Node: {WASM['pulls']['same_rows']} of {WASM['pulls']['of']} pulls give the recorded rows, and the engine case gives the recorded rows on {LIVE_PIN} and {LIVE_FIX_V}. A query box runs your own Cypher on the witness and refuses writes.",
-        [("evidence/wasm-parity.json", ""), ("site/relate/engines.json", "the pinned engines"), ("scripts/site/live.js", "the steps")],
+        f"{BL['pulls']['same_rows']} of {BL['pulls']['of']} live",
+        f"<em>{BL['pulls']['same_rows']}</em>" + _to.format("of") + f"{BL['pulls']['of']}" + _u.format("live"),
+        f"The same pulls, run in a browser by Relate {LIVE_PIN} compiled to WebAssembly.",
+        f"The landing's pull-a-tag runs `@relate/relate-wasm` {LIVE_PIN}, pinned and served from the site, in a module worker: it rebuilds the witness from `witnesses/two-hub.cypher`, deletes the tag and re-runs the query, where the Python run rolls back a transaction (the browser build has none). In headless {BL_CHROME} (`scripts/browser_live.mjs`) the page showed all {BL['pulls']['of']} pulls live and the same as the recording, both engine releases live with their recorded rows, a write refused and a runaway query stopped after {BL['stop']['ms'] / 1000:.1f} s; under Node, `scripts/wasm_parity.mjs` runs the page's own steps (`site/relate/live.js`) on the same engine files and gets the recorded rows on {WASM['pulls']['same_rows']} of {WASM['pulls']['of']} pulls. A query box runs your own Cypher on the witness; a statement that writes runs on a throwaway copy and is refused.",
+        [("evidence/browser-live.json", "the browser run"), ("evidence/wasm-parity.json", "under Node"), ("site/relate/engines.json", "the pinned engines")],
     ),
     (
         f"{TA['rels']} → {w_rels}",
@@ -990,8 +996,8 @@ CRITERIA = [
             ),
             (
                 "Relate runs in the reader's tab.",
-                f"On the landing, Relate {LIVE_PIN} compiled to WebAssembly re-runs each pull, the reader's own read queries and the engine case on two releases; the page's steps give the recorded rows on {WASM['pulls']['same_rows']} of {WASM['pulls']['of']} pulls",
-                ["evidence/wasm-parity.json", "scripts/site/live.js"],
+                f"On the landing, Relate {LIVE_PIN} compiled to WebAssembly re-runs each pull, the reader's own read queries and the engine case on two releases; in headless Chrome all {BL['pulls']['of']} pulls ran live and gave the recorded rows",
+                ["evidence/browser-live.json", "evidence/wasm-parity.json"],
             ),
             (
                 "The graph is persisted in the repository.",

@@ -383,6 +383,61 @@ h1,h2{text-wrap:balance}
 .case code.rel{white-space:nowrap}
 .case-stamp{display:inline-block;margin:14px 0 4px;padding:6px 12px;border:2px solid var(--after);color:var(--after);font:700 13px/1.2 var(--font-display);letter-spacing:.14em;text-transform:uppercase}
 @media (max-width:820px){.case-grid{grid-template-columns:minmax(0,1fr)}.case{padding:24px 0;border-left:0;border-top:1.5px solid var(--rule)}.case:first-child{border-top:0;padding-top:0}}
+/* ── Relate in the tab: the engine's state, live/recorded marks, the query box, the engine case on two releases ── */
+.eng{display:flex;align-items:baseline;gap:10px;margin:14px 0 26px;font:400 14px/1.45 var(--font-body);color:var(--muted);max-width:86ch}
+.eng i{flex:none;position:relative;top:1px;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--before);background:transparent}
+.eng b{font:700 12px/1 var(--font-display);letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+.eng[data-state="load"] i{background:var(--before);animation:eng-blink 1s steps(2,end) infinite}
+.eng[data-state="live"] i{border-color:var(--after);background:var(--after);box-shadow:0 0 0 0 rgba(180,35,24,.45);animation:eng-pulse 2.4s ease-out infinite}
+.eng[data-state="live"] b{color:var(--after)}
+.eng[data-state="down"] i{border-style:dashed}
+@keyframes eng-blink{50%{opacity:.25}}
+@keyframes eng-pulse{0%{box-shadow:0 0 0 0 rgba(180,35,24,.45)}70%,100%{box-shadow:0 0 0 9px rgba(180,35,24,0)}}
+.pk{display:inline-block;margin-right:6px;padding:3px 6px 2px;font:700 10.5px/1 var(--font-display);letter-spacing:.16em;text-transform:uppercase;border:1.5px solid currentColor;border-radius:2px;vertical-align:1px}
+.pk.live{color:var(--after)}
+.pk.run{color:var(--muted);animation:eng-blink 1s steps(2,end) infinite}
+.pk.rec{color:var(--muted)}
+.bad{color:var(--after)!important;font-weight:700!important}
+.tally .tl{font-size:13px}
+.ask{margin-top:56px;padding-top:34px;border-top:1.5px solid var(--ink)}
+.ask-head{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:12px 40px;align-items:baseline}
+.ask-head h3{margin:0;font:400 clamp(28px,3vw,38px)/1.1 var(--font-display)}
+.ask-head p{margin:0;color:var(--muted);font-size:16px;max-width:62ch}
+.ask-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px 40px;margin-top:26px;align-items:start}
+.ask-in{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ask-in .lbl{margin-top:8px}
+.ask-try{display:flex;flex-wrap:wrap;gap:8px;min-height:24px}
+.chip.try{cursor:pointer;font-size:12.5px;padding:6px 11px}
+.chip.try:hover{border-color:var(--ink);color:var(--ink)}
+.ask textarea,.ask input{width:100%;font:400 13.5px/1.55 var(--font-data);font-variant-ligatures:none;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:12px 14px;box-shadow:inset 0 1px 0 rgba(31,26,20,.04);transition:border-color .18s,box-shadow .18s}
+.ask textarea{min-height:240px;resize:vertical;white-space:pre;overflow:auto;tab-size:2}
+.ask textarea:focus,.ask input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(31,26,20,.12)}
+.ask-go{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px}
+.ask-go .fine{margin:0}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.ask kbd{font-size:12px;border:1px solid var(--rule);border-bottom-width:2px;border-radius:3px;padding:1px 5px;background:var(--paper)}
+.ask-out{min-width:0;background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:16px 18px;box-shadow:var(--shadow);min-height:240px}
+.ask-meta{font-size:13px;color:var(--muted);margin:0 0 12px}
+.ask-tbl{max-height:420px;overflow:auto}
+.ask-tbl:empty{display:none}
+.ask-tbl .ans-t{font-size:13.5px}
+.ask-tbl .ans-t td,.ask-tbl .ans-t th{padding-right:14px;white-space:nowrap}
+.ask-tbl .plan{margin:0;font:400 12.5px/1.6 var(--font-data);white-space:pre;color:var(--ink)}
+.ec-live{margin-top:16px}
+.ec-btns{display:flex;gap:10px;flex-wrap:wrap}
+.ec-btns .btn{min-height:40px;font-size:14.5px;padding:0 14px}
+.ec-btns .btn[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.ec-out{font-size:13px;color:var(--muted);margin:12px 0 0;min-height:2.9em}
+.rel-tape tr.live td{background:rgba(180,35,24,.07)}
+.rel-tape tr.live td:first-child{box-shadow:inset 3px 0 0 var(--after);padding-left:8px}
+@media (max-width:900px){.ask-head,.ask-grid{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){.eng i,.pk.run{animation:none!important}}
+@media print{.ask,.ec-live{display:none}}
+.ask-on{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+.ask-on code{font-size:1em;color:var(--ink)}
+.linkish{font:inherit;color:var(--ink);background:none;border:0;padding:0;margin-left:4px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;transition:text-decoration-thickness .15s}
+.linkish:hover{text-decoration-thickness:2px}
+@media (max-width:600px){.ask textarea,.ask input{font-size:16px}.ask textarea{min-height:190px}}
 
 </style>
 </head>
@@ -491,15 +546,16 @@ h1,h2{text-wrap:balance}
     <div class="rc"><b><span data-count="57645">57,645</span><span class="to">→</span><em>22</em></b><span>relationships in the air-routes graph, then in its witness (3,748 → 12 nodes)</span></div>
     <div class="rc"><b><em>22</em><span class="to">of</span>22</b><span>deleting any one from the witness changes the answer, checked on relate-db and on the Relate CLI</span></div>
     <div class="rc"><b><span data-count="68">68</span><span class="to">→</span><em>22</em></b><span>relationships the answer rows bind, then the witness: deleted from the full graph, only 20 of the 68 change the answer (11 of them in the witness); deleted from the witness, all 22 do</span></div>
-    <div class="rc"><b><span data-count="553">553</span><span class="to">·</span>100%</b><span>tests against real Relate · line and branch coverage</span></div>
+    <div class="rc"><b><span data-count="557">557</span><span class="to">·</span>100%</b><span>tests against real Relate · line and branch coverage</span></div>
   </div>
-  <p class="wrap rc-src data">Read from <code>witnesses/two-hub.manifest.json</code>, <code>evidence/pull-each-tag.json</code>, <code>evidence/neo4j-compare-2026-11-24.md</code>, <code>evidence/pytest-2026-11-28.txt</code>. Relate 1.0.1 · Python 3.12.13.</p>
+  <p class="wrap rc-src data">Read from <code>witnesses/two-hub.manifest.json</code>, <code>evidence/pull-each-tag.json</code>, <code>evidence/neo4j-compare-2026-11-24.md</code>, <code>evidence/pytest-2026-11-28b.txt</code>. Relate 1.0.1 · Python 3.12.13.</p>
 </section>
 
 <section class="exhibit" id="exhibit" aria-labelledby="ex-h">
   <div class="wrap">
     <p class="lbl">Exhibit A <span>·</span> pull a tag</p>
     <h2 id="ex-h">Pull any tag. <em>The answer moves.</em></h2>
+    <p class="eng" id="eng" data-state="off" aria-live="polite"><i aria-hidden="true"></i><span id="eng-t">Each pull below shows the recorded run. With JavaScript, Relate 1.0.1 runs the pulls live in this tab.</span></p>
     <div class="ex-grid">
       <div class="ex-left">
         <div class="ex-draw"><svg class="inst" viewBox="56 22 552 312" role="img" aria-labelledby="x-t">
@@ -554,7 +610,7 @@ h1,h2{text-wrap:balance}
         </div>
       </div>
       <div class="ex-right">
-        <p class="lede">The agent's question: <q>Which airports of MX have no direct flight to MEX, yet would still reach it in two flights if any one hub closed?</q> The answer is four airports. The 13 red tags are the witness's routes, the 9 country codes its country links; all 22 are in the register. Pull any one to see what Relate returned without it.</p>
+        <p class="lede">The agent's question: <q>Which airports of MX have no direct flight to MEX, yet would still reach it in two flights if any one hub closed?</q> The answer is four airports. The 13 red tags are the witness's routes, the 9 country codes its country links; all 22 are in the register. Pull any one to see the answer without it: Relate 1.0.1, compiled to WebAssembly and running in this tab, rebuilds the witness, deletes that relationship and re-runs the query. If the engine cannot start, the pull replays the recorded run.</p>
         <div class="reg-head"><span class="lbl">The register</span><span class="lbl">pull it and</span></div>
         <ol class="reg" id="reg"><li data-n="1"><button type="button" class="pull" data-n="1" aria-pressed="false"><span class="no">1</span><code>(ACA)-[:HAS_ROUTE]-&gt;(MEX)</code><span class="fx">TLC drops out</span></button></li>
 <li data-n="2"><button type="button" class="pull" data-n="2" aria-pressed="false"><span class="no">2</span><code>(ACA)-[:IN_COUNTRY]-&gt;(MX)</code><span class="fx">TLC loses MX</span></button></li>
@@ -585,7 +641,36 @@ h1,h2{text-wrap:balance}
         <span class="stamp red reg-stamp" id="reg-stamp">22 of 22 change the answer</span>
       </div>
     </div>
-    <p class="ex-src data">Recorded 2026-11-26 19:35:48 UTC by <code>scripts/pull_each_tag.py</code> on a copy of <code>witnesses/two-hub.rl</code> → <code>evidence/pull-each-tag.json</code>. <code>witness check</code> runs the same probes on relate-db and on the Relate CLI.</p>
+    <p class="ex-src data">Recorded 2026-11-26 19:35:48 UTC by <code>scripts/pull_each_tag.py</code> on a copy of <code>witnesses/two-hub.rl</code> → <code>evidence/pull-each-tag.json</code>. <code>witness check</code> runs the same probes on relate-db and on the Relate CLI. Live pulls run <code>site/relate/live.js</code> on <code>@relate/relate-wasm</code> 1.0.1, served from this site; <code>scripts/wasm_parity.mjs</code> runs the same file outside the browser and matches the recording on 22 of 22 pulls (<code>evidence/wasm-parity.json</code>).</p>
+    <div class="ask" id="ask">
+      <div class="ask-head">
+        <h3 id="ask-h">Cross-examine it yourself.</h3>
+        <p>Your own Cypher, run by Relate 1.0.1 in this tab on a fresh copy of the witness (<code>witnesses/two-hub.cypher</code>, 22 relationships), with the tag you pulled above deleted. Reads only: a statement that writes is refused.</p>
+      </div>
+      <div class="ask-grid">
+        <div class="ask-in">
+          <div class="ask-try" role="group" aria-label="Example queries" id="ask-try"></div>
+          <label class="lbl" for="ask-q">Cypher</label>
+          <textarea id="ask-q" spellcheck="false" autocapitalize="off" autocomplete="off" rows="11">MATCH (a:Airport)-[:IN_COUNTRY]-&gt;(:Country {code: $country})
+WHERE a.iata &lt;&gt; $dest
+  AND NOT EXISTS { MATCH (a)-[:HAS_ROUTE]-&gt;(:Airport {iata: $dest}) }
+MATCH (a)-[:HAS_ROUTE]-&gt;(hub:Airport)-[:HAS_ROUTE]-&gt;(:Airport {iata: $dest})
+OPTIONAL MATCH (hub)-[:IN_COUNTRY]-&gt;(hc:Country)
+WITH a, count(DISTINCT hub) AS hubs, coll.sort(collect(DISTINCT hc.code)) AS hub_countries
+WHERE hubs &gt;= 2
+RETURN a.iata AS airport, hub_countries
+ORDER BY airport</textarea>
+          <label class="lbl" for="ask-p">Parameters, JSON</label>
+          <input id="ask-p" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" value="{&quot;country&quot;: &quot;MX&quot;, &quot;dest&quot;: &quot;MEX&quot;}">
+          <div class="ask-go"><button type="button" class="btn solid" id="ask-run" disabled>Run in this tab</button><span class="fine data"><kbd>Ctrl</kbd> / <kbd>&#8984;</kbd> + <kbd>Enter</kbd></span></div>
+          <p class="ask-on data" id="ask-on">Runs on: the witness, 22 relationships.</p>
+        </div>
+        <div class="ask-out">
+          <p class="ask-meta data" id="ask-meta" aria-live="polite">Needs JavaScript and WebAssembly. Without them: <code>relate query --database witnesses/two-hub.rl --read-only</code> on a clone gives the same answers.</p>
+          <div class="ask-tbl" id="ask-tbl" tabindex="0" role="region" aria-label="Query result"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -625,13 +710,20 @@ h1,h2{text-wrap:balance}
         <table>
           <thead><tr><th scope="col">relate-db</th><th scope="col"><code>COUNT</code> form</th><th scope="col"><code>EXISTS</code> form</th><th scope="col"><span class="sr">Verdict</span></th></tr></thead>
           <tbody>
-            <tr class="dis"><td>1.0.1</td><td>MZT</td><td>no rows</td><td>disagree</td></tr>
-            <tr class="dis"><td>1.1.0</td><td>MZT</td><td>no rows</td><td>disagree</td></tr>
-            <tr class="dis"><td>1.2.0</td><td>MZT</td><td>no rows</td><td>disagree</td></tr>
-            <tr class="agr"><td>1.3.0</td><td>MZT</td><td>MZT</td><td>agree</td></tr>
+            <tr class="dis" data-v="1.0.1"><td>1.0.1</td><td>MZT</td><td>no rows</td><td>disagree</td></tr>
+            <tr class="dis" data-v="1.1.0"><td>1.1.0</td><td>MZT</td><td>no rows</td><td>disagree</td></tr>
+            <tr class="dis" data-v="1.2.0"><td>1.2.0</td><td>MZT</td><td>no rows</td><td>disagree</td></tr>
+            <tr class="agr" data-v="1.3.0"><td>1.3.0</td><td>MZT</td><td>MZT</td><td>agree</td></tr>
           </tbody>
         </table>
-        <p class="cap">Each row rebuilds the witness's script under that release and runs both forms. <code>bench/relate_versions.py</code> · <code>evidence/relate-versions.jsonl</code></p>
+        <div class="ec-live" id="ec-live" hidden>
+          <div class="ec-btns" role="group" aria-label="Run both forms on a Relate release, in this tab">
+            <button type="button" class="btn" data-v="1.0.1" aria-pressed="false">Run on 1.0.1</button>
+            <button type="button" class="btn" data-v="1.3.0" aria-pressed="false">Run on 1.3.0</button>
+          </div>
+          <p class="ec-out data" id="ec-out" aria-live="polite">Both forms on the two-relationship witness, in this tab, on the release you pick. Each release is its own engine, served from this site.</p>
+        </div>
+        <p class="cap">Each row rebuilds the witness's script under that release and runs both forms. <code>bench/relate_versions.py</code> · <code>evidence/relate-versions.jsonl</code>. The two buttons run the same two queries on <code>@relate/relate-wasm</code> 1.0.1 and 1.3.0.</p>
       </figure>
     </article>
     <div class="case-grid">
@@ -728,6 +820,7 @@ h1,h2{text-wrap:balance}
       <details><summary>Does Witness ever write to my graph?</summary><p>No. The source <code>.rl</code> is copied byte for byte and never opened for writing; every reduction checks its SHA-256 unchanged afterwards. Fixture mode pulls from Neo4j once and never pushes back.</p></details>
       <details><summary>Is anything mocked?</summary><p>Not the judged path: the graph store, transactions, rollback and queries are real Relate in every test. In tests, <code>relate pull</code> (it needs a Neo4j server) is stood in, and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach rare branches. The committed fixture run pulled from a real Neo4j server (<code>fixtures/mex-foreign.report.json</code>).</p></details>
       <details><summary>Why Relate rather than a Neo4j server?</summary><p>The inner loop is one transaction per trial, in process, on a single file: 366.8 trials/s here against 90.2 over Bolt to Neo4j in Docker on the same machine. And a witness is a file you can commit, hand over and open with plain <code>relate</code>, with no server.</p></details>
+      <details><summary>Are the pulls on this page real?</summary><p>Yes, when your browser can run them. The page loads <code>@relate/relate-wasm</code> 1.0.1, the release the witness was reduced on, from this site into a worker, rebuilds the witness from its <code>.cypher</code> script, deletes the tag you pulled and re-runs the query; each answer says <b>Live</b> and whether it matches the recorded run. If the engine cannot start, the pull replays the recording and says <b>Recorded</b>. <code>scripts/wasm_parity.mjs</code> runs the same steps outside the browser: <code>evidence/wasm-parity.json</code>.</p></details>
       <details><summary>How does an agent use it?</summary><p>Over MCP. The <code>why</code> tool returns the witness of the agent's own answer and <code>check</code> re-proves it. Two recorded sessions are committed: <code>evidence/mcp-transcript.md</code> (a scripted client) and <code>evidence/mcp-agent-session.md</code> (a real model, claude-sonnet-5-5 in Claude Code, writing its own Cypher and attaching the witness).</p></details>
     </div>
   </div>
@@ -749,7 +842,7 @@ h1,h2{text-wrap:balance}
     <p class="data"><a href="https://github.com/edycutjong/witness">source</a> · <a href="/deck/">deck</a> · <a href="/judge/">judges</a> · <a href="/exhibit/two-hub.html">exhibit</a> · data: air-routes by Kelvin Lawrence (Apache-2.0)</p>
   </div>
 </footer>
-<script type="application/json" id="wdata">{"base":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"tags":[{"n":1,"rel":"(ACA)-[:HAS_ROUTE]->(MEX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["TLC"],"ms":0.656,"fx":"TLC drops out"},{"n":2,"rel":"(ACA)-[:IN_COUNTRY]->(MX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":[],"ms":0.27,"fx":"TLC loses MX"},{"n":3,"rel":"(DFW)-[:HAS_ROUTE]->(MEX)","rows":[{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["PBC","QRO"],"ms":0.243,"fx":"PBC and QRO drop out"},{"n":4,"rel":"(DFW)-[:IN_COUNTRY]->(US)","rows":[{"airport":"PBC","hub_countries":["MX"]},{"airport":"QRO","hub_countries":["MX"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":[],"ms":0.241,"fx":"PBC and QRO lose US"},{"n":5,"rel":"(LAS)-[:HAS_ROUTE]->(MEX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["TLC"],"ms":0.247,"fx":"TLC drops out"},{"n":6,"rel":"(LAS)-[:IN_COUNTRY]->(US)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":[],"ms":0.234,"fx":"TLC loses US"},{"n":7,"rel":"(LAX)-[:HAS_ROUTE]->(MEX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]}],"drops":["UPN"],"ms":0.226,"fx":"UPN drops out"},{"n":8,"rel":"(LAX)-[:IN_COUNTRY]->(US)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX"]}],"drops":[],"ms":0.23,"fx":"UPN loses US"},{"n":9,"rel":"(PBC)-[:HAS_ROUTE]->(DFW)","rows":[{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["PBC"],"ms":0.222,"fx":"PBC drops out"},{"n":10,"rel":"(PBC)-[:HAS_ROUTE]->(TIJ)","rows":[{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["PBC"],"ms":0.223,"fx":"PBC drops out"},{"n":11,"rel":"(PBC)-[:IN_COUNTRY]->(MX)","rows":[{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["PBC"],"ms":0.207,"fx":"PBC drops out"},{"n":12,"rel":"(QRO)-[:HAS_ROUTE]->(DFW)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["QRO"],"ms":0.228,"fx":"QRO drops out"},{"n":13,"rel":"(QRO)-[:HAS_ROUTE]->(TIJ)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["QRO"],"ms":0.244,"fx":"QRO drops out"},{"n":14,"rel":"(QRO)-[:IN_COUNTRY]->(MX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["QRO"],"ms":0.216,"fx":"QRO drops out"},{"n":15,"rel":"(TIJ)-[:HAS_ROUTE]->(MEX)","rows":[{"airport":"TLC","hub_countries":["MX","US"]}],"drops":["PBC","QRO","UPN"],"ms":0.317,"fx":"PBC, QRO and UPN drop out"},{"n":16,"rel":"(TIJ)-[:IN_COUNTRY]->(MX)","rows":[{"airport":"PBC","hub_countries":["US"]},{"airport":"QRO","hub_countries":["US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["US"]}],"drops":[],"ms":0.27,"fx":"PBC, QRO and UPN lose MX"},{"n":17,"rel":"(TLC)-[:HAS_ROUTE]->(ACA)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["TLC"],"ms":0.241,"fx":"TLC drops out"},{"n":18,"rel":"(TLC)-[:HAS_ROUTE]->(LAS)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["TLC"],"ms":0.239,"fx":"TLC drops out"},{"n":19,"rel":"(TLC)-[:IN_COUNTRY]->(MX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["TLC"],"ms":0.216,"fx":"TLC drops out"},{"n":20,"rel":"(UPN)-[:HAS_ROUTE]->(LAX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]}],"drops":["UPN"],"ms":0.228,"fx":"UPN drops out"},{"n":21,"rel":"(UPN)-[:HAS_ROUTE]->(TIJ)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]}],"drops":["UPN"],"ms":0.229,"fx":"UPN drops out"},{"n":22,"rel":"(UPN)-[:IN_COUNTRY]->(MX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]}],"drops":["UPN"],"ms":0.263,"fx":"UPN drops out"}],"geo":{"UPN":[351.6,333.8],"QRO":[371.4,318.9],"PBC":[390.7,336.8],"TLC":[378.0,334.6],"LAX":[177.0,155.5],"TIJ":[192.3,172.7],"DFW":[404.9,168.4],"LAS":[211.7,129.3],"ACA":[376.0,366.2],"MEX":[383.2,333.4]},"sch":{"UPN":[118,76],"QRO":[118,148],"PBC":[118,220],"TLC":[118,292],"LAX":[336,48],"TIJ":[336,114],"DFW":[336,180],"LAS":[336,246],"ACA":[336,312],"MEX":[540,180]},"ms":[[0,57645,"the whole graph"],[2,54141,"EXPLAIN plan drops :ON_CONTINENT"],[255,50,"after the node pass"],[371,22,"the witness"]],"left":[57645,54141,54141,54141,32140,32140,32140,32140,32140,32140,32140,32140,32140,32140,32140,23838,23838,23838,23838,23838,23838,23838,23838,17648,17648,17648,17648,17648,17648,13275,13275,13275,13275,10188,10188,10188,10188,10188,10188,10188,7884,7884,7884,7884,7884,7884,7884,7884,7884,7884,7884,7884,7884,6600,5974,5974,5420,5420,4724,4724,4167,4167,4167,4167,4167,3379,2730,2730,2730,2573,2573,2312,2312,1882,1882,1755,1755,1755,1755,1755,1478,1478,1194,1194,1194,1018,1018,917,917,917,866,866,866,866,765,765,765,676,532,532,489,489,448,448,378,378,378,378,378,319,319,308,308,308,308,262,262,262,262,249,249,223,223,223,223,196,196,177,177,177,177,177,171,171,171,154,154,154,146,146,146,137,137,124,124,111,111,111,111,109,109,109,109,109,102,102,102,102,102,102,89,89,89,83,83,83,83,80,80,68,67,67,67,67,67,66,66,66,66,66,66,64,64,62,62,62,62,62,62,58,58,58,58,55,55,55,55,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,47,47,47,47,47,47,47,43,43,40,40,37,37,37,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,31,31,31,31,31,31,31,31,30,29,29,28,28,27,27,27,27,27,27,26,26,25,25,24,24,23,23,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22],"holds":"01001000000000010000000100000100010000001000000000000110101010000110010101010000101001010010001001101010100001010001000101000101000010010010010101000100001010001001000101101001001001010000010001000100010100001010001010101010000000100000010001000000000000000000000000000100000010101001000000000000000100000000000000000010000000110101000001010101010000000000000000000000000"}</script>
+<script type="application/json" id="wdata">{"base":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"tags":[{"n":1,"rel":"(ACA)-[:HAS_ROUTE]->(MEX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["TLC"],"ms":0.656,"fx":"TLC drops out"},{"n":2,"rel":"(ACA)-[:IN_COUNTRY]->(MX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":[],"ms":0.27,"fx":"TLC loses MX"},{"n":3,"rel":"(DFW)-[:HAS_ROUTE]->(MEX)","rows":[{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["PBC","QRO"],"ms":0.243,"fx":"PBC and QRO drop out"},{"n":4,"rel":"(DFW)-[:IN_COUNTRY]->(US)","rows":[{"airport":"PBC","hub_countries":["MX"]},{"airport":"QRO","hub_countries":["MX"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":[],"ms":0.241,"fx":"PBC and QRO lose US"},{"n":5,"rel":"(LAS)-[:HAS_ROUTE]->(MEX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["TLC"],"ms":0.247,"fx":"TLC drops out"},{"n":6,"rel":"(LAS)-[:IN_COUNTRY]->(US)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":[],"ms":0.234,"fx":"TLC loses US"},{"n":7,"rel":"(LAX)-[:HAS_ROUTE]->(MEX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]}],"drops":["UPN"],"ms":0.226,"fx":"UPN drops out"},{"n":8,"rel":"(LAX)-[:IN_COUNTRY]->(US)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX"]}],"drops":[],"ms":0.23,"fx":"UPN loses US"},{"n":9,"rel":"(PBC)-[:HAS_ROUTE]->(DFW)","rows":[{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["PBC"],"ms":0.222,"fx":"PBC drops out"},{"n":10,"rel":"(PBC)-[:HAS_ROUTE]->(TIJ)","rows":[{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["PBC"],"ms":0.223,"fx":"PBC drops out"},{"n":11,"rel":"(PBC)-[:IN_COUNTRY]->(MX)","rows":[{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["PBC"],"ms":0.207,"fx":"PBC drops out"},{"n":12,"rel":"(QRO)-[:HAS_ROUTE]->(DFW)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["QRO"],"ms":0.228,"fx":"QRO drops out"},{"n":13,"rel":"(QRO)-[:HAS_ROUTE]->(TIJ)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["QRO"],"ms":0.244,"fx":"QRO drops out"},{"n":14,"rel":"(QRO)-[:IN_COUNTRY]->(MX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["QRO"],"ms":0.216,"fx":"QRO drops out"},{"n":15,"rel":"(TIJ)-[:HAS_ROUTE]->(MEX)","rows":[{"airport":"TLC","hub_countries":["MX","US"]}],"drops":["PBC","QRO","UPN"],"ms":0.317,"fx":"PBC, QRO and UPN drop out"},{"n":16,"rel":"(TIJ)-[:IN_COUNTRY]->(MX)","rows":[{"airport":"PBC","hub_countries":["US"]},{"airport":"QRO","hub_countries":["US"]},{"airport":"TLC","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["US"]}],"drops":[],"ms":0.27,"fx":"PBC, QRO and UPN lose MX"},{"n":17,"rel":"(TLC)-[:HAS_ROUTE]->(ACA)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["TLC"],"ms":0.241,"fx":"TLC drops out"},{"n":18,"rel":"(TLC)-[:HAS_ROUTE]->(LAS)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["TLC"],"ms":0.239,"fx":"TLC drops out"},{"n":19,"rel":"(TLC)-[:IN_COUNTRY]->(MX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"UPN","hub_countries":["MX","US"]}],"drops":["TLC"],"ms":0.216,"fx":"TLC drops out"},{"n":20,"rel":"(UPN)-[:HAS_ROUTE]->(LAX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]}],"drops":["UPN"],"ms":0.228,"fx":"UPN drops out"},{"n":21,"rel":"(UPN)-[:HAS_ROUTE]->(TIJ)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]}],"drops":["UPN"],"ms":0.229,"fx":"UPN drops out"},{"n":22,"rel":"(UPN)-[:IN_COUNTRY]->(MX)","rows":[{"airport":"PBC","hub_countries":["MX","US"]},{"airport":"QRO","hub_countries":["MX","US"]},{"airport":"TLC","hub_countries":["MX","US"]}],"drops":["UPN"],"ms":0.263,"fx":"UPN drops out"}],"geo":{"UPN":[351.6,333.8],"QRO":[371.4,318.9],"PBC":[390.7,336.8],"TLC":[378.0,334.6],"LAX":[177.0,155.5],"TIJ":[192.3,172.7],"DFW":[404.9,168.4],"LAS":[211.7,129.3],"ACA":[376.0,366.2],"MEX":[383.2,333.4]},"sch":{"UPN":[118,76],"QRO":[118,148],"PBC":[118,220],"TLC":[118,292],"LAX":[336,48],"TIJ":[336,114],"DFW":[336,180],"LAS":[336,246],"ACA":[336,312],"MEX":[540,180]},"ms":[[0,57645,"the whole graph"],[2,54141,"EXPLAIN plan drops :ON_CONTINENT"],[255,50,"after the node pass"],[371,22,"the witness"]],"left":[57645,54141,54141,54141,32140,32140,32140,32140,32140,32140,32140,32140,32140,32140,32140,23838,23838,23838,23838,23838,23838,23838,23838,17648,17648,17648,17648,17648,17648,13275,13275,13275,13275,10188,10188,10188,10188,10188,10188,10188,7884,7884,7884,7884,7884,7884,7884,7884,7884,7884,7884,7884,7884,6600,5974,5974,5420,5420,4724,4724,4167,4167,4167,4167,4167,3379,2730,2730,2730,2573,2573,2312,2312,1882,1882,1755,1755,1755,1755,1755,1478,1478,1194,1194,1194,1018,1018,917,917,917,866,866,866,866,765,765,765,676,532,532,489,489,448,448,378,378,378,378,378,319,319,308,308,308,308,262,262,262,262,249,249,223,223,223,223,196,196,177,177,177,177,177,171,171,171,154,154,154,146,146,146,137,137,124,124,111,111,111,111,109,109,109,109,109,102,102,102,102,102,102,89,89,89,83,83,83,83,80,80,68,67,67,67,67,67,66,66,66,66,66,66,64,64,62,62,62,62,62,62,58,58,58,58,55,55,55,55,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,47,47,47,47,47,47,47,43,43,40,40,37,37,37,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,31,31,31,31,31,31,31,31,30,29,29,28,28,27,27,27,27,27,27,26,26,25,25,24,24,23,23,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22],"holds":"01001000000000010000000100000100010000001000000000000110101010000110010101010000101001010010001001101010100001010001000101000101000010010010010101000100001010001001000101101001001001010000010001000100010100001010001010101010000000100000010001000000000000000000000000000100000010101001000000000000000100000000000000000010000000110101000001010101010000000000000000000000000","live":{"worker":"/relate/worker.js?v=1516b3c872","pin":"1.0.1","fix":"1.3.0","script":"// Witness 0.1.0 \u00b7 relate-db 1.0.1 \u00b7 seed 0\n// source sha256 b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734\n// params {\"country\": \"MX\", \"dest\": \"MEX\"}\nCREATE\n  (n0:`Airport` {`altitude`: 127, `city`: 'Los Angeles', `descr`: 'Los Angeles International Airport', `iata`: 'LAX', `icao`: 'KLAX', `id`: 13, `lat`: 33.94250107, `lon`: -118.4079971, `longest`: 12091, `region`: 'US-CA', `runways`: 4}),\n  (n1:`Airport` {`altitude`: 16, `city`: 'Acapulco', `descr`: 'General Juan N Alvarez International Airport', `iata`: 'ACA', `icao`: 'MMAA', `id`: 1119, `lat`: 16.7570991516113, `lon`: -99.7539978027344, `longest`: 10832, `region`: 'MX-GRO', `runways`: 2}),\n  (n2:`Airport` {`altitude`: 2181, `city`: 'Las Vegas', `descr`: 'Las Vegas Mc Carran', `iata`: 'LAS', `icao`: 'KLAS', `id`: 30, `lat`: 36.08010101, `lon`: -115.1520004, `longest`: 14512, `region`: 'US-NV', `runways`: 4}),\n  (n3:`Airport` {`altitude`: 489, `city`: 'Tijuana', `descr`: 'General Abelardo L. Rodr\u00edguez International Airport', `iata`: 'TIJ', `icao`: 'MMTJ', `id`: 1456, `lat`: 32.5410995483398, `lon`: -116.970001220703, `longest`: 9711, `region`: 'MX-BCN', `runways`: 1}),\n  (n4:`Airport` {`altitude`: 5258, `city`: 'Uruapan', `descr`: 'Licenciado y General Ignacio Lopez Rayon Airport', `iata`: 'UPN', `icao`: 'MMPN', `id`: 898, `lat`: 19.3966999053955, `lon`: -102.039001464844, `longest`: 7874, `region`: 'MX-MIC', `runways`: 1}),\n  (n5:`Airport` {`altitude`: 607, `city`: 'Dallas', `descr`: 'Dallas/Fort Worth International Airport', `iata`: 'DFW', `icao`: 'KDFW', `id`: 8, `lat`: 32.896800994873, `lon`: -97.0380020141602, `longest`: 13401, `region`: 'US-TX', `runways`: 7}),\n  (n6:`Airport` {`altitude`: 6296, `city`: 'Quer\u00e9taro', `descr`: 'Quer\u00e9taro Intercontinental Airport', `iata`: 'QRO', `icao`: 'MMQT', `id`: 418, `lat`: 20.6173000336, `lon`: -100.185997009, `longest`: 11483, `region`: 'MX-QUE', `runways`: 1}),\n  (n7:`Airport` {`altitude`: 7316, `city`: 'Mexico City', `descr`: 'Mexico City, Licenciado Benito Juarez International Airport', `iata`: 'MEX', `icao`: 'MMMX', `id`: 136, `lat`: 19.43630027771, `lon`: -99.0720977783203, `longest`: 12966, `region`: 'MX-DIF', `runways`: 2}),\n  (n8:`Airport` {`altitude`: 7361, `city`: 'Puebla', `descr`: 'Hermanos Serd\u00e1n International Airport', `iata`: 'PBC', `icao`: 'MMPB', `id`: 414, `lat`: 19.1581001282, `lon`: -98.3713989258, `longest`: 11811, `region`: 'MX-PUE', `runways`: 1}),\n  (n9:`Airport` {`altitude`: 8466, `city`: 'Toluca', `descr`: 'Licenciado Adolfo Lopez Mateos International Airport', `iata`: 'TLC', `icao`: 'MMTO', `id`: 1050, `lat`: 19.3370990753, `lon`: -99.5660018921, `longest`: 13780, `region`: 'MX-MEX', `runways`: 1}),\n  (n10:`Country` {`code`: 'MX', `name`: 'Mexico'}),\n  (n11:`Country` {`code`: 'US', `name`: 'United States'}),\n  (n0)-[:`HAS_ROUTE` {`dist`: 1552}]->(n7),\n  (n1)-[:`HAS_ROUTE` {`dist`: 190}]->(n7),\n  (n2)-[:`HAS_ROUTE` {`dist`: 1507}]->(n7),\n  (n3)-[:`HAS_ROUTE` {`dist`: 1429}]->(n7),\n  (n4)-[:`HAS_ROUTE` {`dist`: 1420}]->(n0),\n  (n4)-[:`HAS_ROUTE` {`dist`: 1294}]->(n3),\n  (n5)-[:`HAS_ROUTE` {`dist`: 938}]->(n7),\n  (n6)-[:`HAS_ROUTE` {`dist`: 1320}]->(n3),\n  (n6)-[:`HAS_ROUTE` {`dist`: 870}]->(n5),\n  (n8)-[:`HAS_ROUTE` {`dist`: 1475}]->(n3),\n  (n8)-[:`HAS_ROUTE` {`dist`: 952}]->(n5),\n  (n9)-[:`HAS_ROUTE` {`dist`: 179}]->(n1),\n  (n9)-[:`HAS_ROUTE` {`dist`: 1494}]->(n2),\n  (n0)-[:`IN_COUNTRY`]->(n11),\n  (n1)-[:`IN_COUNTRY`]->(n10),\n  (n2)-[:`IN_COUNTRY`]->(n11),\n  (n3)-[:`IN_COUNTRY`]->(n10),\n  (n4)-[:`IN_COUNTRY`]->(n10),\n  (n5)-[:`IN_COUNTRY`]->(n11),\n  (n6)-[:`IN_COUNTRY`]->(n10),\n  (n8)-[:`IN_COUNTRY`]->(n10),\n  (n9)-[:`IN_COUNTRY`]->(n10);\n","query":"// Which airports of $country have no direct flight to $dest, yet would still reach it in two flights if any one hub closed?\nMATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\nWHERE a.iata <> $dest\n  AND NOT EXISTS { MATCH (a)-[:HAS_ROUTE]->(:Airport {iata: $dest}) }\nMATCH (a)-[:HAS_ROUTE]->(hub:Airport)-[:HAS_ROUTE]->(:Airport {iata: $dest})\nOPTIONAL MATCH (hub)-[:IN_COUNTRY]->(hc:Country)\nWITH a, count(DISTINCT hub) AS hubs, coll.sort(collect(DISTINCT hc.code)) AS hub_countries\nWHERE hubs >= 2\nRETURN a.iata AS airport, hub_countries\nORDER BY airport\n","params":{"country":"MX","dest":"MEX"},"examples":[["The question","MATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\nWHERE a.iata <> $dest\n  AND NOT EXISTS { MATCH (a)-[:HAS_ROUTE]->(:Airport {iata: $dest}) }\nMATCH (a)-[:HAS_ROUTE]->(hub:Airport)-[:HAS_ROUTE]->(:Airport {iata: $dest})\nOPTIONAL MATCH (hub)-[:IN_COUNTRY]->(hc:Country)\nWITH a, count(DISTINCT hub) AS hubs, coll.sort(collect(DISTINCT hc.code)) AS hub_countries\nWHERE hubs >= 2\nRETURN a.iata AS airport, hub_countries\nORDER BY airport",{"country":"MX","dest":"MEX"}],["Two hubs each","MATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\nMATCH (a)-[:HAS_ROUTE]->(hub:Airport)-[:HAS_ROUTE]->(:Airport {iata: $dest})\nRETURN a.iata AS airport, coll.sort(collect(DISTINCT hub.iata)) AS hubs\nORDER BY airport",{"country":"MX","dest":"MEX"}],["Every relationship","MATCH (a)-[r]->(b)\nRETURN coalesce(a.iata, a.code) AS from, type(r) AS type, coalesce(b.iata, b.code) AS to\nORDER BY type, from, to",{}],["EXPLAIN it","EXPLAIN MATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\nWHERE a.iata <> $dest\n  AND NOT EXISTS { MATCH (a)-[:HAS_ROUTE]->(:Airport {iata: $dest}) }\nMATCH (a)-[:HAS_ROUTE]->(hub:Airport)-[:HAS_ROUTE]->(:Airport {iata: $dest})\nOPTIONAL MATCH (hub)-[:IN_COUNTRY]->(hc:Country)\nWITH a, count(DISTINCT hub) AS hubs, coll.sort(collect(DISTINCT hc.code)) AS hub_countries\nWHERE hubs >= 2\nRETURN a.iata AS airport, hub_countries\nORDER BY airport",{"country":"MX","dest":"MEX"}]],"ec":{"script":"// Witness 0.1.0 \u00b7 relate-db 1.0.1 \u00b7 seed 0\n// source sha256 b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734\n// params {\"country\": \"MX\"}\nCREATE\n  (n0:`Airport` {`altitude`: 127, `city`: 'Los Angeles', `descr`: 'Los Angeles International Airport', `iata`: 'LAX', `icao`: 'KLAX', `id`: 13, `lat`: 33.94250107, `lon`: -118.4079971, `longest`: 12091, `region`: 'US-CA', `runways`: 4}),\n  (n1:`Airport` {`altitude`: 38, `city`: 'Mazatl\u00e1n', `descr`: 'General Rafael Buelna International Airport', `iata`: 'MZT', `icao`: 'MMMZ', `id`: 413, `lat`: 23.1613998413, `lon`: -106.26599884, `longest`: 8858, `region`: 'MX-SIN', `runways`: 1}),\n  (n2:`Country` {`code`: 'MX', `name`: 'Mexico'}),\n  (n1)-[:`HAS_ROUTE` {`dist`: 1045}]->(n0),\n  (n1)-[:`IN_COUNTRY`]->(n2);\n","forms":{"exists":"// Which airports of $country have a flight to an airport they fly to? (the condition written with EXISTS over two MATCH clauses)\nMATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\nWHERE EXISTS { MATCH (a)-[:HAS_ROUTE]->(x:Airport) MATCH (x)<-[:HAS_ROUTE]-(a) }\nRETURN a.iata AS airport\nORDER BY airport\n","count":"// Which airports of $country have a flight to an airport they fly to? (the same condition written with COUNT over the same two MATCH clauses)\nMATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\nWHERE COUNT { MATCH (a)-[:HAS_ROUTE]->(x:Airport) MATCH (x)<-[:HAS_ROUTE]-(a) } > 0\nRETURN a.iata AS airport\nORDER BY airport\n"},"params":{"country":"MX"},"recorded":{"1.0.1":{"exists":[],"count":[{"airport":"MZT"}],"agree":false},"1.3.0":{"exists":[{"airport":"MZT"}],"count":[{"airport":"MZT"}],"agree":true}}}}}</script>
 <script>
 (function () {
   "use strict";
@@ -885,15 +978,76 @@ h1,h2{text-wrap:balance}
     });
   }
 
+  // ── Relate in the tab: a pinned @relate/relate-wasm release per module worker (site/relate/worker.js), running the
+  // steps in site/relate/live.js. A request that runs too long ends its worker (the browser build has no statement
+  // timeout); an engine that cannot start leaves the recorded run in place. ──
+  var LV = D.live;
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var CAN = !!(window.Worker && typeof WebAssembly === "object" && window.Promise);
+  function Engine(v) { this.v = v; this.w = null; this.seq = 0; this.wait = {}; this.boot = null; this.info = null; this.dead = null; }
+  Engine.prototype.start = function () {
+    var self = this;
+    if (self.dead) return Promise.reject(new Error(self.dead));
+    if (self.boot) return self.boot;
+    self.boot = new Promise(function (res, rej) {
+      if (!CAN) { rej(new Error("this browser has no WebAssembly workers")); return; }
+      try { self.w = new Worker(LV.worker, { type: "module" }); } catch (e) { rej(e); return; }
+      self.w.onmessage = function (ev) {
+        var m = ev.data || {}, p = self.wait[m.id];
+        if (!p) return;
+        delete self.wait[m.id]; clearTimeout(p.t);
+        if (m.ok) p.res(m.value); else { p.rej(new Error(m.error)); if (m.trap) self.stop("the engine stopped (a WebAssembly trap); it restarts on the next run"); }
+      };
+      self.w.onerror = function (e) { if (e && e.preventDefault) e.preventDefault(); self.stop((e && e.message) || "the engine worker did not load"); };
+      self.call("boot", [self.v], 30000).then(function (i) { self.info = i; res(i); }, rej);
+    });
+    self.boot.catch(function (e) { self.dead = String((e && e.message) || e); });
+    return self.boot;
+  };
+  Engine.prototype.call = function (op, args, ms) {
+    var self = this, id = ++self.seq;
+    return new Promise(function (res, rej) {
+      if (!self.w) { rej(new Error("the engine is not running")); return; }
+      self.wait[id] = { res: res, rej: rej, t: setTimeout(function () { self.stop("stopped after " + ms / 1000 + " s"); }, ms) };
+      self.w.postMessage({ id: id, op: op, args: args });
+    });
+  };
+  Engine.prototype.stop = function (why) {
+    if (this.w) this.w.terminate();
+    this.w = null; this.boot = null; this.info = null;
+    var w = this.wait; this.wait = {};
+    Object.keys(w).forEach(function (k) { clearTimeout(w[k].t); w[k].rej(new Error(why)); });
+  };
+  Engine.prototype.run = function (op, args, ms) { var self = this; return self.start().then(function () { return self.call(op, args, ms); }); };
+  var engines = {};
+  var eng = function (v) { return engines[v] || (engines[v] = new Engine(v)); };
+  var A = eng(LV.pin);
+  var st = document.getElementById("eng"), stT = document.getElementById("eng-t");
+  function status(state, h) { if (st) { st.setAttribute("data-state", state); stT.innerHTML = h; } }
+  function warm() {
+    if (A.dead || A.boot) return A.start();
+    status("load", "Loading Relate " + esc(LV.pin) + " into this tab…");
+    var p = A.start();
+    p.then(function (i) {
+      status("live", "<b>Live</b> · Relate " + esc(i.reported) + " (the engine's own answer) is running in this tab as WebAssembly, served from this site · started in " + fmt(i.boot_ms) + " ms · no server");
+    }, function (e) {
+      status("down", "<b>Recorded</b> · the engine did not start in this browser (" + esc(e.message) + "), so each pull replays the recorded run");
+      var rb = document.getElementById("ask-run"), rm = document.getElementById("ask-meta");
+      if (rb) { rb.disabled = true; rm.innerHTML = '<span class="pk rec">Not run</span> The engine did not start in this browser (' + esc(e.message) + "). On a clone, <code>relate query --database witnesses/two-hub.rl --read-only</code> runs the same queries."; }
+    });
+    return p;
+  }
+  var same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+  var names = function (rows) { return rows.length ? rows.map(function (r) { return esc(r.airport); }).join(", ") : "no rows"; };
+
   // ── exhibit A: pull a tag ──
   var ex = $("#exhibit .inst"), rows = document.getElementById("ex-rows"), mark = document.getElementById("ex-mark");
   var proof = document.getElementById("ex-proof"), exn = document.getElementById("ex-n"), tally = document.getElementById("tally");
   var regStamp = document.getElementById("reg-stamp");
   var byN = {}; D.tags.forEach(function (t) { byN[t.n] = t; });
-  var cur = 0, proven = {};
-  var esc = function (s) { return String(s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); };
+  var cur = 0, proven = {}, live = {}, liveSame = {}, pg = 0;
   function renderRows(t) {
-    var after = {}; if (t) t.rows.forEach(function (r) { after[r.airport] = r.hub_countries; });
+    var after = {}; if (t) t.rows.forEach(function (r) { after[r.airport] = r.hub_countries; }); // t: a tag, or a live result
     rows.innerHTML = D.base.map(function (r) {
       var a = esc(r.airport);
       if (!t) return "<tr><td>" + a + "</td><td>[" + esc(r.hub_countries.join(", ")) + "]</td></tr>";
@@ -910,8 +1064,8 @@ h1,h2{text-wrap:balance}
   function pull(n) {
     var t = byN[n]; if (!t) return;
     clearPulled();
-    if (cur === n) { cur = 0; renderRows(null); exn.textContent = "none"; mark.textContent = "Unchanged"; proof.innerHTML = "Exhibit " + n + " put back: the answer is the four rows again."; return; }
-    cur = n;
+    if (cur === n) { cur = 0; renderRows(null); exn.textContent = "none"; mark.textContent = "Unchanged"; proof.innerHTML = "Exhibit " + n + " put back: the answer is the four rows again."; askOn(); return; }
+    cur = n; askOn();
     var m = t.rel.match(/\((\w+)\)-\[:(\w+)\]->\((\w+)\)/);
     if (m && m[2] === "HAS_ROUTE") { var e = $('.ed[data-n="' + n + '"]', ex), g = $('.tg[data-n="' + n + '"]', ex); if (e) e.classList.add("pulled"); if (g) g.classList.add("pulled"); }
     else { var cc = $('.cc[data-n="' + n + '"]', ex); if (cc) cc.classList.add("pulled"); }
@@ -919,13 +1073,44 @@ h1,h2{text-wrap:balance}
     renderRows(t);
     exn.textContent = String(n);
     mark.textContent = "Changed"; mark.classList.remove("flip"); void mark.offsetWidth; mark.classList.add("flip");
-    proof.innerHTML = "Exhibit " + n + " pulled: <b>" + esc(t.rel) + "</b>. " + D.base.length + " rows → " + t.rows.length + " · " + esc(t.fx) + ". Relate transaction, rolled back, " + t.ms.toFixed(2) + " ms.";
+    var recorded = "Exhibit " + n + " pulled: <b>" + esc(t.rel) + "</b>. " + D.base.length + " rows → " + t.rows.length + " · " + esc(t.fx) + ". ";
     var b = $('.pull[data-n="' + n + '"]'); if (b) { b.setAttribute("aria-pressed", "true"); b.classList.add("done"); }
-    proven[n] = 1;
-    var k = Object.keys(proven).length;
-    tally.innerHTML = "<b>" + k + "</b> of " + D.tags.length + " change the answer";
+    var my = ++pg;
+    if (A.dead) { proof.innerHTML = '<span class="pk rec">Recorded</span> ' + recorded + "Relate transaction, rolled back, " + t.ms.toFixed(2) + " ms."; tick(n); return; }
+    proof.innerHTML = '<span class="pk run">Running</span> ' + recorded + "Relate " + esc(LV.pin) + " in this tab is rebuilding the witness without it…";
+    warm().then(function () { return A.call("pull", [LV.script, LV.query, LV.params, t.rel], 5000); }).then(function (r) {
+      var ok = same(r.rows, t.rows);
+      live[n] = 1; if (ok) liveSame[n] = 1;
+      if (my !== pg) { tick(); return; }
+      if (!ok) { // never paper over a difference: show what the engine returned
+        renderRows({ rows: r.rows });
+        $$(".out", ex).forEach(function (x) { x.classList.remove("out"); });
+        D.base.forEach(function (row) { if (!r.rows.some(function (q) { return q.airport === row.airport; })) { var nd = $('.nd[data-c="' + row.airport + '"]', ex); if (nd) nd.classList.add("out"); } });
+      }
+      proof.innerHTML = '<span class="pk live">Live</span> Exhibit ' + n + " pulled: <b>" + esc(t.rel) + "</b>. Relate " + esc(A.info ? A.info.reported : LV.pin) + " rebuilt the witness without it and re-ran the query in " + r.ms.toFixed(2) + " ms: " + D.base.length + " rows → " + r.rows.length + (ok ? " · " + esc(t.fx) + ". <b>Same rows as the recorded run.</b>" : '. <b class="bad">Not the recorded run</b> (' + t.rows.length + " rows there).");
+      tick(n);
+    }, function (e) {
+      if (my !== pg) return;
+      proof.innerHTML = '<span class="pk rec">Recorded</span> ' + recorded + "Relate transaction, rolled back, " + t.ms.toFixed(2) + " ms. (Live run unavailable: " + esc(e.message) + ".)";
+      tick(n);
+    });
+  }
+  function tick(n) {
+    if (n) proven[n] = 1;
+    var k = Object.keys(proven).length, lv = Object.keys(live).length, ls = Object.keys(liveSame).length;
+    tally.innerHTML = "<b>" + k + "</b> of " + D.tags.length + " change the answer" + (lv ? '<span class="tl"> · ' + lv + " live in this tab, " + ls + " of " + lv + " same as the recorded run</span>" : "");
     if (k === D.tags.length) { regStamp.classList.add("on"); }
   }
+  if (ex && CAN) {
+    // start the engine once a visitor is near the exhibit AND has scrolled, tapped or typed: a page load alone (or a
+    // crawler resizing the viewport) never fetches it; a pull or the query box starts it at once
+    var near = false, acted = false, go = function () { if (near && acted) warm().catch(function () {}); };
+    ["scroll", "wheel", "pointerdown", "keydown", "touchstart"].forEach(function (k) { window.addEventListener(k, function () { acted = true; go(); }, { once: true, passive: true }); });
+    if ("IntersectionObserver" in window) {
+      var wio = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { wio.disconnect(); near = true; go(); } }, { rootMargin: "600px 0px" });
+      wio.observe(document.getElementById("exhibit"));
+    } else near = true;
+  } else if (ex) { status("down", "<b>Recorded</b> · this browser has no WebAssembly workers, so each pull replays the recorded run"); A.dead = "no WebAssembly workers"; }
   if (ex) {
     tally.innerHTML = "<b>0</b> of " + D.tags.length + " pulled so far";
     $$(".pull").forEach(function (b) { b.addEventListener("click", function () { stopAll(); pull(+b.getAttribute("data-n")); }); });
@@ -942,6 +1127,100 @@ h1,h2{text-wrap:balance}
       if (allT.length) { stopAll(); return; }
       btn.textContent = "Stop";
       D.tags.forEach(function (t, i) { allT.push(setTimeout(function () { pull(t.n); if (i === D.tags.length - 1) { allT = []; btn.textContent = "Pull all " + D.tags.length + " again"; } }, RM ? i * 40 : i * 520)); });
+    });
+  }
+
+  // ── the query box: the visitor's own Cypher on a fresh copy of the witness (minus the pulled tag) ──
+  var askQ = document.getElementById("ask-q"), askP = document.getElementById("ask-p"), askRun = document.getElementById("ask-run");
+  var askMeta = document.getElementById("ask-meta"), askTbl = document.getElementById("ask-tbl"), askTry = document.getElementById("ask-try");
+  function short(v) {
+    if (v === null || v === undefined) return "null";
+    if (Array.isArray(v)) return "[" + v.map(short).join(", ") + "]";
+    if (typeof v === "object") {
+      if (v.kind === "node") { var p = v.properties || {}, k = p.iata !== undefined ? "iata" : p.code !== undefined ? "code" : Object.keys(p)[0]; return "(:" + v.labels.join(":") + (k ? " {" + k + ": " + JSON.stringify(p[k]) + "}" : "") + ")"; }
+      if (v.kind === "relationship") return "[:" + v.type + "]";
+      return JSON.stringify(v);
+    }
+    return typeof v === "string" ? v : JSON.stringify(v);
+  }
+  function planLines(op, depth, out) {
+    out.push(new Array(depth + 1).join("  ") + (depth ? "└ " : "") + op.operator + (op.details ? "  " + op.details : ""));
+    (op.children || []).forEach(function (c) { planLines(c, depth + 1, out); });
+    return out;
+  }
+  function askOn() {
+    var el = document.getElementById("ask-on"); if (!el) return;
+    var t = cur && byN[cur];
+    el.innerHTML = t ? "Runs on: the witness with exhibit " + t.n + " pulled, <code>" + esc(t.rel) + '</code> deleted, " + (D.tags.length - 1) + " relationships. <button type="button" class="linkish" id="ask-back">Put it back</button>' : "Runs on: the witness, " + D.tags.length + " relationships.";
+    var bk = document.getElementById("ask-back");
+    if (bk) bk.addEventListener("click", function () { pull(cur); });
+  }
+  function ask() {
+    if (!askRun || askRun.disabled) return;
+    var on = cur && byN[cur] ? byN[cur] : null, where = on ? "the witness with exhibit " + on.n + " pulled" : "the witness";
+    askRun.disabled = true;
+    askMeta.textContent = "Relate " + LV.pin + " is running it in this tab on a fresh copy of " + where + "…";
+    warm().then(function () { return A.call("ask", [LV.script, askQ.value, askP.value, on ? on.rel : null], 4000); }).then(function (r) {
+      var on2 = esc(where) + " (" + r.relationships + " relationships)";
+      if (r.refused) {
+        askTbl.innerHTML = "";
+        askMeta.innerHTML = '<span class="pk rec">Refused</span> This box reads; it does not write. Relate ran the statement on a throwaway copy and reported ' + Object.keys(r.writes).map(function (k) { return esc(k) + " " + r.writes[k]; }).join(", ") + ". The page dropped that copy; the witness is rebuilt before every run.";
+      } else if (r.error) {
+        askTbl.innerHTML = "";
+        askMeta.innerHTML = '<span class="pk rec">Relate says</span> ' + esc(r.error);
+      } else if (r.plan) {
+        askTbl.innerHTML = '<pre class="plan">' + esc(planLines(r.plan.root, 0, []).join("\n")) + "</pre>";
+        askMeta.innerHTML = '<span class="pk live">Live</span> The plan Relate would run on ' + on2 + " (<code>" + esc(r.plan.schema) + "</code>), " + r.ms.toFixed(2) + " ms. Witness reads these plans to drop relationship types a query cannot reach.";
+      } else {
+        var cols = r.columns;
+        askTbl.innerHTML = cols.length ? "<table class=\"ans-t\"><thead><tr>" + cols.map(function (c) { return '<th scope="col">' + esc(c) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+          r.rows.map(function (row) { return "<tr>" + cols.map(function (c) { return "<td>" + esc(short(row[c])) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>" : "";
+        askMeta.innerHTML = '<span class="pk live">Live</span> ' + fmt(r.total) + (r.total === 1 ? " row" : " rows") + " from " + on2 + " in " + r.ms.toFixed(2) + " ms" + (r.total > r.rows.length ? ", the first " + r.rows.length + " shown" : "") + ".";
+      }
+    }, function (e) {
+      askTbl.innerHTML = "";
+      askMeta.innerHTML = /^stopped/.test(e.message)
+        ? '<span class="pk rec">Stopped</span> after 4 s. Relate\'s browser build has no statement timeout, so the page ended its worker; the engine restarts on the next run.'
+        : '<span class="pk rec">Not run</span> The engine did not start in this browser (' + esc(e.message) + "). On a clone, <code>relate query --database witnesses/two-hub.rl --read-only</code> runs the same query.";
+    }).then(function () { askRun.disabled = !!A.dead; });
+  }
+  if (askRun && CAN) {
+    askRun.disabled = false;
+    askMeta.textContent = "Pick an example or write your own, then run it.";
+    LV.examples.forEach(function (x, i) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip try"; b.textContent = x[0];
+      b.addEventListener("click", function () { askQ.value = x[1]; askP.value = JSON.stringify(x[2]); ask(); });
+      askTry.appendChild(b);
+    });
+    askRun.addEventListener("click", ask);
+    [askQ, askP].forEach(function (f) {
+      f.addEventListener("keydown", function (e) { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); ask(); } });
+      f.addEventListener("focus", function () { warm().catch(function () {}); }, { once: true });
+    });
+  }
+
+  // ── the engine case: both forms on the release the visitor picks, each release its own engine ──
+  var ecWrap = document.getElementById("ec-live"), ecOut = document.getElementById("ec-out");
+  if (ecWrap && CAN) {
+    ecWrap.hidden = false;
+    var ecBtns = $$("button[data-v]", ecWrap);
+    ecBtns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        var v = b.getAttribute("data-v"), E = eng(v), rec = LV.ec.recorded[v];
+        ecBtns.forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+        $$(".rel-tape tr[data-v]").forEach(function (tr) { tr.classList.remove("live"); });
+        ecOut.innerHTML = E.info ? "Running both forms on Relate " + esc(v) + "…" : "Loading Relate " + esc(v) + " into this tab…";
+        E.run("pair", [LV.ec.script, LV.ec.forms, LV.ec.params], 5000).then(function (r) {
+          var ok = !!rec && same(r.exists, rec.exists) && same(r.count, rec.count) && r.agree === rec.agree;
+          if (b.getAttribute("aria-pressed") !== "true") return;
+          ecOut.innerHTML = '<span class="pk live">Live</span> Relate <b>' + esc(E.info.reported) + "</b> (the engine's own answer), in this tab: <code>COUNT</code> form → " + names(r.count) + " · <code>EXISTS</code> form → " + names(r.exists) + " · <b class=\"" + (r.agree ? "" : "bad") + "\">" + (r.agree ? "they agree" : "they disagree") + "</b>. " + (ok ? "Same as the recorded row." : "<b class=\"bad\">Not the recorded row.</b>");
+          var tr = $('.rel-tape tr[data-v="' + v + '"]'); if (tr && ok) tr.classList.add("live");
+        }, function (e) {
+          if (b.getAttribute("aria-pressed") !== "true") return;
+          ecOut.innerHTML = '<span class="pk rec">Not run</span> Relate ' + esc(v) + " did not start in this browser (" + esc(e.message) + "). The table holds the recorded run.";
+        });
+      });
     });
   }
 

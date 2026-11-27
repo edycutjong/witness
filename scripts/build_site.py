@@ -67,6 +67,26 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import site_parts as sp  # noqa: E402
 
 PARTS = Path(__file__).resolve().parent / "site"
+import vendor_relate_wasm as vrw  # noqa: E402
+
+# ── Relate in the tab: the self-hosted @relate/relate-wasm engines (scripts/vendor_relate_wasm.py) run the witness in a
+# module worker (scripts/site/worker.js) through the same steps the Node parity check runs (scripts/site/live.js) ─────
+_vbad = vrw.check()
+assert not _vbad, _vbad
+ENGINES = json.loads((SITE / "relate" / "engines.json").read_text())
+WASM = json.loads((ROOT / "evidence" / "wasm-parity.json").read_text())
+LIVE_PIN = man["versions"]["relate_db"]
+LIVE_FIX = [v for v in ENGINES if v != LIVE_PIN]
+assert WASM["ok"] and WASM["engine"]["version"] == WASM["engine"]["reported"] == LIVE_PIN, WASM["engine"]
+assert WASM["pulls"]["same_rows"] == WASM["pulls"]["of"] == WASM["pulls"]["changed"] == sp.pulls["of"], WASM["pulls"]
+assert WASM["baseline_same"] and WASM["write_refused"] and all(e["same_as_recorded"] for e in WASM["engine_case"])
+assert LIVE_PIN in ENGINES and len(LIVE_FIX) == 1, sorted(ENGINES)
+assert WASM["live_js_sha256"] == hashlib.sha256((PARTS / "live.js").read_bytes()).hexdigest(), "evidence/wasm-parity.json is older than scripts/site/live.js: run node scripts/wasm_parity.mjs --out evidence/wasm-parity.json"
+LIVE_FIX_V = LIVE_FIX[0]
+LIVE_FILES = ("live.js", "worker.js")
+LIVE_KEY = hashlib.sha256(
+    b"".join((PARTS / f).read_bytes() for f in LIVE_FILES) + (SITE / "relate" / "engines.json").read_bytes()
+).hexdigest()[:10]
 fix = json.loads((ROOT / "fixtures" / "mex-foreign.manifest.json").read_text())
 assert fix["check"]["check_text"].startswith(
     f"{fix['witness']['relationships']} of {fix['witness']['relationships']} change"
@@ -111,6 +131,10 @@ FAQ = [
     (
         "Why Relate rather than a Neo4j server?",
         f"The inner loop is one transaction per trial, in process, on a single file: {relate_tps} trials/s here against {neo_tps} over Bolt to Neo4j in Docker on the same machine. And a witness is a file you can commit, hand over and open with plain <code>relate</code>, with no server.",
+    ),
+    (
+        "Are the pulls on this page real?",
+        f"Yes, when your browser can run them. The page loads <code>@relate/relate-wasm</code> {LIVE_PIN}, the release the witness was reduced on, from this site into a worker, rebuilds the witness from its <code>.cypher</code> script, deletes the tag you pulled and re-runs the query; each answer says <b>Live</b> and whether it matches the recorded run. If the engine cannot start, the pull replays the recording and says <b>Recorded</b>. <code>scripts/wasm_parity.mjs</code> runs the same steps outside the browser: <code>evidence/wasm-parity.json</code>.",
     ),
     (
         "How does an agent use it?",
@@ -184,7 +208,7 @@ def cases_vals() -> dict:
         "EC_TRIALS": ec["run"]["trials"],
         "EC_CHECK": ec["check"]["check_text"].split(" (")[0],
         "EC_VERSIONS": "\n            ".join(
-            f'<tr class="{"agr" if v["the_two_forms_agree"] else "dis"}"><td>{html.escape(v["relate_db"])}</td>'
+            f'<tr class="{"agr" if v["the_two_forms_agree"] else "dis"}" data-v="{html.escape(v["relate_db"])}"><td>{html.escape(v["relate_db"])}</td>'
             f"<td>{html.escape(', '.join(r['airport'] for r in v['count-two-match']) or 'no rows')}</td>"
             f"<td>{html.escape(', '.join(r['airport'] for r in v['exists-two-match']) or 'no rows')}</td>"
             f"<td>{'agree' if v['the_two_forms_agree'] else 'disagree'}</td></tr>"
@@ -219,6 +243,45 @@ QUESTION = (
     .replace("$country", man["params"]["country"])
     .replace("$dest", man["params"]["dest"])
 )
+
+
+_EC_MAN = json.loads((ROOT / "witnesses" / "exists-count.manifest.json").read_text())
+_EC_REC = {v["relate_db"]: v for v in (json.loads(ln) for ln in (ROOT / "evidence" / "relate-versions.jsonl").read_text().splitlines())}
+_Q = (ROOT / sp.pulls["query"]).read_text()
+_HUBS_Q = (
+    "MATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\n"
+    "MATCH (a)-[:HAS_ROUTE]->(hub:Airport)-[:HAS_ROUTE]->(:Airport {iata: $dest})\n"
+    "RETURN a.iata AS airport, coll.sort(collect(DISTINCT hub.iata)) AS hubs\n"
+    "ORDER BY airport"
+)
+_ALL_Q = (
+    "MATCH (a)-[r]->(b)\n"
+    "RETURN coalesce(a.iata, a.code) AS from, type(r) AS type, coalesce(b.iata, b.code) AS to\n"
+    "ORDER BY type, from, to"
+)
+LIVE = {
+    "worker": f"/relate/worker.js?v={LIVE_KEY}",
+    "pin": LIVE_PIN,
+    "fix": LIVE_FIX_V,
+    "script": (ROOT / "witnesses" / "two-hub.cypher").read_text(),
+    "query": _Q,
+    "params": sp.pulls["params"],
+    "examples": [
+        ["The question", _Q.split("\n", 1)[1].rstrip("\n"), sp.pulls["params"]],
+        ["Two hubs each", _HUBS_Q, sp.pulls["params"]],
+        ["Every relationship", _ALL_Q, {}],
+        ["EXPLAIN it", "EXPLAIN " + _Q.split("\n", 1)[1].rstrip("\n"), sp.pulls["params"]],
+    ],
+    "ec": {
+        "script": (ROOT / "witnesses" / "exists-count.cypher").read_text(),
+        "forms": {k: (ROOT / "queries" / f"{k}-two-match.cypher").read_text() for k in ("exists", "count")},
+        "params": _EC_MAN["params"],
+        "recorded": {
+            v: {"exists": _EC_REC[v]["exists-two-match"], "count": _EC_REC[v]["count-two-match"], "agree": _EC_REC[v]["the_two_forms_agree"]}
+            for v in ENGINES
+        },
+    },
+}
 
 
 def landing_page() -> str:
@@ -302,7 +365,13 @@ def landing_page() -> str:
         ),
         "FAQ": "\n      ".join(f"<details><summary>{html.escape(q)}</summary><p>{a}</p></details>" for q, a in FAQ),
         "SOURCE_FOOT": f'<a href="{REPO}">source</a>' if REPO_PUBLIC else "source opens at submission",
-        "DATA": sp.page_json(),
+        "DATA": json.dumps({**sp.PAGE_DATA, "live": LIVE}, separators=(",", ":")).replace("</", "<\\/"),
+        "PIN": LIVE_PIN,
+        "ASK_Q": html.escape(_Q.split("\n", 1)[1].rstrip("\n")),
+        "ASK_P": html.escape(json.dumps(sp.pulls["params"]), quote=True),
+        "FIX": LIVE_FIX_V,
+        "WASM_SAME": WASM["pulls"]["same_rows"],
+        "WASM_OF": WASM["pulls"]["of"],
         "JS": (PARTS / "landing.js").read_text(),
         **cases_vals(),
     }
@@ -524,6 +593,8 @@ served = served.replace(
     1,
 )
 (SITE / "exhibit" / "two-hub.html").write_text(served)
+for _f in LIVE_FILES:
+    shutil.copyfile(PARTS / _f, SITE / "relate" / _f)
 page = landing_page()
 (SITE / "index.html").write_text(page)
 (SITE / "deck").mkdir(exist_ok=True)
@@ -669,7 +740,7 @@ assert (
 )
 _demo_md = (ROOT / "DEMO.md").read_text()
 DEMO_SECTIONS = re.findall(r"^## \d+\. (.+)$", _demo_md, re.M)
-assert len(DEMO_SECTIONS) == 14 and [s.split(":")[0].split(",")[0] for s in DEMO_SECTIONS] == [
+assert len(DEMO_SECTIONS) == 15 and [s.split(":")[0].split(",")[0] for s in DEMO_SECTIONS] == [
     "Headline",
     "Determinism",
     "Relate vs Neo4j",
@@ -684,6 +755,7 @@ assert len(DEMO_SECTIONS) == 14 and [s.split(":")[0].split(",")[0] for s in DEMO
     "Re-proved on a second engine",
     "One query on two engines",
     "The differential run",
+    "Relate in the tab",
 ], DEMO_SECTIONS
 _e2e = re.search(r"\(([\d.]+) s end to end", sp.demo)
 assert _e2e
@@ -752,6 +824,13 @@ RECEIPTS = [
         "Deleting any one of them from the witness changes the answer.",
         f"Checked on relate-db and on the Relate CLI: `{check}`.",
         [(_MAN, ""), ("evidence/pull-each-tag.json", "what each deletion does to the answer")],
+    ),
+    (
+        f"{WASM['pulls']['same_rows']} of {WASM['pulls']['of']} live",
+        f"<em>{WASM['pulls']['same_rows']}</em>" + _to.format("of") + f"{WASM['pulls']['of']}" + _u.format("live"),
+        f"The same pulls, run by Relate {LIVE_PIN} compiled to WebAssembly, in the reader's browser tab.",
+        f"The landing's pull-a-tag runs `@relate/relate-wasm` {LIVE_PIN}, pinned and served from the site, in a module worker: it rebuilds the witness from `witnesses/two-hub.cypher`, deletes the tag and re-runs the query, where the Python run rolls back a transaction (the browser build has none). `scripts/wasm_parity.mjs` runs the page's own steps (`site/relate/live.js`) on the same engine files under Node: {WASM['pulls']['same_rows']} of {WASM['pulls']['of']} pulls give the recorded rows, and the engine case gives the recorded rows on {LIVE_PIN} and {LIVE_FIX_V}. A query box runs your own Cypher on the witness and refuses writes.",
+        [("evidence/wasm-parity.json", ""), ("site/relate/engines.json", "the pinned engines"), ("scripts/site/live.js", "the steps")],
     ),
     (
         f"{TA['rels']} → {w_rels}",
@@ -910,6 +989,11 @@ CRITERIA = [
                 ["evidence/pull-each-tag.json"],
             ),
             (
+                "Relate runs in the reader's tab.",
+                f"On the landing, Relate {LIVE_PIN} compiled to WebAssembly re-runs each pull, the reader's own read queries and the engine case on two releases; the page's steps give the recorded rows on {WASM['pulls']['same_rows']} of {WASM['pulls']['of']} pulls",
+                ["evidence/wasm-parity.json", "scripts/site/live.js"],
+            ),
+            (
                 "The graph is persisted in the repository.",
                 f"The source, {len(list((ROOT / 'witnesses').glob('*.rl')))} witnesses, a fixture and the ledger of reductions are committed `.rl` stores",
                 ["data/air-routes.rl", "witnesses/two-hub.rl", "witness.rl"],
@@ -1001,7 +1085,7 @@ CRITERIA = [
             ),
             (
                 "Commands, not only claims.",
-                f"`DEMO.md` gives the command or the recorded run for {len(DEMO_SECTIONS)} sets of numbers: the headline, determinism, the Neo4j comparison, fixture mode (with the commands to create the Neo4j it pulls from), the MCP tools, the tests, the query disagreement, the wrong-answer repro, what each deletion does, the engine disagreement, other query shapes, the Neo4j re-proof, the two-engine door with the changelog fixtures, and the differential run",
+                f"`DEMO.md` gives the command or the recorded run for {len(DEMO_SECTIONS)} sets of numbers: the headline, determinism, the Neo4j comparison, fixture mode (with the commands to create the Neo4j it pulls from), the MCP tools, the tests, the query disagreement, the wrong-answer repro, what each deletion does, the engine disagreement, other query shapes, the Neo4j re-proof, the two-engine door with the changelog fixtures, the differential run, and the live pulls in the browser against the recording",
                 [],
             ),
             (

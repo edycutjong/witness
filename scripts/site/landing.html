@@ -93,6 +93,7 @@
   <div class="wrap">
     <p class="lbl">Exhibit A <span>·</span> pull a tag</p>
     <h2 id="ex-h">Pull any tag. <em>The answer moves.</em></h2>
+    <p class="eng" id="eng" data-state="off" aria-live="polite"><i aria-hidden="true"></i><span id="eng-t">Each pull below shows the recorded run. With JavaScript, Relate {{PIN}} runs the pulls live in this tab.</span></p>
     <div class="ex-grid">
       <div class="ex-left">
         <div class="ex-draw">{{EX_SVG}}</div>
@@ -103,7 +104,7 @@
         </div>
       </div>
       <div class="ex-right">
-        <p class="lede">The agent's question: <q>{{QUESTION}}</q> The answer is four airports. The 13 red tags are the witness's routes, the 9 country codes its country links; all 22 are in the register. Pull any one to see what Relate returned without it.</p>
+        <p class="lede">The agent's question: <q>{{QUESTION}}</q> The answer is four airports. The 13 red tags are the witness's routes, the 9 country codes its country links; all 22 are in the register. Pull any one to see the answer without it: Relate {{PIN}}, compiled to WebAssembly and running in this tab, rebuilds the witness, deletes that relationship and re-runs the query. If the engine cannot start, the pull replays the recorded run.</p>
         <div class="reg-head"><span class="lbl">The register</span><span class="lbl">pull it and</span></div>
         <ol class="reg" id="reg">{{REGISTER}}</ol>
         <div class="reg-foot">
@@ -113,7 +114,28 @@
         <span class="stamp red reg-stamp" id="reg-stamp">{{W_RELS}} of {{W_RELS}} change the answer</span>
       </div>
     </div>
-    <p class="ex-src data">Recorded {{PULL_UTC}} UTC by <code>scripts/pull_each_tag.py</code> on a copy of <code>witnesses/two-hub.rl</code> → <code>evidence/pull-each-tag.json</code>. <code>witness check</code> runs the same probes on relate-db and on the Relate CLI.</p>
+    <p class="ex-src data">Recorded {{PULL_UTC}} UTC by <code>scripts/pull_each_tag.py</code> on a copy of <code>witnesses/two-hub.rl</code> → <code>evidence/pull-each-tag.json</code>. <code>witness check</code> runs the same probes on relate-db and on the Relate CLI. Live pulls run <code>site/relate/live.js</code> on <code>@relate/relate-wasm</code> {{PIN}}, served from this site; <code>scripts/wasm_parity.mjs</code> runs the same file outside the browser and matches the recording on {{WASM_SAME}} of {{WASM_OF}} pulls (<code>evidence/wasm-parity.json</code>).</p>
+    <div class="ask" id="ask">
+      <div class="ask-head">
+        <h3 id="ask-h">Cross-examine it yourself.</h3>
+        <p>Your own Cypher, run by Relate {{PIN}} in this tab on a fresh copy of the witness (<code>witnesses/two-hub.cypher</code>, {{W_RELS}} relationships), with the tag you pulled above deleted. Reads only: a statement that writes is refused.</p>
+      </div>
+      <div class="ask-grid">
+        <div class="ask-in">
+          <div class="ask-try" role="group" aria-label="Example queries" id="ask-try"></div>
+          <label class="lbl" for="ask-q">Cypher</label>
+          <textarea id="ask-q" spellcheck="false" autocapitalize="off" autocomplete="off" rows="11">{{ASK_Q}}</textarea>
+          <label class="lbl" for="ask-p">Parameters, JSON</label>
+          <input id="ask-p" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" value="{{ASK_P}}">
+          <div class="ask-go"><button type="button" class="btn solid" id="ask-run" disabled>Run in this tab</button><span class="fine data"><kbd>Ctrl</kbd> / <kbd>&#8984;</kbd> + <kbd>Enter</kbd></span></div>
+          <p class="ask-on data" id="ask-on">Runs on: the witness, {{W_RELS}} relationships.</p>
+        </div>
+        <div class="ask-out">
+          <p class="ask-meta data" id="ask-meta" aria-live="polite">Needs JavaScript and WebAssembly. Without them: <code>relate query --database witnesses/two-hub.rl --read-only</code> on a clone gives the same answers.</p>
+          <div class="ask-tbl" id="ask-tbl" tabindex="0" role="region" aria-label="Query result"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -156,7 +178,14 @@
             {{EC_VERSIONS}}
           </tbody>
         </table>
-        <p class="cap">Each row rebuilds the witness's script under that release and runs both forms. <code>bench/relate_versions.py</code> · <code>evidence/relate-versions.jsonl</code></p>
+        <div class="ec-live" id="ec-live" hidden>
+          <div class="ec-btns" role="group" aria-label="Run both forms on a Relate release, in this tab">
+            <button type="button" class="btn" data-v="{{PIN}}" aria-pressed="false">Run on {{PIN}}</button>
+            <button type="button" class="btn" data-v="{{FIX}}" aria-pressed="false">Run on {{FIX}}</button>
+          </div>
+          <p class="ec-out data" id="ec-out" aria-live="polite">Both forms on the two-relationship witness, in this tab, on the release you pick. Each release is its own engine, served from this site.</p>
+        </div>
+        <p class="cap">Each row rebuilds the witness's script under that release and runs both forms. <code>bench/relate_versions.py</code> · <code>evidence/relate-versions.jsonl</code>. The two buttons run the same two queries on <code>@relate/relate-wasm</code> {{PIN}} and {{FIX}}.</p>
       </figure>
     </article>
     <div class="case-grid">

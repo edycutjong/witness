@@ -6,3 +6,9 @@ https://github.com/krlawrence/graph (commit efd3b1ae636f602577cfbccb16ecfe358a02
 published in that repository under the Apache License 2.0.
 Modified: reshaped into a property graph for Relate; the version node was dropped.
 See data/SOURCE.md.
+
+The landing page (site/relate/1.0.1/ and site/relate/1.3.0/) serves, unmodified, files from the npm package
+@relate/relate-wasm versions 1.0.1 and 1.3.0 (relate.js, relate_bg.wasm, trap.js, snippets/, package.json),
+Relate compiled to WebAssembly, published under the Apache License 2.0 (https://github.com/relatedb/relate).
+Their source tarballs, registry integrity hashes and per-file SHA-256 are listed in site/relate/engines.json;
+scripts/vendor_relate_wasm.py fetches and verifies them.

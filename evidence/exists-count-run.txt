@@ -1,0 +1,87 @@
+# Recorded 2026-11-27 21:11 +0700 on Darwin arm64, relate-db 1.0.1, Relate CLI v1.0.1. Command (from the repo root):
+# uv run witness why -f queries/count-two-match.cypher --other queries/exists-two-match.cypher --predicate disagree --param country=MX --name exists-count --store data/air-routes.rl --out <temp dir> --no-ledger
+# The two queries state one condition two ways (EXISTS and COUNT over the same two MATCH clauses). Relate's v1.3.0 release notes
+# list the fix: "EXISTS over two MATCH clauses agrees with COUNT on relationship uniqueness". On the pinned 1.0.1 they disagree:
+# the COUNT form returns 59 airports (below), the EXISTS form none. The five files were then copied to witnesses/.
+ANSWER  59 rows on the full graph
+  airport
+  ACA
+  AGU
+  BJX
+  CEN
+  CJS
+  CLQ
+  CME
+  CPE
+  CTM
+  CUL
+  CUN
+  CUU
+  CVM
+  CZM
+  DGO
+  GDL
+  HMO
+  HUX
+  JAL
+  LAP
+  LMM
+  LOV
+  LTO
+  LZC
+  MAM
+  MEX
+  MID
+  MLM
+  MTT
+  MTY
+  MXL
+  MZT
+  NLD
+  OAX
+  PAZ
+  PBC
+  PDS
+  PQM
+  PVR
+  PXM
+  QRO
+  REX
+  SJD
+  SLP
+  SLW
+  TAM
+  TAP
+  TGZ
+  TIJ
+  TLC
+  TPQ
+  TRC
+  TSL
+  UPN
+  VER
+  VSA
+  ZCL
+  ZIH
+  ZLO
+
+WITNESS  2 relationships · 3 nodes, out of 57,645 · 3,748
+  reduced in 0.695 s · 49 trials · 0 inconclusive · seed 0 (4.275 s end to end: copy, guard, order check, reduce, check)
+
+EXHIBITS  (register order; every one is needed)
+   1  (MZT)-[:HAS_ROUTE]->(LAX)
+   2  (MZT)-[:IN_COUNTRY]->(MX)
+
+CHECK  2 of 2 end the disagreement (2 of 2 relationships, 0 of 0 isolated nodes)
+  relate CLI: sufficiency + 2 of 2 necessity probes cross-checked
+
+FILES  <temp dir>/exists-count.rl (+ .cypher .manifest.json .html .trace.json)
+
+VERIFIED · deletion-minimal: no single relationship can be removed without ending the disagreement · determinism claimed
+
+# Plain relate (CLI v1.0.1) on the 2-relationship witness, the COUNT form then the EXISTS form:
+# relate query --database witnesses/exists-count.rl --read-only --param country=MX < queries/count-two-match.cypher
+rows[1]{airport}:
+  MZT
+# relate query --database witnesses/exists-count.rl --read-only --param country=MX < queries/exists-two-match.cypher
+rows[0]{airport}:

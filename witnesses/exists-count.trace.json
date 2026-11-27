@@ -1,0 +1,449 @@
+{
+ "name": "exists-count",
+ "phases": {
+  "after_a": [
+   3,
+   3
+  ],
+  "after_b": [
+   3,
+   2
+  ],
+  "after_plan": [
+   3741,
+   54141
+  ],
+  "commits": 16,
+  "final_counts": [
+   3,
+   2
+  ],
+  "fixpoint_rounds": 0,
+  "inconclusive": 0,
+  "phase_a_removed": 3738,
+  "phase_b_removed": 1,
+  "phase_c_removed": 0,
+  "seconds": 0.695,
+  "seed": 0,
+  "start_counts": [
+   3748,
+   57645
+  ],
+  "ties": 0,
+  "trial_ms_p50": 0.312,
+  "trial_ms_p95": 46.536,
+  "trials": 49
+ },
+ "plan": {
+  "dropped_labels": [
+   "Continent"
+  ],
+  "dropped_nodes": 7,
+  "dropped_rels": 3504,
+  "dropped_types": [
+   "ON_CONTINENT"
+  ],
+  "kept": false,
+  "names": [
+   "Airport",
+   "Country",
+   "HAS_ROUTE",
+   "IN_COUNTRY"
+  ]
+ },
+ "schema": "witness.trace/v1",
+ "trials": [
+  {
+   "holds": false,
+   "ms": 46.536,
+   "n": 1,
+   "nodes": 3748,
+   "phase": "empty-graph",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 84.005,
+   "n": 2,
+   "nodes": 7,
+   "phase": "plan",
+   "rels": 3504
+  },
+  {
+   "holds": true,
+   "ms": 46.951,
+   "n": 3,
+   "nodes": 1870,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 21.035,
+   "n": 4,
+   "nodes": 1871,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 16.924,
+   "n": 5,
+   "nodes": 935,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 9.341,
+   "n": 6,
+   "nodes": 936,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 4.959,
+   "n": 7,
+   "nodes": 468,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 5.834,
+   "n": 8,
+   "nodes": 468,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 2.8,
+   "n": 9,
+   "nodes": 234,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 2.188,
+   "n": 10,
+   "nodes": 234,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 1.227,
+   "n": 11,
+   "nodes": 117,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 1.378,
+   "n": 12,
+   "nodes": 117,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.903,
+   "n": 13,
+   "nodes": 58,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.986,
+   "n": 14,
+   "nodes": 59,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.533,
+   "n": 15,
+   "nodes": 29,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.661,
+   "n": 16,
+   "nodes": 30,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.489,
+   "n": 17,
+   "nodes": 14,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.425,
+   "n": 18,
+   "nodes": 15,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.283,
+   "n": 19,
+   "nodes": 7,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.241,
+   "n": 20,
+   "nodes": 7,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.298,
+   "n": 21,
+   "nodes": 7,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.275,
+   "n": 22,
+   "nodes": 8,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.228,
+   "n": 23,
+   "nodes": 5,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.292,
+   "n": 24,
+   "nodes": 6,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.348,
+   "n": 25,
+   "nodes": 5,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.309,
+   "n": 26,
+   "nodes": 6,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.326,
+   "n": 27,
+   "nodes": 2,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.315,
+   "n": 28,
+   "nodes": 3,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.246,
+   "n": 29,
+   "nodes": 2,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.285,
+   "n": 30,
+   "nodes": 3,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.236,
+   "n": 31,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.22,
+   "n": 32,
+   "nodes": 2,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.309,
+   "n": 33,
+   "nodes": 2,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.303,
+   "n": 34,
+   "nodes": 2,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.222,
+   "n": 35,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.242,
+   "n": 36,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.195,
+   "n": 37,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.341,
+   "n": 38,
+   "nodes": 2,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.288,
+   "n": 39,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.152,
+   "n": 40,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.303,
+   "n": 41,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.342,
+   "n": 42,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.33,
+   "n": 43,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.159,
+   "n": 44,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.312,
+   "n": 45,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.212,
+   "n": 46,
+   "nodes": 0,
+   "phase": "B",
+   "rels": 1
+  },
+  {
+   "holds": false,
+   "ms": 0.18,
+   "n": 47,
+   "nodes": 0,
+   "phase": "B",
+   "rels": 2
+  },
+  {
+   "holds": false,
+   "ms": 0.155,
+   "n": 48,
+   "nodes": 0,
+   "phase": "B",
+   "rels": 1
+  },
+  {
+   "holds": false,
+   "ms": 0.15,
+   "n": 49,
+   "nodes": 0,
+   "phase": "B",
+   "rels": 1
+  }
+ ]
+}

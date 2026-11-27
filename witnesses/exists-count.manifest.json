@@ -1,0 +1,257 @@
+{
+  "baseline": {
+    "columns": [
+      "airport"
+    ],
+    "rows": [
+      {
+        "airport": "ACA"
+      },
+      {
+        "airport": "AGU"
+      },
+      {
+        "airport": "BJX"
+      },
+      {
+        "airport": "CEN"
+      },
+      {
+        "airport": "CJS"
+      },
+      {
+        "airport": "CLQ"
+      },
+      {
+        "airport": "CME"
+      },
+      {
+        "airport": "CPE"
+      },
+      {
+        "airport": "CTM"
+      },
+      {
+        "airport": "CUL"
+      },
+      {
+        "airport": "CUN"
+      },
+      {
+        "airport": "CUU"
+      },
+      {
+        "airport": "CVM"
+      },
+      {
+        "airport": "CZM"
+      },
+      {
+        "airport": "DGO"
+      },
+      {
+        "airport": "GDL"
+      },
+      {
+        "airport": "HMO"
+      },
+      {
+        "airport": "HUX"
+      },
+      {
+        "airport": "JAL"
+      },
+      {
+        "airport": "LAP"
+      },
+      {
+        "airport": "LMM"
+      },
+      {
+        "airport": "LOV"
+      },
+      {
+        "airport": "LTO"
+      },
+      {
+        "airport": "LZC"
+      },
+      {
+        "airport": "MAM"
+      },
+      {
+        "airport": "MEX"
+      },
+      {
+        "airport": "MID"
+      },
+      {
+        "airport": "MLM"
+      },
+      {
+        "airport": "MTT"
+      },
+      {
+        "airport": "MTY"
+      },
+      {
+        "airport": "MXL"
+      },
+      {
+        "airport": "MZT"
+      },
+      {
+        "airport": "NLD"
+      },
+      {
+        "airport": "OAX"
+      },
+      {
+        "airport": "PAZ"
+      },
+      {
+        "airport": "PBC"
+      },
+      {
+        "airport": "PDS"
+      },
+      {
+        "airport": "PQM"
+      },
+      {
+        "airport": "PVR"
+      },
+      {
+        "airport": "PXM"
+      },
+      {
+        "airport": "QRO"
+      },
+      {
+        "airport": "REX"
+      },
+      {
+        "airport": "SJD"
+      },
+      {
+        "airport": "SLP"
+      },
+      {
+        "airport": "SLW"
+      },
+      {
+        "airport": "TAM"
+      },
+      {
+        "airport": "TAP"
+      },
+      {
+        "airport": "TGZ"
+      },
+      {
+        "airport": "TIJ"
+      },
+      {
+        "airport": "TLC"
+      },
+      {
+        "airport": "TPQ"
+      },
+      {
+        "airport": "TRC"
+      },
+      {
+        "airport": "TSL"
+      },
+      {
+        "airport": "UPN"
+      },
+      {
+        "airport": "VER"
+      },
+      {
+        "airport": "VSA"
+      },
+      {
+        "airport": "ZCL"
+      },
+      {
+        "airport": "ZIH"
+      },
+      {
+        "airport": "ZLO"
+      }
+    ],
+    "sha256": "904f29c92a3a401f3b3c8e78a9f46beec7fe94aef41b26a3231061cf8aaf7601"
+  },
+  "check": {
+    "check_text": "2 of 2 end the disagreement (2 of 2 relationships, 0 of 0 isolated nodes)",
+    "cli": "relate CLI: sufficiency + 2 of 2 necessity probes cross-checked",
+    "cli_used": true,
+    "disagreements": [],
+    "inconclusive": 0,
+    "probes": [
+      {
+        "cli_necessary": true,
+        "element": "(MZT)-[:HAS_ROUTE]->(LAX)",
+        "i": 1,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MZT)-[:IN_COUNTRY]->(MX)",
+        "i": 2,
+        "kind": "rel",
+        "necessary": true
+      }
+    ],
+    "reasons": [],
+    "sufficient": true,
+    "verified": true
+  },
+  "comparison": {
+    "float_digits": 12,
+    "rows": "bag",
+    "strict_lists": false
+  },
+  "determinism_claimed": true,
+  "name": "exists-count",
+  "params": {
+    "country": "MX"
+  },
+  "predicate": {
+    "kind": "disagree",
+    "other_baseline_sha256": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
+    "other_statement": "// Which airports of $country have a flight to an airport they fly to? (the condition written with EXISTS over two MATCH clauses)\nMATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\nWHERE EXISTS { MATCH (a)-[:HAS_ROUTE]->(x:Airport) MATCH (x)<-[:HAS_ROUTE]-(a) }\nRETURN a.iata AS airport\nORDER BY airport"
+  },
+  "reasons": [],
+  "run": {
+    "capped": null,
+    "commits": 16,
+    "inconclusive": 0,
+    "seconds": 0.695,
+    "ties": 0,
+    "trials": 49
+  },
+  "schema": "witness.manifest/v1",
+  "seed": 0,
+  "source": {
+    "nodes": 3748,
+    "path": "data/air-routes.rl",
+    "relationships": 57645,
+    "sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+  },
+  "statement": "// Which airports of $country have a flight to an airport they fly to? (the same condition written with COUNT over the same two MATCH clauses)\nMATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})\nWHERE COUNT { MATCH (a)-[:HAS_ROUTE]->(x:Airport) MATCH (x)<-[:HAS_ROUTE]-(a) } > 0\nRETURN a.iata AS airport\nORDER BY airport\n",
+  "verified": true,
+  "versions": {
+    "python": "3.12.13",
+    "relate_db": "1.0.1",
+    "witness": "0.1.0"
+  },
+  "witness": {
+    "isolated_nodes": 0,
+    "nodes": 3,
+    "relationships": 2
+  }
+}

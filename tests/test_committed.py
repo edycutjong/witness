@@ -160,3 +160,38 @@ def test_every_third_party_action_is_pinned_to_a_commit():
     uses = [u for f in files for u in re.findall(r"uses:\s*(\S+)", f.read_text()) if not u.startswith("./")]
     assert uses and all(re.fullmatch(r"[\w.-]+/[\w./-]+@[0-9a-f]{40}", u) for u in uses), uses
 
+
+# ---- the fourth committed example: an engine disagreement, observed (Relate 1.0.1; the v1.3.0 notes list the fix) ---
+EC = ROOT / "witnesses" / "exists-count.rl"
+
+
+def test_committed_engine_disagreement_witness_checks():
+    m = json.loads((ROOT / "witnesses" / "exists-count.manifest.json").read_text())
+    assert m["verified"] and m["witness"]["relationships"] == 2 and m["predicate"]["kind"] == "disagree"
+    assert m["source"]["relationships"] == 57645 and m["versions"]["relate_db"] == "1.0.1"
+    assert m["statement"].strip() == (ROOT / "queries" / "count-two-match.cypher").read_text().strip()
+    assert m["predicate"]["other_statement"] == (ROOT / "queries" / "exists-two-match.cypher").read_text().strip()
+    res = check(EC, spec_from_manifest(m), use_cli=False)
+    assert res.verified and res.text.startswith("2 of 2 end the disagreement")
+
+
+def test_the_release_bisect_record_matches_the_committed_witness():
+    """evidence/relate-versions.jsonl: the two forms disagree on the witness up to 1.2.0 and agree on 1.3.0; the row
+    for the pinned engine is what this suite's own Relate returns."""
+    import relate
+
+    rows = [json.loads(ln) for ln in (ROOT / "evidence" / "relate-versions.jsonl").read_text().splitlines()]
+    assert [(r["relate_db"], r["the_two_forms_agree"]) for r in rows] == [
+        ("1.0.1", False),
+        ("1.1.0", False),
+        ("1.2.0", False),
+        ("1.3.0", True),
+    ]
+    pinned = next(r for r in rows if r["relate_db"] == relate.__version__)
+    db = relate.Database(str(EC), read_only=True)
+    try:
+        for form in ("count-two-match", "exists-two-match"):
+            statement = (ROOT / "queries" / f"{form}.cypher").read_text()
+            assert db.execute(statement, {"country": "MX"}).data == pinned[form], form
+    finally:
+        db.close()

@@ -1,4 +1,4 @@
-# uv run pytest --cov=witness (100% line+branch gate), recorded 2026-11-27 (21:40 +0700); supersedes the 517-test run of the same day (8 tests added: the guard's function classes against Relate's catalog, the example queries, the engine-disagreement witness and its release record, a disagreement whose first query returns no rows)
+# uv run pytest --cov=witness (100% line+branch gate), recorded 2026-11-27 (about 21:20 +0700, between commits 84c12b5 and f1876fd; the same 525 passed in CI run 46016319292 on Linux, Python 3.11 and 3.12); supersedes the 517-test run of the same day (8 tests added: the guard's function classes against Relate's catalog, the example queries, the engine-disagreement witness and its release record, a disagreement whose first query returns no rows)
 # Darwin arm64; relate-db 1.0.1, Relate CLI v1.0.1; Python 3.12.13; local Neo4j in Docker NOT running, so its 2 fixture-pull tests skip (they passed in evidence/pytest-2026-11-24.txt; the same pull, run by hand against a fresh Neo4j today, is evidence/fixture-run-2026-11-27.txt)
 525 passed, 2 skipped in 107.34s (0:01:47)
 TOTAL 2592 statements, 832 branches, 0 missed: 100.00%

@@ -1,0 +1,660 @@
+{
+ "schema": "witness.neo4j-recheck/v1",
+ "what": "each committed witness's rebuild script loaded into an empty Neo4j database; sufficiency, then every relationship deleted alone in a rolled-back transaction; verdicts compared with the manifest's (Relate)",
+ "generated": "2026-11-27 21:00:42 +0700",
+ "neo4j": [
+  {
+   "name": "Neo4j Kernel",
+   "v": "2026.10.2",
+   "edition": "community"
+  },
+  {
+   "name": "Cypher",
+   "v": "5",
+   "edition": ""
+  }
+ ],
+ "dialect": "coll.sort(collect(DISTINCT hc.code)) -> ORDER BY hc.code before collect(DISTINCT hc.code)",
+ "machine": "Darwin 27.2.0 arm64, Python 3.12.13",
+ "seconds": 4.1,
+ "all_agree": true,
+ "witnesses": [
+  {
+   "witness": "witnesses/two-hub.cypher",
+   "predicate": "keep",
+   "relate_check": "22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)",
+   "nodes": 12,
+   "relationships": 22,
+   "sufficient_on_neo4j": true,
+   "necessary_on_neo4j": 22,
+   "probes": 22,
+   "agree_with_relate": 22,
+   "neo4j_check": "22 of 22 change the answer",
+   "rows": [
+    {
+     "element": "(ACA)-[:HAS_ROUTE]->(MEX)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(ACA)-[:IN_COUNTRY]->(MX)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(DFW)-[:HAS_ROUTE]->(MEX)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(DFW)-[:IN_COUNTRY]->(US)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(LAS)-[:HAS_ROUTE]->(MEX)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(LAS)-[:IN_COUNTRY]->(US)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(LAX)-[:HAS_ROUTE]->(MEX)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(LAX)-[:IN_COUNTRY]->(US)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(PBC)-[:HAS_ROUTE]->(DFW)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(PBC)-[:HAS_ROUTE]->(TIJ)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(PBC)-[:IN_COUNTRY]->(MX)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(QRO)-[:HAS_ROUTE]->(DFW)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(QRO)-[:HAS_ROUTE]->(TIJ)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(QRO)-[:IN_COUNTRY]->(MX)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TIJ)-[:HAS_ROUTE]->(MEX)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TIJ)-[:IN_COUNTRY]->(MX)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TLC)-[:HAS_ROUTE]->(ACA)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TLC)-[:HAS_ROUTE]->(LAS)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TLC)-[:IN_COUNTRY]->(MX)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(UPN)-[:HAS_ROUTE]->(LAX)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(UPN)-[:HAS_ROUTE]->(TIJ)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(UPN)-[:IN_COUNTRY]->(MX)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    }
+   ]
+  },
+  {
+   "witness": "witnesses/direction-bug.cypher",
+   "predicate": "disagree",
+   "relate_check": "5 of 5 end the disagreement (5 of 5 relationships, 0 of 0 isolated nodes)",
+   "nodes": 5,
+   "relationships": 5,
+   "sufficient_on_neo4j": true,
+   "necessary_on_neo4j": 5,
+   "probes": 5,
+   "agree_with_relate": 5,
+   "neo4j_check": "5 of 5 end the disagreement",
+   "rows": [
+    {
+     "element": "(AGR)-[:HAS_ROUTE]->(BOM)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(AGR)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(BOM)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(VNS)-[:HAS_ROUTE]->(AGR)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(VNS)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    }
+   ]
+  },
+  {
+   "witness": "witnesses/wrong-answer.cypher",
+   "predicate": "differs",
+   "relate_check": "92 of 92 change the answer (92 of 92 relationships, 0 of 0 isolated nodes)",
+   "nodes": 45,
+   "relationships": 92,
+   "sufficient_on_neo4j": true,
+   "necessary_on_neo4j": 92,
+   "probes": 92,
+   "agree_with_relate": 92,
+   "neo4j_check": "92 of 92 change the answer",
+   "rows": [
+    {
+     "element": "(AGR)-[:HAS_ROUTE]->(BOM)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(AGR)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(AJL)-[:HAS_ROUTE]->(CCU)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(AJL)-[:HAS_ROUTE]->(GAU)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(AJL)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(AUH)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(AUH)-[:IN_COUNTRY]->(AE)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(BAH)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(BAH)-[:IN_COUNTRY]->(BH)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(BLR)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(BOM)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CCJ)-[:HAS_ROUTE]->(AUH)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CCJ)-[:HAS_ROUTE]->(BAH)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CCJ)-[:HAS_ROUTE]->(DOH)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CCJ)-[:HAS_ROUTE]->(KWI)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CCJ)-[:HAS_ROUTE]->(MAA)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CCJ)-[:HAS_ROUTE]->(MCT)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CCJ)-[:HAS_ROUTE]->(RUH)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CCJ)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CCU)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CCU)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CJB)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CJB)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CMB)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CMB)-[:IN_COUNTRY]->(LK)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CNN)-[:HAS_ROUTE]->(AUH)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CNN)-[:HAS_ROUTE]->(BAH)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CNN)-[:HAS_ROUTE]->(DOH)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CNN)-[:HAS_ROUTE]->(KWI)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CNN)-[:HAS_ROUTE]->(MAA)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CNN)-[:HAS_ROUTE]->(MCT)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CNN)-[:HAS_ROUTE]->(RUH)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(CNN)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(DIB)-[:HAS_ROUTE]->(CCU)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(DIB)-[:HAS_ROUTE]->(GAU)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(DIB)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(DMK)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(DMK)-[:IN_COUNTRY]->(TH)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(DOH)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(DOH)-[:IN_COUNTRY]->(QA)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(DXB)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(DXB)-[:IN_COUNTRY]->(AE)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(GAU)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(HBX)-[:HAS_ROUTE]->(BLR)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(HBX)-[:HAS_ROUTE]->(MAA)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(HBX)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(HYD)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IDR)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IDR)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXA)-[:HAS_ROUTE]->(CCU)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXA)-[:HAS_ROUTE]->(GAU)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXA)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXE)-[:HAS_ROUTE]->(AUH)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXE)-[:HAS_ROUTE]->(DOH)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXE)-[:HAS_ROUTE]->(MAA)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXE)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXG)-[:HAS_ROUTE]->(BLR)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXG)-[:HAS_ROUTE]->(IDR)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXG)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXM)-[:HAS_ROUTE]->(CMB)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXM)-[:HAS_ROUTE]->(DXB)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXM)-[:HAS_ROUTE]->(MAA)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXM)-[:HAS_ROUTE]->(SIN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXM)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXS)-[:HAS_ROUTE]->(CCU)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXS)-[:HAS_ROUTE]->(GAU)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(IXS)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(KUL)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(KUL)-[:IN_COUNTRY]->(MY)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(KWI)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(KWI)-[:IN_COUNTRY]->(KW)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(MAA)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(MAA)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(MCT)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(MCT)-[:IN_COUNTRY]->(OM)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(RUH)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(RUH)-[:IN_COUNTRY]->(SA)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(SIN)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(SIN)-[:IN_COUNTRY]->(SG)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TIR)-[:HAS_ROUTE]->(CJB)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TIR)-[:HAS_ROUTE]->(HYD)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TIR)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TRZ)-[:HAS_ROUTE]->(CMB)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TRZ)-[:HAS_ROUTE]->(DMK)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TRZ)-[:HAS_ROUTE]->(DXB)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TRZ)-[:HAS_ROUTE]->(KUL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TRZ)-[:HAS_ROUTE]->(MAA)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TRZ)-[:HAS_ROUTE]->(SIN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(TRZ)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(VNS)-[:HAS_ROUTE]->(AGR)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(VNS)-[:HAS_ROUTE]->(DEL)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    },
+    {
+     "element": "(VNS)-[:IN_COUNTRY]->(IN)",
+     "necessary_on_neo4j": true,
+     "necessary_on_relate": true
+    }
+   ]
+  }
+ ]
+}

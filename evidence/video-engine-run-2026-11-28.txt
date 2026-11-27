@@ -1,0 +1,86 @@
+# recorded 2026-11-28 06:22 +0700 in a fresh clone of edycutjong/witness at 5d962a3 on a terminal (TTY), Apple M1 Max · macOS 27.2.1 · the demo video's engine-case run (relate CLI v1.0.1, relate-db 1.0.1, DO_NOT_TRACK=1)
+# the 'reducing · trial …' lines are the live counter's updates (one per 50 ms, each overwritten on screen by the next)
+# the first two commands are plain relate on the full graph: the EXISTS form returns rows[0], the COUNT form rows[59]
+witness $ relate query --database data/air-routes.rl --read-only --param country=MX < queries/exists-two-match.cypher | grep 'rows\['
+rows[0]{airport}:
+witness $ relate query --database data/air-routes.rl --read-only --param country=MX < queries/count-two-match.cypher | grep 'rows\['
+rows[59]{airport}:
+witness $ uv run witness why -f queries/count-two-match.cypher --other queries/exists-two-match.cypher --predicate disagree --param country=MX
+  reducing · trial     1 · phase empty-graph · 57,645 relationships, 3,748 nodes left
+  reducing · trial     2 · phase plan        · 57,645 relationships, 3,748 nodes left
+  reducing · trial     3 · phase A           · 54,141 relationships, 3,741 nodes left
+  reducing · trial     4 · phase A           · 15,242 relationships, 1,871 nodes left
+  reducing · trial     6 · phase A           ·  3,781 relationships,   936 nodes left
+  reducing · trial    13 · phase A           ·     78 relationships,   117 nodes left
+ANSWER  59 rows on the full graph
+  airport
+  ACA
+  AGU
+  BJX
+  CEN
+  CJS
+  CLQ
+  CME
+  CPE
+  CTM
+  CUL
+  CUN
+  CUU
+  CVM
+  CZM
+  DGO
+  GDL
+  HMO
+  HUX
+  JAL
+  LAP
+  LMM
+  LOV
+  LTO
+  LZC
+  MAM
+  MEX
+  MID
+  MLM
+  MTT
+  MTY
+  MXL
+  MZT
+  NLD
+  OAX
+  PAZ
+  PBC
+  PDS
+  PQM
+  PVR
+  PXM
+  QRO
+  REX
+  SJD
+  SLP
+  SLW
+  TAM
+  TAP
+  TGZ
+  TIJ
+  TLC
+  TPQ
+  TRC
+  TSL
+  UPN
+  VER
+  VSA
+  ZCL
+  ZIH
+  ZLO
+WITNESS  2 relationships · 3 nodes, out of 57,645 · 3,748
+  reduced in 0.72 s · 49 trials · 0 inconclusive · seed 0 (4.339 s end to end: copy, guard, order check, reduce, check)
+EXHIBITS  (register order; every one is needed)
+   1  (MZT)-[:HAS_ROUTE]->(LAX)
+   2  (MZT)-[:IN_COUNTRY]->(MX)
+CHECK  2 of 2 end the disagreement (2 of 2 relationships, 0 of 0 isolated nodes)
+  relate CLI: sufficiency + 2 of 2 necessity probes cross-checked
+FILES  out/count-two-match.rl (+ .cypher .manifest.json .html .trace.json)
+LEDGER  r-20261127-232217-3ac47f4b
+VERIFIED · deletion-minimal: no single relationship can be removed without ending the disagreement · determinism claimed
+witness $

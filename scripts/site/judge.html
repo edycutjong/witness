@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>For judges · Witness</title>
+<meta name="description" content="{{CLAIM_ATTR}}">
+<meta name="author" content="edycutjong">
+<meta name="theme-color" content="#F2E8D5">
+<meta name="color-scheme" content="only light">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="canonical" href="{{SITE}}/judge/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Witness">
+<meta property="og:title" content="Witness · for judges: the 30-second path, the receipts, how to verify">
+<meta property="og:description" content="{{DESC_OG}}">
+<meta property="og:url" content="{{SITE}}/judge/">
+<meta property="og:image" content="{{SITE}}/og-image.png?v={{OGV}}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Witness: {{SRC_RELS}} relationships reduced to {{W_RELS}}, each tagged as an exhibit; {{CHECK}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Witness · for judges: the 30-second path, the receipts, how to verify">
+<meta name="twitter:description" content="{{DESC_OG}}">
+<meta name="twitter:image" content="{{SITE}}/og-image.png?v={{OGV}}">
+<link rel="preload" href="/fonts/old-standard-tt-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/old-standard-tt-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/old-standard-tt-400i.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+{{CSS}}
+{{JUDGE_CSS}}
+</style>
+</head>
+<body>
+<a class="skip sr" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="/" aria-label="Witness, home"><img src="/icon.svg" alt="" width="34" height="34"><span>Witness</span></a>
+    <nav class="jump" aria-label="On this page">
+      <a href="#the-receipts">Receipts</a><a href="#how-it-uses-relate">Relate</a><a href="#verify-it-yourself">Verify</a><a href="#by-criterion">By criterion</a><a href="#honest-limitations">Limits</a><a href="#links">Links</a>
+    </nav>
+    <nav class="site" aria-label="Site">
+      <a class="nav-strong" href="/">Landing</a><a class="nav-strong" href="/deck/">Pitch deck</a>
+      {{NAV_SRC}}
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<section class="jhero" aria-labelledby="h1">
+  <div class="wrap jhero-in">
+    <div class="jhero-copy">
+      <p class="lbl eyebrow">For judges <span aria-hidden="true">·</span> Relate by Neo4j hackathon</p>
+      <h1 id="h1">The evidence behind an agent’s graph answer, <em>small enough to read.</em></h1>
+      <div class="hn">
+        <p class="hn-n"><b class="nb">{{SRC_RELS}}</b><span class="data">relationships in the air-routes graph</span></p>
+        <span class="to" aria-hidden="true">→</span>
+        <p class="hn-n"><b><em>{{W_RELS}}</em></b><span class="data">in the witness that reproduces the answer</span></p>
+      </div>
+      <p class="verdict"><span class="stamp red" id="stamp">{{CHECK}}</span></p>
+      <p class="ident">{{WHAT}}</p>
+      <p class="claim" id="claim">{{CLAIM_HERO}}</p>
+      <p class="built">{{BUILT}}</p>
+      <div class="ctas">
+        {{HERO_CTAS}}
+      </div>
+    </div>
+
+    <div class="jhero-side">
+      <aside class="file path" aria-labelledby="the-30-second-path">
+        <h2 class="file-tab lbl" id="the-30-second-path">The 30-second path</h2>
+        <ol class="steps">
+          {{PATH}}
+        </ol>
+        <p class="path-more">{{PATH_MORE}}</p>
+      </aside>
+      <nav class="more" aria-labelledby="more-h">
+        <h2 class="lbl" id="more-h">With more time</h2>
+        <ol>
+          {{INDEX}}
+        </ol>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<section class="rcpt" id="the-receipts" aria-labelledby="rc-h">
+  <div class="wrap">
+    <p class="lbl">The receipts <span aria-hidden="true">·</span> every figure links to its file</p>
+    <h2 id="rc-h">Every number, <em>and the file it was read from.</em></h2>
+    <div class="sheet">
+      <table class="rt" role="table">
+        <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col" class="no">No.</th><th role="columnheader" scope="col">Receipt</th><th role="columnheader" scope="col">What it is, and where it is recorded</th></tr></thead>
+        <tbody role="rowgroup">
+          {{RECEIPTS}}
+        </tbody>
+      </table>
+    </div>
+    <p class="fine src-note data">{{SRC_NOTE}}</p>
+  </div>
+</section>
+
+<section class="rel" id="how-it-uses-relate" aria-labelledby="rel-h">
+  <div class="wrap">
+    <p class="lbl">How it uses Relate <span aria-hidden="true">·</span> mode, reason, capabilities</p>
+    <h2 id="rel-h">Every trial is <em>a Relate transaction.</em></h2>
+    <div class="rel-grid">
+      <dl class="facts">
+        {{FACTS}}
+      </dl>
+      <figure class="loop" aria-labelledby="loop-h">
+        <figcaption class="lbl" id="loop-h">One trial, <b>{{TRIALS}} times</b></figcaption>
+        <ol class="loop-steps">
+          <li><span><code>begin_transaction</code></span></li><li><span>delete</span></li><li><span>re-run the query</span></li><li><span>compare the answer</span></li><li><span><code>rollback_transaction</code></span></li>
+        </ol>
+        <div class="loop-tape">{{TAPE}}<span class="data">{{TAPE_CAP}}</span></div>
+        <div class="speed" role="group" aria-labelledby="cmp-h">
+          <p class="lbl" id="cmp-h">The same loop on two engines <span aria-hidden="true">·</span> trials per second</p>
+          <p class="cmp-note">{{CMP_NOTE}}</p>
+          <div class="sp"><span class="data">Relate, in-process</span><i style="--w:100%"></i><b class="data">{{RELATE_TPS}}/s</b></div>
+          <div class="sp"><span class="data">Neo4j {{NEO_V}}, Docker</span><i style="--w:{{NEO_W}}%"></i><b class="data">{{NEO_TPS}}/s</b></div>
+        </div>
+      </figure>
+    </div>
+
+    <h3 class="sub-h">{{CAPS_H}}</h3>
+    <div class="sheet">
+      <table class="ct" role="table">
+        <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col" class="no">No.</th><th role="columnheader" scope="col">Relate capability</th><th role="columnheader" scope="col">What Witness does with it</th><th role="columnheader" scope="col">In the source</th></tr></thead>
+        <tbody role="rowgroup">
+          {{CAPS}}
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-h">{{STORES_H}}</h3>
+    <div class="persist">
+      <div>
+        <div class="sheet">
+          <table class="ct st" role="table">
+            <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Store</th><th role="columnheader" scope="col">What it is</th><th role="columnheader" scope="col" class="n">Nodes</th><th role="columnheader" scope="col" class="n">Relationships</th></tr></thead>
+            <tbody role="rowgroup">
+              {{STORES}}
+            </tbody>
+          </table>
+        </div>
+        <p class="fine also">{{STORES_ALSO}}</p>
+      </div>
+      <figure class="wit" aria-labelledby="wit-h">
+        <p class="lbl wit-h" id="wit-h">The headline witness, <b>drawn</b></p>
+        <dl class="qa">
+          <dt class="lbl">The question</dt><dd>{{QUESTION}}</dd>
+          <dt class="lbl">The answer</dt><dd class="data ans">{{ANSWER}}</dd>
+        </dl>
+        <div class="wit-draw">{{WIT_SVG}}</div>
+        <figcaption class="cap">{{WIT_CAP}}</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="ver" id="verify-it-yourself" aria-labelledby="ver-h">
+  <div class="wrap">
+    <p class="lbl">Verify it yourself <span aria-hidden="true">·</span> on your machine, with your own Relate</p>
+    <h2 id="ver-h">Don’t take the page’s word. <em>Run it.</em></h2>
+    <div class="ver-grid">
+      <ol class="vsteps">
+        {{VERIFY}}
+      </ol>
+      <figure class="term" id="term">
+        <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>uv run witness demo</span></div>
+        <pre tabindex="0" role="region" aria-label="What step 1 prints: recorded output of uv run witness demo, selected lines">{{TERM}}</pre>
+        <figcaption class="t-cap data">What step 1 prints. Recorded {{DEMO_UTC}} ({{DEMO_SRC}}). Selected lines in their order, none edited; a dimmed line marks what is left out.</figcaption>
+      </figure>
+    </div>
+    <p class="fine ver-more">{{VERIFY_MORE}}</p>
+  </div>
+</section>
+
+<section class="crit" id="by-criterion" aria-labelledby="cr-h">
+  <div class="wrap">
+    <p class="lbl">By criterion <span aria-hidden="true">·</span> where to look</p>
+    <h2 id="cr-h">The five criteria, <em>each with its evidence.</em></h2>
+    <p class="lede">{{CRIT_LEDE}}</p>
+    <ol class="crit-list">
+      {{CRITERIA}}
+    </ol>
+  </div>
+</section>
+
+<section class="honest" id="honest-limitations" aria-labelledby="hon-h">
+  <div class="wrap">
+    <p class="lbl">Honest limitations</p>
+    <h2 id="hon-h">What the stamp <em>does not say.</em></h2>
+    <ol class="limits">
+      {{LIMITS}}
+    </ol>
+  </div>
+</section>
+
+<section class="lnk" id="links" aria-labelledby="lnk-h">
+  <div class="wrap">
+    <p class="lbl">Links <span aria-hidden="true">·</span> the rest of the file</p>
+    <h2 id="lnk-h">Everything else, <em>one click each.</em></h2>
+    <ul class="tiles">
+      {{LINKS}}
+    </ul>
+  </div>
+</section>
+<p class="sr" id="copy-status" role="status" aria-live="polite"></p>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <p><img src="/icon.svg" alt="" width="22" height="22"> <b>Witness</b> · Apache-2.0 · built on <a href="https://relatedb.ai">Relate</a> for the Relate by Neo4j hackathon</p>
+    <p class="data"><span>{{SOURCE_FOOT}} · <a href="/">landing</a> · <a href="/deck/">deck</a> · <a href="/exhibit/two-hub.html">exhibit</a></span><span>data: air-routes by Kelvin Lawrence (Apache-2.0)</span></p>
+  </div>
+</footer>
+<script>
+{{JS}}
+</script>
+</body>
+</html>

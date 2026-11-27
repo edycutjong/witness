@@ -1,28 +1,794 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>For judges · Witness</title>
-<meta name="description" content="When an agent answers from a graph, Witness hands back a small graph that reproduces the answer (57,645 relationships → 22), and proves that deleting any one of its relationships changes the answer.">
+<meta name="description" content="When an agent answers from a graph, Witness hands back a small graph that reproduces the answer (here, 57,645 relationships → 22), and proves that deleting any one of its relationships changes the answer.">
+<meta name="author" content="edycutjong">
+<meta name="theme-color" content="#F2E8D5">
+<meta name="color-scheme" content="only light">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
-<link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Old+Standard+TT:wght@400;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link rel="canonical" href="https://witness.edycu.dev/judge/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Witness">
+<meta property="og:title" content="Witness · for judges: the 30-second path, the receipts, how to verify">
+<meta property="og:description" content="57,645 relationships → 22 that reproduce an agent&#x27;s answer. Delete any one of the 22 and it changes.">
+<meta property="og:url" content="https://witness.edycu.dev/judge/">
+<meta property="og:image" content="https://witness.edycu.dev/og-image.png?v=4e6a2d4838">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Witness: 57,645 relationships reduced to 22, each tagged as an exhibit; 22 of 22 change the answer">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Witness · for judges: the 30-second path, the receipts, how to verify">
+<meta name="twitter:description" content="57,645 relationships → 22 that reproduce an agent&#x27;s answer. Delete any one of the 22 and it changes.">
+<meta name="twitter:image" content="https://witness.edycu.dev/og-image.png?v=4e6a2d4838">
+<link rel="preload" href="/fonts/old-standard-tt-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/old-standard-tt-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/old-standard-tt-400i.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-:root{--paper:#F2E8D5;--ink:#1F1A14;--muted:#6F6555;--after:#B42318;--rule:#D9CBAE}
-body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.55 "Source Sans 3",Arial,sans-serif;overflow-wrap:anywhere}html{overflow-x:clip}
-main{max-width:760px;margin:0 auto;padding:40px 20px 72px}
-h1{font:700 34px/1.15 "Old Standard TT",Georgia,serif;margin:.2em 0 .5em}
-h2{font:600 13px/1.4 "Source Sans 3",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:40px 0 10px}
-a{color:var(--ink);text-underline-offset:3px}a:hover{color:var(--after)}a:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
-code,pre{font-family:"Fragment Mono",Menlo,monospace;font-size:.88em}pre{background:rgba(31,26,20,.07);padding:14px;overflow-x:auto}
-table{border-collapse:collapse;width:100%}td{border-top:1px solid var(--rule);padding:10px 8px 10px 0;vertical-align:top}td:first-child{font:400 17px "Fragment Mono",monospace;white-space:nowrap;padding-right:18px}
-.claim{font-size:21px}@media (max-width:600px){td:first-child{white-space:normal}}
-</style></head><body><main>
-<p><a href="/">&larr; Witness</a></p>
-<h1>For judges</h1>
-<p class="claim" id="claim">When an agent answers from a graph, Witness hands back a small graph that reproduces the answer (57,645 relationships → 22), and proves that deleting any one of its relationships changes the answer.</p>
-<p>Witness is built on Relate, the embedded graph database, for the Relate by Neo4j hackathon.</p>
-<h2>The 30-second path</h2><ol><li><a href="https://witness.edycu.dev/">Open the landing page</a>: the agent's answer, the 22 relationships that reproduce it, and the check line; nothing to install.</li><li><a href="https://witness.edycu.dev/exhibit/two-hub.html">Open the exhibit page</a>: the register of kept relationships, each tagged as one whose deletion changes the answer.</li><li>Optional, one command: <code>git clone https://github.com/edycutjong/witness &amp;&amp; cd witness &amp;&amp; uv run witness demo</code> (needs uv).</li></ol>
-<h2>The receipts</h2><table><tr><td>57,645 → 22</td><td>relationships in the air-routes graph vs in the witness (3,748 nodes → 12 nodes in the witness graph; <code>witnesses/two-hub.manifest.json</code>)</td></tr><tr><td>22 of 22</td><td>deleting any one of them from the witness changes the answer; checked on relate-db and on the Relate CLI (<code>22 of 22 change the answer</code>)</td></tr><tr><td>68 → 22</td><td>the answer rows bind 68 relationships (<code>queries/two-hub-bindings.cypher</code>); deleted from the full graph, only 20 of them change the answer, because other routes back the rest up (<code>evidence/neo4j-compare-2026-11-24.md</code>, targeted pass). 11 of those 20 are in the witness; the other 9 are flights of Mexican airports outside it, whose deletion adds that airport to the answer (<code>evidence/full-graph-necessity.json</code>). The witness keeps 22, each needed in the witness (<code>witnesses/two-hub.manifest.json</code>)</td></tr><tr><td>57,645 → 5</td><td>a second case: a plausible agent mistake written for this case (the first flight matched in either direction) and the headline query disagree on IN/DEL; <code>5 of 5 end the disagreement</code> (<code>witnesses/direction-bug.manifest.json</code>)</td></tr><tr><td>57,645 → 92</td><td>a third: <code>differs</code>, a smaller repro of a wrong answer; the same mistaken query returns 13 rows where the expected answer has 12, and the repro keeps that wrong answer; <code>92 of 92 change the answer</code> (<code>witnesses/wrong-answer.manifest.json</code>)</td></tr><tr><td>371 trials · 1.095 s</td><td>delete, re-run, roll back; 86 deletions kept the answer and were applied (<code>witnesses/two-hub.manifest.json</code>). Trials and deletions repeat exactly; wall-clock seconds do not: the landing's paste reduced in 0.998 s (<code>evidence/demo-2026-11-24.txt</code>), the video's take in 0.91 s (<code>evidence/video-demo-run-2026-11-27.txt</code>)</td></tr><tr><td>366.8 vs 90.2</td><td>trials per second, Relate in-process vs Neo4j 2026.10.2 in Docker, median of 3 runs on one machine (<code>evidence/neo4j-compare-2026-11-24.md</code>)</td></tr><tr><td>517 tests pass · 100% coverage</td><td>real Relate; the graph store, rollback and queries are never mocked. <code>relate pull</code> (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach rare branches (<code>evidence/pytest-2026-11-27.txt</code>, <code>pytest --cov=witness</code>, gate in <code>pyproject.toml</code>)</td></tr><tr><td>byte-identical</td><td>the same query and seed give a byte-identical rebuild script (<code>.cypher</code>) on 2 runs (<code>evidence/determinism.json</code>)</td></tr></table>
-<h2>Reproduce it</h2><pre>git clone https://github.com/edycutjong/witness &amp;&amp; cd witness
-uv run witness demo</pre><p>The whole suite against real Relate (CI and deterministic replay, not the product path): <code>uv run pytest --cov=witness</code></p>
-<h2>Honest limitations</h2><ul><li>Deletion-minimal, not smallest: no single remaining relationship can be removed without changing the answer; a smaller witness may exist.</li><li>Read-only Cypher only, with no clock or randomness: Witness refuses writes, procedures, clocks and randomness (exit 2) rather than guess. Dependence on storage order is caught by a heuristic (the same answer from a store built in reverse order), not proven absent.</li><li>One graph (a public air-routes dataset, Apache-2.0): the headline query, one disagreement case and one wrong-answer repro. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.</li></ul>
-<h2>Links</h2><ul><li>Repository: <a href="https://github.com/edycutjong/witness">https://github.com/edycutjong/witness</a></li><li>Live site: <a href="https://witness.edycu.dev/">https://witness.edycu.dev/</a></li><li>Exhibit page: <a href="https://witness.edycu.dev/exhibit/two-hub.html">https://witness.edycu.dev/exhibit/two-hub.html</a></li><li>Relate: <a href="https://relatedb.ai">https://relatedb.ai</a></li></ul>
-</main></body></html>
+@font-face{font-family:"Old Standard TT";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/old-standard-tt-400.woff2) format("woff2")}
+@font-face{font-family:"Old Standard TT";font-style:italic;font-weight:400;font-display:swap;src:url(/fonts/old-standard-tt-400i.woff2) format("woff2")}
+@font-face{font-family:"Old Standard TT";font-style:normal;font-weight:700;font-display:swap;src:url(/fonts/old-standard-tt-700.woff2) format("woff2")}
+@font-face{font-family:"Source Sans 3";font-style:normal;font-weight:200 900;font-display:swap;src:url(/fonts/source-sans-3-var.woff2) format("woff2")}
+@font-face{font-family:"Fragment Mono";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/fragment-mono-400.woff2) format("woff2")}
+@font-face{font-family:"OSTT fallback";src:local("Georgia");size-adjust:104%;ascent-override:86%;descent-override:24%;line-gap-override:0%}
+:root {
+  --bg:      #F2E8D5;  /* manila folder stock: the page every exhibit is filed on */
+  --ink:     #1F1A14;  /* carbon ink of a typed register entry */
+  --muted:   #6F6555;  /* pencil marginalia: labels, captions, the dropped graph's legend */
+  --before:  #9C978E;  /* state: unproven — every relationship before the reducer has tested it (graphite) */
+  --after:   #B42318;  /* state: kept and proven to change the answer — fires only when an element survives the reducer and check */
+  --after-on-dark: #E5484D;  /* state: the same kept state, terminal output on a dark background only */
+  --rule:    #D9CBAE;  /* register ruling and table hairlines */
+  --font-display: "Old Standard TT", "OSTT fallback", "Libre Caslon Text", Georgia, serif;
+  --font-body:    "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+  --font-data:    "Fragment Mono", "SF Mono", Menlo, monospace;
+  /* derived surfaces of the same stock (no new hue) */
+  --paper:   #FAF4E8;  /* a fresh register sheet laid on the folder */
+  --deep:    #E7D9BE;  /* the folder's inner flap: band ground */
+  --shadow:  0 1px 0 rgba(31,26,20,.06), 0 18px 40px -18px rgba(31,26,20,.28);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{overflow-x:clip;scroll-behavior:smooth;-webkit-text-size-adjust:100%;scrollbar-color:var(--before) var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.55 var(--font-body);text-rendering:optimizeLegibility}
+::selection{background:var(--ink);color:var(--bg)}
+a{color:inherit;text-underline-offset:3px;text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:2px}
+code,kbd,pre,.data{font-family:var(--font-data);font-size:.86em;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0}
+img,svg{max-width:100%}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:1320px;margin:0 auto;padding:0 28px}
+/* small-caps exhibit labels */
+.lbl{font:700 12px/1.3 var(--font-display);letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-variant-numeric:lining-nums}
+.lbl b{color:var(--ink);font-weight:700}
+/* exhibit tags (the signature) */
+.tg path{fill:var(--after)}
+.tg circle{fill:var(--paper)}
+.tg text{font:700 13px var(--font-data);fill:var(--paper);text-anchor:middle}
+.chip-tag{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px 0 14px;font:700 12px/1 var(--font-data);color:var(--paper);background:var(--after);clip-path:polygon(7px 0,100% 0,100% 100%,7px 100%,0 50%);position:relative;font-variant-numeric:tabular-nums}
+.chip-tag::before{content:"";position:absolute;left:7px;top:50%;width:4px;height:4px;margin-top:-2px;border-radius:50%;background:var(--paper)}
+/* ink and red stamps */
+.stamp{display:inline-block;font:700 15px/1 var(--font-display);letter-spacing:.2em;text-transform:uppercase;padding:9px 14px 8px;border:2.5px solid currentColor;outline:1px solid currentColor;outline-offset:2px;transform:rotate(-2.5deg);white-space:nowrap}
+.stamp.ink{color:var(--ink)}
+.stamp.red{color:var(--after)}
+/* the drawn instrument (hero + exhibit share it) */
+.inst{display:block;width:100%;height:auto;overflow:visible}
+.inst .ghost path.wave{fill:none;stroke:var(--before);stroke-width:.6;opacity:.26}
+.inst .ghost path.dots{fill:none;stroke:var(--before);stroke-width:2.2;stroke-linecap:round;opacity:.3}
+.inst .ed{fill:none;stroke:var(--after);stroke-width:3;stroke-linecap:round}
+.inst .nd circle{fill:var(--ink)}
+.inst .lb{font:700 15px var(--font-data);fill:var(--ink);font-variant-ligatures:none}
+.inst .lb .cc{font-weight:400;font-size:11.5px;fill:var(--muted)}
+.inst .tg{cursor:pointer}
+.inst .ed.pulled{stroke:var(--before);stroke-dasharray:3 6;stroke-width:2}
+.inst .tg.pulled path{fill:var(--paper);stroke:var(--after);stroke-width:1.5}
+.inst .tg.pulled text{fill:var(--after)}
+.inst .tg.pulled circle{fill:var(--after)}
+.inst .cc.pulled{fill:var(--before);text-decoration:line-through}
+.inst .nd.out circle{fill:var(--before)}
+.inst .nd.out .lb{fill:var(--before);text-decoration:line-through}
+/* trial tape */
+.tape{display:block;width:100%;height:18px}
+.tape .ta{stroke:var(--ink);stroke-width:1.3}
+.tape .tr{stroke:var(--before);stroke-width:1;opacity:.55}
+/* terminal (dark is the terminal's, not the page's) */
+.term{background:#15110D;color:#EDE3CF;border-radius:6px;box-shadow:var(--shadow);overflow:hidden}
+.term .bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(237,227,207,.12);font:12px/1.3 var(--font-data);color:#B9AE98}
+.term .bar i{width:9px;height:9px;border-radius:50%;background:#5A5146;display:inline-block}
+.term pre{margin:0;padding:16px 18px 18px;font:12.5px/1.6 var(--font-data);white-space:pre;overflow:auto;tab-size:2}
+.term .ln{display:block}
+.term .k{color:var(--after-on-dark);font-weight:400}
+.term .h{color:#FFF8EA;font-weight:400;letter-spacing:.04em}
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:10px;min-height:46px;padding:0 20px;font:600 16px/1 var(--font-body);text-decoration:none;border:1.5px solid var(--ink);border-radius:3px;color:var(--ink);background:transparent;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
+.btn:hover{background:var(--ink);color:var(--bg);text-decoration:none;transform:translateY(-1px);box-shadow:0 6px 14px -8px rgba(31,26,20,.6)}
+.btn:active{transform:translateY(0);box-shadow:none}
+.btn.solid{background:var(--ink);color:var(--bg)}
+.btn.solid:hover{background:#3A3026;border-color:#3A3026}
+.btn svg{width:17px;height:17px;flex:none}
+.chip{display:inline-block;font:12px/1 var(--font-data);color:var(--muted);border:1px solid var(--rule);border-radius:99px;padding:5px 9px;text-decoration:none;background:var(--paper);transition:border-color .18s,color .18s}
+a.chip:hover{border-color:var(--ink);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+.term pre,.term .ln,.cy,.cmd10,.inst text{font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0}
+
+/* ── /judge: the docket a judge reads first. Same stock, faces and colour rule as the landing ─────────────── */
+:root{color-scheme:only light;
+  --before-ink:#7A7468; /* graphite pressed harder: the "before" numerals at display size (3:1 on the stock) */
+  --body-2:#3B3229;     /* reading text one step under ink */
+  --on-deep:#5A5044;    /* muted text on the deep band (4.5:1) */
+  --rule-deep:#CDBE9E}  /* register ruling on the deep band */
+body{background-color:var(--bg);background-image:repeating-linear-gradient(180deg,transparent 0 31px,rgba(217,203,174,.55) 31px 32px)}
+/* the register's margin rule, only where the page has a margin for it (it never runs through the text) */
+@media (min-width:1400px){body{background-image:linear-gradient(90deg,transparent 0 46px,rgba(156,151,142,.45) 46px 47px,transparent 47px),repeating-linear-gradient(180deg,transparent 0 31px,rgba(217,203,174,.55) 31px 32px)}}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.22;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .36 0 0 0 0 .27 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+.skip:focus{position:fixed!important;left:12px;top:12px;width:auto;height:auto;clip:auto;z-index:99;background:var(--ink);color:var(--bg);padding:10px 14px}
+h1,h2,h3{font-family:var(--font-display);font-weight:700;letter-spacing:-.01em;margin:0}
+h1 em,h2 em{font-style:italic;font-weight:400}
+h1,h2{text-wrap:balance}
+h2{font-size:clamp(30px,3.6vw,48px);line-height:1.08;margin:.25em 0 .55em}
+h1 em,h2 em{display:block}
+p{margin:0}
+.lbl span{color:var(--before);margin:0 .3em}
+.lede{max-width:68ch;color:var(--body-2);margin:0 0 34px}
+.fine{font-size:14px;line-height:1.5;color:var(--muted);margin:10px 0 0;max-width:78ch}
+section{position:relative}
+[id]{scroll-margin-top:84px}
+main a:not(.btn):not(.tile):not(.src){text-decoration-color:var(--before);transition:text-decoration-color .15s}
+main a:not(.btn):not(.tile):not(.src):hover{text-decoration-color:currentColor}
+/* a committed file, linked: every backticked path on this page that exists in the repository */
+a.src{text-decoration:none;border-radius:2px}
+a.src code{color:var(--ink);padding:1px 4px;border-radius:2px;background:rgba(217,203,174,.5);box-shadow:inset 0 -1.5px 0 var(--muted);transition:background .15s,color .15s,box-shadow .15s}
+a.src:hover code{background:var(--ink);color:var(--bg);box-shadow:none}
+.sg{white-space:nowrap} /* a path wraps after a slash, never inside a name */
+code{overflow-wrap:anywhere}
+/* "recorded in": the files behind a statement, on their own line under it */
+.rec{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 14px;margin-top:9px;font-size:14px;line-height:1.5}
+.rec .lbl{font-size:10.5px;letter-spacing:.2em;color:var(--muted)}
+.rec>span:not(.lbl){display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:2px 7px}
+.rec i{font-style:normal;font-size:13px;color:var(--muted)}
+
+/* ── header (the landing's) ── */
+.top{position:sticky;top:0;z-index:20;background:rgba(242,232,213,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
+.top-in{display:flex;align-items:center;height:62px;gap:22px}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto;text-decoration:none;font:700 23px/1 var(--font-display)}
+.brand img{border-radius:7px}
+.top nav{display:flex;align-items:center;gap:22px;font-size:15px}
+.top nav a:not(.chip){text-decoration:none;color:var(--body-2);padding:6px 0;border-bottom:1.5px solid transparent;transition:border-color .18s,color .18s}
+.top nav a:not(.chip):hover{color:var(--ink);border-bottom-color:var(--ink)}
+.top nav .nav-strong{font-weight:600;color:var(--ink)}
+.top nav .chip{color:var(--ink);border-color:var(--before)}
+
+/* ── hero: what it is, the headline receipt, the 30-second path ── */
+.jhero{padding:44px 0 66px}
+.jhero-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:60px;align-items:start}
+.eyebrow{margin:0 0 20px}
+.eyebrow span{color:var(--before)}
+h1{font-size:clamp(36px,3.75vw,54px);line-height:1.05}
+/* the headline receipt: graphite before, red kept (the two state tokens), each numeral with its unit under it */
+.hn{display:flex;align-items:flex-start;gap:0 .17em;margin:32px 0 0;font-size:clamp(64px,7.6vw,112px)}
+.hn-n{display:grid;gap:.13em}
+.hn-n b{font:400 1em/.82 var(--font-display);font-variant-numeric:lining-nums;letter-spacing:-.025em;white-space:nowrap}
+.hn-n .data{font-size:12.5px;line-height:1.45;color:var(--muted);max-width:23ch}
+.hn .nb{color:var(--before-ink)}
+.hn .to{font:300 .46em/1 var(--font-body);color:var(--muted);padding-top:.36em}
+.hn em{font-style:normal;color:var(--after)}
+.verdict{margin:24px 0 0}
+.verdict .stamp{font-size:14px;background:rgba(250,244,232,.7)}
+.ident{margin:28px 0 0;font:600 21px/1.4 var(--font-body);color:var(--ink);max-width:32em}
+.claim{font-size:19px;line-height:1.5;color:#2C241C;margin:8px 0 0;max-width:34em}
+.built{font-size:16px;line-height:1.55;color:var(--body-2);margin:12px 0 0;max-width:38em}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.src-pending{display:inline-flex;align-items:center;min-height:46px;font:600 15px/1.2 var(--font-body);color:var(--muted)}
+
+/* the path: a case file with a tab, as on the landing */
+.file{position:relative;margin:30px 0 0;background:var(--paper);border:1px solid var(--rule);border-radius:2px 8px 8px 8px;box-shadow:var(--shadow);padding:10px 26px 18px}
+h2.file-tab{position:absolute;left:-1px;top:-30px;height:30px;margin:0;max-width:none;padding:9px 18px 0;background:var(--paper);border:1px solid var(--rule);border-bottom:0;border-radius:8px 8px 0 0;color:var(--ink);letter-spacing:.22em}
+.steps{list-style:none;margin:0;padding:0}
+.steps>li{display:grid;grid-template-columns:42px minmax(0,1fr) auto;column-gap:14px;align-items:center;padding:17px 0;border-bottom:1px solid var(--rule)}
+.st-no{align-self:start;font:400 38px/1 var(--font-display);font-variant-numeric:lining-nums;color:var(--ink)}
+.st h3{font-size:22px;line-height:1.2;letter-spacing:0}
+.st h3 small{font:400 12px/1 var(--font-data);color:var(--muted);margin-left:8px;letter-spacing:0;white-space:nowrap}
+.st p{margin-top:4px;font-size:15.5px;line-height:1.45;color:var(--body-2)}
+.steps .st p{max-width:44ch}
+.st-go{min-height:40px;padding:0 15px;font-size:15px;white-space:nowrap}
+.st-go svg{width:14px;height:14px}
+.steps>li.run{align-items:start}
+.steps>li.run .st{grid-column:2/-1}
+.steps .run .st p{max-width:none}
+.path-more{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;padding-top:14px;font-size:15px;color:var(--body-2)}
+.path-more a{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ink)}
+.path-more svg{width:13px;height:13px}
+
+/* the longer path: an index of the sections below, ruled like a register's contents page */
+.more{margin-top:34px}
+h2.lbl{margin:0 0 8px;max-width:none}
+.more ol{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink);counter-reset:ix}
+.more a{display:grid;grid-template-columns:34px auto minmax(24px,1fr) auto 18px;align-items:baseline;gap:0 10px;padding:11px 2px 10px;border-bottom:1px solid var(--rule);text-decoration:none;color:var(--ink);transition:background .15s,padding .15s}
+.more a::before{counter-increment:ix;content:counter(ix);font:400 13px/1 var(--font-data);color:var(--muted)}
+.more a b{font:700 19px/1.25 var(--font-display)}
+.more a span{grid-column:4;font-size:14.5px;color:var(--body-2);text-align:right}
+.more a::after{content:"\2193";grid-column:5;font:400 15px/1 var(--font-body);color:var(--muted);transition:transform .18s,color .18s}
+.more a:hover{background:rgba(217,203,174,.38)}
+.more a:hover::after{transform:translateY(2px);color:var(--ink)}
+
+/* a command you can copy */
+.cmd{display:flex;align-items:flex-start;gap:12px;margin-top:10px;padding:9px 9px 9px 14px;background:var(--bg);border:1px solid var(--rule);border-radius:4px}
+.cmd code{flex:1;min-width:0;align-self:center;font-size:13.5px;line-height:1.55;color:var(--ink)}
+.cmd .cl{display:block;padding-left:2ch;text-indent:-2ch;white-space:pre-wrap;overflow-wrap:anywhere}
+.cmd .nw{white-space:nowrap}
+.cmd .cl::before{content:"$ ";color:var(--muted)}
+.copy{flex:none;font:600 13px/1 var(--font-body);letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:3px;padding:9px 12px;min-width:68px;cursor:pointer;transition:background .18s,color .18s}
+.copy:hover,.copy.done{background:var(--ink);color:var(--bg)}
+html:not(.js) .copy{display:none}
+/* three lines or more: the button sits in the corner the short last line leaves free */
+.cmd.tall{position:relative}
+.cmd.tall .copy{position:absolute;right:9px;bottom:9px}
+.exp{margin-top:9px;font-size:15px;line-height:1.5;color:var(--body-2)}
+.exp .lbl{margin-right:8px;color:var(--muted)}
+
+/* ── the receipts: a ruled register ── */
+.rcpt{padding:30px 0 84px}
+.sheet{background:var(--paper);border:1px solid var(--rule);border-radius:6px;box-shadow:var(--shadow);padding:4px 30px 8px}
+.rt,.ct{width:100%;border-collapse:collapse}
+.rt th,.ct th{text-align:left;font:700 11px/1.3 var(--font-display);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);padding:16px 0 9px;border-bottom:1.5px solid var(--ink)}
+.rt td,.ct td{padding:19px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.rt tr:last-child td,.ct tr:last-child td{border-bottom:0}
+.rt tbody tr,.ct tbody tr{transition:background .15s}
+.rt tbody tr:hover,.ct tbody tr:hover{background:linear-gradient(90deg,transparent,rgba(217,203,174,.3) 4%,rgba(217,203,174,.3) 96%,transparent)}
+.rt .no,.ct .no{width:54px;font:400 13px/1 var(--font-data);color:var(--muted)}
+.rt td.no{padding-top:33px}
+.rt .num{width:396px;padding-right:30px;font:400 41px/1.06 var(--font-display);font-variant-numeric:lining-nums;letter-spacing:-.012em;white-space:nowrap}
+.rt .num .nb{color:var(--before-ink)}
+.rt .num em{font-style:normal;color:var(--after)}
+.rt .num .to{font:300 .58em/1 var(--font-body);color:var(--muted);margin:0 .28em;letter-spacing:0}
+.rt .num .u{font:400 13px/1 var(--font-data);color:var(--muted);margin-left:.5em;letter-spacing:0}
+.rt .num.word{font-style:italic;font-size:34px}
+.rt .what>b{display:block;font-weight:600;font-size:18.5px;line-height:1.35;color:var(--ink);max-width:72ch}
+.rt .what>span{display:block;margin-top:5px;font-size:15.5px;line-height:1.55;color:var(--body-2);max-width:82ch}
+.src-note{margin-top:16px;font-size:12.5px;max-width:none}
+
+/* ── by criterion: a ledger on the deep band ── */
+.crit{padding:80px 0 84px;background:var(--deep);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.crit .lbl,.ver .lbl{color:var(--on-deep)}
+.crit .lede{margin-bottom:30px}
+.crit-list{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
+.crit-list>li{display:grid;grid-template-columns:minmax(0,.34fr) minmax(0,1fr);gap:44px;padding:28px 0;border-bottom:1px solid var(--rule-deep)}
+.crit-list h3{font-size:29px;line-height:1.1;max-width:15ch}
+.crit-k{display:block;margin-bottom:9px;font:400 12.5px/1 var(--font-data);color:var(--on-deep)}
+.crit-list ul{list-style:none;margin:0;padding:0;display:grid;gap:15px}
+.crit-list ul li{position:relative;padding-left:24px;font-size:16.5px;line-height:1.52;color:#2C241C;max-width:88ch}
+.crit-list ul li>b{font-weight:600;color:var(--ink)}
+.crit-list .rec{margin-top:5px}
+.crit-list ul li::before{content:"";position:absolute;left:0;top:.74em;width:12px;height:1.5px;background:var(--ink)}
+.crit a.src code,.ver a.src code{background:rgba(250,244,232,.62)}
+.crit a.src:hover code,.ver a.src:hover code{background:var(--ink)}
+
+/* ── how it uses Relate ── */
+.rel{padding:84px 0 88px}
+.rel-grid{display:grid;grid-template-columns:minmax(0,.94fr) minmax(0,1.06fr);gap:48px;align-items:start}
+.facts{margin:6px 0 0}
+.facts dt{font:700 12px/1.3 var(--font-display);letter-spacing:.22em;text-transform:uppercase;color:var(--muted);padding-top:16px;border-top:1px solid var(--rule)}
+.facts dt:first-child{border-top:1.5px solid var(--ink)}
+.facts dd{margin:7px 0 18px;font-size:17px;line-height:1.55;color:#2C241C;max-width:60ch}
+.facts dd b{font-weight:600}
+.loop{margin:0;background:var(--paper);border:1px solid var(--rule);border-radius:6px;box-shadow:var(--shadow);padding:22px 26px 22px}
+.loop-steps{list-style:none;display:flex;flex-wrap:wrap;gap:10px 0;margin:16px 0 20px;padding:0;font:13px/1 var(--font-data)}
+.loop-steps li{display:flex;align-items:center;white-space:nowrap}
+.loop-steps li>span{padding:9px 11px;border:1px solid var(--ink);border-radius:3px;background:var(--bg)}
+.loop-steps li code{font-size:1em}
+/* the arrow trails its step, so a wrapped row ends on one; the last step turns back to the first */
+.loop-steps li::after{content:"";flex:none;width:8px;height:8px;margin:0 10px 0 4px;border-top:1.5px solid var(--ink);border-right:1.5px solid var(--ink);transform:rotate(45deg)}
+.loop-steps li:last-child::after{content:"\21BA";width:auto;height:auto;margin:0 0 0 9px;border:0;transform:none;font:400 19px/1 var(--font-body);color:var(--muted)}
+.loop-tape{display:grid;gap:8px}
+.loop-tape .tape{height:36px}
+.loop-tape .data{font-size:12.5px;line-height:1.55;color:var(--muted)}
+.loop-tape .data b{font-weight:400;color:var(--ink)}
+.speed{margin-top:22px;padding-top:20px;border-top:1px dashed var(--rule);display:grid;gap:13px}
+.speed .lbl{margin:0}
+.cmp-note{font-size:14.5px;line-height:1.5;color:var(--body-2);margin-bottom:2px}
+.sp{display:grid;grid-template-columns:190px minmax(0,1fr) 104px;align-items:center;gap:14px;font-size:14px}
+.sp i{display:block;height:26px;width:var(--w);background:var(--ink);border-radius:1px}
+.sp+.sp i{background:var(--before)}
+.sp b{font-weight:400;text-align:right;font-size:22px}
+.sub-h{margin:56px 0 18px;font-size:27px;line-height:1.15}
+.ct .cap{width:27%;padding-right:26px;font:14.5px/1.5 var(--font-data);color:var(--ink)}
+.ct .cap code{font-size:1em}
+.ct .use{padding-right:26px;font-size:16px;line-height:1.52;color:#2C241C}
+.ct .where{width:24%;font-size:14px;line-height:1.9}
+.ct .where a{display:inline-block;margin-right:4px}
+.ct td.no{padding-top:23px}
+/* the persisted graph: the stores, and the headline witness drawn (the exhibit tags are the product's own mark) */
+.persist{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:28px;align-items:start}
+.wit{margin:0;background:var(--paper);border:1px solid var(--rule);border-radius:6px;box-shadow:var(--shadow);padding:20px 24px 18px}
+.wit .qa{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 16px;align-items:baseline;padding-bottom:14px;border-bottom:1.5px solid var(--ink)}
+.wit .qa dt{white-space:nowrap}
+.wit .qa dd{margin:0;font-size:15.5px;line-height:1.45;color:#2C241C}
+.wit .qa .ans{font-size:17px;letter-spacing:.04em;display:flex;flex-wrap:wrap;gap:0 14px}
+.wit .qa .ans b{font-weight:400}
+.wit-draw{padding:14px 0 6px}
+.wit .inst .tg{cursor:default}
+.wit .cap{font-size:13.5px;line-height:1.55;color:var(--muted);padding-top:12px;border-top:1px solid var(--rule)}
+.wit .cap a:not(.src){color:var(--ink);font-weight:600}
+.wit-h{margin-bottom:12px}
+.also{margin-top:14px;font-size:14.5px;color:var(--body-2);max-width:none}
+.st .path{width:35%;padding-right:18px;font-size:14.5px}
+.st .role{font-size:16px;line-height:1.5;color:#2C241C;padding-right:22px}
+.st th.n,.st td.n{width:1%;padding-left:22px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.st td.n{font:400 16px/1.5 var(--font-data)}
+
+/* ── verify ── */
+.ver{padding:82px 0 86px;background:var(--deep);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.ver-grid{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);gap:44px;align-items:start}
+.vsteps{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
+.vsteps>li{display:grid;grid-template-columns:46px minmax(0,1fr);column-gap:14px;padding:22px 0 24px;border-bottom:1px solid var(--rule-deep)}
+.vsteps .st-no{padding-top:1px}
+.vsteps h3{font-size:23px;line-height:1.2;letter-spacing:0}
+.vsteps .cmd{background:var(--paper);border-color:var(--rule-deep)}
+.vsteps .note{margin-top:6px;font-size:14px;line-height:1.5;color:var(--on-deep)}
+.ver .term{margin:0}
+.ver .term pre{max-height:none;white-space:pre-wrap;overflow-wrap:anywhere}
+.ver .term .ln{padding-left:4ch;text-indent:-4ch}
+.ver .term .ln.cut{color:#8F8576}
+.t-cap{padding:11px 18px 14px;font-size:12px;line-height:1.55;color:#B9AE98;border-top:1px solid rgba(237,227,207,.12)}
+.t-cap code{color:#EDE3CF;font-size:1em}
+.t-cap a.src code,.honest a.src code{color:#EDE3CF;background:rgba(237,227,207,.12);box-shadow:inset 0 -1.5px 0 #8F8576}
+.t-cap a.src:hover code,.honest a.src:hover code{background:#EDE3CF;color:var(--ink)}
+.term .bar i{background:#5A5146}
+/* focus stays visible on the dark grounds */
+.term :focus-visible,.honest :focus-visible{outline-color:#EDE3CF}
+.term pre:focus-visible{outline-offset:-4px}
+.btn.solid:focus-visible{outline-offset:4px}
+.ver-more{margin-top:22px;color:var(--on-deep);font-size:15px;max-width:none}
+
+/* ── honest limitations (the landing's ink band) ── */
+.honest{padding:80px 0 84px;background:var(--ink);color:var(--bg)}
+.honest .lbl{color:#B9AE98}
+.honest .lbl span{color:#6F6555}
+.honest h2 em{color:#EDE3CF}
+.limits{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
+.limits li{padding:26px 26px 6px;border-top:1px solid rgba(242,232,213,.3);border-left:1px solid rgba(242,232,213,.16)}
+.limits li:first-child{padding-left:0;border-left:0}
+.limits li:last-child{padding-right:0}
+.limits .ln-no{display:block;font:400 34px/1 var(--font-display);color:#B9AE98;margin-bottom:16px}
+.limits h3{font:400 italic clamp(21px,1.75vw,24px)/1.28 var(--font-display);color:#F7EEDC;letter-spacing:0}
+.limits p{margin-top:10px;font-size:15.5px;line-height:1.56;color:#D9CDB4}
+.limits code{color:#EDE3CF}
+
+/* ── links ── */
+.lnk{padding:84px 0 70px}
+.tiles{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.tile{display:grid;gap:7px;height:100%;padding:19px 22px 18px;background:var(--paper);border:1px solid var(--rule);border-radius:6px;text-decoration:none;color:var(--ink);transition:transform .2s,box-shadow .2s,border-color .2s}
+.tile:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--before)}
+.tile:active{transform:none}
+.tile b{font:700 23px/1.2 var(--font-display);display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.tile b svg{flex:none;width:15px;height:15px;color:var(--muted);transition:transform .2s,color .2s}
+.tile:hover b svg{transform:translate(2px,-2px);color:var(--ink)}
+.tile .t-note{font-size:15.5px;line-height:1.45;color:var(--body-2)}
+.tile .t-url{font:12.5px/1.4 var(--font-data);color:var(--muted);overflow-wrap:anywhere}
+
+/* ── footer (the landing's) ── */
+.foot{padding:30px 0 40px;font-size:14px;color:var(--muted);border-top:1px solid var(--rule)}
+.foot-in{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.foot p{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.foot .data{font-size:12.5px}
+.foot .data span+span::before{content:"· "}
+
+/* the stamp lands once */
+@keyframes slam{from{opacity:0;transform:rotate(-2.5deg) scale(1.5)}to{opacity:1;transform:rotate(-2.5deg) scale(1)}}
+.js #stamp{animation:slam .3s cubic-bezier(.2,1.6,.4,1) .25s both}
+@media (prefers-reduced-motion:reduce){.js #stamp{animation:none}.tile:hover{transform:none}}
+
+/* ── responsive ── */
+@media (max-width:1240px){
+  .limits{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .limits li{padding:26px 32px 28px}
+  .limits li:nth-child(odd){padding-left:0;border-left:0}
+  .limits li:nth-child(even){padding-right:0}
+  .limits p{font-size:16.5px}
+}
+@media (max-width:1100px){
+  .jhero-in{grid-template-columns:minmax(0,1fr);gap:64px}
+  h1{max-width:20ch}
+  .rel-grid,.ver-grid,.persist{grid-template-columns:minmax(0,1fr);gap:36px}
+  .rt .num{width:290px;font-size:32px}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  /* the section anchors stay reachable: a second header row that scrolls sideways */
+  .top-in{flex-wrap:wrap;height:auto;row-gap:0}
+  .brand,.top .site{height:56px}
+  .top .jump{order:3;flex:0 0 100%;height:40px;gap:24px;overflow-x:auto;white-space:nowrap;scrollbar-width:none;border-top:1px solid var(--rule);-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
+  .top .jump::-webkit-scrollbar{display:none}
+  .top .jump a{flex:none;padding:8px 0}
+  .top .jump a:last-child{padding-right:28px}
+  [id]{scroll-margin-top:114px}
+}
+@media (max-width:760px){
+  body{font-size:17px}
+  .wrap{padding:0 18px}
+  .top nav{gap:14px;font-size:14px}
+  .top .jump{gap:20px}
+  .jhero{padding:28px 0 48px}
+  /* one column: what it is, then the path, then the longer claim; where supported, keyboard focus follows that order */
+  .jhero-copy,.jhero-side{display:contents}.jhero-in{display:flex;flex-direction:column;align-items:stretch;gap:0;reading-flow:flex-visual}
+  .eyebrow{order:1}h1{order:2}.hn{order:3}.verdict{order:4}.ident{order:5;margin-top:24px;font-size:19px}.file{order:6;margin-top:56px}.claim{order:7;margin-top:30px}.built{order:8}.ctas{order:9}.more{order:10;margin-top:40px}
+  .more a{grid-template-columns:26px minmax(0,1fr) 16px;gap:2px 8px}.more a span{grid-column:2;text-align:left}.more a::after{grid-column:3;grid-row:1}
+  h1{font-size:clamp(34px,9.6vw,46px)}
+  .hn{margin-top:26px;font-size:clamp(46px,14.6vw,84px)}
+  .hn-n .data{font-size:11.5px;max-width:19ch}
+  .claim{font-size:18px}
+  .file{padding:8px 16px 16px}
+  .steps>li{grid-template-columns:34px minmax(0,1fr);row-gap:10px}
+  .steps>li.run .st{display:contents}
+  .steps>li.run h3{grid-column:2;align-self:center}
+  .steps>li.run .cmd,.steps>li.run .exp{grid-column:1/-1;margin-top:0}
+  .steps .st p{max-width:none}
+  .st-no{font-size:32px}
+  .st-go{grid-column:2;justify-self:start}
+  .cmd{flex-wrap:wrap}.cmd code{flex-basis:100%}.cmd.tall .copy{position:static}
+  .rcpt{padding:14px 0 60px}
+  .crit,.rel,.ver,.honest,.lnk{padding:58px 0 60px}
+  .sheet{padding:2px 16px 4px}
+  /* registers stack: one receipt per block, the ruling stays */
+  .rt,.rt tbody,.rt tr,.rt td,.ct,.ct tbody,.ct tr,.ct td{display:block;width:auto}
+  .rt thead,.ct thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .rt tr,.ct tr{position:relative;padding:18px 0 18px;border-bottom:1px solid var(--rule)}
+  .rt tr:last-child,.ct tr:last-child{border-bottom:0}
+  .rt td,.ct td{padding:0;border:0}
+  .rt td.no,.ct td.no{position:absolute;right:0;top:20px;width:auto;padding:0}
+  .rt .num{width:auto;padding:0 34px 8px 0;font-size:34px;white-space:normal}
+  .rt .num.word{font-size:29px}
+  .ct .cap{width:auto;padding:0 34px 7px 0}
+  .ct .use{padding:0 0 8px}
+  .ct .where,.st .path{width:auto}
+  .st .path{padding:0 0 4px}
+  .st .role{padding:0 0 6px}
+  .st td.n{display:inline-block;width:auto;padding-left:0;text-align:left;font-size:14px;margin-right:16px}
+  .st td.n::before{content:attr(data-l) " ";color:var(--muted)}
+  .crit-list>li{grid-template-columns:minmax(0,1fr);gap:14px;padding:24px 0}
+  .crit-list h3{font-size:26px;max-width:none}
+  .loop{padding:18px 16px}
+  .wit{padding:16px 14px 14px}
+  .wit .qa{grid-template-columns:minmax(0,1fr);gap:3px}.wit .qa dd{margin-bottom:8px}
+  .inst .lb{font-size:21px}.inst .lb .cc{font-size:15px}
+  .inst .tg>*{transform:scale(1.15)}
+  .loop-steps li>span{padding:8px 9px}
+  .sp{grid-template-columns:minmax(0,1fr) 84px}.sp i{grid-column:1/-1;grid-row:2}
+  .sub-h{margin-top:44px;font-size:24px}
+  .vsteps>li{grid-template-columns:34px minmax(0,1fr)}
+  .limits{grid-template-columns:minmax(0,1fr)}
+  .limits li,.limits li:nth-child(even),.limits li:nth-child(odd){padding:22px 0 24px;border-left:0}
+  .limits .ln-no{font-size:24px;margin-bottom:10px}
+  /* the recorded output scrolls in place, so step 4 is not a screen away from step 1 */
+  .ver .term pre{max-height:440px;overflow-y:auto;background:linear-gradient(#15110D 33%,rgba(21,17,13,0)) top/100% 36px no-repeat local,linear-gradient(rgba(21,17,13,0),#15110D 66%) bottom/100% 36px no-repeat local,linear-gradient(rgba(237,227,207,.24),rgba(237,227,207,0)) top/100% 12px no-repeat scroll,linear-gradient(rgba(237,227,207,0),rgba(237,227,207,.24)) bottom/100% 12px no-repeat scroll}
+  .tiles{grid-template-columns:minmax(0,1fr);gap:10px}
+  .tile{padding:14px 16px 13px;gap:3px}.tile b{font-size:20px}.tile .t-url{display:none}
+  .foot-in{flex-direction:column}
+  .foot .data{flex-direction:column;align-items:flex-start;gap:4px}.foot .data span+span::before{content:none}
+}
+@media (max-width:420px){
+  .brand span{font-size:20px}
+  .top nav .chip{display:none}
+  .verdict .stamp{font-size:11.5px;letter-spacing:.12em;white-space:normal;max-width:100%}
+  .sg{white-space:normal}
+  .btn{padding:0 16px}
+}
+@media print{
+  body{background:#fff}body::after{display:none}
+  .top{position:static}.top nav,.copy,.skip{display:none}
+  .crit,.ver{background:#fff}.honest{background:#fff;color:#000}.honest .limits h3,.honest .limits p,.honest .lbl,.honest h2 em{color:#000}
+  .sheet,.file,.loop,.tile,.wit,.term{box-shadow:none}
+  .crit-list>li,.vsteps>li,.steps>li,tr,.wit,.loop{break-inside:avoid}
+  *{transition:none!important;animation:none!important}
+  a.src code{background:none;box-shadow:none}
+}
+
+</style>
+</head>
+<body>
+<a class="skip sr" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="/" aria-label="Witness, home"><img src="/icon.svg" alt="" width="34" height="34"><span>Witness</span></a>
+    <nav class="jump" aria-label="On this page">
+      <a href="#the-receipts">Receipts</a><a href="#how-it-uses-relate">Relate</a><a href="#verify-it-yourself">Verify</a><a href="#by-criterion">By criterion</a><a href="#honest-limitations">Limits</a><a href="#links">Links</a>
+    </nav>
+    <nav class="site" aria-label="Site">
+      <a class="nav-strong" href="/">Landing</a><a class="nav-strong" href="/deck/">Pitch deck</a>
+      <a class="chip" href="https://github.com/edycutjong/witness">source</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<section class="jhero" aria-labelledby="h1">
+  <div class="wrap jhero-in">
+    <div class="jhero-copy">
+      <p class="lbl eyebrow">For judges <span aria-hidden="true">·</span> Relate by Neo4j hackathon</p>
+      <h1 id="h1">The evidence behind an agent’s graph answer, <em>small enough to read.</em></h1>
+      <div class="hn">
+        <p class="hn-n"><b class="nb">57,645</b><span class="data">relationships in the air-routes graph</span></p>
+        <span class="to" aria-hidden="true">→</span>
+        <p class="hn-n"><b><em>22</em></b><span class="data">in the witness that reproduces the answer</span></p>
+      </div>
+      <p class="verdict"><span class="stamp red" id="stamp">22 of 22 change the answer</span></p>
+      <p class="ident">Witness is a Python CLI and MCP server built on Relate.</p>
+      <p class="claim" id="claim">When an agent answers from a graph, Witness hands back a small graph that reproduces the answer, and proves that deleting any one of its relationships changes the answer.</p>
+      <p class="built">Every trial is a Relate transaction, and the witness is one <code>.rl</code> file you open with plain <code>relate</code>. Built for the Relate by Neo4j hackathon.</p>
+      <div class="ctas">
+        <a class="btn" href="https://github.com/edycutjong/witness"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5L2 10l5 5M13 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>Source on GitHub</a>
+        <a class="btn" href="https://youtu.be/GYbci7TseJw"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v12H3z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 7.5v5l4.5-2.5z" fill="currentColor"/></svg>Demo video (1:55)</a>
+        <a class="btn" href="/deck/"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v10H3zM7 17h6M10 14v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Pitch deck</a>
+      </div>
+    </div>
+
+    <div class="jhero-side">
+      <aside class="file path" aria-labelledby="the-30-second-path">
+        <h2 class="file-tab lbl" id="the-30-second-path">The 30-second path</h2>
+        <ol class="steps">
+          <li><span class="st-no" aria-hidden="true">1</span><div class="st"><h3>Open the landing page</h3><p>The answer, the 22 relationships that reproduce it, and the check line; nothing to install.</p></div><a class="btn st-go solid" href="/">Open landing<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5L12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a></li>
+          <li><span class="st-no" aria-hidden="true">2</span><div class="st"><h3>Open the exhibit page</h3><p>The register of kept relationships, each tagged as one whose deletion changes the answer.</p></div><a class="btn st-go" href="/exhibit/two-hub.html">Open exhibit<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5L12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a></li>
+          <li class="run"><span class="st-no" aria-hidden="true">3</span><div class="st"><h3>Run one command <small>optional · needs uv</small></h3><div class="cmd tall"><code><span class="cl">git clone https://<wbr>github.com/<wbr>edycutjong/<wbr>witness</span><span class="cl">cd witness</span><span class="cl">uv run witness demo</span></code><button type="button" class="copy" data-copy="git clone https://github.com/edycutjong/witness &amp;&amp; cd witness &amp;&amp; uv run witness demo" aria-label="Copy the command: clone the repository and run the demo">copy</button></div><p class="exp">Expect <code>22 of 22 change the answer</code> and exit 0.</p></div></li>
+        </ol>
+        <p class="path-more"><span>Prefer to watch it run?</span><a href="https://youtu.be/GYbci7TseJw">Demo video (1:55)<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6.5 5H11v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a></p>
+      </aside>
+      <nav class="more" aria-labelledby="more-h">
+        <h2 class="lbl" id="more-h">With more time</h2>
+        <ol>
+          <li><a href="#the-receipts"><b>The receipts</b><span>9 receipts, each with its file</span></a></li>
+          <li><a href="#how-it-uses-relate"><b>How it uses Relate</b><span>mode, reason, 8 capabilities</span></a></li>
+          <li><a href="#verify-it-yourself"><b>Verify it yourself</b><span>4 commands, on your machine</span></a></li>
+          <li><a href="#by-criterion"><b>By criterion</b><span>where to look for each of the 5</span></a></li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<section class="rcpt" id="the-receipts" aria-labelledby="rc-h">
+  <div class="wrap">
+    <p class="lbl">The receipts <span aria-hidden="true">·</span> every figure links to its file</p>
+    <h2 id="rc-h">Every number, <em>and the file it was read from.</em></h2>
+    <div class="sheet">
+      <table class="rt" role="table">
+        <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col" class="no">No.</th><th role="columnheader" scope="col">Receipt</th><th role="columnheader" scope="col">What it is, and where it is recorded</th></tr></thead>
+        <tbody role="rowgroup">
+          <tr role="row"><td role="cell" class="no">1</td><td role="cell" class="num"><span class="sr">57,645 → 22</span><span aria-hidden="true"><span class="nb">57,645</span><span class="to">→</span><em>22</em></span></td><td role="cell" class="what"><b>Relationships in the air-routes graph, then in the witness.</b><span>3,748 nodes → 12 nodes in the witness graph.</span><p class="rec"><span class="lbl">Recorded in</span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/two-hub.manifest.json"><code><span class="sg">witnesses/</span><wbr><span class="sg">two-hub.manifest.json</span></code></a></span></p></td></tr>
+          <tr role="row"><td role="cell" class="no">2</td><td role="cell" class="num"><span class="sr">22 of 22</span><span aria-hidden="true"><em>22</em><span class="to">of</span>22</span></td><td role="cell" class="what"><b>Deleting any one of them from the witness changes the answer.</b><span>Checked on relate-db and on the Relate CLI: <code>22 of 22 change the answer</code>.</span><p class="rec"><span class="lbl">Recorded in</span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/two-hub.manifest.json"><code><span class="sg">witnesses/</span><wbr><span class="sg">two-hub.manifest.json</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/pull-each-tag.json"><code><span class="sg">evidence/</span><wbr><span class="sg">pull-each-tag.json</span></code></a><i>what each deletion does to the answer</i></span></p></td></tr>
+          <tr role="row"><td role="cell" class="no">3</td><td role="cell" class="num"><span class="sr">68 → 22</span><span aria-hidden="true"><span class="nb">68</span><span class="to">→</span><em>22</em></span></td><td role="cell" class="what"><b>The answer rows bind 68 relationships; the witness keeps 22 of them.</b><span>Deleted from the full graph, only 20 of the 68 change the answer; the other 48 change nothing. 11 of those 20 are in the witness; the other 9 are flights of Mexican airports outside it, whose deletion adds that airport to the answer. Deleted from the witness, each of the 22 changes it.</span><p class="rec"><span class="lbl">Recorded in</span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/neo4j-compare-2026-11-24.md"><code><span class="sg">evidence/</span><wbr><span class="sg">neo4j-compare-2026-11-24.md</span></code></a><i>targeted pass</i></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/full-graph-necessity.json"><code><span class="sg">evidence/</span><wbr><span class="sg">full-graph-necessity.json</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/two-hub.manifest.json"><code><span class="sg">witnesses/</span><wbr><span class="sg">two-hub.manifest.json</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/queries/two-hub-bindings.cypher"><code><span class="sg">queries/</span><wbr><span class="sg">two-hub-bindings.cypher</span></code></a><i>the binding query</i></span></p></td></tr>
+          <tr role="row"><td role="cell" class="no">4</td><td role="cell" class="num"><span class="sr">57,645 → 5</span><span aria-hidden="true"><span class="nb">57,645</span><span class="to">→</span><em>5</em></span></td><td role="cell" class="what"><b>A second case: two queries disagree.</b><span>A plausible agent mistake written for this case (the first flight matched in either direction) and the headline query disagree on IN/DEL; <code>5 of 5 end the disagreement</code>.</span><p class="rec"><span class="lbl">Recorded in</span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/direction-bug.manifest.json"><code><span class="sg">witnesses/</span><wbr><span class="sg">direction-bug.manifest.json</span></code></a></span></p></td></tr>
+          <tr role="row"><td role="cell" class="no">5</td><td role="cell" class="num"><span class="sr">57,645 → 92</span><span aria-hidden="true"><span class="nb">57,645</span><span class="to">→</span><em>92</em></span></td><td role="cell" class="what"><b>A third: a smaller repro of a wrong answer (<code>differs</code>).</b><span>The same mistaken query returns 13 rows where the expected answer has 12, and the repro keeps that wrong answer; <code>92 of 92 change the answer</code>.</span><p class="rec"><span class="lbl">Recorded in</span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/wrong-answer.manifest.json"><code><span class="sg">witnesses/</span><wbr><span class="sg">wrong-answer.manifest.json</span></code></a></span></p></td></tr>
+          <tr role="row"><td role="cell" class="no">6</td><td role="cell" class="num"><span class="sr">371 trials · 1.095 s</span><span aria-hidden="true">371<span class="u">trials</span><span class="to">·</span>1.095<span class="u">s</span></span></td><td role="cell" class="what"><b>Delete, re-run, roll back.</b><span>86 deletions kept the answer and were then applied. Trials and deletions repeat exactly; wall-clock seconds do not: the landing's paste reduced in 0.998 s, the video's take in 0.91 s.</span><p class="rec"><span class="lbl">Recorded in</span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/two-hub.manifest.json"><code><span class="sg">witnesses/</span><wbr><span class="sg">two-hub.manifest.json</span></code></a><i>this run</i></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/demo-2026-11-24.txt"><code><span class="sg">evidence/</span><wbr><span class="sg">demo-2026-11-24.txt</span></code></a><i>the landing's paste</i></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/video-demo-run-2026-11-27.txt"><code><span class="sg">evidence/</span><wbr><span class="sg">video-demo-run-2026-11-27.txt</span></code></a><i>the video's take</i></span></p></td></tr>
+          <tr role="row"><td role="cell" class="no">7</td><td role="cell" class="num"><span class="sr">366.8 vs 90.2</span><span aria-hidden="true">366.8<span class="to">vs</span>90.2<span class="u">trials/s</span></span></td><td role="cell" class="what"><b>Trials per second: Relate in-process, then Neo4j 2026.10.2 in Docker.</b><span>The same loop and query on one machine, median of 3 runs, the same answer on every trial. It measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.</span><p class="rec"><span class="lbl">Recorded in</span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/neo4j-compare-2026-11-24.md"><code><span class="sg">evidence/</span><wbr><span class="sg">neo4j-compare-2026-11-24.md</span></code></a></span></p></td></tr>
+          <tr role="row"><td role="cell" class="no">8</td><td role="cell" class="num"><span class="sr">517 tests pass · 100% coverage</span><span aria-hidden="true">517<span class="u">tests</span><span class="to">·</span>100%<span class="u">coverage</span></span></td><td role="cell" class="what"><b>Tests pass against real Relate, under a 100% line and branch coverage gate.</b><span>The graph store, rollback and queries are never mocked. <code>relate pull</code> (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach rare branches. 2 more tests need a local Neo4j in Docker and skip without it.</span><p class="rec"><span class="lbl">Recorded in</span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/pytest-2026-11-27.txt"><code><span class="sg">evidence/</span><wbr><span class="sg">pytest-2026-11-27.txt</span></code></a><i><code>pytest --cov=witness</code></i></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/pyproject.toml"><code><span class="sg">pyproject.toml</span></code></a><i>the gate</i></span></p></td></tr>
+          <tr role="row"><td role="cell" class="no">9</td><td role="cell" class="num word"><span class="sr">byte-identical</span><span aria-hidden="true">byte-identical</span></td><td role="cell" class="what"><b>The same query and seed give a byte-identical rebuild script (<code>.cypher</code>) on 2 runs.</b><p class="rec"><span class="lbl">Recorded in</span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/determinism.json"><code><span class="sg">evidence/</span><wbr><span class="sg">determinism.json</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/scripts/determinism.py"><code><span class="sg">scripts/</span><wbr><span class="sg">determinism.py</span></code></a><i>re-records it</i></span></p></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fine src-note data">Relate 1.0.1 · Python 3.12.13 · every linked path is a file in the repository, and <a class="src" href="https://github.com/edycutjong/witness/blob/main/scripts/build_site.py"><code><span class="sg">scripts/</span><wbr><span class="sg">build_site.py</span></code></a> writes this page from them.</p>
+  </div>
+</section>
+
+<section class="rel" id="how-it-uses-relate" aria-labelledby="rel-h">
+  <div class="wrap">
+    <p class="lbl">How it uses Relate <span aria-hidden="true">·</span> mode, reason, capabilities</p>
+    <h2 id="rel-h">Every trial is <em>a Relate transaction.</em></h2>
+    <div class="rel-grid">
+      <dl class="facts">
+        <dt>Mode</dt><dd>Single file (<code>.rl</code>). Reductions run on a file-backed scratch copy in a temp dir; the committed source is copied byte for byte, never opened for writing, and its SHA-256 is checked unchanged after every run.</dd>
+        <dt>Why this mode</dt><dd>The unit of evidence is a file. One <code>.rl</code> per witness can be committed, handed over and re-run by a reviewer with <code>relate</code> alone, with no server. A directory store is many files; <code>:memory:</code> disappears when the process ends and cannot be inspected.</dd>
+        <dt>What the graph models</dt><dd>The air-routes network by Kelvin Lawrence (Apache-2.0): 3,748 nodes and 57,645 relationships, <code>(:Airport)-[:HAS_ROUTE]-&gt;(:Airport)</code>, <code>(:Airport)-[:IN_COUNTRY]-&gt;(:Country)</code> and <code>(:Airport)-[:ON_CONTINENT]-&gt;(:Continent)</code> (<a class="src" href="https://github.com/edycutjong/witness/blob/main/data/SOURCE.md"><code><span class="sg">data/</span><wbr><span class="sg">SOURCE.md</span></code></a>).</dd>
+      </dl>
+      <figure class="loop" aria-labelledby="loop-h">
+        <figcaption class="lbl" id="loop-h">One trial, <b>371 times</b></figcaption>
+        <ol class="loop-steps">
+          <li><span><code>begin_transaction</code></span></li><li><span>delete</span></li><li><span>re-run the query</span></li><li><span>compare the answer</span></li><li><span><code>rollback_transaction</code></span></li>
+        </ol>
+        <div class="loop-tape"><svg class="tape" viewBox="0 0 742 18" preserveAspectRatio="none" aria-hidden="true"><path class="tr" d="M1 6v6M5 6v6M7 6v6M11 6v6M13 6v6M15 6v6M17 6v6M19 6v6M21 6v6M23 6v6M25 6v6M27 6v6M29 6v6M33 6v6M35 6v6M37 6v6M39 6v6M41 6v6M43 6v6M45 6v6M49 6v6M51 6v6M53 6v6M55 6v6M57 6v6M61 6v6M63 6v6M65 6v6M69 6v6M71 6v6M73 6v6M75 6v6M77 6v6M79 6v6M83 6v6M85 6v6M87 6v6M89 6v6M91 6v6M93 6v6M95 6v6M97 6v6M99 6v6M101 6v6M103 6v6M105 6v6M111 6v6M115 6v6M119 6v6M123 6v6M125 6v6M127 6v6M129 6v6M135 6v6M137 6v6M141 6v6M145 6v6M149 6v6M153 6v6M155 6v6M157 6v6M159 6v6M163 6v6M167 6v6M169 6v6M173 6v6M177 6v6M179 6v6M183 6v6M185 6v6M187 6v6M191 6v6M193 6v6M199 6v6M203 6v6M207 6v6M211 6v6M213 6v6M215 6v6M217 6v6M221 6v6M225 6v6M227 6v6M229 6v6M233 6v6M235 6v6M237 6v6M241 6v6M245 6v6M247 6v6M249 6v6M253 6v6M257 6v6M259 6v6M261 6v6M263 6v6M267 6v6M269 6v6M273 6v6M275 6v6M279 6v6M281 6v6M285 6v6M289 6v6M293 6v6M295 6v6M297 6v6M301 6v6M303 6v6M305 6v6M307 6v6M311 6v6M315 6v6M317 6v6M319 6v6M323 6v6M325 6v6M329 6v6M331 6v6M333 6v6M337 6v6M343 6v6M347 6v6M349 6v6M353 6v6M355 6v6M359 6v6M361 6v6M365 6v6M369 6v6M371 6v6M373 6v6M375 6v6M377 6v6M381 6v6M383 6v6M385 6v6M389 6v6M391 6v6M393 6v6M397 6v6M399 6v6M401 6v6M405 6v6M409 6v6M411 6v6M413 6v6M415 6v6M419 6v6M423 6v6M425 6v6M427 6v6M431 6v6M435 6v6M439 6v6M443 6v6M447 6v6M449 6v6M451 6v6M453 6v6M455 6v6M457 6v6M459 6v6M463 6v6M465 6v6M467 6v6M469 6v6M471 6v6M473 6v6M477 6v6M479 6v6M481 6v6M485 6v6M487 6v6M489 6v6M491 6v6M493 6v6M495 6v6M497 6v6M499 6v6M501 6v6M503 6v6M505 6v6M507 6v6M509 6v6M511 6v6M513 6v6M515 6v6M517 6v6M519 6v6M521 6v6M523 6v6M525 6v6M527 6v6M529 6v6M531 6v6M533 6v6M535 6v6M537 6v6M541 6v6M543 6v6M545 6v6M547 6v6M549 6v6M551 6v6M555 6v6M559 6v6M563 6v6M565 6v6M569 6v6M571 6v6M573 6v6M575 6v6M577 6v6M579 6v6M581 6v6M583 6v6M585 6v6M587 6v6M589 6v6M591 6v6M593 6v6M595 6v6M597 6v6M601 6v6M603 6v6M605 6v6M607 6v6M609 6v6M611 6v6M613 6v6M615 6v6M617 6v6M619 6v6M621 6v6M623 6v6M625 6v6M627 6v6M629 6v6M631 6v6M633 6v6M635 6v6M639 6v6M641 6v6M643 6v6M645 6v6M647 6v6M649 6v6M651 6v6M657 6v6M661 6v6M665 6v6M667 6v6M669 6v6M671 6v6M673 6v6M677 6v6M681 6v6M685 6v6M689 6v6M693 6v6M695 6v6M697 6v6M699 6v6M701 6v6M703 6v6M705 6v6M707 6v6M709 6v6M711 6v6M713 6v6M715 6v6M717 6v6M719 6v6M721 6v6M723 6v6M725 6v6M727 6v6M729 6v6M731 6v6M733 6v6M735 6v6M737 6v6M739 6v6M741 6v6"/><path class="ta" d="M3 2v14M9 2v14M31 2v14M47 2v14M59 2v14M67 2v14M81 2v14M107 2v14M109 2v14M113 2v14M117 2v14M121 2v14M131 2v14M133 2v14M139 2v14M143 2v14M147 2v14M151 2v14M161 2v14M165 2v14M171 2v14M175 2v14M181 2v14M189 2v14M195 2v14M197 2v14M201 2v14M205 2v14M209 2v14M219 2v14M223 2v14M231 2v14M239 2v14M243 2v14M251 2v14M255 2v14M265 2v14M271 2v14M277 2v14M283 2v14M287 2v14M291 2v14M299 2v14M309 2v14M313 2v14M321 2v14M327 2v14M335 2v14M339 2v14M341 2v14M345 2v14M351 2v14M357 2v14M363 2v14M367 2v14M379 2v14M387 2v14M395 2v14M403 2v14M407 2v14M417 2v14M421 2v14M429 2v14M433 2v14M437 2v14M441 2v14M445 2v14M461 2v14M475 2v14M483 2v14M539 2v14M553 2v14M557 2v14M561 2v14M567 2v14M599 2v14M637 2v14M653 2v14M655 2v14M659 2v14M663 2v14M675 2v14M679 2v14M683 2v14M687 2v14M691 2v14"/></svg><span class="data"><b>86</b> deletions kept the answer and were then applied (tall) · the other <b>285</b> changed it and stayed rolled back (short) · <a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/two-hub.trace.json"><code><span class="sg">witnesses/</span><wbr><span class="sg">two-hub.trace.json</span></code></a></span></div>
+        <div class="speed" role="group" aria-labelledby="cmp-h">
+          <p class="lbl" id="cmp-h">The same loop on two engines <span aria-hidden="true">·</span> trials per second</p>
+          <p class="cmp-note">Same loop and query, one machine, median of 3 runs, identical answers (<a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/neo4j-compare-2026-11-24.md"><code><span class="sg">evidence/</span><wbr><span class="sg">neo4j-compare-2026-11-24.md</span></code></a>). It measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.</p>
+          <div class="sp"><span class="data">Relate, in-process</span><i style="--w:100%"></i><b class="data">366.8/s</b></div>
+          <div class="sp"><span class="data">Neo4j 2026.10.2, Docker</span><i style="--w:24.6%"></i><b class="data">90.2/s</b></div>
+        </div>
+      </figure>
+    </div>
+
+    <h3 class="sub-h">8 Relate capabilities, each with its place in the source</h3>
+    <div class="sheet">
+      <table class="ct" role="table">
+        <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col" class="no">No.</th><th role="columnheader" scope="col">Relate capability</th><th role="columnheader" scope="col">What Witness does with it</th><th role="columnheader" scope="col">In the source</th></tr></thead>
+        <tbody role="rowgroup">
+          <tr role="row"><td role="cell" class="no">1</td><td role="cell" class="cap"><code>begin_transaction · rollback_transaction</code></td><td role="cell" class="use">One transaction per trial: begin, delete, re-run the query, compare, roll back. 371 trials in the headline run; the 86 deletions that kept the answer are then committed on the scratch copy.</td><td role="cell" class="where"><a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/store.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">store.py</span></code></a></td></tr>
+          <tr role="row"><td role="cell" class="no">2</td><td role="cell" class="cap"><code>QueryResult.query_type</code></td><td role="cell" class="use">After Witness's own token check, Relate has to report the query as read-only (<code>query_type</code> is <code>"r"</code>); anything else is refused with exit 2.</td><td role="cell" class="where"><a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/guard.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">guard.py</span></code></a></td></tr>
+          <tr role="row"><td role="cell" class="no">3</td><td role="cell" class="cap"><code>EXPLAIN</code></td><td role="cell" class="use">Labels and types that neither the query nor its plan names go in one verified step: <code>:ON_CONTINENT</code>, 3,504 relationships, in trial 2.</td><td role="cell" class="where"><a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/reduce.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">reduce.py</span></code></a></td></tr>
+          <tr role="row"><td role="cell" class="no">4</td><td role="cell" class="cap"><code>read_only=True</code></td><td role="cell" class="use">The rerun, ledger-reader and fixture-test paths open their store read-only, so they cannot write.</td><td role="cell" class="where"><a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/cli.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">cli.py</span></code></a> <a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/ledger.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">ledger.py</span></code></a> <a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/fixture.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">fixture.py</span></code></a></td></tr>
+          <tr role="row"><td role="cell" class="no">5</td><td role="cell" class="cap"><code>single-file .rl</code></td><td role="cell" class="use">The witness, the source and the ledger are each one <code>.rl</code> file: commit it, hand it over, open it with plain <code>relate</code>.</td><td role="cell" class="where"><a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/export.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">export.py</span></code></a> <a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/ledger.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">ledger.py</span></code></a></td></tr>
+          <tr role="row"><td role="cell" class="no">6</td><td role="cell" class="cap"><code>relate pull</code></td><td role="cell" class="use">Fixture mode: one pull from Neo4j, then shrink; nothing is pushed back. The committed run pulled 1,272 relationships and kept 126.</td><td role="cell" class="where"><a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/fixture.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">fixture.py</span></code></a> <a class="src" href="https://github.com/edycutjong/witness/blob/main/fixtures/mex-foreign.report.json"><code><span class="sg">fixtures/</span><wbr><span class="sg">mex-foreign.report.json</span></code></a></td></tr>
+          <tr role="row"><td role="cell" class="no">7</td><td role="cell" class="cap"><code>relate query --mode json</code></td><td role="cell" class="use">The independent re-check: when the Relate CLI is installed, sufficiency and the necessity probes run again on it, outside the Python API. In the committed run, all 22.</td><td role="cell" class="where"><a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/check.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">check.py</span></code></a></td></tr>
+          <tr role="row"><td role="cell" class="no">8</td><td role="cell" class="cap"><code>MCP · why · check</code></td><td role="cell" class="use">A client answers through Relate's own server, then calls Witness's <code>why</code> for the evidence of that answer; <code>check</code> re-proves a witness. Recorded twice: a scripted client that calls both, and a real model that calls <code>why</code>.</td><td role="cell" class="where"><a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/mcp_server.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">mcp_server.py</span></code></a> <a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/mcp-transcript.md"><code><span class="sg">evidence/</span><wbr><span class="sg">mcp-transcript.md</span></code></a> <a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/mcp-agent-session.md"><code><span class="sg">evidence/</span><wbr><span class="sg">mcp-agent-session.md</span></code></a></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-h">The graph is persisted: the stores in the repository</h3>
+    <div class="persist">
+      <div>
+        <div class="sheet">
+          <table class="ct st" role="table">
+            <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Store</th><th role="columnheader" scope="col">What it is</th><th role="columnheader" scope="col" class="n">Nodes</th><th role="columnheader" scope="col" class="n">Relationships</th></tr></thead>
+            <tbody role="rowgroup">
+              <tr role="row"><td role="cell" class="path"><a class="src" href="https://github.com/edycutjong/witness/blob/main/data/air-routes.rl"><code><span class="sg">data/</span><wbr><span class="sg">air-routes.rl</span></code></a></td><td role="cell" class="role">The source graph, never opened for writing</td><td role="cell" class="n" data-l="nodes">3,748</td><td role="cell" class="n" data-l="relationships">57,645</td></tr>
+              <tr role="row"><td role="cell" class="path"><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/two-hub.rl"><code><span class="sg">witnesses/</span><wbr><span class="sg">two-hub.rl</span></code></a></td><td role="cell" class="role">The headline witness</td><td role="cell" class="n" data-l="nodes">12</td><td role="cell" class="n" data-l="relationships">22</td></tr>
+              <tr role="row"><td role="cell" class="path"><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/direction-bug.rl"><code><span class="sg">witnesses/</span><wbr><span class="sg">direction-bug.rl</span></code></a></td><td role="cell" class="role">The witness of a disagreement between two queries</td><td role="cell" class="n" data-l="nodes">5</td><td role="cell" class="n" data-l="relationships">5</td></tr>
+              <tr role="row"><td role="cell" class="path"><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/wrong-answer.rl"><code><span class="sg">witnesses/</span><wbr><span class="sg">wrong-answer.rl</span></code></a></td><td role="cell" class="role">The smaller repro of a wrong answer</td><td role="cell" class="n" data-l="nodes">45</td><td role="cell" class="n" data-l="relationships">92</td></tr>
+              <tr role="row"><td role="cell" class="path"><a class="src" href="https://github.com/edycutjong/witness/blob/main/fixtures/mex-foreign.rl"><code><span class="sg">fixtures/</span><wbr><span class="sg">mex-foreign.rl</span></code></a></td><td role="cell" class="role">A test fixture: pulled from Neo4j once, then shrunk</td><td role="cell" class="n" data-l="nodes">88</td><td role="cell" class="n" data-l="relationships">126</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="fine also">Also committed: <a class="src" href="https://github.com/edycutjong/witness/blob/main/witness.rl"><code><span class="sg">witness.rl</span></code></a>, the ledger of reductions, where a review verdict is recorded.</p>
+      </div>
+      <figure class="wit" aria-labelledby="wit-h">
+        <p class="lbl wit-h" id="wit-h">The headline witness, <b>drawn</b></p>
+        <dl class="qa">
+          <dt class="lbl">The question</dt><dd>Which airports of MX have no direct flight to MEX, yet would still reach it in two flights if any one hub closed?</dd>
+          <dt class="lbl">The answer</dt><dd class="data ans"><b>PBC</b> <b>QRO</b> <b>TLC</b> <b>UPN</b></dd>
+        </dl>
+        <div class="wit-draw"><svg class="inst" viewBox="56 22 552 312" role="img" aria-labelledby="j-t">
+<title id="j-t">The witness: 22 relationships among 12 nodes (10 airports, 2 countries), the 13 routes carry numbered exhibit tags, the 9 country links show as country codes</title>
+<g class="edges">
+<path class="ed" data-n="1" data-s="ACA" data-e="MEX" d="M336.0 312.0Q445.9 258.2 540.0 180.0"/>
+<path class="ed" data-n="3" data-s="DFW" data-e="MEX" d="M336.0 180.0Q438.0 192.2 540.0 180.0"/>
+<path class="ed" data-n="5" data-s="LAS" data-e="MEX" d="M336.0 246.0Q442.0 225.2 540.0 180.0"/>
+<path class="ed" data-n="7" data-s="LAX" data-e="MEX" d="M336.0 48.0Q430.1 126.2 540.0 180.0"/>
+<path class="ed" data-n="9" data-s="PBC" data-e="DFW" d="M118.0 220.0Q229.4 213.1 336.0 180.0"/>
+<path class="ed" data-n="10" data-s="PBC" data-e="TIJ" d="M118.0 220.0Q233.4 180.1 336.0 114.0"/>
+<path class="ed" data-n="12" data-s="QRO" data-e="DFW" d="M118.0 148.0Q225.1 177.1 336.0 180.0"/>
+<path class="ed" data-n="13" data-s="QRO" data-e="TIJ" d="M118.0 148.0Q229.0 144.1 336.0 114.0"/>
+<path class="ed" data-n="15" data-s="TIJ" data-e="MEX" d="M336.0 114.0Q434.0 159.2 540.0 180.0"/>
+<path class="ed" data-n="17" data-s="TLC" data-e="ACA" d="M118.0 292.0Q225.8 315.1 336.0 312.0"/>
+<path class="ed" data-n="18" data-s="TLC" data-e="LAS" d="M118.0 292.0Q229.8 282.1 336.0 246.0"/>
+<path class="ed" data-n="20" data-s="UPN" data-e="LAX" d="M118.0 76.0Q228.7 75.1 336.0 48.0"/>
+<path class="ed" data-n="21" data-s="UPN" data-e="TIJ" d="M118.0 76.0Q224.7 108.1 336.0 114.0"/>
+</g><g class="nodes">
+<g class="nd" data-c="UPN" transform="translate(118 76)"><circle r="5"/><text class="lb" x="-14" y="6" text-anchor="end">UPN<tspan class="cc" data-n="22" dx="5">MX</tspan></text></g>
+<g class="nd" data-c="QRO" transform="translate(118 148)"><circle r="5"/><text class="lb" x="-14" y="6" text-anchor="end">QRO<tspan class="cc" data-n="14" dx="5">MX</tspan></text></g>
+<g class="nd" data-c="PBC" transform="translate(118 220)"><circle r="5"/><text class="lb" x="-14" y="6" text-anchor="end">PBC<tspan class="cc" data-n="11" dx="5">MX</tspan></text></g>
+<g class="nd" data-c="TLC" transform="translate(118 292)"><circle r="5"/><text class="lb" x="-14" y="6" text-anchor="end">TLC<tspan class="cc" data-n="19" dx="5">MX</tspan></text></g>
+<g class="nd" data-c="LAX" transform="translate(336 48)"><circle r="5"/><text class="lb" x="0" y="-14" text-anchor="middle">LAX<tspan class="cc" data-n="8" dx="5">US</tspan></text></g>
+<g class="nd" data-c="TIJ" transform="translate(336 114)"><circle r="5"/><text class="lb" x="0" y="-14" text-anchor="middle">TIJ<tspan class="cc" data-n="16" dx="5">MX</tspan></text></g>
+<g class="nd" data-c="DFW" transform="translate(336 180)"><circle r="5"/><text class="lb" x="0" y="-14" text-anchor="middle">DFW<tspan class="cc" data-n="4" dx="5">US</tspan></text></g>
+<g class="nd" data-c="LAS" transform="translate(336 246)"><circle r="5"/><text class="lb" x="0" y="-14" text-anchor="middle">LAS<tspan class="cc" data-n="6" dx="5">US</tspan></text></g>
+<g class="nd" data-c="ACA" transform="translate(336 312)"><circle r="5"/><text class="lb" x="0" y="-14" text-anchor="middle">ACA<tspan class="cc" data-n="2" dx="5">MX</tspan></text></g>
+<g class="nd" data-c="MEX" transform="translate(540 180)"><circle r="5"/><text class="lb" x="14" y="6" text-anchor="start">MEX</text></g>
+</g><g class="tags">
+<g class="tg" data-n="1" transform="translate(442.0 252.1)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">1</text></g>
+<g class="tg" data-n="3" transform="translate(438.0 186.1)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">3</text></g>
+<g class="tg" data-n="5" transform="translate(440.0 219.1)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">5</text></g>
+<g class="tg" data-n="7" transform="translate(434.0 120.1)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">7</text></g>
+<g class="tg" data-n="9" transform="translate(197.6 211.6)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">9</text></g>
+<g class="tg" data-n="10" transform="translate(199.4 187.9)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">10</text></g>
+<g class="tg" data-n="12" transform="translate(195.6 165.5)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">12</text></g>
+<g class="tg" data-n="13" transform="translate(197.4 141.8)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">13</text></g>
+<g class="tg" data-n="15" transform="translate(436.0 153.1)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">15</text></g>
+<g class="tg" data-n="17" transform="translate(195.9 305.2)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">17</text></g>
+<g class="tg" data-n="18" transform="translate(197.8 281.5)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">18</text></g>
+<g class="tg" data-n="20" transform="translate(197.3 71.9)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">20</text></g>
+<g class="tg" data-n="21" transform="translate(195.4 95.7)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">21</text></g>
+</g></svg></div>
+        <figcaption class="cap"><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/two-hub.rl"><code><span class="sg">witnesses/</span><wbr><span class="sg">two-hub.rl</span></code></a>, drawn: 22 relationships among 12 nodes (10 airports, 2 countries). The 13 routes carry numbered exhibit tags; the 9 country links show as country codes. Delete any one and the answer changes: <a href="/#exhibit">pull a tag yourself</a>.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="ver" id="verify-it-yourself" aria-labelledby="ver-h">
+  <div class="wrap">
+    <p class="lbl">Verify it yourself <span aria-hidden="true">·</span> on your machine, with your own Relate</p>
+    <h2 id="ver-h">Don’t take the page’s word. <em>Run it.</em></h2>
+    <div class="ver-grid">
+      <ol class="vsteps">
+        <li><span class="st-no" aria-hidden="true">1</span><div class="st"><h3>Run the whole path</h3><div class="cmd tall"><code><span class="cl">git clone https://<wbr>github.com/<wbr>edycutjong/<wbr>witness</span><span class="cl">cd witness</span><span class="cl">uv run witness demo</span></code><button type="button" class="copy" data-copy="git clone https://github.com/edycutjong/witness &amp;&amp; cd witness &amp;&amp; uv run witness demo" aria-label="Copy the command: run the whole path">copy</button></div><p class="exp"><span class="lbl">Expect</span><code>22 of 22 change the answer</code>, a last line that starts <code>VERIFIED</code>, and exit 0.</p><p class="note">Needs uv. The committed graph is copied, never modified; the output goes to <code>out/</code>. The recorded run reports 5.78 s end to end on an Apple M1 Max (<a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/demo-2026-11-24.txt"><code><span class="sg">evidence/</span><wbr><span class="sg">demo-2026-11-24.txt</span></code></a>).</p></div></li>
+        <li><span class="st-no" aria-hidden="true">2</span><div class="st"><h3>Re-prove the committed witness</h3><div class="cmd"><code><span class="cl">uv run witness check <span class="nw">witnesses/two-hub.rl</span></span></code><button type="button" class="copy" data-copy="uv run witness check witnesses/two-hub.rl" aria-label="Copy the command: re-prove the committed witness">copy</button></div><p class="exp"><span class="lbl">Expect</span><code>22 of 22 change the answer</code>, then <code>VERIFIED</code>, exit 0. Exit 1 would mean not verified.</p><p class="note">One fresh copy of the witness per probe; nothing is shared with the reduction.</p></div></li>
+        <li><span class="st-no" aria-hidden="true">3</span><div class="st"><h3>Re-run it with plain Relate</h3><div class="cmd tall"><code><span class="cl">relate query <span class="nw">--database</span> <span class="nw">witnesses/two-hub.rl</span> <span class="nw">--read-only</span> \
+  <span class="nw">--param</span> <span class="nw">country=MX</span> <span class="nw">--param</span> <span class="nw">dest=MEX</span> \
+  &lt; <span class="nw">queries/two-hub.cypher</span></span></code><button type="button" class="copy" data-copy="relate query --database witnesses/two-hub.rl --read-only --param country=MX --param dest=MEX &lt; queries/two-hub.cypher" aria-label="Copy the command: re-run it with plain relate">copy</button></div><p class="exp"><span class="lbl">Expect</span>the same 4 airports the full graph gives: PBC, QRO, TLC, UPN.</p><p class="note">Needs the Relate CLI. No Witness code runs: the witness is an ordinary <code>.rl</code> file.</p></div></li>
+        <li><span class="st-no" aria-hidden="true">4</span><div class="st"><h3>Run the tests</h3><div class="cmd"><code><span class="cl">uv run pytest <span class="nw">--cov=witness</span></span></code><button type="button" class="copy" data-copy="uv run pytest --cov=witness" aria-label="Copy the command: run the tests">copy</button></div><p class="exp"><span class="lbl">Expect</span>517 passed and 100% line and branch coverage; 2 more need a local Neo4j in Docker and skip without it.</p><p class="note">CI and deterministic replay, not the product path.</p></div></li>
+      </ol>
+      <figure class="term" id="term">
+        <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>uv run witness demo</span></div>
+        <pre tabindex="0" role="region" aria-label="What step 1 prints: recorded output of uv run witness demo, selected lines"><span class="ln">Witness 0.1.0 · Python 3.12.13 · relate-db 1.0.1</span><span class="ln">  relate CLI v1.0.1: answers are cross-checked on the CLI too</span><span class="ln">  source data/air-routes.rl · 3,748 nodes · 57,645 relationships · air-routes (krlawrence/graph, Apache-2.0)</span><span class="ln"> </span><span class="ln"><b class="h">QUESTION</b>  Which airports of MX have no direct flight to MEX, yet would still reach it in two flights if any one hub closed?</span><span class="ln">  queries/two-hub.cypher · aggregation, NOT EXISTS, OPTIONAL MATCH · params {&quot;country&quot;: &quot;MX&quot;, &quot;dest&quot;: &quot;MEX&quot;}</span><span class="ln"> </span><span class="ln"><b class="h">ANSWER</b>  4 rows on the full graph · guard: read-only: Relate query_type &#x27;r&#x27; · order check: same answer from a store built in reverse order</span><span class="ln">  airport  hub_countries</span><span class="ln">  PBC      [MX, US]</span><span class="ln">  QRO      [MX, US]</span><span class="ln">  TLC      [MX, US]</span><span class="ln">  UPN      [MX, US]</span><span class="ln"> </span><span class="ln"><b class="h">WITNESS</b>  22 relationships · 12 nodes, out of 57,645 · 3,748</span><span class="ln">  reduced in 0.998 s · 371 trials · 0 inconclusive · seed 0 (5.78 s end to end: copy, guard, order check, reduce, check)</span><span class="ln">  68 relationships match the answer rows; 22 of them suffice</span><span class="ln"> </span><span class="ln"><b class="h">EXHIBITS</b>  (register order; every one is needed)</span><span class="ln">   <b class="k">1</b>  (ACA)-[:HAS_ROUTE]-&gt;(MEX)</span><span class="ln">   <b class="k">2</b>  (ACA)-[:IN_COUNTRY]-&gt;(MX)</span><span class="ln">   <b class="k">3</b>  (DFW)-[:HAS_ROUTE]-&gt;(MEX)</span><span class="ln cut">  ⋮ 19 lines not shown here</span><span class="ln"> </span><span class="ln"><b class="k">CHECK  22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)</b></span><span class="ln">  relate CLI: sufficiency + 22 of 22 necessity probes cross-checked</span><span class="ln cut">  ⋮ 6 lines not shown here</span><span class="ln"> </span><span class="ln"><b class="h">PROVE ONE</b>  delete exhibit 9 (PBC)-[:HAS_ROUTE]-&gt;(DFW) from a copy of W, re-run</span><span class="ln">  CHANGED: 4 rows → 3 rows (PBC drops out)</span><span class="ln cut">  ⋮ 6 lines not shown here</span><span class="ln"> </span><span class="ln">VERIFIED · deletion-minimal: no single relationship can be removed without changing the answer · determinism claimed</span></pre>
+        <figcaption class="t-cap data">What step 1 prints. Recorded 2026-11-24 00:58:52 UTC (<a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/demo-2026-11-24.txt"><code><span class="sg">evidence/</span><wbr><span class="sg">demo-2026-11-24.txt</span></code></a>). Selected lines in their order, none edited; a dimmed line marks what is left out.</figcaption>
+      </figure>
+    </div>
+    <p class="fine ver-more">More commands, one section per set of numbers: <a class="src" href="https://github.com/edycutjong/witness/blob/main/DEMO.md"><code><span class="sg">DEMO.md</span></code></a>. The two receipts it does not cover have their own scripts: <a class="src" href="https://github.com/edycutjong/witness/blob/main/scripts/pull_each_tag.py"><code><span class="sg">scripts/</span><wbr><span class="sg">pull_each_tag.py</span></code></a> and <a class="src" href="https://github.com/edycutjong/witness/blob/main/bench/full_graph_necessity.py"><code><span class="sg">bench/</span><wbr><span class="sg">full_graph_necessity.py</span></code></a>. The files behind every figure on this page: <a class="src" href="https://github.com/edycutjong/witness/tree/main/evidence"><code><span class="sg">evidence/</span></code></a>, <a class="src" href="https://github.com/edycutjong/witness/tree/main/witnesses"><code><span class="sg">witnesses/</span></code></a>.</p>
+  </div>
+</section>
+
+<section class="crit" id="by-criterion" aria-labelledby="cr-h">
+  <div class="wrap">
+    <p class="lbl">By criterion <span aria-hidden="true">·</span> where to look</p>
+    <h2 id="cr-h">The five criteria, <em>each with its evidence.</em></h2>
+    <p class="lede">The <a href="https://relate.devpost.com/">listing</a>'s five criteria, each with the files and sections that answer it. Nothing below is a score; it is where the evidence is.</p>
+    <ol class="crit-list">
+      <li><div><span class="crit-k">Criterion 1 of 5</span><h3>Creativity</h3></div><ul><li><b>Rollback as the search loop.</b> 371 delete, re-run, roll-back trials take 57,645 relationships down to 22.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/reduce.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">reduce.py</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/two-hub.trace.json"><code><span class="sg">witnesses/</span><wbr><span class="sg">two-hub.trace.json</span></code></a></span></span></li><li><b>Not a path lookup.</b> The headline question uses aggregation, <code>NOT EXISTS</code> and <code>OPTIONAL MATCH</code>, and the witness still reproduces its answer.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/queries/two-hub.cypher"><code><span class="sg">queries/</span><wbr><span class="sg">two-hub.cypher</span></code></a></span></span></li><li><b>One loop, three predicates.</b> It can hold on to an answer (22 relationships), a disagreement between two queries (5), or a wrong answer (92).<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/two-hub.manifest.json"><code><span class="sg">witnesses/</span><wbr><span class="sg">two-hub.manifest.json</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/direction-bug.manifest.json"><code><span class="sg">witnesses/</span><wbr><span class="sg">direction-bug.manifest.json</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/wrong-answer.manifest.json"><code><span class="sg">witnesses/</span><wbr><span class="sg">wrong-answer.manifest.json</span></code></a></span></span></li></ul></li>
+      <li><div><span class="crit-k">Criterion 2 of 5</span><h3>Relate and connected context</h3></div><ul><li><b>Mode: single-file <code>.rl</code>.</b> The unit of evidence is a file a reviewer opens with plain <code>relate</code>. Mode, reason and capabilities are in <a href="#how-it-uses-relate">How it uses Relate</a>.</li><li><b>Which relationships matter is measured.</b> Each of the 22 is deleted in turn and the query re-run; all 22 change the answer.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/pull-each-tag.json"><code><span class="sg">evidence/</span><wbr><span class="sg">pull-each-tag.json</span></code></a></span></span></li><li><b>The graph is persisted in the repository.</b> The source, the witness and the ledger of reductions are committed <code>.rl</code> stores.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/data/air-routes.rl"><code><span class="sg">data/</span><wbr><span class="sg">air-routes.rl</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/two-hub.rl"><code><span class="sg">witnesses/</span><wbr><span class="sg">two-hub.rl</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witness.rl"><code><span class="sg">witness.rl</span></code></a></span></span></li><li><b>Beside Relate's own MCP server.</b> A scripted client and, separately, a real model answer through <code>relate serve --mcp</code>, then call Witness's <code>why</code> for the evidence; the scripted client also calls <code>check</code>.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/mcp-transcript.md"><code><span class="sg">evidence/</span><wbr><span class="sg">mcp-transcript.md</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/mcp-agent-session.md"><code><span class="sg">evidence/</span><wbr><span class="sg">mcp-agent-session.md</span></code></a></span></span></li></ul></li>
+      <li><div><span class="crit-k">Criterion 3 of 5</span><h3>Functionality and completeness</h3></div><ul><li><b>One command, the whole path.</b> On a fresh clone: copy, guard, order check, reduce, check, then the exhibit page and a ledger row. The commands are in <a href="#verify-it-yourself">Verify it yourself</a>.</li><li><b>More than the demo.</b> <code>witness why</code> on any read-only query, <code>check</code>, <code>rerun</code>, <code>export</code>, <code>review</code>, fixture mode and an MCP server.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/cli.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">cli.py</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/mcp_server.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">mcp_server.py</span></code></a></span></span></li><li><b>Tested against real Relate.</b> 517 tests pass under a 100% line and branch coverage gate; CI runs 6 stages, one of them the built wheel running <code>witness demo</code> and plain <code>relate</code> re-running the committed witness.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/pytest-2026-11-27.txt"><code><span class="sg">evidence/</span><wbr><span class="sg">pytest-2026-11-27.txt</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/.github/workflows/ci.yml"><code><span class="sg">.github/</span><wbr><span class="sg">workflows/</span><wbr><span class="sg">ci.yml</span></code></a></span></span></li><li><b>It refuses what it cannot do.</b> Writes, procedures, clocks and randomness exit 2 with a one-line reason.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/src/witness/guard.py"><code><span class="sg">src/</span><wbr><span class="sg">witness/</span><wbr><span class="sg">guard.py</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/tests/test_guard.py"><code><span class="sg">tests/</span><wbr><span class="sg">test_guard.py</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/tests/test_errors.py"><code><span class="sg">tests/</span><wbr><span class="sg">test_errors.py</span></code></a></span></span></li></ul></li>
+      <li><div><span class="crit-k">Criterion 4 of 5</span><h3>Usefulness</h3></div><ul><li><b>Who it is for.</b> The developer whose agent answers from a graph and who has to show why an answer is right before anyone acts on it: a reviewer reads 22 relationships instead of 57,645.</li><li><b>An agent attached the evidence itself.</b> In a recorded session a real model (claude-sonnet-5-5 in Claude Code) wrote its own Cypher, called <code>why</code> over MCP and attached the witness of its answer: <code>68 of 68 change the answer</code>. Its answer also reports hub counts, so all 68 relationships the answer rows bind are needed.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/mcp-agent-session.md"><code><span class="sg">evidence/</span><wbr><span class="sg">mcp-agent-session.md</span></code></a></span></span></li><li><b>It shows where a wrong query goes wrong.</b> Two versions of the question disagree on 6 of 232 country and busiest-airport pairs; for India and DEL, 5 relationships keep them disagreeing, one of them the flight the mistaken query read backwards.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/evidence/disagree-scan.json"><code><span class="sg">evidence/</span><wbr><span class="sg">disagree-scan.json</span></code></a></span><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/direction-bug.manifest.json"><code><span class="sg">witnesses/</span><wbr><span class="sg">direction-bug.manifest.json</span></code></a></span></span></li><li><b>A second use: test fixtures.</b> <code>relate pull</code> brought 1,272 relationships in from Neo4j once, and Witness kept the 126 the test needs.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/fixtures/mex-foreign.manifest.json"><code><span class="sg">fixtures/</span><wbr><span class="sg">mex-foreign.manifest.json</span></code></a></span></span></li></ul></li>
+      <li><div><span class="crit-k">Criterion 5 of 5</span><h3>Documentation and reproducibility</h3></div><ul><li><b>The README answers the listing's question.</b> How Witness uses Relate, which mode, and why.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/README.md"><code><span class="sg">README.md</span></code></a></span></span></li><li><b>Commands, not only claims.</b> <a class="src" href="https://github.com/edycutjong/witness/blob/main/DEMO.md"><code><span class="sg">DEMO.md</span></code></a> gives the command or the recorded run for 8 sets of numbers: the headline, determinism, the Neo4j comparison, fixture mode, the MCP tools, the tests, the disagreement and the wrong-answer repro.</li><li><b>The page cannot drift from the evidence.</b> This page and <a class="src" href="https://github.com/edycutjong/witness/blob/main/JUDGE.md"><code><span class="sg">JUDGE.md</span></code></a> are written by <a class="src" href="https://github.com/edycutjong/witness/blob/main/scripts/build_site.py"><code><span class="sg">scripts/</span><wbr><span class="sg">build_site.py</span></code></a> from the committed files; CI rebuilds both and fails on any difference.<span class="rec"><span><a class="src" href="https://github.com/edycutjong/witness/blob/main/.github/workflows/ci.yml"><code><span class="sg">.github/</span><wbr><span class="sg">workflows/</span><wbr><span class="sg">ci.yml</span></code></a></span></span></li><li><b>Shown running.</b> The <a href="https://youtu.be/GYbci7TseJw">demo video (1:55)</a> and the <a href="/deck/">pitch deck</a>. What the stamp does not say is in <a href="#honest-limitations">Honest limitations</a>.</li></ul></li>
+    </ol>
+  </div>
+</section>
+
+<section class="honest" id="honest-limitations" aria-labelledby="hon-h">
+  <div class="wrap">
+    <p class="lbl">Honest limitations</p>
+    <h2 id="hon-h">What the stamp <em>does not say.</em></h2>
+    <ol class="limits">
+      <li><span class="ln-no" aria-hidden="true">1</span><div><h3>Deletion-minimal, not smallest</h3><p>No single remaining relationship can be removed without changing the answer; a smaller witness may exist.</p></div></li>
+      <li><span class="ln-no" aria-hidden="true">2</span><div><h3>Its own answer, on its own file</h3><p>Because a query with <code>NOT EXISTS</code> or aggregation is not monotone, a witness does not prove that every graph containing it gives the same answer. It also leaves out true facts the answer does not need: MEX has no country link in <a class="src" href="https://github.com/edycutjong/witness/blob/main/witnesses/two-hub.rl"><code><span class="sg">witnesses/</span><wbr><span class="sg">two-hub.rl</span></code></a>.</p></div></li>
+      <li><span class="ln-no" aria-hidden="true">3</span><div><h3>Read-only Cypher only, with no clock or randomness</h3><p>Witness refuses writes, procedures, clocks and randomness (exit 2) rather than guess. Dependence on storage order is caught by a heuristic (the same answer from a store built in reverse order), not proven absent.</p></div></li>
+      <li><span class="ln-no" aria-hidden="true">4</span><div><h3>One graph (a public air-routes dataset, Apache-2.0)</h3><p>The headline query, one disagreement case and one wrong-answer repro. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="lnk" id="links" aria-labelledby="lnk-h">
+  <div class="wrap">
+    <p class="lbl">Links <span aria-hidden="true">·</span> the rest of the file</p>
+    <h2 id="lnk-h">Everything else, <em>one click each.</em></h2>
+    <ul class="tiles">
+      <li><a class="tile" href="https://github.com/edycutjong/witness"><b>Repository<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6.5 5H11v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></b><span class="t-note">The source, the evidence and the commit history</span><span class="t-url">github.com/edycutjong/witness</span></a></li>
+      <li><a class="tile" href="/"><b>Live site<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6.5 5H11v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></b><span class="t-note">The landing: replay the reduction, pull a tag yourself</span><span class="t-url">witness.edycu.dev</span></a></li>
+      <li><a class="tile" href="https://youtu.be/GYbci7TseJw"><b>Demo video<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6.5 5H11v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></b><span class="t-note">Watch it run (1:55)</span><span class="t-url">youtu.be/GYbci7TseJw</span></a></li>
+      <li><a class="tile" href="/deck/"><b>Pitch deck<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6.5 5H11v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></b><span class="t-note">10 slides, every number read from the same files</span><span class="t-url">witness.edycu.dev/deck</span></a></li>
+      <li><a class="tile" href="/exhibit/two-hub.html"><b>Exhibit page<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6.5 5H11v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></b><span class="t-note">The page Witness writes beside every witness</span><span class="t-url">witness.edycu.dev/exhibit/two-hub.html</span></a></li>
+      <li><a class="tile" href="https://github.com/edycutjong/witness/blob/main/README.md"><b>README<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6.5 5H11v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></b><span class="t-note">How it uses Relate, and why</span><span class="t-url">edycutjong/witness · README.md</span></a></li>
+      <li><a class="tile" href="https://github.com/edycutjong/witness/blob/main/DEMO.md"><b>DEMO.md<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6.5 5H11v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></b><span class="t-note">The commands behind the numbers, section by section</span><span class="t-url">edycutjong/witness · DEMO.md</span></a></li>
+      <li><a class="tile" href="https://github.com/edycutjong/witness/blob/main/JUDGE.md"><b>JUDGE.md<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6.5 5H11v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></b><span class="t-note">This page as Markdown, in the repository</span><span class="t-url">edycutjong/witness · JUDGE.md</span></a></li>
+      <li><a class="tile" href="https://relatedb.ai"><b>Relate<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6.5 5H11v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></b><span class="t-note">The embedded graph database it is built on</span><span class="t-url">relatedb.ai</span></a></li>
+    </ul>
+  </div>
+</section>
+<p class="sr" id="copy-status" role="status" aria-live="polite"></p>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <p><img src="/icon.svg" alt="" width="22" height="22"> <b>Witness</b> · Apache-2.0 · built on <a href="https://relatedb.ai">Relate</a> for the Relate by Neo4j hackathon</p>
+    <p class="data"><span><a href="https://github.com/edycutjong/witness">source</a> · <a href="/">landing</a> · <a href="/deck/">deck</a> · <a href="/exhibit/two-hub.html">exhibit</a></span><span>data: air-routes by Kelvin Lawrence (Apache-2.0)</span></p>
+  </div>
+</footer>
+<script>
+(function () {
+  "use strict";
+  document.documentElement.classList.add("js");
+  // copy buttons: say "copied" only when the text reached the clipboard; otherwise say so (no silent false success)
+  var status = document.getElementById("copy-status");
+  Array.prototype.slice.call(document.querySelectorAll(".copy")).forEach(function (b) {
+    var timer = 0;
+    b.addEventListener("click", function () {
+      var t = b.getAttribute("data-copy");
+      var show = function (ok) {
+        b.textContent = ok ? "copied" : "select it";
+        b.classList.toggle("done", ok);
+        if (status) status.textContent = ok ? "Command copied to the clipboard." : "Copy failed: select the command text instead.";
+        clearTimeout(timer);
+        timer = setTimeout(function () { b.textContent = "copy"; b.classList.remove("done"); if (status) status.textContent = ""; }, ok ? 1600 : 3200);
+      };
+      var legacy = function () {
+        var ta = document.createElement("textarea"), ok = false;
+        ta.value = t; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+        document.body.removeChild(ta); b.focus(); show(ok);
+      };
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(function () { show(true); }, legacy); else legacy();
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

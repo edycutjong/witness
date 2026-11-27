@@ -57,10 +57,10 @@ neo_tps = cmp["median_trials_per_s"]["neo4j_docker"]
 ratio = cmp["ratio_trials_per_s"]
 
 fmt = lambda n: f"{n:,}"  # noqa: E731
-CLAIM = (
-    f"When an agent answers from a graph, Witness hands back a small graph that reproduces the answer "
-    f"({fmt(src_rels)} relationships → {w_rels}), and proves that deleting any one of its relationships changes the answer."
-)
+# the claim as /judge's hero prints it (the numbers stand above it there), and with this run's numbers for JUDGE.md
+CLAIM_HERO = "When an agent answers from a graph, Witness hands back a small graph that reproduces the answer, and proves that deleting any one of its relationships changes the answer."
+CLAIM = CLAIM_HERO.replace("the answer,", f"the answer (here, {fmt(src_rels)} relationships → {w_rels}),", 1)
+assert CLAIM != CLAIM_HERO
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -187,16 +187,20 @@ DESC_OG = f"{fmt(src_rels)} relationships → {w_rels} that reproduce an agent's
 assert 50 <= len(DESC) <= 160 and len(DESC_OG) <= 125, (len(DESC), len(DESC_OG))
 
 
+# the headline question as the query file states it, with the run's parameters filled in
+QUESTION = (
+    man["statement"]
+    .splitlines()[0]
+    .lstrip("/ ")
+    .replace("$country", man["params"]["country"])
+    .replace("$dest", man["params"]["dest"])
+)
+
+
 def landing_page() -> str:
     shot_w, shot_h = png_size(SITE / "media" / "exhibit-page.png")
     og = hashlib.sha256((ROOT / "docs" / "assets" / "og-image-1200.png").read_bytes()).hexdigest()[:10]
-    question = (
-        man["statement"]
-        .splitlines()[0]
-        .lstrip("/ ")
-        .replace("$country", man["params"]["country"])
-        .replace("$dest", man["params"]["dest"])
-    )
+    question = QUESTION
     src_cta = (
         f'<a class="btn solid" href="{REPO}"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5L2 10l5 5M13 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>Source on GitHub</a>'
         if REPO_PUBLIC
@@ -506,6 +510,8 @@ shutil.copyfile(ROOT / "docs" / "assets" / "icon.svg", SITE / "icon.svg")
 shutil.copyfile(ROOT / "docs" / "assets" / "og-image-1200.png", SITE / "og-image.png")
 
 # ── /judge and JUDGE.md: one reader, one page, every number read from the committed files ───────────────────────────
+# Both are written from the same lists below. A backticked path that exists in the repository becomes a link to that
+# file (GitHub on the page, a relative link in JUDGE.md), so a receipt cannot name a file that is not there.
 COMMITS = man["run"]["commits"]
 TA = cmp["targeted_agreement"]
 _db = json.loads((ROOT / "witnesses" / "direction-bug.manifest.json").read_text())
@@ -516,172 +522,782 @@ WA_RELS, WA_CHECK = _wa["witness"]["relationships"], _wa["check"]["check_text"].
 WA_ROWS, WA_EXP = len(_wa["baseline"]["rows"]), len(_wa["predicate"]["expected_rows"])
 assert _wa["verified"] and _wa["predicate"]["kind"] == "differs" and WA_CHECK.endswith("change the answer")
 det = json.loads((ROOT / "evidence" / "determinism.json").read_text())
+assert det["byte_identical"] is True and man["verified"] and man["check"]["cli_used"]
+assert check == f"{w_rels} of {w_rels} change the answer"
 LIVE = SITE_URL + "/"
 EXHIBIT = SITE_URL + "/exhibit/two-hub.html"
+DECK = SITE_URL + "/deck/"
+VIDEO = "https://youtu.be/GYbci7TseJw"
+assert VIDEO in readme, "the README names a different demo video"
+_vlen = re.search(r"Demo video \((\d+:\d\d)\)", readme)
+VIDEO_LEN = f" ({_vlen.group(1)})" if _vlen else ""  # the README's own figure, or none
+LISTING = "https://relate.devpost.com/"
+assert LISTING in readme
 OPENS = "" if REPO_PUBLIC else " (the repository opens at submission)"
 OPENS_LINE = "" if REPO_PUBLIC else "The repository opens at submission; until then use the live pages above."
+
+# more committed evidence, each figure bound to its file
+_plog = pytest_log.read_text()
+_skip = re.search(r"(\d+) skipped", _plog)
+assert _skip
+SKIPPED = int(_skip.group(1))
+_ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text()
+N_STAGES = len(set(re.findall(r"# ── STAGE (\d+)", _ci)))
+assert N_STAGES >= 4 and "git diff --exit-code -- site JUDGE.md" in _ci and "witness demo" in _ci
+_ag = json.loads((ROOT / "evidence" / "mcp-agent-session-witness.manifest.json").read_text())
+AG_RELS, AG_CHECK = _ag["witness"]["relationships"], _ag["check"]["check_text"].split(" (")[0]
+AG_MODEL = "claude-sonnet-5-5"
+_agmd = (ROOT / "evidence" / "mcp-agent-session.md").read_text()
+# the recorded session: that model, its answer reports hub counts, so every bound relationship is needed
+assert _ag["verified"] and AG_MODEL in _agmd and "hub count" in _agmd and AG_RELS == TA["rels"]
+_mcp = json.loads((ROOT / "evidence" / "mcp-transcript.json").read_text())
+assert {"why", "check", "read_cypher"} <= {c["tool"] for c in _mcp["calls"]} and "scripted MCP client" in _mcp["what"]
+_scan = json.loads((ROOT / "evidence" / "disagree-scan.json").read_text())
+_cy = (ROOT / "queries" / "two-hub.cypher").read_text()
+assert all(k in _cy for k in ("NOT EXISTS", "OPTIONAL MATCH", "count(DISTINCT hub)")), "the headline query changed"
+_per = cmp["protocol"]["trials_per_run"]
+assert all(r["answers_identical_per_trial"] == f"{_per}/{_per}" for r in cmp["runs"]) and TA["identical"] == TA["rels"]
+assert sum(r["in_witness"] for r in fgn["rows"]) == w_rels, "the witness is not a subset of the bound relationships"
+# the committed source store is the one every manifest names
+assert hashlib.sha256((ROOT / "data" / "air-routes.rl").read_bytes()).hexdigest() == man["source"]["sha256"]
+_proj = (ROOT / "pyproject.toml").read_text()
+assert (
+    'witness = "witness.cli:main"' in _proj
+    and "relate-db==" in _proj
+    and (ROOT / "src/witness/mcp_server.py").is_file()
+)
+_demo_md = (ROOT / "DEMO.md").read_text()
+DEMO_SECTIONS = re.findall(r"^## \d+\. (.+)$", _demo_md, re.M)
+assert len(DEMO_SECTIONS) == 8 and [s.split(":")[0].split(",")[0] for s in DEMO_SECTIONS] == [
+    "Headline",
+    "Determinism",
+    "Relate vs Neo4j",
+    "Fixture mode",
+    "MCP tools `why` and `check`",
+    "Tests",
+    "Two queries disagree",
+    "A smaller repro of a wrong answer (`differs`)",
+], DEMO_SECTIONS
+_e2e = re.search(r"\(([\d.]+) s end to end", sp.demo)
+assert _e2e
+E2E_S, DEMO_MACHINE = _e2e.group(1), sp.DEMO_HEADER.split(" · ")[1]
+NEO_V = cmp["neo4j"]["components"][0]["v"]
+CMP_MD = f"evidence/{cmp_path.with_suffix('.md').name}"
+PYTEST = f"evidence/{pytest_log.name}"
+DEMO_TXT = f"evidence/{sp.demo_path.name}"
+PLAN_DROP = sp.trace["plan"]["dropped_rels"]
+PLAN_TRIAL = sp.MILESTONES[1][0]
+APPLIED, ROLLED = sp.HOLDS.count("1"), sp.HOLDS.count("0")
+ANSWER = [r["airport"] for r in rows]
+PARAMS_CLI = " ".join(f"--param {k}={v}" for k, v in man["params"].items())
+RUN_CMD = ["git clone " + REPO, "cd witness", "uv run witness demo"]
+ONE_CMD = " && ".join(RUN_CMD)
+# shown on three lines (shell continuations), copied as one
+RELATE_CMD = (
+    f"relate query --database witnesses/two-hub.rl --read-only \\\n  {PARAMS_CLI} \\\n  < queries/two-hub.cypher"
+)
+assert RELATE_CMD.replace(" \\\n  ", " ") in readme, "the README's plain-relate command differs"
+
+WHAT = "Witness is a Python CLI and MCP server built on Relate."
+BUILT = "Every trial is a Relate transaction, and the witness is one `.rl` file you open with plain `relate`. Built for the Relate by Neo4j hackathon."
 PATH30 = [
     (
         "Open the landing page",
+        "Open landing",
         LIVE,
-        f"the agent's answer, the {w_rels} relationships that reproduce it, and the check line; nothing to install",
+        f"the answer, the {w_rels} relationships that reproduce it, and the check line; nothing to install",
     ),
     (
         "Open the exhibit page",
+        "Open exhibit",
         EXHIBIT,
         "the register of kept relationships, each tagged as one whose deletion changes the answer",
     ),
-    (
-        "Optional, one command",
-        None,
-        "`git clone "
-        + REPO
-        + " && cd witness && uv run witness demo` (needs uv"
-        + OPENS.replace(" (", "; ").rstrip(")")
-        + ")",
-    ),
 ]
+PATH_CMD_NOTE = "needs uv" + OPENS.replace(" (", "; ").rstrip(")")
+PATH_EXPECT = f"Expect `{check}` and exit 0."
+
+# (number as text, number as markup, what it is, what bounds it, [(the file it is recorded in, a note)])
+_nb, _to, _u = '<span class="nb">{}</span>', '<span class="to">{}</span>', '<span class="u">{}</span>'
+_MAN = "witnesses/two-hub.manifest.json"
 RECEIPTS = [
     (
         f"{fmt(src_rels)} → {w_rels}",
-        f"relationships in the air-routes graph vs in the witness ({fmt(src_nodes)} nodes → {w_nodes} nodes in the witness graph; `witnesses/two-hub.manifest.json`)",
+        _nb.format(fmt(src_rels)) + _to.format("→") + f"<em>{w_rels}</em>",
+        "Relationships in the air-routes graph, then in the witness.",
+        f"{fmt(src_nodes)} nodes → {w_nodes} nodes in the witness graph.",
+        [(_MAN, "")],
     ),
     (
         f"{w_rels} of {w_rels}",
-        f"deleting any one of them from the witness changes the answer; checked on relate-db and on the Relate CLI (`{check}`)",
+        f"<em>{w_rels}</em>" + _to.format("of") + f"{w_rels}",
+        "Deleting any one of them from the witness changes the answer.",
+        f"Checked on relate-db and on the Relate CLI: `{check}`.",
+        [(_MAN, ""), ("evidence/pull-each-tag.json", "what each deletion does to the answer")],
     ),
     (
         f"{TA['rels']} → {w_rels}",
-        f"the answer rows bind {TA['rels']} relationships (`queries/two-hub-bindings.cypher`); deleted from the full graph, only {TA['relate_changed']} of them change the answer, because other routes back the rest up (`evidence/{cmp_path.with_suffix('.md').name}`, targeted pass). {FGN_IN} of those {TA['relate_changed']} are in the witness; the other {FGN_OUT} are flights of Mexican airports outside it, whose deletion adds that airport to the answer (`evidence/full-graph-necessity.json`). The witness keeps {w_rels}, each needed in the witness (`witnesses/two-hub.manifest.json`)",
+        _nb.format(TA["rels"]) + _to.format("→") + f"<em>{w_rels}</em>",
+        f"The answer rows bind {TA['rels']} relationships; the witness keeps {w_rels} of them.",
+        f"Deleted from the full graph, only {TA['relate_changed']} of the {TA['rels']} change the answer; the other {TA['rels'] - TA['relate_changed']} change nothing. {FGN_IN} of those {TA['relate_changed']} are in the witness; the other {FGN_OUT} are flights of Mexican airports outside it, whose deletion adds that airport to the answer. Deleted from the witness, each of the {w_rels} changes it.",
+        [
+            (CMP_MD, "targeted pass"),
+            ("evidence/full-graph-necessity.json", ""),
+            (_MAN, ""),
+            ("queries/two-hub-bindings.cypher", "the binding query"),
+        ],
     ),
     (
         f"{fmt(src_rels)} → {DB_RELS}",
-        f"a second case: a plausible agent mistake written for this case (the first flight matched in either direction) and the headline query disagree on {_db['params']['country']}/{_db['params']['dest']}; `{DB_CHECK}` (`witnesses/direction-bug.manifest.json`)",
+        _nb.format(fmt(src_rels)) + _to.format("→") + f"<em>{DB_RELS}</em>",
+        "A second case: two queries disagree.",
+        f"A plausible agent mistake written for this case (the first flight matched in either direction) and the headline query disagree on {_db['params']['country']}/{_db['params']['dest']}; `{DB_CHECK}`.",
+        [("witnesses/direction-bug.manifest.json", "")],
     ),
     (
         f"{fmt(src_rels)} → {WA_RELS}",
-        f"a third: `differs`, a smaller repro of a wrong answer; the same mistaken query returns {WA_ROWS} rows where the expected answer has {WA_EXP}, and the repro keeps that wrong answer; `{WA_CHECK}` (`witnesses/wrong-answer.manifest.json`)",
+        _nb.format(fmt(src_rels)) + _to.format("→") + f"<em>{WA_RELS}</em>",
+        "A third: a smaller repro of a wrong answer (`differs`).",
+        f"The same mistaken query returns {WA_ROWS} rows where the expected answer has {WA_EXP}, and the repro keeps that wrong answer; `{WA_CHECK}`.",
+        [("witnesses/wrong-answer.manifest.json", "")],
     ),
     (
         f"{trials} trials · {secs} s",
-        f"delete, re-run, roll back; {COMMITS} deletions kept the answer and were applied (`witnesses/two-hub.manifest.json`). Trials and deletions repeat exactly; wall-clock seconds do not: the landing's paste reduced in {LANDING_S} s (`evidence/demo-2026-11-24.txt`), the video's take in {VIDEO_S} s (`evidence/video-demo-run-2026-11-27.txt`)",
+        f"{trials}" + _u.format("trials") + _to.format("·") + f"{secs}" + _u.format("s"),
+        "Delete, re-run, roll back.",
+        f"{COMMITS} deletions kept the answer and were then applied. Trials and deletions repeat exactly; wall-clock seconds do not: the landing's paste reduced in {LANDING_S} s, the video's take in {VIDEO_S} s.",
+        [
+            (_MAN, "this run"),
+            ("evidence/demo-2026-11-24.txt", "the landing's paste"),
+            ("evidence/video-demo-run-2026-11-27.txt", "the video's take"),
+        ],
     ),
     (
         f"{relate_tps} vs {neo_tps}",
-        f"trials per second, Relate in-process vs Neo4j {cmp['neo4j']['components'][0]['v']} in Docker, median of 3 runs on one machine (`evidence/{cmp_path.with_suffix('.md').name}`)",
+        f"{relate_tps}" + _to.format("vs") + f"{neo_tps}" + _u.format("trials/s"),
+        f"Trials per second: Relate in-process, then Neo4j {NEO_V} in Docker.",
+        f"The same loop and query on one machine, median of {len(cmp['runs'])} runs, the same answer on every trial. It measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
+        [(CMP_MD, "")],
     ),
     (
         f"{TESTS} tests pass · 100% coverage",
-        f"real Relate; the graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach rare branches (`evidence/{pytest_log.name}`, `pytest --cov=witness`, gate in `pyproject.toml`)",
+        f"{TESTS}" + _u.format("tests") + _to.format("·") + "100%" + _u.format("coverage"),
+        "Tests pass against real Relate, under a 100% line and branch coverage gate.",
+        f"The graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach rare branches. {SKIPPED} more tests need a local Neo4j in Docker and skip without it.",
+        [(PYTEST, "`pytest --cov=witness`"), ("pyproject.toml", "the gate")],
     ),
     (
         "byte-identical",
-        f"the same query and seed give a byte-identical rebuild script (`.cypher`) on {len(det['runs'])} runs (`evidence/determinism.json`)",
+        "byte-identical",
+        f"The same query and seed give a byte-identical rebuild script (`.cypher`) on {len(det['runs'])} runs.",
+        "",
+        [("evidence/determinism.json", ""), ("scripts/determinism.py", "re-records it")],
     ),
 ]
-REPRO = [
-    "git clone " + REPO + " && cd witness",
-    "uv run witness demo",
+
+# the listing's criteria, in the listing's order: where the evidence for each one is (no scores, only places to look)
+# each bullet: (a short lead, the sentence, [files])
+CRIT_LEDE = f"The [listing]({LISTING})'s five criteria, each with the files and sections that answer it. Nothing below is a score; it is where the evidence is."
+CRITERIA = [
+    (
+        "Creativity",
+        [
+            (
+                "Rollback as the search loop.",
+                f"{trials} delete, re-run, roll-back trials take {fmt(src_rels)} relationships down to {w_rels}",
+                ["src/witness/reduce.py", "witnesses/two-hub.trace.json"],
+            ),
+            (
+                "Not a path lookup.",
+                "The headline question uses aggregation, `NOT EXISTS` and `OPTIONAL MATCH`, and the witness still reproduces its answer",
+                ["queries/two-hub.cypher"],
+            ),
+            (
+                "One loop, three predicates.",
+                f"It can hold on to an answer ({w_rels} relationships), a disagreement between two queries ({DB_RELS}), or a wrong answer ({WA_RELS})",
+                [_MAN, "witnesses/direction-bug.manifest.json", "witnesses/wrong-answer.manifest.json"],
+            ),
+        ],
+    ),
+    (
+        "Relate and connected context",
+        [
+            (
+                "Mode: single-file `.rl`.",
+                "The unit of evidence is a file a reviewer opens with plain `relate`. Mode, reason and capabilities are in [How it uses Relate](#how-it-uses-relate)",
+                [],
+            ),
+            (
+                "Which relationships matter is measured.",
+                f"Each of the {w_rels} is deleted in turn and the query re-run; all {w_rels} change the answer",
+                ["evidence/pull-each-tag.json"],
+            ),
+            (
+                "The graph is persisted in the repository.",
+                "The source, the witness and the ledger of reductions are committed `.rl` stores",
+                ["data/air-routes.rl", "witnesses/two-hub.rl", "witness.rl"],
+            ),
+            (
+                "Beside Relate's own MCP server.",
+                "A scripted client and, separately, a real model answer through `relate serve --mcp`, then call Witness's `why` for the evidence; the scripted client also calls `check`",
+                ["evidence/mcp-transcript.md", "evidence/mcp-agent-session.md"],
+            ),
+        ],
+    ),
+    (
+        "Functionality and completeness",
+        [
+            (
+                "One command, the whole path.",
+                "On a fresh clone: copy, guard, order check, reduce, check, then the exhibit page and a ledger row. The commands are in [Verify it yourself](#verify-it-yourself)",
+                [],
+            ),
+            (
+                "More than the demo.",
+                "`witness why` on any read-only query, `check`, `rerun`, `export`, `review`, fixture mode and an MCP server",
+                ["src/witness/cli.py", "src/witness/mcp_server.py"],
+            ),
+            (
+                "Tested against real Relate.",
+                f"{TESTS} tests pass under a 100% line and branch coverage gate; CI runs {N_STAGES} stages, one of them the built wheel running `witness demo` and plain `relate` re-running the committed witness",
+                [PYTEST, ".github/workflows/ci.yml"],
+            ),
+            (
+                "It refuses what it cannot do.",
+                "Writes, procedures, clocks and randomness exit 2 with a one-line reason",
+                ["src/witness/guard.py", "tests/test_guard.py", "tests/test_errors.py"],
+            ),
+        ],
+    ),
+    (
+        "Usefulness",
+        [
+            (
+                "Who it is for.",
+                f"The developer whose agent answers from a graph and who has to show why an answer is right before anyone acts on it: a reviewer reads {w_rels} relationships instead of {fmt(src_rels)}",
+                [],
+            ),
+            (
+                "An agent attached the evidence itself.",
+                f"In a recorded session a real model ({AG_MODEL} in Claude Code) wrote its own Cypher, called `why` over MCP and attached the witness of its answer: `{AG_CHECK}`. Its answer also reports hub counts, so all {AG_RELS} relationships the answer rows bind are needed",
+                ["evidence/mcp-agent-session.md"],
+            ),
+            (
+                "It shows where a wrong query goes wrong.",
+                f"Two versions of the question disagree on {_scan['pairs_differ']} of {_scan['pairs_scanned']} country and busiest-airport pairs; for India and DEL, {DB_RELS} relationships keep them disagreeing, one of them the flight the mistaken query read backwards",
+                ["evidence/disagree-scan.json", "witnesses/direction-bug.manifest.json"],
+            ),
+            (
+                "A second use: test fixtures.",
+                f"`relate pull` brought {fmt(fix['source']['relationships'])} relationships in from Neo4j once, and Witness kept the {fix['witness']['relationships']} the test needs",
+                ["fixtures/mex-foreign.manifest.json"],
+            ),
+        ],
+    ),
+    (
+        "Documentation and reproducibility",
+        [
+            (
+                "The README answers the listing's question.",
+                "How Witness uses Relate, which mode, and why",
+                ["README.md"],
+            ),
+            (
+                "Commands, not only claims.",
+                f"`DEMO.md` gives the command or the recorded run for {len(DEMO_SECTIONS)} sets of numbers: the headline, determinism, the Neo4j comparison, fixture mode, the MCP tools, the tests, the disagreement and the wrong-answer repro",
+                [],
+            ),
+            (
+                "The page cannot drift from the evidence.",
+                "This page and `JUDGE.md` are written by `scripts/build_site.py` from the committed files; CI rebuilds both and fails on any difference",
+                [".github/workflows/ci.yml"],
+            ),
+            (
+                "Shown running.",
+                f"The [demo video{VIDEO_LEN}]({VIDEO}) and the [pitch deck]({DECK}). What the stamp does not say is in [Honest limitations](#honest-limitations)",
+                [],
+            ),
+        ],
+    ),
 ]
-REPLAY = "The whole suite against real Relate (CI and deterministic replay, not the product path): `uv run pytest --cov=witness`"
+assert len(CRITERIA) == 5
+# the README section the last criterion points at
+assert all(x in readme for x in ("### How it uses Relate", "**Mode:**", "**Why this mode:**"))
+
+FACTS = [
+    (
+        "Mode",
+        "Single file (`.rl`). Reductions run on a file-backed scratch copy in a temp dir; the committed source is copied byte for byte, never opened for writing, and its SHA-256 is checked unchanged after every run.",
+    ),
+    (
+        "Why this mode",
+        "The unit of evidence is a file. One `.rl` per witness can be committed, handed over and re-run by a reviewer with `relate` alone, with no server. A directory store is many files; `:memory:` disappears when the process ends and cannot be inspected.",
+    ),
+    (
+        "What the graph models",
+        f"The air-routes network by Kelvin Lawrence (Apache-2.0): {fmt(src_nodes)} nodes and {fmt(src_rels)} relationships, `(:Airport)-[:HAS_ROUTE]->(:Airport)`, `(:Airport)-[:IN_COUNTRY]->(:Country)` and `(:Airport)-[:ON_CONTINENT]->(:Continent)` (`data/SOURCE.md`).",
+    ),
+]
+CMP_NOTE = f"Same loop and query, one machine, median of {len(cmp['runs'])} runs, identical answers (`{CMP_MD}`). It measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j."
+TAPE_CAP = f"**{APPLIED}** deletions kept the answer and were then applied (tall) · the other **{ROLLED}** changed it and stayed rolled back (short) · `witnesses/two-hub.trace.json`"
+# what Witness does with each capability in CAPS, the files it lives in, and a token that must be in the first one
+CAP_USE = [
+    (
+        f"One transaction per trial: begin, delete, re-run the query, compare, roll back. {trials} trials in the headline run; the {COMMITS} deletions that kept the answer are then committed on the scratch copy.",
+        ["src/witness/store.py"],
+        "rollback_transaction",
+    ),
+    (
+        'After Witness\'s own token check, Relate has to report the query as read-only (`query_type` is `"r"`); anything else is refused with exit 2.',
+        ["src/witness/guard.py"],
+        "query_type",
+    ),
+    (
+        f"Labels and types that neither the query nor its plan names go in one verified step: `:ON_CONTINENT`, {fmt(PLAN_DROP)} relationships, in trial {PLAN_TRIAL}.",
+        ["src/witness/reduce.py"],
+        "EXPLAIN",
+    ),
+    (
+        "The rerun, ledger-reader and fixture-test paths open their store read-only, so they cannot write.",
+        ["src/witness/cli.py", "src/witness/ledger.py", "src/witness/fixture.py"],
+        "read_only=True",
+    ),
+    (
+        "The witness, the source and the ledger are each one `.rl` file: commit it, hand it over, open it with plain `relate`.",
+        ["src/witness/export.py", "src/witness/ledger.py"],
+        ".rl",
+    ),
+    (
+        f"Fixture mode: one pull from Neo4j, then shrink; nothing is pushed back. The committed run pulled {fmt(fix['source']['relationships'])} relationships and kept {fix['witness']['relationships']}.",
+        ["src/witness/fixture.py", "fixtures/mex-foreign.report.json"],
+        '"pull"',
+    ),
+    (
+        f"The independent re-check: when the Relate CLI is installed, sufficiency and the necessity probes run again on it, outside the Python API. In the committed run, all {w_rels}.",
+        ["src/witness/check.py"],
+        '"--mode", "json"',
+    ),
+    (
+        "A client answers through Relate's own server, then calls Witness's `why` for the evidence of that answer; `check` re-proves a witness. Recorded twice: a scripted client that calls both, and a real model that calls `why`.",
+        ["src/witness/mcp_server.py", "evidence/mcp-transcript.md", "evidence/mcp-agent-session.md"],
+        "def why",
+    ),
+]
+assert len(CAP_USE) == len(CAPS)
+for (_code, _, _), (_, _files, _tok) in zip(CAPS, CAP_USE, strict=True):
+    assert all((ROOT / f).is_file() for f in _files), _files
+    assert _tok in (ROOT / _files[0]).read_text(), f"{_code}: {_tok!r} is not in {_files[0]}"
+assert (
+    "committed on the scratch" in CAP_USE[0][0] and "commit_transaction" in (ROOT / "src/witness/store.py").read_text()
+)
+_fx = fix["witness"]
+STORES = [  # (store, what it is, nodes, relationships): the persisted graphs a judge can open
+    ("data/air-routes.rl", "the source graph, never opened for writing", src_nodes, src_rels),
+    ("witnesses/two-hub.rl", "the headline witness", w_nodes, w_rels),
+    (
+        "witnesses/direction-bug.rl",
+        "the witness of a disagreement between two queries",
+        _db["witness"]["nodes"],
+        DB_RELS,
+    ),
+    ("witnesses/wrong-answer.rl", "the smaller repro of a wrong answer", _wa["witness"]["nodes"], WA_RELS),
+    (
+        "fixtures/mex-foreign.rl",
+        "a test fixture: pulled from Neo4j once, then shrunk",
+        _fx["nodes"],
+        _fx["relationships"],
+    ),
+]
+STORES_ALSO = "Also committed: `witness.rl`, the ledger of reductions, where a review verdict is recorded."
+assert all((ROOT / s[0]).is_file() for s in STORES) and (ROOT / "witness.rl").is_file()
+# the drawing of witnesses/two-hub.rl (site_parts asserts each of these counts against the register)
+WIT_CAP = (
+    f"`witnesses/two-hub.rl`, drawn: {len(sp.EDGES)} relationships among {len(sp.SCH) + sp.N_COUNTRIES} nodes "
+    f"({len(sp.SCH)} airports, {sp.N_COUNTRIES} countries). The {len(sp.ROUTES)} routes carry numbered exhibit tags; the "
+    f"{len(sp.COUNTRY)} country links show as country codes. Delete any one and the answer changes: "
+    f"[pull a tag yourself]({LIVE}#exhibit)."
+)
+assert (len(sp.EDGES), len(sp.SCH) + sp.N_COUNTRIES) == (w_rels, w_nodes) and 'id="exhibit"' in page
+
+# (what to do, the command lines, what to expect, a note)
+VERIFY = [
+    (
+        "Run the whole path",
+        RUN_CMD,
+        f"`{check}`, a last line that starts `VERIFIED`, and exit 0.",
+        f"Needs uv. The committed graph is copied, never modified; the output goes to `out/`. The recorded run reports {E2E_S} s end to end on an {DEMO_MACHINE} (`{DEMO_TXT}`)."
+        + OPENS,
+    ),
+    (
+        "Re-prove the committed witness",
+        ["uv run witness check witnesses/two-hub.rl"],
+        f"`{check}`, then `VERIFIED`, exit 0. Exit 1 would mean not verified.",
+        "One fresh copy of the witness per probe; nothing is shared with the reduction.",
+    ),
+    (
+        "Re-run it with plain Relate",
+        [RELATE_CMD],
+        f"the same {len(ANSWER)} airports the full graph gives: {', '.join(ANSWER)}.",
+        "Needs the Relate CLI. No Witness code runs: the witness is an ordinary `.rl` file.",
+    ),
+    (
+        "Run the tests",
+        ["uv run pytest --cov=witness"],
+        f"{TESTS} passed and 100% line and branch coverage; {SKIPPED} more need a local Neo4j in Docker and skip without it.",
+        "CI and deterministic replay, not the product path.",
+    ),
+]
+assert "VERIFIED" in sp.demo.splitlines()[-1]
+VERIFY_MORE = "More commands, one section per set of numbers: `DEMO.md`. The two receipts it does not cover have their own scripts: `scripts/pull_each_tag.py` and `bench/full_graph_necessity.py`. The files behind every figure on this page: `evidence/`, `witnesses/`."
+# the sections of this page in order, with what each one holds (every count is a list's own length)
+INDEX = [
+    ("The receipts", "#the-receipts", f"{len(RECEIPTS)} receipts, each with its file"),
+    ("How it uses Relate", "#how-it-uses-relate", f"mode, reason, {len(CAPS)} capabilities"),
+    ("Verify it yourself", "#verify-it-yourself", f"{len(VERIFY)} commands, on your machine"),
+    ("By criterion", "#by-criterion", f"where to look for each of the {len(CRITERIA)}"),
+]
+assert "MEX" not in sp.COUNTRY, "MEX now has a country link in the witness: the limitation below names it"
 LIMITS = [
     "Deletion-minimal, not smallest: no single remaining relationship can be removed without changing the answer; a smaller witness may exist.",
+    "Its own answer, on its own file: because a query with `NOT EXISTS` or aggregation is not monotone, a witness does not prove that every graph containing it gives the same answer. It also leaves out true facts the answer does not need: MEX has no country link in `witnesses/two-hub.rl`.",
     "Read-only Cypher only, with no clock or randomness: Witness refuses writes, procedures, clocks and randomness (exit 2) rather than guess. Dependence on storage order is caught by a heuristic (the same answer from a store built in reverse order), not proven absent.",
     "One graph (a public air-routes dataset, Apache-2.0): the headline query, one disagreement case and one wrong-answer repro. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
 ]
-LINKS = [
-    ("Repository", REPO + OPENS),
-    ("Live site", LIVE),
-    ("Exhibit page", EXHIBIT),
-    ("Relate", "https://relatedb.ai"),
+DECK_SLIDES = (SITE / "deck" / "index.html").read_text().count('<div class="pfoot">')  # the deck written just above
+assert DECK_SLIDES == 10
+LINKS = [  # (label, url, what is there)
+    ("Repository", REPO + OPENS, "the source, the evidence and the commit history"),
+    ("Live site", LIVE, "the landing: replay the reduction, pull a tag yourself"),
+    ("Demo video", VIDEO, f"watch it run{VIDEO_LEN}"),
+    ("Pitch deck", DECK, f"{DECK_SLIDES} slides, every number read from the same files"),
+    ("Exhibit page", EXHIBIT, "the page Witness writes beside every witness"),
+    ("README", f"{REPO}/blob/main/README.md", "how it uses Relate, and why"),
+    ("DEMO.md", f"{REPO}/blob/main/DEMO.md", "the commands behind the numbers, section by section"),
+    ("JUDGE.md", f"{REPO}/blob/main/JUDGE.md", "this page as Markdown, in the repository"),
+    ("Relate", "https://relatedb.ai", "the embedded graph database it is built on"),
 ]
+
+
+def repo_path(tok: str) -> bool:
+    """True when a backticked token is a file or directory of this repository (never the ignored out/ or dist/)."""
+    if not re.fullmatch(r"[\w./-]+", tok) or ("/" not in tok and "." not in tok.strip(".")):
+        return False
+    return not tok.startswith(("out/", "dist/", "/", "..")) and (ROOT / tok).exists()
+
+
+def _spans(t: str) -> list[str]:
+    parts = t.split("`")
+    assert len(parts) % 2 == 1, f"unbalanced backticks: {t}"
+    return parts
+
+
+def md_inline(t: str) -> str:
+    """JUDGE.md: a committed path becomes a relative link, so it opens from the repository page."""
+    return "".join(p if i % 2 == 0 else f"[`{p}`]({p})" if repo_path(p) else f"`{p}`" for i, p in enumerate(_spans(t)))
+
+
+def _local(u: str) -> str:
+    """Pages of this site are linked relative, so the page works on any host that serves site/."""
+    return (u[len(SITE_URL) :] or "/") if u.startswith(SITE_URL) else u
+
+
+def chip(p: str) -> str:
+    """A committed path as a link to that file on GitHub. It may wrap after a slash, never inside a name."""
+    assert repo_path(p), f"not a path of this repository: {p}"
+    segs = "<wbr>".join(f'<span class="sg">{html.escape(s, quote=False)}</span>' for s in re.findall(r"[^/]+/?", p))
+    if not REPO_PUBLIC:
+        return f"<code>{segs}</code>"
+    kind = "tree" if (ROOT / p).is_dir() else "blob"
+    return f'<a class="src" href="{REPO}/{kind}/main/{p.rstrip("/")}"><code>{segs}</code></a>'
+
+
+def inline(t: str) -> str:
+    """/judge: `code`, **bold**, [text](url); a committed path links to that file on GitHub."""
+    out = []
+    for i, p in enumerate(_spans(t)):
+        e = html.escape(p, quote=False)
+        if i % 2:
+            out.append(chip(p) if repo_path(p) else f"<code>{e}</code>")
+        else:
+            e = re.sub(r"\[([^\]]+)\]\(([^)\s]+)\)", lambda m: f'<a href="{_local(m.group(2))}">{m.group(1)}</a>', e)
+            out.append(re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", e))
+    return "".join(out)
+
+
+def md_srcs(srcs: list[tuple[str, str]]) -> str:
+    return ", ".join(md_inline(f"`{p}`") + (f" ({md_inline(n)})" if n else "") for p, n in srcs)
+
+
+def html_srcs(srcs: list[tuple[str, str]]) -> str:
+    return "".join(f"<span>{chip(p)}{f'<i>{inline(n)}</i>' if n else ''}</span>" for p, n in srcs)
+
 
 md = [
     "# For judges",
     "",
     f"**The claim.** {CLAIM}",
     "",
-    "Witness is built on Relate, the embedded graph database, for the Relate by Neo4j hackathon.",
+    f"{WHAT} {BUILT}",
     "",
     "## The 30-second path",
     "",
 ]
-for i, (t, u, d) in enumerate(PATH30, 1):
-    md.append(f"{i}. {f'[{t}]({u})' if u else t}: {d}.")
-md += ["", "## The receipts", "", "| Number | What it is |", "|---|---|"]
-md += [f"| **{a}** | {b} |" for a, b in RECEIPTS]
+md += [f"{i}. [{t}]({u}): {d}." for i, (t, _, u, d) in enumerate(PATH30, 1)]
+md += [
+    f"{len(PATH30) + 1}. Optional, one command: `{ONE_CMD}` ({PATH_CMD_NOTE}). {PATH_EXPECT}",
+    "",
+    f"Prefer to watch? [Demo video{VIDEO_LEN}]({VIDEO}) · [pitch deck]({DECK})",
+    "",
+    "## The receipts",
+    "",
+    "| Number | What it is | Recorded in |",
+    "|---|---|---|",
+]
+md += [
+    f"| **{a}** | **{md_inline(lead)}**{' ' + md_inline(rest) if rest else ''} | {md_srcs(srcs)} |"
+    for a, _, lead, rest, srcs in RECEIPTS
+]
+md += ["", "## How it uses Relate", "", *[f"- **{k}:** {md_inline(v)}" for k, v in FACTS], ""]
+md += [
+    "One trial is `begin_transaction`, delete, re-run the query, compare the answer, `rollback_transaction`. "
+    + md_inline(
+        f"In the headline run {APPLIED} deletions kept the answer and were then applied; the other {ROLLED} changed it and stayed rolled back (`witnesses/two-hub.trace.json`). "
+        f"Relate in-process ran {relate_tps} trials/s, Neo4j {NEO_V} in Docker {neo_tps}. {CMP_NOTE}"
+    ),
+    "",
+    f"The {len(CAPS)} Relate capabilities it uses:",
+    "",
+    "| | Relate capability | What Witness does with it | In the source |",
+    "|---|---|---|---|",
+]
+md += [
+    f"| {i} | `{code}` | {md_inline(use)} | {', '.join(md_inline(f'`{f}`') for f in files)} |"
+    for i, ((code, _, _), (use, files, _)) in enumerate(zip(CAPS, CAP_USE, strict=True), 1)
+]
 md += [
     "",
-    "## Reproduce it",
+    "The graph is persisted. Stores committed in this repository:",
     "",
-    "```bash",
-    *REPRO,
-    "```",
-    "",
-    *([OPENS_LINE, ""] if OPENS_LINE else []),
-    f"{REPLAY}",
-    "",
-    "## Honest limitations",
-    "",
+    "| Store | What it is | Nodes | Relationships |",
+    "|---|---|---|---|",
 ]
-md += [f"- {x}" for x in LIMITS]
-md += ["", "## Links", ""] + [f"- {a}: {b}" for a, b in LINKS] + [""]
+md += [f"| {md_inline(f'`{p}`')} | {what} | {fmt(n)} | {fmt(r)} |" for p, what, n, r in STORES]
+md += ["", md_inline(STORES_ALSO), "", f"The question: {QUESTION} The answer: {', '.join(ANSWER)}.", ""]
+md += ["## Verify it yourself", ""]
+for i, (t, lines, expect, note) in enumerate(VERIFY, 1):
+    md += [f"{i}. **{t}.** {md_inline(note)}", "", "   ```bash"]
+    md += [*[f"   {x}".replace("\n", "\n   ") for x in lines], "   ```", "", f"   Expect {md_inline(expect)}", ""]
+md += [
+    *([OPENS_LINE, ""] if OPENS_LINE else []),
+    md_inline(VERIFY_MORE),
+    "",
+    "## By criterion",
+    "",
+    md_inline(CRIT_LEDE),
+]
+for name, bullets in CRITERIA:
+    md += ["", f"### {name}", ""]
+    md += [
+        f"- **{md_inline(lead)}** {md_inline(text)}" + (f" ({md_srcs([(f, '') for f in files])})." if files else ".")
+        for lead, text, files in bullets
+    ]
+md += ["", "## Honest limitations", ""]
+md += [f"- {md_inline(x)}" for x in LIMITS]
+md += ["", "## Links", ""] + [f"- {a}: {b} · {c}" for a, b, c in LINKS] + [""]
 (ROOT / "JUDGE.md").write_text("\n".join(md))
 
-
-def inline(t):
-    return re.sub(r"`([^`]+)`", r"<code>\1</code>", html.escape(t, quote=False))
-
-
-JUDGE_PAGE = """<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>For judges · Witness</title>
-<meta name="description" content="{claim_attr}">
-<link rel="icon" href="/icon.svg" type="image/svg+xml">
-<link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Old+Standard+TT:wght@400;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
-<style>
-:root{{--paper:#F2E8D5;--ink:#1F1A14;--muted:#6F6555;--after:#B42318;--rule:#D9CBAE}}
-body{{margin:0;background:var(--paper);color:var(--ink);font:18px/1.55 "Source Sans 3",Arial,sans-serif;overflow-wrap:anywhere}}html{{overflow-x:clip}}
-main{{max-width:760px;margin:0 auto;padding:40px 20px 72px}}
-h1{{font:700 34px/1.15 "Old Standard TT",Georgia,serif;margin:.2em 0 .5em}}
-h2{{font:600 13px/1.4 "Source Sans 3",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:40px 0 10px}}
-a{{color:var(--ink);text-underline-offset:3px}}a:hover{{color:var(--after)}}a:focus-visible{{outline:3px solid var(--ink);outline-offset:3px}}
-code,pre{{font-family:"Fragment Mono",Menlo,monospace;font-size:.88em}}pre{{background:rgba(31,26,20,.07);padding:14px;overflow-x:auto}}
-table{{border-collapse:collapse;width:100%}}td{{border-top:1px solid var(--rule);padding:10px 8px 10px 0;vertical-align:top}}td:first-child{{font:400 17px "Fragment Mono",monospace;white-space:nowrap;padding-right:18px}}
-.claim{{font-size:21px}}@media (max-width:600px){{td:first-child{{white-space:normal}}}}
-</style></head><body><main>
-<p><a href="/">&larr; Witness</a></p>
-<h1>For judges</h1>
-<p class="claim" id="claim">{claim}</p>
-<p>Witness is built on Relate, the embedded graph database, for the Relate by Neo4j hackathon.</p>
-<h2>The 30-second path</h2><ol>{path}</ol>
-<h2>The receipts</h2><table>{receipts}</table>
-<h2>Reproduce it</h2><pre>{repro}</pre>{opens_line}<p>{replay}</p>
-<h2>Honest limitations</h2><ul>{limits}</ul>
-<h2>Links</h2><ul>{links}</ul>
-</main></body></html>
-"""
+_EXT = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11l6-6M6.5 5H11v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>'
+_GO = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5L12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>'
 
 
-def _link(u):
-    return f'<a href="{u.split(" ")[0]}">{html.escape(u)}</a>' if u.startswith("http") else html.escape(u)
+def _cmd_tokens(line: str) -> str:
+    """A command line for display: flags never break at their hyphens, a long URL may break after a slash."""
+    out = []
+    for tok in re.split(r"( +|\n)", line):
+        e = html.escape(tok, quote=False)
+        if "/" in tok and len(tok) > 30:
+            out.append(re.sub(r"/(?=[^/])", "/<wbr>", e))
+        elif "-" in tok or "=" in tok or "/" in tok:
+            out.append(f'<span class="nw">{e}</span>')
+        else:
+            out.append(e)
+    return "".join(out)
+
+
+def cmd_block(lines: list[str], what: str) -> str:
+    """Each line is one command; a line may carry a shell continuation (backslash + newline) for display only."""
+    code = "".join(f'<span class="cl">{_cmd_tokens(x)}</span>' for x in lines)
+    one = " && ".join(re.sub(r" \\\n +", " ", x) for x in lines)
+    tall = sum(1 + x.count("\n") for x in lines) > 2
+    return (
+        f'<div class="cmd{" tall" if tall else ""}"><code>{code}</code><button type="button" class="copy" '
+        f'data-copy="{html.escape(one)}" aria-label="Copy the command: {html.escape(what)}">copy</button></div>'
+    )
+
+
+def judge_term() -> str:
+    """Lines of the recorded `witness demo` run: whole blocks in their order, text untouched; every gap is marked."""
+    lines = sp.demo.splitlines()[1:]
+
+    def block(word: str) -> list[int]:
+        i = next(k for k, ln in enumerate(lines) if ln.startswith(word))
+        j = i
+        while j < len(lines) and lines[j].strip():
+            j += 1
+        return list(range(i, j))
+
+    keep = [*block("Witness "), *block("QUESTION"), *block("ANSWER"), *block("WITNESS"), *block("EXHIBITS")[:4]]
+    keep += [*block("CHECK"), *block("PROVE ONE"), *block("VERIFIED")]
+    assert keep == sorted(keep) and keep[0] == 0
+    out, prev = [], -1
+    for k in keep:
+        skipped = [ln for ln in lines[prev + 1 : k] if ln.strip()]
+        if skipped:
+            out.append(f'<span class="ln cut">  ⋮ {len(skipped)} lines not shown here</span>')
+        if k - prev > 1:
+            out.append('<span class="ln"> </span>')
+        out.append(sp.term_line(lines[k]))
+        prev = k
+    assert prev == len(lines) - 1, "the transcript no longer ends on the VERIFIED line"
+    return "".join(out)
+
+
+def judge_page() -> str:
+    og = hashlib.sha256((ROOT / "docs" / "assets" / "og-image-1200.png").read_bytes()).hexdigest()[:10]
+    path = [
+        f'<li><span class="st-no" aria-hidden="true">{i}</span><div class="st"><h3>{html.escape(t)}</h3>'
+        f'<p>{inline(d[0].upper() + d[1:])}.</p></div><a class="btn st-go{" solid" if i == 1 else ""}" href="{_local(u)}">'
+        f"{html.escape(b)}{_GO}</a></li>"
+        for i, (t, b, u, d) in enumerate(PATH30, 1)
+    ]
+    path.append(
+        f'<li class="run"><span class="st-no" aria-hidden="true">{len(PATH30) + 1}</span><div class="st">'
+        f"<h3>Run one command <small>optional · {html.escape(PATH_CMD_NOTE)}</small></h3>"
+        f'{cmd_block(RUN_CMD, "clone the repository and run the demo")}<p class="exp">{inline(PATH_EXPECT)}</p></div></li>'
+    )
+    ctas = [
+        (
+            f'<a class="btn" href="{REPO}"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5L2 10l5 5M13 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>Source on GitHub</a>'
+            if REPO_PUBLIC
+            else '<span class="src-pending">Source on GitHub opens at submission</span>'
+        ),
+        f'<a class="btn" href="{VIDEO}"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v12H3z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 7.5v5l4.5-2.5z" fill="currentColor"/></svg>Demo video{VIDEO_LEN}</a>',
+        '<a class="btn" href="/deck/"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v10H3zM7 17h6M10 14v3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Pitch deck</a>',
+    ]
+    receipts = [
+        f'<tr role="row"><td role="cell" class="no">{i}</td>'
+        f'<td role="cell" class="num{" word" if num == label else ""}"><span class="sr">{html.escape(label)}</span><span aria-hidden="true">{num}</span></td>'
+        f'<td role="cell" class="what"><b>{inline(lead)}</b>{f"<span>{inline(rest)}</span>" if rest else ""}'
+        f'<p class="rec"><span class="lbl">Recorded in</span>{html_srcs(srcs)}</p></td></tr>'
+        for i, (label, num, lead, rest, srcs) in enumerate(RECEIPTS, 1)
+    ]
+    criteria = [
+        f'<li><div><span class="crit-k">Criterion {i} of {len(CRITERIA)}</span><h3>{html.escape(name)}</h3></div><ul>'
+        + "".join(
+            f"<li><b>{inline(lead)}</b> {inline(text)}."
+            + (f'<span class="rec">{html_srcs([(f, "") for f in files])}</span>' if files else "")
+            + "</li>"
+            for lead, text, files in bullets
+        )
+        + "</ul></li>"
+        for i, (name, bullets) in enumerate(CRITERIA, 1)
+    ]
+    caps = [
+        f'<tr role="row"><td role="cell" class="no">{i}</td><td role="cell" class="cap"><code>{html.escape(code)}</code></td>'
+        f'<td role="cell" class="use">{inline(use)}</td>'
+        f'<td role="cell" class="where">{" ".join(chip(f) for f in files)}</td></tr>'
+        for i, ((code, _, _), (use, files, _)) in enumerate(zip(CAPS, CAP_USE, strict=True), 1)
+    ]
+    stores = [
+        f'<tr role="row"><td role="cell" class="path">{chip(p)}</td><td role="cell" class="role">{html.escape(what[0].upper() + what[1:])}</td>'
+        f'<td role="cell" class="n" data-l="nodes">{fmt(n)}</td><td role="cell" class="n" data-l="relationships">{fmt(r)}</td></tr>'
+        for p, what, n, r in STORES
+    ]
+    verify = [
+        f'<li><span class="st-no" aria-hidden="true">{i}</span><div class="st"><h3>{html.escape(t)}</h3>'
+        f'{cmd_block(lines, t.lower())}<p class="exp"><span class="lbl">Expect</span>{inline(expect)}</p>'
+        f'<p class="note">{inline(note)}</p></div></li>'
+        for i, (t, lines, expect, note) in enumerate(VERIFY, 1)
+    ]
+    limits = []
+    for i, x in enumerate(LIMITS, 1):
+        lead, rest = x.split(": ", 1)
+        limits.append(
+            f'<li><span class="ln-no" aria-hidden="true">{i}</span><div><h3>{html.escape(lead)}</h3>'
+            f"<p>{inline(rest[0].upper() + rest[1:])}</p></div></li>"
+        )
+    tiles = [
+        f'<li><a class="tile" href="{_local(u.split(" ")[0])}"><b>{html.escape(a)}{_EXT}</b>'
+        f'<span class="t-note">{html.escape(c[0].upper() + c[1:])}</span><span class="t-url">{html.escape(_shown(u))}</span></a></li>'
+        for a, u, c in LINKS
+    ]
+    vals = {
+        "CLAIM_ATTR": html.escape(CLAIM),
+        "DESC_OG": html.escape(DESC_OG),
+        "SITE": SITE_URL,
+        "OGV": og,
+        "CSS": (PARTS / "witness.css").read_text(),
+        "JUDGE_CSS": (PARTS / "judge.css").read_text(),
+        "NAV_SRC": f'<a class="chip" href="{REPO}">source</a>' if REPO_PUBLIC else "",
+        "SRC_RELS": fmt(src_rels),
+        "W_RELS": w_rels,
+        "CHECK": html.escape(check),
+        "WHAT": html.escape(WHAT),
+        "CLAIM_HERO": html.escape(CLAIM_HERO, quote=False),
+        "BUILT": inline(BUILT),
+        "HERO_CTAS": "\n        ".join(ctas),
+        "PATH": "\n          ".join(path),
+        "PATH_MORE": f'<span>Prefer to watch it run?</span><a href="{VIDEO}">Demo video{VIDEO_LEN}{_EXT}</a>'
+        + (f"<span>{OPENS_LINE}</span>" if OPENS_LINE else ""),
+        "INDEX": "\n          ".join(
+            f'<li><a href="{u}"><b>{html.escape(t)}</b><span>{html.escape(d)}</span></a></li>' for t, u, d in INDEX
+        ),
+        "RECEIPTS": "\n          ".join(receipts),
+        "SRC_NOTE": inline(
+            f"Relate {man['versions']['relate_db']} · Python {man['versions']['python']} · every linked path is a file in the repository, and `scripts/build_site.py` writes this page from them."
+        ),
+        "CRIT_LEDE": inline(CRIT_LEDE),
+        "CRITERIA": "\n      ".join(criteria),
+        "FACTS": "\n        ".join(f"<dt>{html.escape(k)}</dt><dd>{inline(v)}</dd>" for k, v in FACTS),
+        "TRIALS": trials,
+        "TAPE": sp.tape_svg(),
+        "TAPE_CAP": inline(TAPE_CAP),
+        "RELATE_TPS": relate_tps,
+        "NEO_TPS": neo_tps,
+        "NEO_V": NEO_V,
+        "NEO_W": round(100 * neo_tps / relate_tps, 1),
+        "CMP_NOTE": inline(CMP_NOTE),
+        "CAPS_H": f"{len(CAPS)} Relate capabilities, each with its place in the source",
+        "CAPS": "\n          ".join(caps),
+        "STORES_H": "The graph is persisted: the stores in the repository",
+        "STORES": "\n              ".join(stores),
+        "STORES_ALSO": inline(STORES_ALSO),
+        "QUESTION": html.escape(QUESTION),
+        "ANSWER": " ".join(f"<b>{html.escape(a)}</b>" for a in ANSWER),
+        "WIT_SVG": sp.schematic("j", ghost=False),
+        "WIT_CAP": inline(WIT_CAP),
+        "VERIFY": "\n        ".join(verify),
+        "TERM": judge_term(),
+        "DEMO_UTC": sp.DEMO_HEADER.split(" · ")[0].replace("recorded ", "").replace("T", " ").replace("Z", " UTC"),
+        "DEMO_SRC": inline(f"`{DEMO_TXT}`"),
+        "VERIFY_MORE": inline(VERIFY_MORE),
+        "LIMITS": "\n      ".join(limits),
+        "LINKS": "\n      ".join(tiles),
+        "SOURCE_FOOT": f'<a href="{REPO}">source</a>' if REPO_PUBLIC else "source opens at submission",
+        "JS": (PARTS / "judge.js").read_text(),
+    }
+    return fill((PARTS / "judge.html").read_text(), vals)
+
+
+def _shown(u: str) -> str:
+    """A link tile's printed address: a file of the repository reads as repository · file."""
+    blob = REPO + "/blob/main/"
+    return f"{REPO.split('github.com/')[1]} · {u[len(blob) :]}" if u.startswith(blob) else u.split("://")[1].rstrip("/")
 
 
 (SITE / "judge").mkdir(exist_ok=True)
-(SITE / "judge" / "index.html").write_text(
-    JUDGE_PAGE.format(
-        claim=html.escape(CLAIM, quote=False),
-        claim_attr=html.escape(CLAIM),
-        path="".join(
-            "<li>" + (f'<a href="{u}">{html.escape(t)}</a>' if u else html.escape(t)) + f": {inline(d)}.</li>"
-            for t, u, d in PATH30
-        ),
-        receipts="".join(f"<tr><td>{html.escape(a)}</td><td>{inline(b)}</td></tr>" for a, b in RECEIPTS),
-        repro=html.escape("\n".join(REPRO)),
-        replay=inline(REPLAY),
-        opens_line=f"<p>{OPENS_LINE}</p>" if OPENS_LINE else "",
-        limits="".join(f"<li>{inline(x)}</li>" for x in LIMITS),
-        links="".join(f"<li>{html.escape(a)}: {_link(b)}</li>" for a, b in LINKS),
-    )
+judge = judge_page()
+(SITE / "judge" / "index.html").write_text(judge)
+print(
+    f"site/index.html {len(page):,} bytes; site/judge/index.html {len(judge):,} bytes; witness {w_rels} of {src_rels}; compare {cmp_path.name}"
 )
-print(f"site/index.html {len(page):,} bytes; witness {w_rels} of {src_rels}; compare {cmp_path.name}")

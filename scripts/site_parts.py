@@ -275,21 +275,23 @@ def answer_rows() -> str:
     return "\n".join(out)
 
 
+def term_line(ln: str) -> str:
+    """One line of the recorded transcript, text untouched; exhibit numbers and the check line in the kept colour."""
+    e = html.escape(ln)
+    m = re.match(r"^(\s+)(\d+)(\s+\(\w+\)-\[:\w+\]->\(\w+\))$", ln)
+    if m:
+        e = f'{m.group(1)}<b class="k">{m.group(2)}</b>{html.escape(m.group(3))}'
+    elif ln.startswith("CHECK"):
+        e = f'<b class="k">{e}</b>'
+    elif re.match(r"^[A-Z]{3,}", ln):
+        e = re.sub(r"^([A-Z][A-Z ]+?)(\s{2}|$)", r'<b class="h">\1</b>\2', e, count=1)
+    return f'<span class="ln">{e or " "}</span>'
+
+
 def terminal_lines(limit: int | None = None) -> str:
     """The recorded `witness demo` transcript, verbatim; exhibit numbers and the check line in the kept colour."""
     lines = demo.splitlines()[1:]  # line 0 is the recording header, shown as the card's caption
-    out = []
-    for ln in lines[:limit]:
-        e = html.escape(ln)
-        m = re.match(r"^(\s+)(\d+)(\s+\(\w+\)-\[:\w+\]->\(\w+\))$", ln)
-        if m:
-            e = f'{m.group(1)}<b class="k">{m.group(2)}</b>{html.escape(m.group(3))}'
-        elif ln.startswith("CHECK"):
-            e = f'<b class="k">{e}</b>'
-        elif re.match(r"^[A-Z]{3,}", ln):
-            e = re.sub(r"^([A-Z][A-Z ]+?)(\s{2}|$)", r'<b class="h">\1</b>\2', e, count=1)
-        out.append(f'<span class="ln">{e or " "}</span>')
-    return "".join(out)
+    return "".join(term_line(ln) for ln in lines[:limit])
 
 
 DEMO_HEADER = demo.splitlines()[0].lstrip("# ")

@@ -89,13 +89,13 @@ With a real model in the loop: `evidence/mcp-agent-session.md` records claude-so
 MCP servers enabled) writing its own Cypher and attaching the witness; the exact command, `mcp.json` and prompt are in that file.
 It needs a Claude Code login, so it is a recorded run, not a step of the judge path.
 
-## 6. Tests: 553 pass, 100% coverage
+## 6. Tests: 557 pass, 100% coverage
 
 ```bash
 uv run pytest --cov=witness   # fails below 100% line + branch coverage (pyproject.toml)
 ```
 
-The run is recorded in `evidence/pytest-2026-11-28.txt` (553 passed; the 2 fixture-pull tests need a local Neo4j in Docker and
+The run is recorded in `evidence/pytest-2026-11-28b.txt` (557 passed; the 2 fixture-pull tests need a local Neo4j in Docker and
 skip without it). GitHub Actions runs the same suite on every push, on Linux under Python 3.11 and 3.12, with ruff, mypy,
 pip-audit, gitleaks, the wheel build and a throughput floor (`.github/workflows/ci.yml`).
 
@@ -220,3 +220,27 @@ when `NEO4J_BOLT` / `NEO4J_USER` / `NEO4J_PASSWORD` point at an empty Neo4j, Neo
 committed run has no Neo4j leg (`"neo4j": "not run: ..."` in `evidence/differential.json`). `bench/any_shortest_inline.py`
 runs each size in its own process with an 8 s watchdog, because the slow form does not return on 40 relationships.
 
+
+## 15. Relate in the tab: the landing's pulls, run live, against the recording
+
+```bash
+uv run python scripts/vendor_relate_wasm.py --check   # the self-hosted engines match their pinned checksums (offline)
+node scripts/wasm_parity.mjs --out /tmp/wasm-parity.json   # = evidence/wasm-parity.json, timings aside
+```
+
+The landing (https://witness.edycu.dev/#exhibit) runs `@relate/relate-wasm` 1.0.1, the release the witness was reduced
+on, in a module worker. The engine files are served from the site (`site/relate/1.0.1/`, unchanged from npm, pinned by
+version and by the registry's sha512 in `scripts/vendor_relate_wasm.py`), so the page makes no third-party request to run
+it. Relate's browser build has no transactions, so a pull rebuilds the witness from `witnesses/two-hub.cypher`, deletes
+that one relationship and re-runs `queries/two-hub.cypher`; every answer is marked Live and compared with
+`evidence/pull-each-tag.json` on screen. If the engine cannot start, the pull replays the recording and is marked
+Recorded. A query box runs the reader's own Cypher on a fresh copy of the witness, minus the pulled tag; a statement that
+writes is refused (it ran on a throwaway copy, and its write counters are shown instead of rows), and a statement still
+running after 4 s is stopped by ending the worker (the browser build has no statement timeout). The engine case
+(section 10) runs both forms on 1.0.1 and on 1.3.0, each its own engine.
+
+`scripts/wasm_parity.mjs` imports the page's own steps (`site/relate/live.js`) and the same engine files under Node, as
+Relate's browser guide allows (`initSync` with the engine's bytes), and checks: all 22 pulls give the recorded rows; the
+unpulled witness gives the manifest's answer; the engine case gives the recorded rows on 1.0.1 (the forms disagree) and
+1.3.0 (they agree); a `CREATE` in the query box is refused. `tests/test_wasm_parity.py` runs it under pytest when Node
+is installed and requires the committed evidence to match the fresh run.

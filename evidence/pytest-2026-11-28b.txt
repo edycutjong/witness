@@ -1,0 +1,5 @@
+# uv run pytest --cov=witness (100% line+branch gate), recorded 2026-11-28 05:03 +0700 on commit 6aac0b9 plus the live-tab changes committed with this file; supersedes evidence/pytest-2026-11-28.txt (4 tests added: the self-hosted @relate/relate-wasm engines match their pins, the vendor step takes only the served entries, the page serves the live steps it was checked with, and the landing's live pulls on Relate 1.0.1 WebAssembly under Node give the recorded rows)
+# Darwin arm64; relate-db 1.0.1 (other engines: relate-db 1.0.2, 1.2.0, 1.3.0 through uv), Relate CLI v1.0.1, @relate/relate-wasm 1.0.1 + 1.3.0 under Node v22.22.0; Python 3.12.13; local Neo4j in Docker NOT running, so its 2 fixture-pull tests skip
+557 passed, 2 skipped in 108.86s (0:01:48)
+TOTAL 2996 statements, 960 branches, 0 missed: 100.00%
+# skipped: tests/test_fixture.py "local Neo4j (Docker) is not running" (559 tests in total)

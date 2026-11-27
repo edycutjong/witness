@@ -16,7 +16,7 @@
   [![Release](https://img.shields.io/github/v/release/edycutjong/witness?sort=semver)](https://github.com/edycutjong/witness/releases/latest)
   ![Python](https://img.shields.io/badge/Python_3.11_|_3.12-3776AB?style=flat&logo=python&logoColor=white)
   ![Relate](https://img.shields.io/badge/Relate_1.0.1-1F1A14?style=flat)
-  ![Tests](https://img.shields.io/badge/tests-553_passed-2ea043?style=flat)
+  ![Tests](https://img.shields.io/badge/tests-557_passed-2ea043?style=flat)
   [![License](https://img.shields.io/badge/License-Apache_2.0-yellow)](LICENSE)
 
 </div>
@@ -85,6 +85,7 @@ Relate capabilities used:
 6. `relate pull` for fixture mode: one pull from Neo4j, then shrink; never pushed back (`fixture.py`)
 7. `relate query --mode json` on the CLI as a second surface for every probe (`check.py`): it rules out a mistake in Witness's Python path, not one in the engine; for that, the witnesses are re-proved on Neo4j ([below](#measured-against-neo4j))
 8. MCP: Witness's own tools `why` and `check` (`mcp_server.py`) run beside Relate's `relate serve --mcp`; the pairing is exercised in `scripts/mcp_transcript.py` and `evidence/mcp-transcript.md`, and with a real model in `evidence/mcp-agent-session.md`
+9. the WebAssembly build, `@relate/relate-wasm` 1.0.1 (and 1.3.0 for the engine case), self-hosted on the landing: each pull of a tag, the reader's own read queries and both engine releases run in the reader's browser tab, checked against the recorded run (`scripts/site/live.js`, `scripts/wasm_parity.mjs`, `evidence/wasm-parity.json`; DEMO.md section 15)
 
 ### What a witness shows, and what it does not
 
@@ -383,11 +384,11 @@ rolled-back transaction: 22 of 22, 5 of 5 and 92 of 92, each verdict the same as
 
 ```bash
 make ci                          # ruff, mypy, pytest with the 100% coverage gate, pip-audit, gitleaks
-uv run pytest --cov=witness      # 553 pass against real Relate (2 more need a local Neo4j), 100% line + branch coverage
+uv run pytest --cov=witness      # 557 pass against real Relate (2 more need a local Neo4j), 100% line + branch coverage
 ```
 
 Reproduce every number in this README: [DEMO.md](DEMO.md). Raw evidence and the machine/version of each run:
-`evidence/` (this suite's run: `evidence/pytest-2026-11-28.txt`; CI runs the same suite on every push). The tests use real Relate, not mocks of the graph store. The graph store, the rollback transactions and the queries are never mocked. `relate pull` is stood in for in the fixture-mode tests (it needs a running Neo4j server; the Neo4j side is exercised by `bench/neo4j_compare.py`), and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach a rare branch.
+`evidence/` (this suite's run: `evidence/pytest-2026-11-28b.txt`; CI runs the same suite on every push). The tests use real Relate, not mocks of the graph store. The graph store, the rollback transactions and the queries are never mocked. `relate pull` is stood in for in the fixture-mode tests (it needs a running Neo4j server; the Neo4j side is exercised by `bench/neo4j_compare.py`), and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach a rare branch.
 
 GitHub Actions (`.github/workflows/ci.yml`) runs six stages: **Quality** (ruff, mypy, tests with the coverage gate; Python 3.11
 and 3.12 on `main`) and **Security** (gitleaks over the full history, pip-audit) in parallel, then **Build** (wheel, sdist,
@@ -401,19 +402,22 @@ For judges: [JUDGE.md](JUDGE.md), also served at <https://witness.edycu.dev/judg
 ## 📽️ Demo Materials
 
 - Demo video (1:55): https://youtu.be/GYbci7TseJw
-- Landing page: https://witness.edycu.dev (`site/`)
+- Landing page: https://witness.edycu.dev (`site/`). Relate runs in the tab there: pull any of the 22 tags and Relate 1.0.1,
+  compiled to WebAssembly and served from the site, rebuilds the witness without it and re-runs the query; each answer is
+  compared on screen with the recorded run (22 of 22 match, `evidence/wasm-parity.json`). A query box takes your own read
+  queries on the witness, and the engine disagreement runs on 1.0.1 and on 1.3.0 side by side.
 - Reproduce steps: [DEMO.md](DEMO.md)
 
 ## 🧰 Tools and AI use
 
 - **Product capabilities:** Relate 1.0.1 (embedded engine, `relate` CLI, `relate serve --mcp`).
-- **Third-party tools:** `uv`, pytest, Neo4j 2026.10.2 in Docker (comparison and fixture source only), Vercel (landing hosting). Relate 1.0.2, 1.1.0, 1.2.0 and 1.3.0 (through `uv`) as other engines and for the release tables.
+- **Third-party tools:** `uv`, pytest, Neo4j 2026.10.2 in Docker (comparison and fixture source only), Vercel (landing hosting). `@relate/relate-wasm` 1.0.1 and 1.3.0 on the landing (served from the site, unmodified; Node runs the parity check). Relate 1.0.2, 1.1.0, 1.2.0 and 1.3.0 (through `uv`) as other engines and for the release tables.
 - **AI use:** built with Claude Code as the coding agent, under the author's direction. The author is responsible for the result.
   The 219 queries of the differential run were written by an AI agent (Claude) from the graph's schema, before any comparison
   (the prompt: `evidence/differential-prompt.md`).
   The demo video's voiceover is an AI voice (ElevenLabs) reading a script drafted by Claude Code under the author's direction; its music and sound are synthesized in code.
 - **Built during the contest period:** first commit 2026-11-15 (`git log --reverse`). No code from before the contest.
-- **Reused material:** the air-routes dataset by Kelvin Lawrence (Apache-2.0, commit `efd3b1a`), modified as stated in `NOTICE`.
+- **Reused material:** the air-routes dataset by Kelvin Lawrence (Apache-2.0, commit `efd3b1a`), modified as stated in `NOTICE`. The landing serves Relate's own WebAssembly build unmodified (Apache-2.0; `site/relate/engines.json`, `NOTICE`).
 
 ## 📄 License
 

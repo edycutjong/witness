@@ -1,7 +1,7 @@
 <div align="center">
   <img src="docs/assets/icon.svg" alt="Witness Icon" width="144">
   <h1>Witness 🔎</h1>
-  <p><em>When an agent answers from a graph, Witness hands back a small graph that reproduces the answer (57,645 relationships → 22), and proves that deleting any one of its relationships changes the answer.</em></p>
+  <p><em>Witness: why does this query return this row? A deletion-minimal graph that reproduces the answer (57,645 relationships → 22): deleting any one of its relationships changes the answer.</em></p>
   <img src="docs/assets/readme-hero-animated.svg" alt="Witness reduces the graph behind an agent's answer to the relationships that reproduce it. Thousands of graphite lines fade; a handful stay, each tagged with a red exhibit number; the answer above never moves." width="100%">
 
   <br/>

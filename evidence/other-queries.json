@@ -1,0 +1,315 @@
+{
+ "schema": "witness.other-queries/v1",
+ "what": "witness why on other query shapes, same graph; each run is the product's pipeline in a temp dir",
+ "generated": "2026-11-27 21:15:32 +0700",
+ "witness": "0.1.0",
+ "relate_db": "1.0.1",
+ "machine": "Darwin 27.2.0 arm64, Python 3.12.13",
+ "source": {
+  "path": "data/air-routes.rl",
+  "nodes": 3748,
+  "relationships": 57645
+ },
+ "examples": [
+  {
+   "query": "queries/examples/fewest-flights.cypher",
+   "shape": "a path question: allShortestPaths over a variable-length pattern",
+   "question": "What is the smallest number of flights that gets you from JOG to KEF?",
+   "params": {
+    "from": "JOG",
+    "to": "KEF"
+   },
+   "command": "uv run witness why -f queries/examples/fewest-flights.cypher --param from=JOG --param to=KEF",
+   "answer": [
+    {
+     "flights": 3
+    }
+   ],
+   "warnings": [
+    "a bare scalar answer: different rows can give the same value; return the identities to keep the reason"
+   ],
+   "witness": {
+    "relationships": 3,
+    "nodes": 4,
+    "isolated_nodes": 0
+   },
+   "exhibits": [
+    "(FRA)-[:HAS_ROUTE]->(KEF)",
+    "(JOG)-[:HAS_ROUTE]->(KUL)",
+    "(KUL)-[:HAS_ROUTE]->(FRA)"
+   ],
+   "run": {
+    "trials": 104,
+    "inconclusive": 0,
+    "seconds": 0.699,
+    "capped": null
+   },
+   "check": "3 of 3 change the answer (3 of 3 relationships, 0 of 0 isolated nodes)",
+   "cli": "relate CLI: sufficiency + 3 of 3 necessity probes cross-checked",
+   "verified": true,
+   "exit_code": 0,
+   "reasons": [],
+   "wall_clock_s": 4.1
+  },
+  {
+   "query": "queries/examples/longest-nonstop.cypher",
+   "shape": "a top-k question: ORDER BY + LIMIT in the final RETURN",
+   "question": "Which two nonstop flights out of CGK are the longest?",
+   "params": {
+    "from": "CGK"
+   },
+   "command": "uv run witness why -f queries/examples/longest-nonstop.cypher --param from=CGK",
+   "answer": [
+    {
+     "airport": "LHR",
+     "miles": 7278
+    },
+    {
+     "airport": "AMS",
+     "miles": 7050
+    }
+   ],
+   "warnings": [],
+   "witness": {
+    "relationships": 2,
+    "nodes": 3,
+    "isolated_nodes": 0
+   },
+   "exhibits": [
+    "(CGK)-[:HAS_ROUTE]->(AMS)",
+    "(CGK)-[:HAS_ROUTE]->(LHR)"
+   ],
+   "run": {
+    "trials": 90,
+    "inconclusive": 0,
+    "seconds": 0.664,
+    "capped": null
+   },
+   "check": "2 of 2 change the answer (2 of 2 relationships, 0 of 0 isolated nodes)",
+   "cli": "relate CLI: sufficiency cross-checked; CLI necessity skipped: order-cut query",
+   "verified": true,
+   "exit_code": 0,
+   "reasons": [],
+   "wall_clock_s": 3.8
+  },
+  {
+   "query": "queries/examples/domestic-only.cypher",
+   "shape": "EXISTS and NOT EXISTS with no aggregation",
+   "question": "Which airports of IS have flights, but none that leave the country?",
+   "params": {
+    "country": "IS"
+   },
+   "command": "uv run witness why -f queries/examples/domestic-only.cypher --param country=IS",
+   "answer": [
+    {
+     "airport": "EGS"
+    },
+    {
+     "airport": "IFJ"
+    }
+   ],
+   "warnings": [],
+   "witness": {
+    "relationships": 4,
+    "nodes": 4,
+    "isolated_nodes": 0
+   },
+   "exhibits": [
+    "(EGS)-[:HAS_ROUTE]->(RKV)",
+    "(EGS)-[:IN_COUNTRY]->(IS)",
+    "(IFJ)-[:HAS_ROUTE]->(RKV)",
+    "(IFJ)-[:IN_COUNTRY]->(IS)"
+   ],
+   "run": {
+    "trials": 200,
+    "inconclusive": 0,
+    "seconds": 0.661,
+    "capped": null
+   },
+   "check": "4 of 4 change the answer (4 of 4 relationships, 0 of 0 isolated nodes)",
+   "cli": "relate CLI: sufficiency + 4 of 4 necessity probes cross-checked",
+   "verified": true,
+   "exit_code": 0,
+   "reasons": [],
+   "wall_clock_s": 3.9
+  }
+ ],
+ "count_bounded": {
+  "query": "queries/examples/count-no-direct.cypher",
+  "shape": "a count over the whole graph: it rests on everything it counts",
+  "question": "How many airports have no direct flight to MEX?",
+  "params": {
+   "dest": "MEX"
+  },
+  "command": "uv run witness why -f queries/examples/count-no-direct.cypher --param dest=MEX --max-seconds 20 --no-cli",
+  "answer": [
+   {
+    "airports": 3388
+   }
+  ],
+  "warnings": [
+   "a bare scalar answer: different rows can give the same value; return the identities to keep the reason"
+  ],
+  "witness": {
+   "relationships": 50637,
+   "nodes": 3504,
+   "isolated_nodes": 28
+  },
+  "exhibits": [
+   "(AAA)-[:HAS_ROUTE]->(FAC)",
+   "(AAA)-[:HAS_ROUTE]->(MKP)",
+   "(AAA)-[:HAS_ROUTE]->(PPT)",
+   "(AAA)-[:HAS_ROUTE]->(RAR)",
+   "(AAE)-[:HAS_ROUTE]->(ALG)",
+   "(AAE)-[:HAS_ROUTE]->(CDG)",
+   "(AAE)-[:HAS_ROUTE]->(IST)",
+   "(AAE)-[:HAS_ROUTE]->(LYS)",
+   "(AAE)-[:HAS_ROUTE]->(MRS)",
+   "(AAE)-[:HAS_ROUTE]->(ORN)",
+   "(AAE)-[:HAS_ROUTE]->(ORY)",
+   "(AAE)-[:HAS_ROUTE]->(TUN)",
+   "(AAL)-[:HAS_ROUTE]->(AAR)",
+   "(AAL)-[:HAS_ROUTE]->(AGP)",
+   "(AAL)-[:HAS_ROUTE]->(ALC)",
+   "(AAL)-[:HAS_ROUTE]->(AMS)",
+   "(AAL)-[:HAS_ROUTE]->(ARN)",
+   "(AAL)-[:HAS_ROUTE]->(ATH)",
+   "(AAL)-[:HAS_ROUTE]->(AYT)",
+   "(AAL)-[:HAS_ROUTE]->(BCN)",
+   "(AAL)-[:HAS_ROUTE]->(BLL)",
+   "(AAL)-[:HAS_ROUTE]->(CPH)",
+   "(AAL)-[:HAS_ROUTE]->(EDI)",
+   "(AAL)-[:HAS_ROUTE]->(IST)",
+   "(AAL)-[:HAS_ROUTE]->(LGW)",
+   "(AAL)-[:HAS_ROUTE]->(OSL)",
+   "(AAL)-[:HAS_ROUTE]->(PMI)",
+   "(AAL)-[:HAS_ROUTE]->(STN)",
+   "(AAL)-[:HAS_ROUTE]->(SVG)",
+   "(AAN)-[:HAS_ROUTE]->(CAI)",
+   "(AAN)-[:HAS_ROUTE]->(CCJ)",
+   "(AAN)-[:HAS_ROUTE]->(KWI)",
+   "(AAN)-[:HAS_ROUTE]->(PEW)",
+   "(AAN)-[:HAS_ROUTE]->(RKT)",
+   "(AAQ)-[:HAS_ROUTE]->(BAX)",
+   "(AAQ)-[:HAS_ROUTE]->(DME)",
+   "(AAQ)-[:HAS_ROUTE]->(EVN)",
+   "(AAQ)-[:HAS_ROUTE]->(LED)",
+   "(AAQ)-[:HAS_ROUTE]->(OMS)",
+   "(AAQ)-[:HAS_ROUTE]->(OSS)",
+   "(AAQ)-[:HAS_ROUTE]->(REN)",
+   "(AAQ)-[:HAS_ROUTE]->(SVO)",
+   "(AAQ)-[:HAS_ROUTE]->(TAS)",
+   "(AAQ)-[:HAS_ROUTE]->(TBW)",
+   "(AAQ)-[:HAS_ROUTE]->(URS)",
+   "(AAR)-[:HAS_ROUTE]->(AAL)",
+   "(AAR)-[:HAS_ROUTE]->(AGP)",
+   "(AAR)-[:HAS_ROUTE]->(ARN)",
+   "(AAR)-[:HAS_ROUTE]->(BER)",
+   "(AAR)-[:HAS_ROUTE]->(BMA)"
+  ],
+  "run": {
+   "trials": 328,
+   "inconclusive": 0,
+   "seconds": 20.018,
+   "capped": "--max-seconds 20.0 reached"
+  },
+  "check": "NOT VERIFIED: 0 of 0 change the answer; necessity not checked (partial witness from a capped run)",
+  "cli": "CLI cross-check off",
+  "verified": false,
+  "exit_code": 3,
+  "reasons": [
+   "--max-seconds 20.0 reached: reduced to 50637 relationships, deletion-minimality NOT verified",
+   "necessity not checked (partial witness from a capped run)"
+  ],
+  "wall_clock_s": 34.0
+ },
+ "count_with_the_default_cap": {
+  "query": "queries/examples/count-no-direct.cypher",
+  "shape": "a count over the whole graph: it rests on everything it counts",
+  "question": "How many airports have no direct flight to MEX?",
+  "params": {
+   "dest": "MEX"
+  },
+  "command": "uv run witness why -f queries/examples/count-no-direct.cypher --param dest=MEX --no-cli",
+  "answer": [
+   {
+    "airports": 3388
+   }
+  ],
+  "warnings": [
+   "a bare scalar answer: different rows can give the same value; return the identities to keep the reason"
+  ],
+  "witness": {
+   "relationships": 38521,
+   "nodes": 3411,
+   "isolated_nodes": 180
+  },
+  "exhibits": [
+   "(AAA)-[:HAS_ROUTE]->(FAC)",
+   "(AAA)-[:HAS_ROUTE]->(MKP)",
+   "(AAA)-[:HAS_ROUTE]->(PPT)",
+   "(AAA)-[:HAS_ROUTE]->(RAR)",
+   "(AAE)-[:HAS_ROUTE]->(ALG)",
+   "(AAE)-[:HAS_ROUTE]->(IST)",
+   "(AAE)-[:HAS_ROUTE]->(LYS)",
+   "(AAE)-[:HAS_ROUTE]->(MRS)",
+   "(AAE)-[:HAS_ROUTE]->(ORN)",
+   "(AAE)-[:HAS_ROUTE]->(ORY)",
+   "(AAE)-[:HAS_ROUTE]->(TUN)",
+   "(AAL)-[:HAS_ROUTE]->(AAR)",
+   "(AAL)-[:HAS_ROUTE]->(AGP)",
+   "(AAL)-[:HAS_ROUTE]->(ALC)",
+   "(AAL)-[:HAS_ROUTE]->(ARN)",
+   "(AAL)-[:HAS_ROUTE]->(ATH)",
+   "(AAL)-[:HAS_ROUTE]->(AYT)",
+   "(AAL)-[:HAS_ROUTE]->(BLL)",
+   "(AAL)-[:HAS_ROUTE]->(CPH)",
+   "(AAL)-[:HAS_ROUTE]->(EDI)",
+   "(AAL)-[:HAS_ROUTE]->(IST)",
+   "(AAL)-[:HAS_ROUTE]->(LGW)",
+   "(AAL)-[:HAS_ROUTE]->(OSL)",
+   "(AAL)-[:HAS_ROUTE]->(PMI)",
+   "(AAL)-[:HAS_ROUTE]->(STN)",
+   "(AAL)-[:HAS_ROUTE]->(SVG)",
+   "(AAN)-[:HAS_ROUTE]->(CAI)",
+   "(AAN)-[:HAS_ROUTE]->(CCJ)",
+   "(AAN)-[:HAS_ROUTE]->(KWI)",
+   "(AAN)-[:HAS_ROUTE]->(PEW)",
+   "(AAN)-[:HAS_ROUTE]->(RKT)",
+   "(AAQ)-[:HAS_ROUTE]->(BAX)",
+   "(AAQ)-[:HAS_ROUTE]->(DME)",
+   "(AAQ)-[:HAS_ROUTE]->(EVN)",
+   "(AAQ)-[:HAS_ROUTE]->(LED)",
+   "(AAQ)-[:HAS_ROUTE]->(OMS)",
+   "(AAQ)-[:HAS_ROUTE]->(OSS)",
+   "(AAQ)-[:HAS_ROUTE]->(REN)",
+   "(AAQ)-[:HAS_ROUTE]->(SVO)",
+   "(AAQ)-[:HAS_ROUTE]->(TAS)",
+   "(AAQ)-[:HAS_ROUTE]->(TBW)",
+   "(AAQ)-[:HAS_ROUTE]->(URS)",
+   "(AAR)-[:HAS_ROUTE]->(AAL)",
+   "(AAR)-[:HAS_ROUTE]->(AGP)",
+   "(AAR)-[:HAS_ROUTE]->(ARN)",
+   "(AAR)-[:HAS_ROUTE]->(BER)",
+   "(AAR)-[:HAS_ROUTE]->(BMA)",
+   "(AAR)-[:HAS_ROUTE]->(CPH)",
+   "(AAR)-[:HAS_ROUTE]->(FAO)",
+   "(AAR)-[:HAS_ROUTE]->(FCO)"
+  ],
+  "run": {
+   "trials": 20000,
+   "inconclusive": 0,
+   "seconds": 1101.665,
+   "capped": "trial cap 20000 reached"
+  },
+  "check": "NOT VERIFIED: 0 of 0 change the answer; necessity not checked (partial witness from a capped run)",
+  "cli": "CLI cross-check off",
+  "verified": false,
+  "exit_code": 3,
+  "reasons": [
+   "trial cap 20000 reached: reduced to 38521 relationships, deletion-minimality NOT verified",
+   "necessity not checked (partial witness from a capped run)"
+  ],
+  "wall_clock_s": 1114.9
+ }
+}

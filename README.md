@@ -185,10 +185,12 @@ the air-routes schema, with a copy of the store to check that each one runs on 1
 compared (`queries/differential.jsonl`, the prompt in `evidence/differential-prompt.md`; no query was edited afterwards).
 On relate-db 1.0.1 and 1.3.0 (`bench/differential.py`, `evidence/differential.json`):
 
-- 207 give the same answer, 8 are refused by both, 1 gives no answer within 20 s on either;
+- 207 give the same answer, 8 end in an error on both (6 at run time, such as a division by zero; 2 at parse or plan time),
+  1 gives no answer within 20 s on either;
 - 2 `SHORTEST` queries answer only on 1.3.0 (1.0.1 gives no answer within 20 s); a run that never answers cannot be shrunk,
   so these two stay as recorded timeouts;
-- 1 disagrees on the data: `percentileDisc` over airport altitudes, shrunk to 1 node (`witnesses/differential/`).
+- 1 differs in value type: `percentileDisc` over airport altitudes is a float on 1.0.1 and an integer on 1.3.0, shrunk to
+  1 node (`witnesses/differential/`).
 
 The script also has a Neo4j leg that shrinks each disagreement with `--other-engine neo4j`; the local Neo4j was not
 available, so there is no Neo4j comparison in the committed run.
@@ -406,7 +408,7 @@ For judges: [JUDGE.md](JUDGE.md), also served at <https://witness.edycu.dev/judg
   compiled to WebAssembly and served from the site, rebuilds the witness without it and re-runs the query; each answer is
   compared on screen with the recorded run (in headless Chrome, 22 of 22 live and the same: `evidence/browser-live.json`;
   the page's steps under Node: `evidence/wasm-parity.json`). A query box takes your own read queries on the witness, and
-  the engine disagreement runs on 1.0.1 and on 1.3.0 side by side.
+  the engine disagreement runs live on 1.0.1 and on 1.3.0, one button each.
 - Reproduce steps: [DEMO.md](DEMO.md)
 
 ## 🧰 Tools and AI use

@@ -888,7 +888,7 @@ RECEIPTS = [
         f"{DF_Q} queries",
         f"<em>{DF_Q}</em>" + _to.format("queries"),
         "A differential run of agent-written queries.",
-        f"{DF_Q} read queries written by an AI agent from the schema before the releases were compared, on relate-db 1.0.1 and 1.3.0: {DF_SAME} agree, {DF_BOTH_REFUSED} are refused by both, {DF_BOTH_TIMEOUT} gives no answer within 20 s on either, {DF_ONLY_130} answer only on 1.3.0, {DF_DIFF} disagrees on the data and shrinks to {DF_RED[0]['nodes']} node." + ("" if DF_NEO else " The Neo4j leg is not in the committed run."),
+        f"{DF_Q} read queries written by an AI agent from the schema before the releases were compared, on relate-db 1.0.1 and 1.3.0: {DF_SAME} agree, {DF_BOTH_REFUSED} end in an error on both, {DF_BOTH_TIMEOUT} gives no answer within 20 s on either, {DF_ONLY_130} answer only on 1.3.0, {DF_DIFF} differs in value type (a float on 1.0.1, an integer on 1.3.0) and shrinks to {DF_RED[0]['nodes']} node." + ("" if DF_NEO else " The Neo4j leg is not in the committed run."),
         [("evidence/differential.json", ""), ("queries/differential.jsonl", "the queries")],
     ),
     (

@@ -1,0 +1,42 @@
+# Recorded 2026-11-27 21:03 +0700 on Darwin arm64, relate-db 1.0.1, Relate CLI v1.0.1. Command (from the repo root):
+# uv run witness why -f queries/two-hub-agent.cypher --predicate differs --loose --expected "$(cat evidence/wrong-answer-expected.json)" --strict-lists --param country=IN --param dest=DEL --name wrong-answer-loose --store data/air-routes.rl --out <temp dir> --no-ledger
+# The same case as evidence/wrong-answer-run.txt (57,645 -> 92, the strict form), with --loose: any non-empty answer other than the
+# expected rows keeps the predicate, so the reduction is free to leave the wrong row (AGR) behind. It does: the 5 relationships
+# kept here make the query return IXE, which is one of the 12 expected rows. Nothing below was edited except the temp path.
+ANSWER  13 rows on the full graph
+  airport  hub_countries
+  AGR      [IN]
+  AJL      [IN]
+  CCJ      [AE, BH, IN, KW, OM, QA, SA]
+  CNN      [AE, BH, IN, KW, OM, QA, SA]
+  DIB      [IN]
+  HBX      [IN]
+  IXA      [IN]
+  IXE      [AE, IN, QA]
+  IXG      [IN]
+  IXM      [AE, IN, LK, SG]
+  IXS      [IN]
+  TIR      [IN]
+  TRZ      [AE, IN, LK, MY, SG, TH]
+
+WITNESS  5 relationships · 5 nodes, out of 57,645 · 3,748
+  reduced in 0.683 s · 132 trials · 0 inconclusive · seed 0 (4.215 s end to end: copy, guard, order check, reduce, check)
+
+EXHIBITS  (register order; every one is needed)
+   1  (AUH)-[:HAS_ROUTE]->(DEL)
+   2  (IXE)-[:HAS_ROUTE]->(AUH)
+   3  (IXE)-[:IN_COUNTRY]->(IN)
+   4  (SHJ)-[:HAS_ROUTE]->(DEL)
+   5  (SHJ)-[:HAS_ROUTE]->(IXE)
+
+CHECK  5 of 5 end the mismatch (5 of 5 relationships, 0 of 0 isolated nodes)
+  relate CLI: sufficiency + 5 of 5 necessity probes cross-checked
+
+FILES  <temp dir>/wrong-answer-loose.rl (+ .cypher .manifest.json .html .trace.json)
+
+VERIFIED · deletion-minimal: no single relationship can be removed without ending the mismatch · determinism claimed
+
+# The query on that 5-relationship store (uv run witness rerun <temp dir>/wrong-answer-loose.rl -f queries/two-hub-agent.cypher --param country=IN --param dest=DEL):
+RERUN  <temp dir>/wrong-answer-loose.rl · relate-db 1.0.1 · read-only · 1 rows
+  airport  hub_countries
+  IXE      []

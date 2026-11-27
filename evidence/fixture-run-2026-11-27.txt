@@ -1,0 +1,46 @@
+# Fixture mode end to end against a Neo4j created from scratch. Recorded 2026-11-27, about 21:05 +0700, on Darwin arm64,
+# relate-db 1.0.1, Relate CLI v1.0.1, Docker image neo4j:2026.10.2-community. Commands, from the repo root
+# (the password is whatever you choose; here a random one, not recorded; container name and host ports are free choices; the container was removed afterwards):
+#
+#   docker run -d --name witness-recheck -p 127.0.0.1:7477:7474 -p 127.0.0.1:7690:7687 \
+#     -e NEO4J_AUTH=neo4j/<password> neo4j:2026.10.2-community
+#   docker exec -i witness-recheck cypher-shell -u neo4j -p <password> < data/air-routes.cypher      # 35 s here
+#   printf 'NEO4J_URI=http://127.0.0.1:7477\nNEO4J_USERNAME=neo4j\nNEO4J_PASSWORD=<password>\nNEO4J_DATABASE=neo4j\n' > neo4j.env
+#   uv run witness fixture --from neo4j.env --pull queries/fixture-slice.cypher --test queries/fixture-test.cypher \
+#     --expect fixtures/mex-foreign.expected.json --name mex-foreign --out <temp dir>
+#
+# After the load, cypher-shell counted 3,748 nodes and 57,645 relationships in Neo4j (the counts of data/air-routes.rl).
+# Output of the last command, unedited except the temp path:
+PULLED   1,272 relationships · 207 nodes in 0.726 s (relate pull; nothing pushed)
+FIXTURE  126 relationships · 88 nodes · 2092 trials · 0.728 s
+CHECK    126 of 126 change the answer (126 of 126 relationships, 0 of 0 isolated nodes)
+FILES    <temp dir>/mex-foreign.rl (+ .cypher .manifest.json)  test: <temp dir>/test_mex_foreign.py
+VERIFIED
+
+# The report it wrote (<temp dir>/mex-foreign.report.json):
+{
+  "check": "126 of 126 change the answer (126 of 126 relationships, 0 of 0 isolated nodes)",
+  "fixture": {
+    "inconclusive": 0,
+    "nodes": 88,
+    "reduction_seconds": 0.728,
+    "relationships": 126,
+    "trials": 2092
+  },
+  "name": "mex-foreign",
+  "neo4j_image": null,
+  "never_pushed": true,
+  "pull_tail": [
+    "pulled 207 new / 125 reused nodes, 1272 new / 292 reused rels (+ 3 constraints, 0 indexes; 0 schema skipped) to <slice.rl>"
+  ],
+  "relate_cli": "relate CLI v1.0.1",
+  "relate_db": "1.0.1",
+  "slice": {
+    "nodes": 207,
+    "pull_seconds": 0.726,
+    "relationships": 1272
+  },
+  "verified": true
+}
+
+# Same CREATE statement as the committed fixtures/mex-foreign.cypher (header comment lines aside): True

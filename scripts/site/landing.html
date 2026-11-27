@@ -93,13 +93,13 @@
   <div class="wrap">
     <p class="lbl">Exhibit A <span>·</span> pull a tag</p>
     <h2 id="ex-h">Pull any tag. <em>The answer moves.</em></h2>
+    <div class="eng" id="eng" data-state="off">
+      <i aria-hidden="true"></i>
+      <div class="eng-x"><p class="eng-k" id="eng-k" role="status">Recorded run</p><p class="eng-t" id="eng-t">With JavaScript, Relate {{PIN}} runs every pull live in this tab.</p></div>
+      <p class="eng-m data" id="eng-m"></p>
+    </div>
     <div class="ex-grid">
       <div class="ex-left">
-        <div class="eng" id="eng" data-state="off">
-          <i aria-hidden="true"></i>
-          <div class="eng-x"><p class="eng-k" id="eng-k">Recorded run</p><p class="eng-t" id="eng-t">With JavaScript, Relate {{PIN}} runs every pull live in this tab.</p></div>
-          <p class="eng-m data" id="eng-m"></p>
-        </div>
         <div class="ex-draw">{{EX_SVG}}</div>
         <div class="ex-answer">
           <div class="ex-ahead"><span class="lbl">Answer with exhibit <b id="ex-n">none</b> pulled</span><span class="ex-stamps"><span class="stamp small par" id="ex-par" hidden></span><span class="stamp ink small" id="ex-mark">Unchanged</span></span></div>
@@ -109,7 +109,7 @@
         </div>
       </div>
       <div class="ex-right">
-        <p class="lede">The agent's question: <q>{{QUESTION}}</q> The answer is four airports. The 13 red tags are the witness's routes, the 9 country codes its country links; all 22 are in the register. Pull any one to see the answer without it, computed by Relate {{PIN}} in your tab.</p>
+        <p class="lede">The agent's question: <q>{{QUESTION}}</q> The answer is four airports. The 13 red tags are the witness's routes, the 9 country codes its country links; all 22 are in the register. Pull any one to see the answer without it, computed live by Relate {{PIN}} in your tab (or replayed from the recording if the engine cannot start).</p>
         <div class="reg-head"><span class="lbl">The register</span><span class="lbl">pull it and</span></div>
         <ol class="reg" id="reg">{{REGISTER}}</ol>
         <div class="reg-foot">
@@ -117,6 +117,7 @@
           <span class="tally data" id="tally"><b>{{W_RELS}}</b> of {{W_RELS}} change the answer</span>
         </div>
         <span class="stamp red reg-stamp" id="reg-stamp">{{W_RELS}} of {{W_RELS}} change the answer</span>
+        <div class="ex-bar" id="ex-bar" hidden><p class="data" id="ex-bar-t"></p><button type="button" class="linkish" id="ex-bar-go">See the answer</button></div>
       </div>
     </div>
     <p class="ex-src data">Recorded {{PULL_UTC}} UTC by <code>scripts/pull_each_tag.py</code> on a copy of <code>witnesses/two-hub.rl</code> → <code>evidence/pull-each-tag.json</code>. <code>witness check</code> runs the same probes on relate-db and on the Relate CLI. Live pulls run <code>site/relate/live.js</code> on <code>@relate/relate-wasm</code> {{PIN}}, served from this site; <code>scripts/wasm_parity.mjs</code> runs the same file outside the browser and matches the recording on {{WASM_SAME}} of {{WASM_OF}} pulls (<code>evidence/wasm-parity.json</code>).</p>

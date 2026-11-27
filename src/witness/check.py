@@ -29,14 +29,20 @@ from .predicates import answer_of, answer_sha, expected_answer
 from .store import Scratch
 
 PINNED_RELATE_CLI = "1.0.1"
-INSTALL_HINT = "curl -sSfL https://relatedb.ai/install.sh | bash"
+# Relate's installer always installs the latest release, so the hint names the pinned release's own binaries instead:
+# the cross-check compares one engine version with itself (relate-db is pinned to the same version in pyproject.toml).
+PINNED_RELEASE = f"https://github.com/relatedb/relate/releases/tag/v{PINNED_RELATE_CLI}"
+INSTALL_HINT = (
+    f"the cross-check needs the v{PINNED_RELATE_CLI} CLI: binaries at {PINNED_RELEASE}; "
+    "WITNESS_RELATE_BIN can point at one"
+)
 
 
 def relate_cli() -> tuple[str | None, str]:
     """(path or None, one-line status). Only the pinned version counts as present."""
     path = os.environ.get("WITNESS_RELATE_BIN") or shutil.which("relate")
     if not path:
-        return None, f"relate not on PATH (install: {INSTALL_HINT})"
+        return None, f"relate not on PATH ({INSTALL_HINT})"
     try:
         out = subprocess.run(
             [path, "--version"], capture_output=True, text=True, timeout=30, env={**os.environ, "DO_NOT_TRACK": "1"}
@@ -46,7 +52,7 @@ def relate_cli() -> tuple[str | None, str]:
     m = re.search(r"v?(\d+\.\d+\.\d+)", out)
     ver = m.group(1) if m else out[:40]
     if ver != PINNED_RELATE_CLI:
-        return None, f"relate {ver} != pinned {PINNED_RELATE_CLI} (install the pinned one: {INSTALL_HINT})"
+        return None, f"relate {ver} != pinned {PINNED_RELATE_CLI} ({INSTALL_HINT})"
     return path, f"relate CLI v{ver}"
 
 

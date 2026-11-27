@@ -68,17 +68,20 @@ def fake_cli(tmp_path, body, name="relate-fake"):
 # ---- CLI discovery ---------------------------------------------------------------------------------------------
 
 
-def test_a_missing_cli_is_reported_with_the_install_hint(monkeypatch, tmp_path):
+def test_a_missing_cli_is_reported_with_where_the_pinned_one_is(monkeypatch, tmp_path):
     monkeypatch.delenv("WITNESS_RELATE_BIN", raising=False)
     monkeypatch.setenv("PATH", str(tmp_path))
     path, status = relate_cli()
-    assert path is None and status.startswith("relate not on PATH") and "relatedb.ai/install.sh" in status
+    # Relate's installer installs the latest release, never the pinned one: the hint names the pinned release itself
+    assert path is None and status.startswith("relate not on PATH")
+    assert "github.com/relatedb/relate/releases/tag/v1.0.1" in status and "install.sh" not in status
 
 
 def test_a_cli_of_the_wrong_version_never_counts_as_present(monkeypatch, tmp_path):
     monkeypatch.setenv("WITNESS_RELATE_BIN", fake_cli(tmp_path, "print('Relate v9.9.9')"))
     path, status = relate_cli()
     assert path is None and "9.9.9 != pinned 1.0.1" in status
+    assert "releases/tag/v1.0.1" in status and "WITNESS_RELATE_BIN" in status and "install.sh" not in status
 
 
 def test_a_cli_whose_version_cannot_be_parsed_is_reported_by_its_first_words(monkeypatch, tmp_path):

@@ -193,7 +193,7 @@ is not part of this: its claim is about Relate 1.0.1.
 
 ```bash
 uv run witness why -f queries/exists-two-match.cypher --param country=MX --other-engine relate-db==1.3.0 \
-  --name exists-engines --out /tmp/w --no-ledger                     # 57,645 -> 2 in 49 trials, "2 of 2 end the disagreement"
+  --name exists-engines --out /tmp/w --no-ledger                     # 57,645 -> 2 in 49 trials (evidence/exists-engines-run.txt)
 uv run witness check witnesses/regress/cycle-repeated-variable.rl    # 3 of 3, against relate-db 1.3.0 (from the manifest)
 uv run witness check witnesses/regress/cycle-repeated-variable.rl --other-engine relate-db==1.2.0   # NOT verified: 1.2.0 answers like 1.0.1
 for v in 1.0.1 1.0.2 1.1.0 1.2.0 1.3.0; do

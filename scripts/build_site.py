@@ -584,6 +584,9 @@ _df = json.loads((ROOT / "evidence" / "differential.json").read_text())
 DF_Q, DF_T = _df["queries"], _df["tally"]["relate_1_0_1_vs_1_3_0"]
 DF_SAME, DF_DIFF, DF_BOTH_ERR = DF_T.get("same", 0), DF_T.get("differ", 0), DF_T.get("both-error", 0)
 DF_ONLY_130 = DF_T.get("error:first", 0)
+_dfa = [json.loads(ln) for ln in (ROOT / "evidence" / "differential-answers.jsonl").read_text().splitlines()]
+DF_BOTH_TIMEOUT = sum(1 for r in _dfa if r["relate_1_0_1_vs_1_3_0"] == "both-error" and "timeout" in r["relate_1_3_0"].get("error", ""))
+DF_BOTH_REFUSED = DF_BOTH_ERR - DF_BOTH_TIMEOUT
 DF_NEO = "relate_1_0_1_vs_neo4j" in _df["tally"]
 assert DF_SAME + DF_DIFF + DF_BOTH_ERR + DF_ONLY_130 + DF_T.get("error:second", 0) == DF_Q
 DF_RED = [r for r in _df.get("reductions", []) if r.get("verified")]
@@ -592,7 +595,6 @@ _as = [json.loads(ln) for ln in (ROOT / "evidence" / "any-shortest-inline.jsonl"
 _as13 = [r for r in _as if r["relate_db"] == "1.3.0"]
 AS_LAST_OK = max((r for r in _as13 if r["form"] == "inline" and "ms" in r), key=lambda r: r["nodes"])
 AS_HANG = min((r for r in _as13 if r["form"] == "inline" and "ms" not in r), key=lambda r: r["nodes"])
-AS_PLAIN_MAX = max(r["ms"] for r in _as13 if r["form"] == "plain")
 # every relationship of the full graph deleted alone: supports (drop or alter a row) and guards (add one)
 sens = json.loads((ROOT / "evidence" / "full-graph-sensitivity.json").read_text())
 assert sens["relationships_tried"] == src_rels and sens["supports"] + sens["guards"] == sens["change_the_answer"]
@@ -783,7 +785,7 @@ RECEIPTS = [
         f"{RN_ENTRIES} → {RN_CHANGE} → {RN_SHRUNK}",
         _nb.format(RN_ENTRIES) + _to.format("→") + _nb.format(RN_CHANGE) + _to.format("→") + f"<em>{RN_SHRUNK}</em>",
         "Relate's own release notes, as regression fixtures.",
-        f"Every read-path fix entry from v1.0.2 to v1.3.0 ({RN_ENTRIES}) was tried on air-routes against the pinned release: {RN_CHANGE} change an answer, and {RN_SHRUNK} of those fixes shrink with `--other-engine` against the release that fixed them, to {RG_N} witnesses of at most {RG_MAX_RELS} relationships. Rebuilt on {_and(RV_RELEASES)}, each changes its answer exactly at the release its notes name.",
+        f"Every read-path fix entry from v1.0.2 to v1.3.0 ({RN_ENTRIES}) was tried on air-routes against the pinned release: {RN_CHANGE} change an answer, and {RN_SHRUNK} of those fixes shrink with `--other-engine` against the release that fixed them, to {RG_N} witnesses of at most {RG_MAX_RELS} relationships ({sum(1 for r, _ in RG_SIZES if r == 0)} of them hold only one or two nodes: those answers turn on a property or a column name). Rebuilt on {_and(RV_RELEASES)}, each changes its answer exactly at the release its notes name.",
         [
             ("evidence/release-notes-fixes.json", "all the entries"),
             ("evidence/regress-runs.txt", "the runs"),
@@ -794,14 +796,14 @@ RECEIPTS = [
         f"{DF_Q} queries",
         f"<em>{DF_Q}</em>" + _to.format("queries"),
         "A differential run of agent-written queries.",
-        f"{DF_Q} read queries written by an AI agent from the schema alone, on relate-db 1.0.1 and 1.3.0: {DF_SAME} agree, {DF_BOTH_ERR} are refused by both, {DF_ONLY_130} answer only on 1.3.0, {DF_DIFF} disagrees on the data and shrinks to {DF_RED[0]['nodes']} node." + ("" if DF_NEO else " The Neo4j leg is not in the committed run."),
+        f"{DF_Q} read queries written by an AI agent from the schema alone, on relate-db 1.0.1 and 1.3.0: {DF_SAME} agree, {DF_BOTH_REFUSED} are refused by both, {DF_BOTH_TIMEOUT} gives no answer within 20 s on either, {DF_ONLY_130} answer only on 1.3.0, {DF_DIFF} disagrees on the data and shrinks to {DF_RED[0]['nodes']} node." + ("" if DF_NEO else " The Neo4j leg is not in the committed run."),
         [("evidence/differential.json", ""), ("queries/differential.jsonl", "the queries")],
     ),
     (
         f"{AS_LAST_OK['ms']:,} ms",
         f"<em>{AS_LAST_OK['ms']:,}</em>" + _to.format("ms"),
         "A slowdown still present on Relate 1.3.0, found by that run.",
-        f"`ANY SHORTEST` over `->+` with an inline relationship predicate that every relationship satisfies: {AS_LAST_OK['ms']:,} ms on {AS_LAST_OK['rels']} relationships, no answer within 8 s on {AS_HANG['nodes'] * 2}; without the predicate, at most {AS_PLAIN_MAX} ms. The same on 1.0.1.",
+        f"`ANY SHORTEST` over `->+` with an inline relationship predicate that every relationship satisfies: {AS_LAST_OK['ms']:,} ms on {AS_LAST_OK['rels']} relationships, no answer within 8 s on {AS_HANG['nodes'] * 2}; without the predicate, under 1 ms. The same on {_and(sorted({r["relate_db"] for r in _as} - {"1.3.0"}))}.",
         [("evidence/any-shortest-inline.jsonl", ""), ("bench/any_shortest_inline.py", "re-records it")],
     ),
     (
@@ -967,7 +969,7 @@ CRITERIA = [
             ),
             (
                 "For the people who maintain the engine, and anyone moving a query between releases.",
-                f"`--other-engine` shrinks what makes two engines answer one query differently. Relate's own release notes became {RG_N} regression fixtures of at most {RG_MAX_RELS} relationships, each changing its answer exactly at the release that fixed it, and a differential run of {DF_Q} agent-written queries found a slowdown still present on 1.3.0",
+                f"`--other-engine` shrinks what makes two engines answer one query differently. Relate's own release notes became {RG_N} regression fixtures of at most {RG_MAX_RELS} relationships, each changing its answer exactly at the release that fixed it, and a differential run of {DF_Q} agent-written queries (Relate 1.0.1 against 1.3.0{"" if DF_NEO else "; the Neo4j leg was not run"}) found a slowdown still present on 1.3.0",
                 ["evidence/release-notes-fixes.json", "evidence/regression-releases.jsonl", "evidence/differential.json"],
             ),
             (
@@ -997,7 +999,7 @@ CRITERIA = [
             ),
             (
                 "Commands, not only claims.",
-                f"`DEMO.md` gives the command or the recorded run for {len(DEMO_SECTIONS)} sets of numbers: the headline, determinism, the Neo4j comparison, fixture mode (with the commands to create the Neo4j it pulls from), the MCP tools, the tests, the query disagreement, the wrong-answer repro, what each deletion does, the engine disagreement, other query shapes and the Neo4j re-proof",
+                f"`DEMO.md` gives the command or the recorded run for {len(DEMO_SECTIONS)} sets of numbers: the headline, determinism, the Neo4j comparison, fixture mode (with the commands to create the Neo4j it pulls from), the MCP tools, the tests, the query disagreement, the wrong-answer repro, what each deletion does, the engine disagreement, other query shapes, the Neo4j re-proof, the two-engine door with the changelog fixtures, and the differential run",
                 [],
             ),
             (

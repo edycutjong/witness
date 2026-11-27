@@ -6,7 +6,7 @@ seconds, while the same query without the predicate answers 3 hops in about 13 m
 graph: n nodes in a ring, each with a second edge 7 ahead (2n relationships, every `w` = 1), from node 0 to node 2 (a
 2-hop answer). Each run is its own process with a watchdog, so a run that does not return is killed:
 
-    for v in 1.0.1 1.3.0; do uv run --no-project --with relate-db==$v python bench/any_shortest_inline.py; done \\
+    for v in 1.0.1 1.3.0 1.2.0; do uv run --no-project --with relate-db==$v python bench/any_shortest_inline.py; done \\
         > evidence/any-shortest-inline.jsonl
 """
 

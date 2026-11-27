@@ -148,47 +148,47 @@ repro, and the answer to "which release changed this", is what Witness adds.
 queries/exists-two-match.cypher --param country=MX --other-engine relate-db==1.3.0` runs the query on the pinned 1.0.1 in
 process and on relate-db 1.3.0 in a worker (`uv run --with relate-db==1.3.0`), deletes the same relationships on both
 sides in every trial, and keeps what makes the two releases answer differently: 57,645 relationships to the same 2, in 49
-trials. The other engine can be any relate-db release (`relate-db==X.Y.Z`, or `python:/path/to/python` for an interpreter
-that has one) or Neo4j over Bolt (`neo4j`; an empty database, the graph is loaded once and removed afterwards).
-Deletions cross to the other engine as content keys (labels, type, properties, endpoints), never as element ids.
-`witness check W.rl --other-engine relate-db==1.2.0` re-proves a witness against another release: on 1.2.0 the
-predicate no longer holds, because 1.2.0 still answers like 1.0.1.
+trials (`evidence/exists-engines-run.txt`). The other engine can be any relate-db release (`relate-db==X.Y.Z`, or
+`python:/path/to/python`) or Neo4j over Bolt (`neo4j`: an empty database; the graph is loaded once and removed
+afterwards). Each deletion is sent to the other engine as the relationship's type, properties and end nodes, never as an
+internal id. `witness check W.rl --other-engine relate-db==1.2.0` re-checks a witness against another release.
 
 **Relate's changelog, as regression fixtures.** Every read-path fix entry in Relate's release notes from v1.0.2 to v1.3.0
-(72 entries, `evidence/release-notes-fixes.json`, each with its status) was tried on air-routes against 1.0.1. Seven change
-an answer on this graph; the rest are spellings 1.0.1 refuses (23), new rejections (10), or not about answers on this data.
-Five of the seven fixes shrink with `--other-engine` against the release that fixed them (`queries/regress/`,
-`witnesses/regress/`, `evidence/regress-runs.txt`), each verified "N of N end the disagreement":
+(72 entries, each with its status in `evidence/release-notes-fixes.json`) was tried on air-routes against 1.0.1. Seven
+change an answer on this graph; most of the rest are spellings 1.0.1 refuses (23) or new rejections (10). Five of the seven
+fixes shrink with `--other-engine` against the release that fixed them, to six witnesses (one scope fix has two cases),
+each verified "N of N end the disagreement" (`queries/regress/`, `witnesses/regress/`, `evidence/regress-runs.txt`):
 
 | Fix (release) | On 1.0.1, full graph | Witness |
 |---|---|---|
-| a WHERE over the path of a keyword shortest selector post-filters the selected paths (v1.0.2) | 548 airports | 3 relationships: MZT→LAX, MZT→IAH, LAX→IAH |
-| a parenthesized projection item is its plain form (v1.2.0) | one column, `null` | 1 node |
+| a `WHERE` on the path of `ALL SHORTEST` filters after the shortest paths are chosen (v1.0.2) | 548 airports | 3 relationships: MZT→LAX, MZT→IAH, LAX→IAH |
+| a parenthesized projection item means its plain form (v1.2.0) | one column, `null` | 1 node |
 | a node variable repeated in a cycle checks every occurrence (v1.3.0) | 122 cycles | 3 relationships |
-| a variable an `OPTIONAL MATCH` bound to null matches nothing later (v1.3.0) | 1,699 paths | 2 relationships |
-| a subquery reusing a name a `DISTINCT` dropped binds fresh (v1.3.0) | 18 regions | 2 nodes |
+| a variable an `OPTIONAL MATCH` bound to null matches nothing later (v1.3.0, scope fix, case 1) | 1,699 paths | 2 relationships |
+| a subquery reusing a name a `DISTINCT` dropped binds fresh (v1.3.0, scope fix, case 2) | 18 regions | 2 nodes |
 | `percentileDisc` returns the input value exactly (v1.3.0) | `1.0`, a float | 1 node |
 
-Each witness, rebuilt in `:memory:` on 1.0.1, 1.0.2, 1.1.0, 1.2.0 and 1.3.0, changes its answer exactly at the release the
-notes name and at no other (`bench/regression_table.py`, `evidence/regression-releases.jsonl`). Two of the seven do not
-shrink, and Witness says why: an `EXISTS { … NEXT … }` whose answer does not depend on the data (refused: the predicate
-holds on the empty graph), and a change that moves the same rows as another fix of the same release. One case of a
-scope fix, a `CALL { }` subquery (60 Mexican airports on 1.0.1, 3,504 on 1.3.0), is refused at the read-only door because
-relate-db 1.0.1 reports `query_type` `'rw'` for it.
+Three witnesses hold no relationship: those answers turn on a node's property or a column's name, not on a path, so one or
+two nodes are all they need. Each witness, rebuilt on 1.0.1, 1.0.2, 1.1.0, 1.2.0 and 1.3.0, changes its answer exactly at
+the release the notes name and at no other (`bench/regression_table.py`, `evidence/regression-releases.jsonl`). The other
+two of the seven: an `EXISTS { … NEXT … }` that gives a different answer even on an empty graph (nothing to shrink, so
+Witness refuses it), and a change to the same rows as the scope fix in the same release. A third case of the scope fix, a
+`CALL { }` subquery (60 Mexican airports on 1.0.1, 3,504 on 1.3.0), is refused at the read-only door: relate-db 1.0.1
+reports `query_type` `'rw'` for it.
 
-**A differential run.** 219 read queries, written by an AI agent from the air-routes schema before any engine compared
-them (`queries/differential.jsonl`; none was changed to make engines agree), on relate-db 1.0.1 and 1.3.0
-(`bench/differential.py`, `evidence/differential.json`): 207 agree, 9 are refused by both, two `SHORTEST` queries answer
-only on 1.3.0 (1.0.1 gives no answer within 20 s), and one disagrees on the data: `percentileDisc` over airport
-altitudes, shrunk to 1 node (`witnesses/differential/`). The same script compares Neo4j over Bolt and shrinks each
-disagreement with `--other-engine neo4j`; that leg is not in the committed run (the local Neo4j was not available).
+**A differential run, Relate 1.0.1 against 1.3.0.** 219 read queries, written by an AI agent from the air-routes schema
+before any engine compared them (`queries/differential.jsonl`, prompt in `evidence/differential-prompt.md`; no query was
+edited afterwards), on relate-db 1.0.1 and 1.3.0 (`bench/differential.py`, `evidence/differential.json`): 207 agree, 8 are
+refused by both, 1 gives no answer within 20 s on either, two `SHORTEST` queries answer only on 1.3.0 (1.0.1 gives no answer within 20 s), and one disagrees on the data: `percentileDisc` over airport
+altitudes, shrunk to 1 node (`witnesses/differential/`). The script also has a Neo4j leg that shrinks each disagreement
+with `--other-engine neo4j`; that leg was not run (the local Neo4j was not available), so there is no Neo4j comparison yet.
 
 **Found on the current release.** One differential query gave no answer on 1.3.0 either. Narrowed down: `ANY SHORTEST`
 over `->+` with an inline relationship predicate, even one every relationship satisfies, takes 85.8 ms on a 24-relationship
 graph, 649.9 ms on 32, 5,389.4 ms on 36 and gives no answer within 8 s on 40; without the predicate each answers in under
-1 ms. The same on 1.0.1 (`bench/any_shortest_inline.py`, `evidence/any-shortest-inline.jsonl`). On air-routes the process
-passed 16 GB within 2 s (`evidence/any-shortest-air-routes.txt`). Witness cannot shrink a query that never answers; the
-measurement is the repro.
+1 ms. The same on 1.0.1 and 1.2.0 (`bench/any_shortest_inline.py`, `evidence/any-shortest-inline.jsonl`). On air-routes the
+process held about 16 GB (16,264,832 KB resident) 2 s after start (`evidence/any-shortest-air-routes.txt`). Witness cannot shrink a query that never answers;
+the measurement is the repro.
 
 **A query mistake.** A plausible agent mistake, written for this case: the headline question with the first
 flight matched in either direction (`queries/two-hub-agent.cypher`). On 6 of 232 country and busiest-airport pairs the two queries disagree
@@ -400,7 +400,8 @@ For judges: [JUDGE.md](JUDGE.md), also served at <https://witness.edycu.dev/judg
 - **Product capabilities:** Relate 1.0.1 (embedded engine, `relate` CLI, `relate serve --mcp`).
 - **Third-party tools:** `uv`, pytest, Neo4j 2026.10.2 in Docker (comparison and fixture source only), Vercel (landing hosting). Relate 1.0.2, 1.1.0, 1.2.0 and 1.3.0 (through `uv`) as other engines and for the release tables.
 - **AI use:** built with Claude Code as the coding agent, under the author's direction. The author is responsible for the result.
-  The 219 queries of the differential run were written by an AI agent (Claude) from the graph's schema, before any comparison.
+  The 219 queries of the differential run were written by an AI agent (Claude) from the graph's schema, before any comparison
+  (the prompt: `evidence/differential-prompt.md`).
   The demo video's voiceover is an AI voice (ElevenLabs) reading a script drafted by Claude Code under the author's direction; its music and sound are synthesized in code.
 - **Built during the contest period:** first commit 2026-11-15 (`git log --reverse`). No code from before the contest.
 - **Reused material:** the air-routes dataset by Kelvin Lawrence (Apache-2.0, commit `efd3b1a`), modified as stated in `NOTICE`.

@@ -39,6 +39,9 @@ def test_demo_is_the_whole_judge_path(tmp_path, monkeypatch, capsys):
     man = json.loads((out / "two-hub.manifest.json").read_text())
     assert man["verified"] and man["witness"]["relationships"] == 22 and man["determinism_claimed"]
     assert [r["airport"] for r in man["baseline"]["rows"]] == ["PBC", "QRO", "TLC", "UPN"]
+    # Determinism beyond one machine: this fresh reduction must write the committed rebuild script byte for byte,
+    # wherever the suite runs (CI: Linux x86_64, Python 3.11 and 3.12; the committed run: macOS arm64, Python 3.12).
+    assert (out / "two-hub.cypher").read_bytes() == (ROOT / "witnesses" / "two-hub.cypher").read_bytes()
 
 
 def test_why_export_rerun_review(tiny_rl, tmp_path, capsys):

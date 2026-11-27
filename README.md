@@ -29,6 +29,9 @@
 the answer and shows that each of the 22 is needed. A reviewer reads 22 relationships: not the 57,645 in the graph, and not
 the 68 that a listing of the matched paths would show.
 
+<p align="center"><img src="docs/assets/witness-broll.gif" alt="Witness on its landing page: the air-routes graph thins from 57,645 relationships to the 22 that reproduce the answer (PBC, QRO, TLC, UPN), each tagged as an exhibit, while the answer stays unchanged. Pulling exhibit 15, (TIJ)-[:HAS_ROUTE]-&gt;(MEX), strikes PBC, QRO and UPN from the answer; pulling all 22 one at a time ends on the stamp 22 of 22 change the answer." width="100%"><br>
+<sub>Rendered frame by frame from the landing page's own drawing, answer table and script, arranged into one frame. The page replays committed evidence: the reduction from <code>witnesses/two-hub.trace.json</code> (the run itself takes 1.1 s) and, for each tag, the answer recorded after deleting that relationship in a Relate transaction (<code>evidence/pull-each-tag.json</code>).</sub></p>
+
 **Run it:** `git clone https://github.com/edycutjong/witness && cd witness && uv run witness demo` (needs [`uv`](https://docs.astral.sh/uv/)).
 Expect `22 of 22 change the answer` and exit 0; details in [Getting Started](#-getting-started-setup-and-run).
 

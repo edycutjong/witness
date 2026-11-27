@@ -1,0 +1,58 @@
+name: deploy
+
+# Deploys the static site (site/) to Vercel production -> https://witness.edycu.dev
+# Runs only after the CI/CD Pipeline succeeded on a push to main, so a red commit never ships.
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  DO_NOT_TRACK: '1'
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-24.04
+    environment:
+      name: production
+      url: https://witness.edycu.dev
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Require the Vercel token
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::VERCEL_TOKEN secret is not set (create one at vercel.com/account/tokens)"; exit 1
+          fi
+
+      - name: Deploy site/ to production
+        working-directory: site
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: npx --yes vercel@53.2.0 deploy --prod --yes --token "$VERCEL_TOKEN"
+
+      - name: Smoke-check the live pages
+        run: |
+          set -euo pipefail
+          for p in / /deck/ /judge/ /exhibit/two-hub.html; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://witness.edycu.dev$p")
+            echo "$p -> $code"; test "$code" = 200
+          done

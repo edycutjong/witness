@@ -1,0 +1,75 @@
+# Witness on the current Relate release. Recorded 2026-11-27 on Darwin arm64, Python 3.12.13.
+# The repository pins relate-db 1.0.1 and every number in README.md was measured on it. These runs use relate-db 1.3.0 in a
+# throwaway environment (uv run --no-project --with relate-db==1.3.0), nothing written to a committed path. The Relate CLI
+# installed on this machine stayed v1.0.1; section 4 runs the v1.3.0 CLI binary from a temp directory.
+
+## 1. The committed stores, written by 1.0.1, open read-only under 1.3.0 and give the same headline answer
+# for v in 1.0.1 1.3.0; do uv run --no-project --python 3.12 --with relate-db==$v python bench/open_stores.py; done
+relate-db 1.0.1
+  data/air-routes.rl: opens read-only, 3,748 nodes, 57,645 relationships; headline answer PBC, QRO, TLC, UPN
+  witnesses/two-hub.rl: opens read-only, 12 nodes, 22 relationships; headline answer PBC, QRO, TLC, UPN
+  witnesses/direction-bug.rl: opens read-only, 5 nodes, 5 relationships
+  witnesses/wrong-answer.rl: opens read-only, 45 nodes, 92 relationships
+  witnesses/exists-count.rl: opens read-only, 3 nodes, 2 relationships
+  fixtures/mex-foreign.rl: opens read-only, 88 nodes, 126 relationships
+  witness.rl: opens read-only, 2 nodes, 1 relationships
+relate-db 1.3.0
+  data/air-routes.rl: opens read-only, 3,748 nodes, 57,645 relationships; headline answer PBC, QRO, TLC, UPN
+  witnesses/two-hub.rl: opens read-only, 12 nodes, 22 relationships; headline answer PBC, QRO, TLC, UPN
+  witnesses/direction-bug.rl: opens read-only, 5 nodes, 5 relationships
+  witnesses/wrong-answer.rl: opens read-only, 45 nodes, 92 relationships
+  witnesses/exists-count.rl: opens read-only, 3 nodes, 2 relationships
+  fixtures/mex-foreign.rl: opens read-only, 88 nodes, 126 relationships
+  witness.rl: opens read-only, 2 nodes, 1 relationships
+
+## 2. The headline reduction under 1.3.0
+# PYTHONPATH=src uv run --no-project --python 3.12 --with relate-db==1.3.0 python -m witness demo --out <temp dir> --no-cli
+Witness 0.1.0 · Python 3.12.13 · relate-db 1.3.0
+WITNESS  22 relationships · 12 nodes, out of 57,645 · 3,748
+  reduced in 1.051 s · 371 trials · 0 inconclusive · seed 0 (3.948 s end to end: copy, guard, order check, reduce, check)
+CHECK  22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)
+VERIFIED · deletion-minimal: no single relationship can be removed without changing the answer · determinism claimed
+# The rebuild script it wrote equals witnesses/two-hub.cypher from the second line on; the first line is the header that
+# names the engine version (diff <(tail -n +2 <temp dir>/two-hub.cypher) <(tail -n +2 witnesses/two-hub.cypher): no output).
+
+## 3. The test suite under 1.3.0
+# PYTHONPATH=src uv run --no-project --python 3.12 --with relate-db==1.3.0 --with pytest --with "mcp>=2.3,<3" python -m pytest -q
+# 527 tests: 522 passed, 3 failed, 2 skipped (the 2 that need a local Neo4j). The three failures are the three places
+# where the engine version is the point:
+#   tests/test_cli.py::test_demo_is_the_whole_judge_path
+#     the rebuild script's header line names relate-db 1.3.0, not 1.0.1 (the body is identical, section 2)
+#   tests/test_committed.py::test_committed_engine_disagreement_witness_checks
+#     on 1.3.0 EXISTS and COUNT agree, so that witness no longer shows a disagreement (evidence/relate-versions.jsonl)
+#   tests/test_cov_check.py::test_raw_rows_that_differ_between_the_cli_and_python_are_a_disagreement_even_when_canonical_forms_agree
+#     a store written by relate-db 1.3.0 is not opened by the v1.0.1 CLI ("storage error: manifest part ...");
+#     the other direction, an older store under a newer engine, is section 1
+
+## 4. The v1.3.0 CLI on the committed stores (byte copies), and what Witness says when it finds that CLI
+# relate-darwin-arm64 from https://github.com/relatedb/relate/releases/download/v1.3.0/, SHA256SUMS signature and checksum
+# verified the way .github/actions/setup-relate does ("Good "relate-release" signature ... ED25519 key
+# SHA256:BfnIA0YD0h+ldihdq8V1k/xFY91lm8mRCuVS21+3kzA", "# relate-release-version: v1.3.0", "relate-darwin-arm64: OK").
+# ./relate-darwin-arm64 --version
+Relate v1.3.0
+# ./relate-darwin-arm64 query --database <copy of witnesses/two-hub.rl> --read-only --param country=MX --param dest=MEX < queries/two-hub.cypher
+rows[4]{airport,hub_countries}:
+  PBC,["MX","US"]
+  QRO,["MX","US"]
+  TLC,["MX","US"]
+  UPN,["MX","US"]
+# the same command on a copy of data/air-routes.rl
+rows[4]{airport,hub_countries}:
+  PBC,["MX","US"]
+  QRO,["MX","US"]
+  TLC,["MX","US"]
+  UPN,["MX","US"]
+# on a copy of witnesses/exists-count.rl, queries/count-two-match.cypher then queries/exists-two-match.cypher (--param country=MX):
+rows[1]{airport}:
+  MZT
+rows[1]{airport}:
+  MZT
+# so the v1.3.0 CLI agrees with itself on that witness, as the relate-db 1.3.0 row of evidence/relate-versions.jsonl says.
+# WITNESS_RELATE_BIN=<that binary> uv run witness demo   (first lines and the check; exit 0)
+Witness 0.1.0 · Python 3.12.13 · relate-db 1.0.1
+  relate 1.3.0 != pinned 1.0.1 (the cross-check needs the v1.0.1 CLI: binaries at https://github.com/relatedb/relate/releases/tag/v1.0.1; WITNESS_RELATE_BIN can point at one) — Python checks only; the CLI is optional
+CHECK  22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)
+  CLI cross-check skipped: relate 1.3.0 != pinned 1.0.1 (the cross-check needs the v1.0.1 CLI: binaries at https://github.com/relatedb/relate/releases/tag/v1.0.1; WITNESS_RELATE_BIN can point at one)

@@ -181,7 +181,7 @@ result is not a report but a `.rl` file that plain `relate` opens.
 
 | Layer | Choice |
 |---|---|
-| Engine | Relate 1.0.1 (`relate-db`, embedded, single file) |
+| Engine | Relate 1.0.1 (`relate-db`, embedded, single file): the pin every number here was measured on. Under relate-db 1.3.0 the committed stores open unchanged and the headline reduction gives the same 22 relationships in the same 371 trials (`evidence/relate-1.3.0-2026-11-27.txt`) |
 | Reducer, checker, CLI, MCP | Python 3.11+ (developed on 3.12), `uv` |
 | Source data | air-routes by Kelvin Lawrence (Apache-2.0), reshaped for Relate; see `NOTICE`, `data/SOURCE.md` |
 | Landing | static `site/` on Vercel, built from the committed witness by `scripts/build_site.py` |
@@ -190,7 +190,11 @@ result is not a report but a `.rl` file that plain `relate` opens.
 
 ### Prerequisites
 
-[`uv`](https://docs.astral.sh/uv/) and Python 3.11 or newer. The optional CLI cross-check needs the `relate` CLI (signed installer at relatedb.ai).
+[`uv`](https://docs.astral.sh/uv/) and Python 3.11 or newer; nothing else. The `relate` CLI is optional. It re-runs the witness files
+by hand, whichever release you have (checked with v1.0.1 and v1.3.0, `evidence/relate-1.3.0-2026-11-27.txt`). Witness's own CLI cross-check
+compares one engine version with itself, so it runs only with the v1.0.1 CLI, whose binaries are on the
+[v1.0.1 release](https://github.com/relatedb/relate/releases/tag/v1.0.1) (Relate's installer installs the latest release). With
+any other version on your PATH the cross-check is skipped with a notice and the Python checks still run.
 
 ### Installation
 

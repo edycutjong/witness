@@ -1077,7 +1077,7 @@ VERIFY = [
         "Run the whole path",
         RUN_CMD,
         f"`{check}`, a last line that starts `VERIFIED`, and exit 0.",
-        f"Needs uv. The committed graph is copied, never modified; the output goes to `out/`. The recorded run reports {E2E_S} s end to end on an {DEMO_MACHINE} (`{DEMO_TXT}`)."
+        f"Needs uv. The committed graph is copied, never modified; the output goes to `out/`. The recorded run reports {E2E_S} s end to end on an {DEMO_MACHINE} (`{DEMO_TXT}`). With a `relate` CLI other than v1.0.1 on your PATH the first lines say the CLI cross-check is skipped; the Python checks and the result are the same."
         + OPENS,
     ),
     (
@@ -1090,7 +1090,7 @@ VERIFY = [
         "Re-run it with plain Relate",
         [RELATE_CMD],
         f"the same {len(ANSWER)} airports the full graph gives: {', '.join(ANSWER)}.",
-        "Needs the Relate CLI. No Witness code runs: the witness is an ordinary `.rl` file.",
+        "Needs the Relate CLI (checked with v1.0.1 and v1.3.0, `evidence/relate-1.3.0-2026-11-27.txt`). No Witness code runs: the witness is an ordinary `.rl` file.",
     ),
     (
         "Ask it something else",

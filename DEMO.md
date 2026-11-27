@@ -62,7 +62,8 @@ Throughput depends on the machine and Docker VM; expect the ratio, not the absol
 
 ## 4. Fixture mode: 1,272 pulled → 126 kept, "126 of 126"
 
-The committed result is checked offline by the test suite: `uv run pytest tests/test_fixture.py`. Artifacts:
+The committed result is checked offline by the test suite: `uv run pytest tests/test_fixture.py`. A fresh run needs the v1.0.1
+`relate` CLI (the pinned engine reads what that release's `relate pull` writes). Artifacts:
 `fixtures/mex-foreign.{rl,report.json,manifest.json,expected.json}`. The pull is read-only on Neo4j and nothing is pushed back.
 
 To run it end to end you need a Neo4j that holds the graph. With the container of section 3 (its HTTP port is 7475):

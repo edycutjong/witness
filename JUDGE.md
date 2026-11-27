@@ -67,7 +67,7 @@ The question: Which airports of MX have no direct flight to MEX, yet would still
 
 ## Verify it yourself
 
-1. **Run the whole path.** Needs uv. The committed graph is copied, never modified; the output goes to `out/`. The recorded run reports 5.78 s end to end on an Apple M1 Max ([`evidence/demo-2026-11-24.txt`](evidence/demo-2026-11-24.txt)).
+1. **Run the whole path.** Needs uv. The committed graph is copied, never modified; the output goes to `out/`. The recorded run reports 5.78 s end to end on an Apple M1 Max ([`evidence/demo-2026-11-24.txt`](evidence/demo-2026-11-24.txt)). With a `relate` CLI other than v1.0.1 on your PATH the first lines say the CLI cross-check is skipped; the Python checks and the result are the same.
 
    ```bash
    git clone https://github.com/edycutjong/witness
@@ -85,7 +85,7 @@ The question: Which airports of MX have no direct flight to MEX, yet would still
 
    Expect `22 of 22 change the answer`, then `VERIFIED`, exit 0. Exit 1 would mean not verified.
 
-3. **Re-run it with plain Relate.** Needs the Relate CLI. No Witness code runs: the witness is an ordinary `.rl` file.
+3. **Re-run it with plain Relate.** Needs the Relate CLI (checked with v1.0.1 and v1.3.0, [`evidence/relate-1.3.0-2026-11-27.txt`](evidence/relate-1.3.0-2026-11-27.txt)). No Witness code runs: the witness is an ordinary `.rl` file.
 
    ```bash
    relate query --database witnesses/two-hub.rl --read-only \

@@ -118,6 +118,7 @@ class CheckSpec:
     strict_lists: bool = False
     digits: int = 12
     expect_rows: list | None = None  # no manifest: the stated answer, resolved against W's columns at check time
+    other_engine: str | None = None  # disagree across engines: queries[1] is queries[0], answered by this engine
 
     def resolve(self, columns: list[str]) -> None:
         if self.expect_rows is None or self.baseline_sha:
@@ -160,6 +161,7 @@ def spec_from_manifest(manifest: dict) -> CheckSpec:
         loose=bool(pred.get("loose")),
         strict_lists=bool(cmp_.get("strict_lists")),
         digits=int(cmp_.get("float_digits", 12)),
+        other_engine=pred.get("other_engine_spec"),
     )
 
 
@@ -188,6 +190,7 @@ class CheckResult:
     disagreements: list[str] = field(default_factory=list)
     reasons: list[str] = field(default_factory=list)
     change_phrase: str = "change the answer"
+    other_engine: str | None = None
 
     @property
     def inconclusive(self) -> int:
@@ -237,7 +240,7 @@ class CheckResult:
             "disagreements": self.disagreements,
             "reasons": self.reasons,
             "probes": self.probes,
-        }
+        } | ({"other_engine": self.other_engine} if self.other_engine else {})
 
 
 def _answers(sc: Scratch, spec: CheckSpec) -> tuple[list, list]:
@@ -324,10 +327,19 @@ def check(
         tmp = Path(tmp_name)
         # ---- Python sufficiency: on W.rl, and on a store rebuilt from W.cypher ----------------------------------
         base = Scratch.open_copy(w_rl, tmp)
+        eng = None
+        n_local = 1 if spec.other_engine else len(spec.queries)  # queries this relate-db answers itself
         try:
             for gq in spec.queries:  # every door: Relate's own query_type 'r' too, not only the static checks
                 engine_checks(gq, base.db)
             ans_w, raw_w = _answers(base, spec)
+            if spec.other_engine:
+                from .engines import open_engine
+
+                cmp_opts = {"strict_lists": spec.strict_lists, "digits": spec.digits}
+                eng = open_engine(spec.other_engine, w_rl, spec.queries[0], sc=base, **cmp_opts)
+                out.other_engine = eng.label
+                ans_w[1] = eng.answer().answer
             if raw_w[0] is not None:
                 spec.resolve(list(raw_w[0].columns))
             suff = spec.holds(ans_w)
@@ -346,7 +358,7 @@ def check(
                 sc2.close()
                 if not same_graph:
                     out.disagreements.append("W.rl and W.cypher hold different graphs")
-                if not same_answer(ans_c, ans_w):
+                if not same_answer(ans_c[:n_local], ans_w[:n_local]):
                     out.disagreements.append("W.rl and the store rebuilt from W.cypher give different answers")
             else:
                 out.reasons.append(f"cypher cross-check unavailable: {w_cypher.name} missing beside {w_rl.name}")
@@ -359,9 +371,14 @@ def check(
             node_order = sorted(base.node_keys, key=lambda k: base.node_keys[k])
             elements += [("node", n) for n in node_order if n not in touched]
             labels = {eid: _element_label(base, k, eid) for k, eid in elements}
+            keys = {eid: (base.rel_keys if k == "rel" else base.node_keys)[eid] for k, eid in elements}
             deletes = {eid: _content_delete(base, k, eid) for k, eid in elements}
             py_raw_cols = [r.columns if r is not None else None for r in raw_w]
             graph_cols = any(r is not None and has_graph_values(r.data) for r in raw_w)
+        except BaseException:
+            if eng is not None:
+                eng.close()
+            raise
         finally:
             base.close()
 
@@ -374,6 +391,9 @@ def check(
             try:
                 sc.commit_delete([eid] if kind == "rel" else [], [eid] if kind == "node" else [])
                 ans, raws = _answers(sc, spec)
+                if eng is not None:
+                    k = [keys[eid]]
+                    ans[1] = eng.answer(k if kind == "rel" else [], k if kind == "node" else []).answer
                 h = spec.holds(ans)
                 probe: dict[str, Any] = {
                     "i": i,
@@ -388,6 +408,8 @@ def check(
             finally:
                 sc.close()
             out.probes.append(probe)
+        if eng is not None:
+            eng.close()
 
         # ---- CLI surface ----------------------------------------------------------------------------------------
         cli, status = relate_cli() if use_cli else (None, "CLI cross-check off")
@@ -402,7 +424,8 @@ def check(
             cut = any(gq.cut is not None for gq in spec.queries)
             params = spec.queries[0].params
             pargs = cli_param_args(params)
-            texts = [strip_comments(gq.text) for gq in spec.queries]
+            local = spec.queries[:n_local]
+            texts = [strip_comments(gq.text) for gq in local]
             # sufficiency, read-only on W
             stdin = "".join(t + ";\n" for t in texts)
             code, docs, err = _cli_run(cli, ["--database", str(w_rl), "--read-only", *pargs], stdin)
@@ -410,12 +433,12 @@ def check(
                 out.disagreements.append(f"CLI sufficiency run failed (exit {code}): {err.strip()[:160]}")
             else:
                 cli_ans = []
-                for gq, doc, cols, pyraw in zip(spec.queries, docs, py_raw_cols, raw_w, strict=True):
+                for gq, doc, cols, pyraw in zip(local, docs, py_raw_cols[:n_local], raw_w[:n_local], strict=True):
                     c, rows = _cli_canon(spec, gq, doc, cols or [])
                     cli_ans.append(c)
                     if pyraw is not None and gq.cut is None and raw_bag(rows) != raw_bag(pyraw.data):
                         out.disagreements.append("raw rows differ between the CLI and Python on W")
-                if not same_answer(cli_ans, ans_w):
+                if not same_answer(cli_ans, ans_w[:n_local]):
                     out.disagreements.append("canonical answers differ between the CLI and Python on W")
             # necessity, one fresh writable copy per probe (skipped for order-cut queries)
             if cut:
@@ -433,14 +456,15 @@ def check(
                         continue
                     pairs = [
                         _cli_canon(spec, gq, d, c or [])
-                        for gq, d, c in zip(spec.queries, docs[1:], py_raw_cols, strict=True)
+                        for gq, d, c in zip(local, docs[1:], py_raw_cols[:n_local], strict=True)
                     ]
                     cans = [c for c, _ in pairs]
                     rows_l = [r for _, r in pairs]
-                    h = spec.holds(cans)
+                    py_canon = list(probe.get("_canon") or [])
+                    h = spec.holds(cans + py_canon[n_local:])  # the other engine's answer is not the CLI's to give
                     cli_nec = None if h is None else (not h)
-                    raw_ok = list(probe.get("_raw") or []) == [raw_bag(r) for r in rows_l]
-                    same = same_answer(cans, list(probe.get("_canon") or []))
+                    raw_ok = list(probe.get("_raw") or [])[:n_local] == [raw_bag(r) for r in rows_l]
+                    same = same_answer(cans, py_canon[:n_local])
                     if cli_nec != probe["necessary"] or not same or not raw_ok:
                         out.disagreements.append(f"probe {probe['i']} {probe['element']}: CLI and Python disagree")
                     else:

@@ -4,6 +4,7 @@
 - ``differs --expected E``: ans(H) = ans(G) where ans(G) != E. It is ``keep`` with a stated wrong-answer precondition;
   E is the reference the report names. ``--loose``: ans(H) != E, ans(H) non-empty, no error.
 - ``disagree --other Q2``: ans_Q(H) != ans_Q2(H), where the two differ on G.
+- ``disagree`` by ``--other-engine E``: ans_Q(H) on this relate-db != ans_Q(H) on engine E (``engines.py``).
 
 Any predicate that holds on the empty graph is refused by the reducer ("the answer does not depend on the data").
 """
@@ -57,6 +58,7 @@ class Predicate:
     expected: tuple | None = None
     loose: bool = False
     notes: list[str] = field(default_factory=list)
+    other_engine: str | None = None  # set by --other-engine: Q2 is Q itself, answered by this engine
 
     def __post_init__(self):
         if self.kind not in KINDS:
@@ -103,4 +105,6 @@ class Predicate:
             assert self.other_baseline is not None  # validate() refuses a disagree without the second baseline
             d["other_statement"] = self.queries[1].text
             d["other_baseline_sha256"] = answer_sha(self.other_baseline)
+            if self.other_engine:
+                d["other_engine"] = self.other_engine
         return d

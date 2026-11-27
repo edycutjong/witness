@@ -46,6 +46,7 @@ class Request:
     expected: str | list | None = None
     loose: bool = False
     other: str | None = None
+    other_engine: str | None = None  # relate-db==X.Y.Z | python:/path | neo4j: the same query on another engine
     seed: int = 0
     strict_lists: bool = False
     digits: int = 12
@@ -141,7 +142,7 @@ def reduce_request(req: Request, progress=None) -> Outcome:
     except CollisionError as e:
         raise Refused(f"{e}; Witness needs distinguishable elements", "store") from e
     out = Outcome(exit_code=EXIT_OK, source_sha256=sha_before)
-    backend = None
+    backend: Any = None
     try:
         out.source_counts = sc.counts()
         names = {lb for ls in sc.node_labels.values() for lb in ls} | set(sc.rel_type.values())
@@ -151,7 +152,11 @@ def reduce_request(req: Request, progress=None) -> Outcome:
             raise Refused(f"label/type/key {bad[0]!r} holds a control character; no witness could be exported", "store")
         # ---- guard every user statement (W2) ----------------------------------------------------------------
         queries = [guard(req.statement, req.params, sc.db, "query")]
-        if req.predicate == "disagree":
+        if req.other_engine:
+            if req.other or req.predicate not in ("keep", "disagree") or req.isolate:
+                raise Refused("--other-engine compares one query on two engines: no --other, --expected or --isolate")
+            req.predicate = "disagree"
+        elif req.predicate == "disagree":
             if not req.other:
                 raise Refused("disagree needs --other", "predicate")
             queries.append(guard(req.other, req.params, sc.db, "--other"))
@@ -182,6 +187,28 @@ def reduce_request(req: Request, progress=None) -> Outcome:
             finally:
                 mem.close()
             out.guard_notes.append("order check: same answer from a store built in reverse order")
+        if req.other_engine:
+            from .engines import TwoEngines, open_engine
+
+            engine = open_engine(
+                req.other_engine, source, queries[0], sc=sc, strict_lists=req.strict_lists, digits=req.digits
+            )
+            backend = TwoEngines(sc, queries[0], engine, strict_lists=req.strict_lists, digits=req.digits)
+            first = engine.answer()
+            if first.error is not None:
+                why = f"{engine.label} cannot answer the query on the full graph: {first.error}"
+                raise Refused(why, "other-engine")
+            if isinstance(first.answer, Tie):
+                raise Refused(f"{engine.label}: a tie straddles the SKIP/LIMIT cut on the full graph", "other-engine")
+            if same_answer(first.answer, answers[0]):
+                raise Refused(
+                    f"relate-db {relate_version()} and {engine.label} give the same answer on the full graph",
+                    "other-engine",
+                )
+            queries.append(queries[0])
+            answers.append(first.answer)
+            results.append(results[0])
+            out.guard_notes.append(f"other engine: {engine.label}")
         base, res0 = answers[0], results[0]
         if len(base) == 0 and req.predicate != "disagree":
             # two queries can disagree while the first returns nothing: Predicate() refuses only when both agree
@@ -214,6 +241,8 @@ def reduce_request(req: Request, progress=None) -> Outcome:
             expected=expected,
             loose=req.loose,
         )
+        if backend is not None:
+            pred.other_engine = backend.engine.label
         # ---- reduce ---------------------------------------------------------------------------------------
         if req.isolate:
             from .isolate import IsolatedTrials
@@ -250,6 +279,9 @@ def reduce_request(req: Request, progress=None) -> Outcome:
             run["trial_ms_p95"] = round(ms[min(len(ms) - 1, int(len(ms) * 0.95))], 3)
         if backend is not None:
             run["isolate_restarts"] = backend.restarts
+            if req.other_engine:
+                oms = sorted(backend.other_ms)
+                run["other_engine_ms_p50"] = round(oms[len(oms) // 2], 3) if oms else None
         out.run = run
         # ---- export W --------------------------------------------------------------------------------------
         req.out_dir.mkdir(parents=True, exist_ok=True)
@@ -321,6 +353,8 @@ def reduce_request(req: Request, progress=None) -> Outcome:
         manifest["predicate"]["expected_rows"] = plain(
             req.expected if isinstance(req.expected, list) else json.loads(req.expected)
         )
+    if req.other_engine:
+        manifest["predicate"]["other_engine_spec"] = req.other_engine
     chk = check(
         files["rl"],
         spec_from_manifest(manifest),

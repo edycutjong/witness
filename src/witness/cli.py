@@ -153,6 +153,7 @@ def request_from(args, statement: str, source: Path, params: dict) -> Request:
         expected=args.expected,
         loose=args.loose,
         other=other,
+        other_engine=args.other_engine,
         seed=args.seed,
         strict_lists=args.strict_lists,
         digits=args.float_digits,
@@ -266,11 +267,20 @@ def cmd_check(args) -> int:
         src = shown(man_path)
     else:
         raise Refused(f"no {man_path.name} beside {w.name}: pass -f, --param and --expect", "check")
+    if args.other_engine:
+        if not spec.other_engine and not (args.file and len(spec.queries) == 1):
+            raise Refused("--other-engine re-checks a witness reduced with --other-engine (or one -f query)", "check")
+        if len(spec.queries) == 1:
+            spec.queries.append(spec.queries[0])
+            spec.kind = "disagree"
+        spec.other_engine = args.other_engine
     res = check(w, spec, use_cli=not args.no_cli, require_cli=args.require_cli)
     if args.json:
         print(json.dumps(res.to_dict(), indent=2, sort_keys=True))
         return 0 if res.verified else 1
     print(f"CHECK  {shown(w)}  (query, parameters and baseline from {src})")
+    if res.other_engine:
+        print(f"  the same query on relate-db {relate_version()} and on {res.other_engine}")
     print(f"  answer reproduced on W: {'yes' if res.sufficient else 'NO'}")
     print(f"  {res.text}")
     print(f"  {res.cli_status}")
@@ -597,6 +607,11 @@ def _reduce_opts(p) -> None:
     p.add_argument("--expected", metavar="JSON", help="differs: the expected answer as JSON rows")
     p.add_argument("--loose", action="store_true", help="differs: any non-empty answer other than --expected")
     p.add_argument("--other", metavar="Q2", help="disagree: the second query file")
+    p.add_argument(
+        "--other-engine",
+        metavar="E",
+        help="disagree across engines: the same query on relate-db==X.Y.Z, python:/path/to/python or neo4j",
+    )
     p.add_argument("--strict-lists", action="store_true", help="compare lists in order (default: as bags)")
     p.add_argument("--float-digits", type=int, default=12)
 

@@ -1,5 +1,5 @@
-# uv run pytest --cov=witness (100% line+branch gate), recorded 2026-11-27 (02:44 +0700) after arch review r7 (MCP inconclusive probes + reply size bound, wheel-install root, CI grep/pin tests, evidence-script checks); supersedes the 508-test run
-# Darwin arm64; relate-db 1.0.1, Relate CLI v1.0.1; Python 3.12.13; local Neo4j in Docker NOT running, so its 2 fixture-pull tests skip (they passed in evidence/pytest-2026-11-24.txt)
-517 passed, 2 skipped in 88.30s (0:01:28)
+# uv run pytest --cov=witness (100% line+branch gate), recorded 2026-11-27 (21:40 +0700); supersedes the 517-test run of the same day (8 tests added: the guard's function classes against Relate's catalog, the example queries, the engine-disagreement witness and its release record, a disagreement whose first query returns no rows)
+# Darwin arm64; relate-db 1.0.1, Relate CLI v1.0.1; Python 3.12.13; local Neo4j in Docker NOT running, so its 2 fixture-pull tests skip (they passed in evidence/pytest-2026-11-24.txt; the same pull, run by hand against a fresh Neo4j today, is evidence/fixture-run-2026-11-27.txt)
+525 passed, 2 skipped in 107.34s (0:01:47)
 TOTAL 2592 statements, 832 branches, 0 missed: 100.00%
-# skipped: tests/test_fixture.py:105 and :131 "local Neo4j (Docker) is not running" (519 tests in total)
+# skipped: tests/test_fixture.py "local Neo4j (Docker) is not running" (527 tests in total)

@@ -1,0 +1,605 @@
+{
+ "generated": "2026-11-27 20:53:31 +0700",
+ "relate_db": "1.0.1",
+ "machine": "Darwin 27.2.0 arm64, Python 3.12.13",
+ "query": "queries/two-hub.cypher",
+ "params": {
+  "country": "MX",
+  "dest": "MEX"
+ },
+ "method": "every relationship of data/air-routes.rl deleted alone by elementId (count asserted == 1) in a Relate transaction on a scratch copy, the query re-run, rolled back; compared with canon_rows (manifest settings)",
+ "relationships_tried": 57645,
+ "seconds": 147.1,
+ "trials_per_s": 392.0,
+ "change_the_answer": 45,
+ "supports": 10,
+ "guards": 35,
+ "bound_by_the_answer_rows": 68,
+ "change_and_bound": 20,
+ "change_and_in_witness": 11,
+ "supports_in_witness": 10,
+ "guards_in_witness": 1,
+ "guards_outside_the_bound": 25,
+ "airports_a_guard_keeps_out": [
+  "ACA",
+  "AGU",
+  "BJX",
+  "CEN",
+  "CJS",
+  "CME",
+  "CUL",
+  "CUN",
+  "CUU",
+  "CZM",
+  "DGO",
+  "GDL",
+  "HMO",
+  "HUX",
+  "LAP",
+  "LMM",
+  "MID",
+  "MLM",
+  "MTY",
+  "MXL",
+  "MZT",
+  "OAX",
+  "PAZ",
+  "PVR",
+  "REX",
+  "SJD",
+  "SLP",
+  "TAM",
+  "TGZ",
+  "TRC",
+  "VER",
+  "VSA",
+  "ZCL",
+  "ZIH",
+  "ZLO"
+ ],
+ "witness_relationships": 22,
+ "changing": [
+  {
+   "relationship": "(CME)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "CME"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(CUL)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "CUL"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(LAX)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "support",
+   "added": [],
+   "dropped": [
+    "UPN"
+   ],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": true
+  },
+  {
+   "relationship": "(MTY)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "MTY"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": false
+  },
+  {
+   "relationship": "(REX)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "REX"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(TGZ)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "TGZ"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": false
+  },
+  {
+   "relationship": "(CZM)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "CZM"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(ACA)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "ACA"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": true
+  },
+  {
+   "relationship": "(LMM)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "LMM"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(CUN)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "CUN"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": false
+  },
+  {
+   "relationship": "(PVR)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "PVR"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": false
+  },
+  {
+   "relationship": "(CEN)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "CEN"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(ZIH)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "ZIH"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": false
+  },
+  {
+   "relationship": "(ZLO)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "ZLO"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(TRC)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "TRC"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(SJD)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "SJD"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": false
+  },
+  {
+   "relationship": "(MID)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "MID"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(MZT)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "MZT"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": false
+  },
+  {
+   "relationship": "(CJS)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "CJS"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(CUU)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "CUU"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(VSA)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "VSA"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(HUX)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "HUX"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(TIJ)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "support",
+   "added": [
+    "TIJ"
+   ],
+   "dropped": [
+    "UPN"
+   ],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": true
+  },
+  {
+   "relationship": "(PAZ)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "PAZ"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(OAX)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "OAX"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(GDL)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "GDL"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": false
+  },
+  {
+   "relationship": "(UPN)-[:HAS_ROUTE]->(LAX)",
+   "type": "HAS_ROUTE",
+   "kind": "support",
+   "added": [],
+   "dropped": [
+    "UPN"
+   ],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": true
+  },
+  {
+   "relationship": "(UPN)-[:HAS_ROUTE]->(TIJ)",
+   "type": "HAS_ROUTE",
+   "kind": "support",
+   "added": [],
+   "dropped": [
+    "UPN"
+   ],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": true
+  },
+  {
+   "relationship": "(BJX)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "BJX"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(MLM)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "MLM"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(SLP)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "SLP"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(DGO)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "DGO"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": false
+  },
+  {
+   "relationship": "(AGU)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "AGU"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(HMO)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "HMO"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(LAP)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "LAP"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(ZCL)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "ZCL"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(MXL)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "MXL"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(TAM)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "TAM"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(VER)-[:HAS_ROUTE]->(MEX)",
+   "type": "HAS_ROUTE",
+   "kind": "guard",
+   "added": [
+    "VER"
+   ],
+   "dropped": [],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": false,
+   "in_witness": false
+  },
+  {
+   "relationship": "(LAX)-[:IN_COUNTRY]->(US)",
+   "type": "IN_COUNTRY",
+   "kind": "support",
+   "added": [],
+   "dropped": [],
+   "lists_changed": [
+    "UPN"
+   ],
+   "bound_by_the_answer_rows": true,
+   "in_witness": true
+  },
+  {
+   "relationship": "(TIJ)-[:IN_COUNTRY]->(MX)",
+   "type": "IN_COUNTRY",
+   "kind": "support",
+   "added": [],
+   "dropped": [],
+   "lists_changed": [
+    "UPN"
+   ],
+   "bound_by_the_answer_rows": true,
+   "in_witness": true
+  },
+  {
+   "relationship": "(UPN)-[:IN_COUNTRY]->(MX)",
+   "type": "IN_COUNTRY",
+   "kind": "support",
+   "added": [],
+   "dropped": [
+    "UPN"
+   ],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": true
+  },
+  {
+   "relationship": "(QRO)-[:IN_COUNTRY]->(MX)",
+   "type": "IN_COUNTRY",
+   "kind": "support",
+   "added": [],
+   "dropped": [
+    "QRO"
+   ],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": true
+  },
+  {
+   "relationship": "(PBC)-[:IN_COUNTRY]->(MX)",
+   "type": "IN_COUNTRY",
+   "kind": "support",
+   "added": [],
+   "dropped": [
+    "PBC"
+   ],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": true
+  },
+  {
+   "relationship": "(TLC)-[:IN_COUNTRY]->(MX)",
+   "type": "IN_COUNTRY",
+   "kind": "support",
+   "added": [],
+   "dropped": [
+    "TLC"
+   ],
+   "lists_changed": [],
+   "bound_by_the_answer_rows": true,
+   "in_witness": true
+  }
+ ]
+}

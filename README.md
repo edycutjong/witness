@@ -6,8 +6,8 @@
 
   <br/>
 
-  [![Live Site](https://img.shields.io/badge/🚀_Live-Site-B42318?style=for-the-badge)](https://witness-wheat.vercel.app)
-  [![For judges](https://img.shields.io/badge/For_judges-open_%2Fjudge-1F1A14?style=for-the-badge)](https://witness-wheat.vercel.app/judge/)
+  [![Live Site](https://img.shields.io/badge/🚀_Live-Site-B42318?style=for-the-badge)](https://witness.edycu.dev)
+  [![For judges](https://img.shields.io/badge/For_judges-open_%2Fjudge-1F1A14?style=for-the-badge)](https://witness.edycu.dev/judge/)
   [![Relate by Neo4j Hackathon](https://img.shields.io/badge/Devpost-Relate_by_Neo4j_Hackathon-1F1A14?style=for-the-badge)](https://relate.devpost.com/)
 
   <br/>
@@ -255,12 +255,12 @@ the site checked against the committed evidence), **E2E** (the built wheel: `wit
 committed witness, the site and `/judge/` with no credentials), **Performance** (a throughput floor) and a **Deploy Gate**.
 CodeQL and secret scanning run on their own; releases are cut from Angular-style commit messages
 (`.github/workflows/release.yml`); Dependabot proposes grouped minor and patch updates monthly and never a major.
-For judges: [JUDGE.md](JUDGE.md), also served at <https://witness-wheat.vercel.app/judge/>.
+For judges: [JUDGE.md](JUDGE.md), also served at <https://witness.edycu.dev/judge/>.
 
 ## 📽️ Demo Materials
 
 - Demo video (1:55): https://youtu.be/GYbci7TseJw
-- Landing page: https://witness-wheat.vercel.app (`site/`)
+- Landing page: https://witness.edycu.dev (`site/`)
 - Reproduce steps: [DEMO.md](DEMO.md)
 
 ## 🧰 Tools and AI use

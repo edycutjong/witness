@@ -6,9 +6,9 @@ Witness is built on Relate, the embedded graph database, for the Relate by Neo4j
 
 ## The 30-second path
 
-1. [Open the landing page](https://witness-wheat.vercel.app/): the agent's answer, the 22 relationships that reproduce it, and the check line; nothing to install.
-2. [Open the exhibit page](https://witness-wheat.vercel.app/exhibit/two-hub.html): the register of kept relationships, each tagged as one whose deletion changes the answer.
-3. Optional, one command: `git clone https://github.com/edycutjong/witness && cd witness && uv run witness demo` (needs uv; the repository opens at submission).
+1. [Open the landing page](https://witness.edycu.dev/): the agent's answer, the 22 relationships that reproduce it, and the check line; nothing to install.
+2. [Open the exhibit page](https://witness.edycu.dev/exhibit/two-hub.html): the register of kept relationships, each tagged as one whose deletion changes the answer.
+3. Optional, one command: `git clone https://github.com/edycutjong/witness && cd witness && uv run witness demo` (needs uv).
 
 ## The receipts
 
@@ -31,8 +31,6 @@ git clone https://github.com/edycutjong/witness && cd witness
 uv run witness demo
 ```
 
-The repository opens at submission; until then use the live pages above.
-
 The whole suite against real Relate (CI and deterministic replay, not the product path): `uv run pytest --cov=witness`
 
 ## Honest limitations
@@ -43,7 +41,7 @@ The whole suite against real Relate (CI and deterministic replay, not the produc
 
 ## Links
 
-- Repository: https://github.com/edycutjong/witness (the repository opens at submission)
-- Live site: https://witness-wheat.vercel.app/
-- Exhibit page: https://witness-wheat.vercel.app/exhibit/two-hub.html
+- Repository: https://github.com/edycutjong/witness
+- Live site: https://witness.edycu.dev/
+- Exhibit page: https://witness.edycu.dev/exhibit/two-hub.html
 - Relate: https://relatedb.ai

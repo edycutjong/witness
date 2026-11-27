@@ -8,6 +8,7 @@
 //
 // Needs Node, Chrome and puppeteer (any recent version; it is not a dependency of this repository). Exit 1 when the
 // page does not run live or any pull differs from the recording.
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 
@@ -25,7 +26,12 @@ page.on("response", (r) => { if (r.status() >= 400) failed.push({ url: r.url(), 
 await page.setViewport({ width: 1440, height: 1000 });
 await page.goto(url, { waitUntil: "networkidle0" });
 const origin = new URL(url).origin;
-const wasmAtLoad = requests.filter((u) => u.endsWith(".wasm")).length;
+// at load: no engine worker exists yet and the plate says "ready" (requests a worker makes are not visible to page
+// listeners, so the worker count is the control, not a request count)
+const workersAtLoad = page.workers().length;
+const stateAtLoad = await page.$eval("#eng", (e) => e.dataset.state);
+const sha = async (path) => crypto.createHash("sha256").update(Buffer.from(await (await fetch(new URL(path, url))).arrayBuffer())).digest("hex");
+const served = { "index.html": await sha("/"), "relate/live.js": await sha("/relate/live.js"), "relate/worker.js": await sha("/relate/worker.js") };
 const text = (sel) => page.$eval(sel, (e) => e.innerText.replace(/\s+/g, " ").trim());
 const until = (fn, ms = 30000) => page.waitForFunction(fn, { timeout: ms });
 const click = (sel) => page.$eval(sel, (e) => e.click());
@@ -74,7 +80,8 @@ const report = {
   what: "the landing in headless Chrome: what the page showed for each live pull, the query box, a write, a runaway query and the engine case",
   url,
   run: { utc: new Date().toISOString().replace(/\.\d+Z$/, "Z"), browser: await browser.version(), node: process.version, machine: `${os.type()} ${os.arch()}` },
-  wasm_requests_at_load: wasmAtLoad,
+  served_sha256: served,
+  at_load: { engine_workers: workersAtLoad, plate: stateAtLoad },
   engine,
   pulls: { of: pulls.length, live: pulls.filter((p) => p.live).length, same_rows: pulls.filter((p) => p.same_rows).length, tally, rows: pulls },
   ask,
@@ -90,8 +97,9 @@ const report = {
 const chipOnly = failed.length > 0 && failed.every((f) => f.url.startsWith("https://api.github.com/"));
 const engineErrors = consoleErrors.filter((m) => !(chipOnly && /^Failed to load resource/.test(m)));
 report.console_errors_not_from_the_version_chip = engineErrors;
+report.engine_workers_at_end = page.workers().length; // engine workers the page created that Chrome still lists at the end
 report.ok = engine.state === "live" && report.pulls.live === n && report.pulls.same_rows === n && report.write.refused && report.stop.stopped &&
-  /^LIVE/i.test(after.meta) && engineCase.every((e) => e.live && e.same_as_recorded) && report.third_party_requests.length === 0 && engineErrors.length === 0;
+  /^LIVE/i.test(after.meta) && engineCase.every((e) => e.live && e.same_as_recorded) && report.third_party_requests.length === 0 && engineErrors.length === 0 && workersAtLoad === 0 && stateAtLoad === "ready" && report.engine_workers_at_end >= 1;
 await browser.close();
 if (OUT) fs.writeFileSync(OUT, JSON.stringify(report, null, 2) + "\n");
 console.log(`browser: ${report.run.browser}; engine ${engine.state}; ${report.pulls.live} of ${n} pulls live, ${report.pulls.same_rows} same as the recording; ` +

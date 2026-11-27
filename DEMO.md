@@ -227,7 +227,7 @@ runs each size in its own process with an 8 s watchdog, because the slow form do
 uv run python scripts/vendor_relate_wasm.py --check   # the self-hosted engines match their pinned checksums (offline)
 node scripts/wasm_parity.mjs --out /tmp/wasm-parity.json   # = evidence/wasm-parity.json, timings and run header aside
 PUPPETEER_MODULE=<path to puppeteer's ESM entry> CHROME=<path to Chrome> \
-  node scripts/browser_live.mjs https://witness.edycu.dev/ --out /tmp/browser-live.json   # = evidence/browser-live.json
+  node scripts/browser_live.mjs https://witness.edycu.dev/ --out /tmp/browser-live.json   # same verdicts as evidence/browser-live.json; timings and run header differ
 ```
 
 The landing (https://witness.edycu.dev/#exhibit) runs `@relate/relate-wasm` 1.0.1, the release the witness was reduced
@@ -247,6 +247,8 @@ unpulled witness gives the manifest's answer; the engine case gives the recorded
 1.3.0 (they agree); a `CREATE` in the query box is refused. `tests/test_wasm_parity.py` runs it under pytest when Node
 is installed and requires the committed evidence to match the fresh run. `scripts/browser_live.mjs` drives the page itself
 in headless Chrome (puppeteer is not a dependency of this repository) and records what it showed: in the committed run,
-all 22 pulls live and the same as the recording, the four example queries answered, a write refused, a runaway query
-stopped after 4 s and the next one answered, and both engine releases live with their recorded rows; no request to a
-third party, and no console error other than the version chip's call to GitHub's API when it is rate-limited.
+all 22 pulls live and the same as the recording, the four example queries answered (on the witness with the last tag
+pulled), a write refused, a runaway query stopped after 4 s and the next one answered, and both engine releases live with
+their recorded rows; no engine worker before the visitor reaches the exhibit; no request to a third party other than the
+version chip's call to GitHub's releases API, and no console error. The run records the SHA-256 of the served page and
+of `site/relate/live.js` and `worker.js`; the site build refuses a browser run older than the live steps it ships.

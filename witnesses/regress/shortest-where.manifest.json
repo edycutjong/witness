@@ -1,0 +1,91 @@
+{
+  "baseline": {
+    "columns": [
+      "n"
+    ],
+    "rows": [
+      {
+        "n": 548
+      }
+    ],
+    "sha256": "6498330ab4e10666ef9259e1beb83779ed2994f1bc8c6e09b85a77585ffd2fd4"
+  },
+  "check": {
+    "check_text": "3 of 3 end the disagreement (3 of 3 relationships, 0 of 0 isolated nodes)",
+    "cli": "relate CLI: sufficiency + 3 of 3 necessity probes cross-checked",
+    "cli_used": true,
+    "disagreements": [],
+    "inconclusive": 0,
+    "other_engine": "relate-db 1.0.2",
+    "probes": [
+      {
+        "cli_necessary": true,
+        "element": "(LAX)-[:HAS_ROUTE]->(IAH)",
+        "i": 1,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MZT)-[:HAS_ROUTE]->(LAX)",
+        "i": 2,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MZT)-[:HAS_ROUTE]->(IAH)",
+        "i": 3,
+        "kind": "rel",
+        "necessary": true
+      }
+    ],
+    "reasons": [],
+    "sufficient": true,
+    "verified": true
+  },
+  "comparison": {
+    "float_digits": 12,
+    "rows": "bag",
+    "strict_lists": false
+  },
+  "determinism_claimed": true,
+  "name": "shortest-where",
+  "params": {},
+  "predicate": {
+    "kind": "disagree",
+    "other_baseline_sha256": "b533af91eaf40f970e47342cdc86c96160381a349cf93db75939daa46c2fbd3f",
+    "other_engine": "relate-db 1.0.2",
+    "other_engine_spec": "relate-db==1.0.2",
+    "other_statement": "// Airports reached from MZT whose shortest paths have at least 2 hops (a clause WHERE over the path of ALL SHORTEST). Relate v1.0.2: the WHERE post-filters the selected shortest paths (#373).\nMATCH p = ALL SHORTEST (a:Airport {iata: 'MZT'})-[:HAS_ROUTE*..2]-(b:Airport)\nWHERE length(p) >= 2\nRETURN count(DISTINCT b) AS n"
+  },
+  "reasons": [],
+  "run": {
+    "capped": null,
+    "commits": 20,
+    "inconclusive": 0,
+    "seconds": 1.921,
+    "ties": 0,
+    "trials": 70
+  },
+  "schema": "witness.manifest/v1",
+  "seed": 0,
+  "source": {
+    "nodes": 3748,
+    "path": "data/air-routes.rl",
+    "relationships": 57645,
+    "sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+  },
+  "statement": "// Airports reached from MZT whose shortest paths have at least 2 hops (a clause WHERE over the path of ALL SHORTEST). Relate v1.0.2: the WHERE post-filters the selected shortest paths (#373).\nMATCH p = ALL SHORTEST (a:Airport {iata: 'MZT'})-[:HAS_ROUTE*..2]-(b:Airport)\nWHERE length(p) >= 2\nRETURN count(DISTINCT b) AS n\n",
+  "verified": true,
+  "versions": {
+    "python": "3.12.13",
+    "relate_db": "1.0.1",
+    "witness": "0.1.0"
+  },
+  "witness": {
+    "isolated_nodes": 0,
+    "nodes": 3,
+    "relationships": 3
+  }
+}

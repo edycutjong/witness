@@ -1,0 +1,129 @@
+# Recorded 2026-11-28 04:03 +0700 on Darwin arm64, relate-db 1.0.1 in process; the other engine is the relate-db release named on each run, in a uv worker.
+# Command per query (from the repo root); output written to a temp dir, then the five files copied to witnesses/regress/:
+#   uv run witness why -f queries/regress/<name>.cypher --store data/air-routes.rl --other-engine relate-db==<release that fixed it> --name <name> --out <temp dir> --no-ledger
+# The last two are refused, as they should be: one does not depend on the data, the other is a CALL subquery Relate 1.0.1 classifies as read-write.
+
+## shortest-where (--other-engine relate-db==1.0.2)
+ANSWER  1 rows on the full graph
+  n
+  548
+  warning: a bare scalar answer: different rows can give the same value; return the identities to keep the reason
+
+WITNESS  3 relationships · 3 nodes, out of 57,645 · 3,748
+  reduced in 1.921 s · 70 trials · 0 inconclusive · seed 0 (6.515 s end to end: copy, guard, order check, reduce, check)
+
+EXHIBITS  (register order; every one is needed)
+   1  (LAX)-[:HAS_ROUTE]->(IAH)
+   2  (MZT)-[:HAS_ROUTE]->(IAH)
+   3  (MZT)-[:HAS_ROUTE]->(LAX)
+
+CHECK  3 of 3 end the disagreement (3 of 3 relationships, 0 of 0 isolated nodes)
+  relate CLI: sufficiency + 3 of 3 necessity probes cross-checked
+
+FILES  <temp dir>/shortest-where.rl (+ .cypher .manifest.json .html .trace.json)
+
+VERIFIED · deletion-minimal: no single relationship can be removed without ending the disagreement · determinism claimed
+
+## paren-projection (--other-engine relate-db==1.2.0)
+ANSWER  1 rows on the full graph
+  a.runways
+  None
+  warning: a bare scalar answer: different rows can give the same value; return the identities to keep the reason
+
+WITNESS  0 relationships · 1 nodes, out of 57,645 · 3,748
+  reduced in 2.247 s · 28 trials · 0 inconclusive · seed 0 (6.822 s end to end: copy, guard, order check, reduce, check)
+
+EXHIBITS  (register order; every one is needed)
+   ·  (MZT)  isolated node
+
+CHECK  1 of 1 end the disagreement (0 of 0 relationships, 1 of 1 isolated nodes)
+  relate CLI: sufficiency + 1 of 1 necessity probes cross-checked
+
+FILES  <temp dir>/paren-projection.rl (+ .cypher .manifest.json .html .trace.json)
+
+VERIFIED · deletion-minimal: no single relationship can be removed without ending the disagreement · determinism claimed
+
+## cycle-repeated-variable (--other-engine relate-db==1.3.0)
+ANSWER  1 rows on the full graph
+  n
+  122
+  warning: a bare scalar answer: different rows can give the same value; return the identities to keep the reason
+
+WITNESS  3 relationships · 3 nodes, out of 57,645 · 3,748
+  reduced in 1.506 s · 70 trials · 0 inconclusive · seed 0 (6.066 s end to end: copy, guard, order check, reduce, check)
+
+EXHIBITS  (register order; every one is needed)
+   1  (LAX)-[:HAS_ROUTE]->(IAH)
+   2  (MZT)-[:HAS_ROUTE]->(IAH)
+   3  (MZT)-[:HAS_ROUTE]->(LAX)
+
+CHECK  3 of 3 end the disagreement (3 of 3 relationships, 0 of 0 isolated nodes)
+  relate CLI: sufficiency + 3 of 3 necessity probes cross-checked
+
+FILES  <temp dir>/cycle-repeated-variable.rl (+ .cypher .manifest.json .html .trace.json)
+
+VERIFIED · deletion-minimal: no single relationship can be removed without ending the disagreement · determinism claimed
+
+## null-bound-varlength (--other-engine relate-db==1.3.0)
+ANSWER  1 rows on the full graph
+  n
+  1699
+  warning: a bare scalar answer: different rows can give the same value; return the identities to keep the reason
+
+WITNESS  2 relationships · 2 nodes, out of 57,645 · 3,748
+  reduced in 1.377 s · 37 trials · 0 inconclusive · seed 0 (5.56 s end to end: copy, guard, order check, reduce, check)
+
+EXHIBITS  (register order; every one is needed)
+   1  (LAX)-[:HAS_ROUTE]->(MZT)
+   2  (MZT)-[:HAS_ROUTE]->(LAX)
+
+CHECK  2 of 2 end the disagreement (2 of 2 relationships, 0 of 0 isolated nodes)
+  relate CLI: sufficiency + 2 of 2 necessity probes cross-checked
+
+FILES  <temp dir>/null-bound-varlength.rl (+ .cypher .manifest.json .html .trace.json)
+
+VERIFIED · deletion-minimal: no single relationship can be removed without ending the disagreement · determinism claimed
+
+## distinct-dropped-name (--other-engine relate-db==1.3.0)
+ANSWER  1 rows on the full graph
+  c
+  18
+  warning: a bare scalar answer: different rows can give the same value; return the identities to keep the reason
+
+WITNESS  0 relationships · 2 nodes, out of 57,645 · 3,748
+  reduced in 3.46 s · 28 trials · 0 inconclusive · seed 0 (8.18 s end to end: copy, guard, order check, reduce, check)
+
+EXHIBITS  (register order; every one is needed)
+   ·  (DTW)  isolated node
+   ·  (ZEL)  isolated node
+
+CHECK  2 of 2 end the disagreement (0 of 0 relationships, 2 of 2 isolated nodes)
+  relate CLI: sufficiency + 2 of 2 necessity probes cross-checked
+
+FILES  <temp dir>/distinct-dropped-name.rl (+ .cypher .manifest.json .html .trace.json)
+
+VERIFIED · deletion-minimal: no single relationship can be removed without ending the disagreement · determinism claimed
+
+## percentile-disc (--other-engine relate-db==1.3.0)
+ANSWER  1 rows on the full graph
+  v    t
+  1.0  FLOAT NOT NULL
+
+WITNESS  0 relationships · 1 nodes, out of 57,645 · 3,748
+  reduced in 2.214 s · 28 trials · 0 inconclusive · seed 0 (6.348 s end to end: copy, guard, order check, reduce, check)
+
+EXHIBITS  (register order; every one is needed)
+   ·  (TGM)  isolated node
+
+CHECK  1 of 1 end the disagreement (0 of 0 relationships, 1 of 1 isolated nodes)
+  relate CLI: sufficiency + 1 of 1 necessity probes cross-checked
+
+FILES  <temp dir>/percentile-disc.rl (+ .cypher .manifest.json .html .trace.json)
+
+VERIFIED · deletion-minimal: no single relationship can be removed without ending the disagreement · determinism claimed
+
+## exists-next (--other-engine relate-db==1.3.0)
+refused (query): the predicate holds on the empty graph: the answer does not depend on the data
+
+## call-no-import (--other-engine relate-db==1.3.0)
+refused (query): Relate reports query_type 'rw'; only read queries ('r') are supported

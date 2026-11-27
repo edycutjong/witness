@@ -1,0 +1,79 @@
+{
+  "baseline": {
+    "columns": [
+      "v",
+      "t"
+    ],
+    "rows": [
+      {
+        "t": "FLOAT NOT NULL",
+        "v": 1.0
+      }
+    ],
+    "sha256": "45d583c536a48143a185d9cb03fb4f57a9ae9476281232980cc14204355a08ef"
+  },
+  "check": {
+    "check_text": "1 of 1 end the disagreement (0 of 0 relationships, 1 of 1 isolated nodes)",
+    "cli": "relate CLI: sufficiency + 1 of 1 necessity probes cross-checked",
+    "cli_used": true,
+    "disagreements": [],
+    "inconclusive": 0,
+    "other_engine": "relate-db 1.3.0",
+    "probes": [
+      {
+        "cli_necessary": true,
+        "element": "(TGM)",
+        "i": 1,
+        "kind": "node",
+        "necessary": true
+      }
+    ],
+    "reasons": [],
+    "sufficient": true,
+    "verified": true
+  },
+  "comparison": {
+    "float_digits": 12,
+    "rows": "bag",
+    "strict_lists": false
+  },
+  "determinism_claimed": true,
+  "name": "percentile-disc",
+  "params": {},
+  "predicate": {
+    "kind": "disagree",
+    "other_baseline_sha256": "18e7ba291ad92eb919c850b8608a849283db1bffed10a7d098ac5f34add9b331",
+    "other_engine": "relate-db 1.3.0",
+    "other_engine_spec": "relate-db==1.3.0",
+    "other_statement": "// The 30th percentile of runway counts, and its type. Relate v1.3.0: percentileDisc returns the input value exactly (#730).\nMATCH (a:Airport)\nRETURN percentileDisc(a.runways, 0.3) AS v, valueType(percentileDisc(a.runways, 0.3)) AS t"
+  },
+  "reasons": [],
+  "run": {
+    "capped": null,
+    "commits": 13,
+    "inconclusive": 0,
+    "seconds": 2.214,
+    "ties": 0,
+    "trials": 28
+  },
+  "schema": "witness.manifest/v1",
+  "seed": 0,
+  "source": {
+    "nodes": 3748,
+    "path": "data/air-routes.rl",
+    "relationships": 57645,
+    "sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+  },
+  "statement": "// The 30th percentile of runway counts, and its type. Relate v1.3.0: percentileDisc returns the input value exactly (#730).\nMATCH (a:Airport)\nRETURN percentileDisc(a.runways, 0.3) AS v, valueType(percentileDisc(a.runways, 0.3)) AS t\n",
+  "verified": true,
+  "versions": {
+    "python": "3.12.13",
+    "relate_db": "1.0.1",
+    "witness": "0.1.0"
+  },
+  "witness": {
+    "isolated_nodes": 1,
+    "nodes": 1,
+    "relationships": 0
+  }
+}

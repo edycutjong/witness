@@ -1,0 +1,84 @@
+{
+  "baseline": {
+    "columns": [
+      "c"
+    ],
+    "rows": [
+      {
+        "c": 18
+      }
+    ],
+    "sha256": "79e5e0a85447bcd71608201cbae0e67b1d9989cff0716f8095d3e6088a260979"
+  },
+  "check": {
+    "check_text": "2 of 2 end the disagreement (0 of 0 relationships, 2 of 2 isolated nodes)",
+    "cli": "relate CLI: sufficiency + 2 of 2 necessity probes cross-checked",
+    "cli_used": true,
+    "disagreements": [],
+    "inconclusive": 0,
+    "other_engine": "relate-db 1.3.0",
+    "probes": [
+      {
+        "cli_necessary": true,
+        "element": "(ZEL)",
+        "i": 1,
+        "kind": "node",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(DTW)",
+        "i": 2,
+        "kind": "node",
+        "necessary": true
+      }
+    ],
+    "reasons": [],
+    "sufficient": true,
+    "verified": true
+  },
+  "comparison": {
+    "float_digits": 12,
+    "rows": "bag",
+    "strict_lists": false
+  },
+  "determinism_claimed": true,
+  "name": "distinct-dropped-name",
+  "params": {},
+  "predicate": {
+    "kind": "disagree",
+    "other_baseline_sha256": "78755cf3a496ecc19f248c574940911f8277b423f4921f22bc87bf19b220aa3d",
+    "other_engine": "relate-db 1.3.0",
+    "other_engine_spec": "relate-db==1.3.0",
+    "other_statement": "// Regions counted after a DISTINCT that drops n, with an EXISTS that names n again. Relate v1.3.0: a subquery reusing a name the DISTINCT dropped binds fresh (#734).\nMATCH (n:Airport)\nWITH DISTINCT n.region AS g\nWHERE EXISTS { MATCH (n) WHERE n.runways > 4 }\nRETURN count(g) AS c"
+  },
+  "reasons": [],
+  "run": {
+    "capped": null,
+    "commits": 12,
+    "inconclusive": 0,
+    "seconds": 3.46,
+    "ties": 0,
+    "trials": 28
+  },
+  "schema": "witness.manifest/v1",
+  "seed": 0,
+  "source": {
+    "nodes": 3748,
+    "path": "data/air-routes.rl",
+    "relationships": 57645,
+    "sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+  },
+  "statement": "// Regions counted after a DISTINCT that drops n, with an EXISTS that names n again. Relate v1.3.0: a subquery reusing a name the DISTINCT dropped binds fresh (#734).\nMATCH (n:Airport)\nWITH DISTINCT n.region AS g\nWHERE EXISTS { MATCH (n) WHERE n.runways > 4 }\nRETURN count(g) AS c\n",
+  "verified": true,
+  "versions": {
+    "python": "3.12.13",
+    "relate_db": "1.0.1",
+    "witness": "0.1.0"
+  },
+  "witness": {
+    "isolated_nodes": 2,
+    "nodes": 2,
+    "relationships": 0
+  }
+}

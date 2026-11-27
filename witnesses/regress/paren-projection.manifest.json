@@ -1,0 +1,77 @@
+{
+  "baseline": {
+    "columns": [
+      "a.runways"
+    ],
+    "rows": [
+      {
+        "a.runways": null
+      }
+    ],
+    "sha256": "af94548b75eb97634f8f3ed267945894290bdbec6d34f48491900027081b4b80"
+  },
+  "check": {
+    "check_text": "1 of 1 end the disagreement (0 of 0 relationships, 1 of 1 isolated nodes)",
+    "cli": "relate CLI: sufficiency + 1 of 1 necessity probes cross-checked",
+    "cli_used": true,
+    "disagreements": [],
+    "inconclusive": 0,
+    "other_engine": "relate-db 1.2.0",
+    "probes": [
+      {
+        "cli_necessary": true,
+        "element": "(MZT)",
+        "i": 1,
+        "kind": "node",
+        "necessary": true
+      }
+    ],
+    "reasons": [],
+    "sufficient": true,
+    "verified": true
+  },
+  "comparison": {
+    "float_digits": 12,
+    "rows": "bag",
+    "strict_lists": false
+  },
+  "determinism_claimed": true,
+  "name": "paren-projection",
+  "params": {},
+  "predicate": {
+    "kind": "disagree",
+    "other_baseline_sha256": "7113868d294152750f8725558cb1f2d76c48586e66cdb77c47811c0372390cd9",
+    "other_engine": "relate-db 1.2.0",
+    "other_engine_spec": "relate-db==1.2.0",
+    "other_statement": "// The same property projected with and without parentheses. Relate v1.2.0: a parenthesized projection item is classified like its plain form (#518).\nMATCH (a:Airport {iata: 'MZT'})\nRETURN (a.runways), a.runways"
+  },
+  "reasons": [],
+  "run": {
+    "capped": null,
+    "commits": 13,
+    "inconclusive": 0,
+    "seconds": 2.247,
+    "ties": 0,
+    "trials": 28
+  },
+  "schema": "witness.manifest/v1",
+  "seed": 0,
+  "source": {
+    "nodes": 3748,
+    "path": "data/air-routes.rl",
+    "relationships": 57645,
+    "sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+  },
+  "statement": "// The same property projected with and without parentheses. Relate v1.2.0: a parenthesized projection item is classified like its plain form (#518).\nMATCH (a:Airport {iata: 'MZT'})\nRETURN (a.runways), a.runways\n",
+  "verified": true,
+  "versions": {
+    "python": "3.12.13",
+    "relate_db": "1.0.1",
+    "witness": "0.1.0"
+  },
+  "witness": {
+    "isolated_nodes": 1,
+    "nodes": 1,
+    "relationships": 0
+  }
+}

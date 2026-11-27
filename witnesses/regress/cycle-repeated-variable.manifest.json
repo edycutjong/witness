@@ -1,0 +1,91 @@
+{
+  "baseline": {
+    "columns": [
+      "n"
+    ],
+    "rows": [
+      {
+        "n": 122
+      }
+    ],
+    "sha256": "5679e1488889be7a5578f300b3c6a7114087876482d189fa2431bcc5cac3988e"
+  },
+  "check": {
+    "check_text": "3 of 3 end the disagreement (3 of 3 relationships, 0 of 0 isolated nodes)",
+    "cli": "relate CLI: sufficiency + 3 of 3 necessity probes cross-checked",
+    "cli_used": true,
+    "disagreements": [],
+    "inconclusive": 0,
+    "other_engine": "relate-db 1.3.0",
+    "probes": [
+      {
+        "cli_necessary": true,
+        "element": "(LAX)-[:HAS_ROUTE]->(IAH)",
+        "i": 1,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MZT)-[:HAS_ROUTE]->(LAX)",
+        "i": 2,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MZT)-[:HAS_ROUTE]->(IAH)",
+        "i": 3,
+        "kind": "rel",
+        "necessary": true
+      }
+    ],
+    "reasons": [],
+    "sufficient": true,
+    "verified": true
+  },
+  "comparison": {
+    "float_digits": 12,
+    "rows": "bag",
+    "strict_lists": false
+  },
+  "determinism_claimed": true,
+  "name": "cycle-repeated-variable",
+  "params": {},
+  "predicate": {
+    "kind": "disagree",
+    "other_baseline_sha256": "ba9d576fefb49ec3a3ff6677873500f3a2895b281d835fd76fea9703f58c3cd5",
+    "other_engine": "relate-db 1.3.0",
+    "other_engine_spec": "relate-db==1.3.0",
+    "other_statement": "// Three-hop cycles through LAX with the map on the first occurrence of a and a WHERE on a. Relate v1.3.0: a node variable repeated in a cycle checks every occurrence's labels and properties (#712).\nMATCH (a {iata: 'LAX'})<-[:HAS_ROUTE]-(b:Airport {iata: 'MZT'})-[:HAS_ROUTE]->(c)-[:HAS_ROUTE]->(a)\nWHERE a.runways > 0\nRETURN count(*) AS n"
+  },
+  "reasons": [],
+  "run": {
+    "capped": null,
+    "commits": 20,
+    "inconclusive": 0,
+    "seconds": 1.506,
+    "ties": 0,
+    "trials": 70
+  },
+  "schema": "witness.manifest/v1",
+  "seed": 0,
+  "source": {
+    "nodes": 3748,
+    "path": "data/air-routes.rl",
+    "relationships": 57645,
+    "sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+  },
+  "statement": "// Three-hop cycles through LAX with the map on the first occurrence of a and a WHERE on a. Relate v1.3.0: a node variable repeated in a cycle checks every occurrence's labels and properties (#712).\nMATCH (a {iata: 'LAX'})<-[:HAS_ROUTE]-(b:Airport {iata: 'MZT'})-[:HAS_ROUTE]->(c)-[:HAS_ROUTE]->(a)\nWHERE a.runways > 0\nRETURN count(*) AS n\n",
+  "verified": true,
+  "versions": {
+    "python": "3.12.13",
+    "relate_db": "1.0.1",
+    "witness": "0.1.0"
+  },
+  "witness": {
+    "isolated_nodes": 0,
+    "nodes": 3,
+    "relationships": 3
+  }
+}

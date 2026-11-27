@@ -1,0 +1,30 @@
+{"witness": "witnesses/regress/cycle-repeated-variable", "relate_db": "1.0.1", "relationships": 3, "rows": [{"n": 1}], "digest": "aa0717b095d94d62", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/distinct-dropped-name", "relate_db": "1.0.1", "relationships": 0, "rows": [{"c": 1}], "digest": "8a2dd83862239f14", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/null-bound-varlength", "relate_db": "1.0.1", "relationships": 2, "rows": [{"n": 1}], "digest": "aa0717b095d94d62", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/paren-projection", "relate_db": "1.0.1", "relationships": 0, "rows": [{"a.runways": null}], "digest": "af94548b75eb9763", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/percentile-disc", "relate_db": "1.0.1", "relationships": 0, "rows": [{"v": 1.0, "t": "FLOAT NOT NULL"}], "digest": "45d583c536a48143", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/shortest-where", "relate_db": "1.0.1", "relationships": 3, "rows": [{"n": 2}], "digest": "9acbed4d99978837", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/cycle-repeated-variable", "relate_db": "1.0.2", "relationships": 3, "rows": [{"n": 1}], "digest": "aa0717b095d94d62", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/distinct-dropped-name", "relate_db": "1.0.2", "relationships": 0, "rows": [{"c": 1}], "digest": "8a2dd83862239f14", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/null-bound-varlength", "relate_db": "1.0.2", "relationships": 2, "rows": [{"n": 1}], "digest": "aa0717b095d94d62", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/paren-projection", "relate_db": "1.0.2", "relationships": 0, "rows": [{"a.runways": null}], "digest": "af94548b75eb9763", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/percentile-disc", "relate_db": "1.0.2", "relationships": 0, "rows": [{"v": 1.0, "t": "FLOAT NOT NULL"}], "digest": "45d583c536a48143", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/shortest-where", "relate_db": "1.0.2", "relationships": 3, "rows": [{"n": 0}], "digest": "ef92fd678b91422e", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/cycle-repeated-variable", "relate_db": "1.1.0", "relationships": 3, "rows": [{"n": 1}], "digest": "aa0717b095d94d62", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/distinct-dropped-name", "relate_db": "1.1.0", "relationships": 0, "rows": [{"c": 1}], "digest": "8a2dd83862239f14", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/null-bound-varlength", "relate_db": "1.1.0", "relationships": 2, "rows": [{"n": 1}], "digest": "aa0717b095d94d62", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/paren-projection", "relate_db": "1.1.0", "relationships": 0, "rows": [{"a.runways": null}], "digest": "af94548b75eb9763", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/percentile-disc", "relate_db": "1.1.0", "relationships": 0, "rows": [{"v": 1.0, "t": "FLOAT NOT NULL"}], "digest": "45d583c536a48143", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/shortest-where", "relate_db": "1.1.0", "relationships": 3, "rows": [{"n": 0}], "digest": "ef92fd678b91422e", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/cycle-repeated-variable", "relate_db": "1.2.0", "relationships": 3, "rows": [{"n": 1}], "digest": "aa0717b095d94d62", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/distinct-dropped-name", "relate_db": "1.2.0", "relationships": 0, "rows": [{"c": 1}], "digest": "8a2dd83862239f14", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/null-bound-varlength", "relate_db": "1.2.0", "relationships": 2, "rows": [{"n": 1}], "digest": "aa0717b095d94d62", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/paren-projection", "relate_db": "1.2.0", "relationships": 0, "rows": [{"(a.runways)": 1, "a.runways": 1}], "digest": "7113868d29415275", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/percentile-disc", "relate_db": "1.2.0", "relationships": 0, "rows": [{"v": 1.0, "t": "FLOAT NOT NULL"}], "digest": "45d583c536a48143", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/shortest-where", "relate_db": "1.2.0", "relationships": 3, "rows": [{"n": 0}], "digest": "ef92fd678b91422e", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/cycle-repeated-variable", "relate_db": "1.3.0", "relationships": 3, "rows": [{"n": 0}], "digest": "ef92fd678b91422e", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/distinct-dropped-name", "relate_db": "1.3.0", "relationships": 0, "rows": [{"c": 2}], "digest": "1f9d48417884e44f", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/null-bound-varlength", "relate_db": "1.3.0", "relationships": 2, "rows": [{"n": 0}], "digest": "ef92fd678b91422e", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/paren-projection", "relate_db": "1.3.0", "relationships": 0, "rows": [{"(a.runways)": 1, "a.runways": 1}], "digest": "7113868d29415275", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/percentile-disc", "relate_db": "1.3.0", "relationships": 0, "rows": [{"v": 1, "t": "INTEGER NOT NULL"}], "digest": "18e7ba291ad92eb9", "python": "3.12.13", "machine": "Darwin arm64"}
+{"witness": "witnesses/regress/shortest-where", "relate_db": "1.3.0", "relationships": 3, "rows": [{"n": 0}], "digest": "ef92fd678b91422e", "python": "3.12.13", "machine": "Darwin arm64"}

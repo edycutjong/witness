@@ -1,0 +1,531 @@
+{
+ "schema": "witness.release-notes/v1",
+ "source": "the Fixed entries of the read path (fix(executor|cypher|planner|front|parser)) in the GitHub release notes of relatedb/relate v1.0.2, v1.1.0, v1.2.0 and v1.3.0 (What's Changed)",
+ "entries": 72,
+ "tally": {
+  "error on 1.0.1, answer after the fix": 23,
+  "reproduced, shrunk": 3,
+  "not on this data": 5,
+  "answer on 1.0.1, error after the fix": 10,
+  "not a read-path answer on this data": 22,
+  "reproduced, attributed to #734": 1,
+  "reproduced, shrunk (both read-path parts)": 1,
+  "reproduced, not shrinkable": 1,
+  "not reproduced on air-routes": 5,
+  "reproduced, shrunk (2 of its 4 cases)": 1
+ },
+ "fixes": [
+  {
+   "pr": 512,
+   "release": "v1.2.0",
+   "entry": "fix(cypher): accept backtick-quoted and whitespace-separated parameter names (LABS-1602, LABS-1612)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 514,
+   "release": "v1.2.0",
+   "entry": "fix(cypher): accept null as a constraint name (LABS-1614)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 518,
+   "release": "v1.2.0",
+   "entry": "fix(cypher): classify parenthesized projection items like their unparenthesized forms (LABS-1615, LABS-1616)",
+   "status": "reproduced, shrunk",
+   "witness": "witnesses/regress/paren-projection.rl"
+  },
+  {
+   "pr": 552,
+   "release": "v1.2.0",
+   "entry": "fix(cypher): accept USING RANGE INDEX hints (LABS-1607)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 553,
+   "release": "v1.2.0",
+   "entry": "fix(cypher): accept label expressions in WHERE pattern predicates and pattern comprehensions (LABS-1603, LABS-1604)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 554,
+   "release": "v1.2.0",
+   "entry": "fix(cypher): accept map projections as a filtered comprehension's map expression (LABS-1605)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 555,
+   "release": "v1.2.0",
+   "entry": "fix(cypher): allow pattern expressions in SET values (LABS-1609)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 556,
+   "release": "v1.2.0",
+   "entry": "fix(cypher): allow property access on aggregation results (LABS-1611)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 564,
+   "release": "v1.2.0",
+   "entry": "fix(cypher): leave an ambiguous trailing pipe to the comprehension's map separator after a type predicate (LABS-1606)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 565,
+   "release": "v1.2.0",
+   "entry": "fix(cypher): accept USING TEXT INDEX hints (LABS-1608)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 566,
+   "release": "v1.2.0",
+   "entry": "fix(cypher): allow pattern predicates inside quantifier filters in projections (LABS-1610)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 571,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): expand unmatched regex replacement groups as empty strings (REL8-1061)",
+   "status": "not on this data",
+   "note": "an expression whose answer does not depend on the graph"
+  },
+  {
+   "pr": 572,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): reject FLOAT32 numeric suffixes glued into number runs (REL8-1064)",
+   "status": "answer on 1.0.1, error after the fix",
+   "note": "a stricter rejection; nothing to shrink against an error"
+  },
+  {
+   "pr": 573,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): reject quarters as a duration map field (REL8-1063)",
+   "status": "answer on 1.0.1, error after the fix",
+   "note": "a stricter rejection; nothing to shrink against an error"
+  },
+  {
+   "pr": 574,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): align vector quantization types with SCALAR, BINARY and NONE (REL8-1062)",
+   "status": "not a read-path answer on this data",
+   "note": "vector index"
+  },
+  {
+   "pr": 575,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): saturate dynamic slice bounds into the int32 range (REL8-1055, ADR-0631)",
+   "status": "not on this data",
+   "note": "an expression whose answer does not depend on the graph"
+  },
+  {
+   "pr": 580,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): accept whitespace between relationship dashes and arrowheads (REL8-1870)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 581,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): name unaliased map projections after their base variable (REL8-1866)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 582,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): read a parenthesized value alias as grouping in WHERE (REL8-1867)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "WITH a, a.runways > 2 AS b WHERE (b) / NOT(b): UndefinedVariable in 1.0.1 through 1.2.0, rows in 1.3.0. No variant with rows on both sides. Flip at 1.3.0."
+  },
+  {
+   "pr": 583,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): admit scalar calls over grouping-key variables in mixed aggregations (REL8-1869)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 584,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): let ORDER BY read the base variable behind a DISTINCT alias (REL8-1868)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "RETURN DISTINCT m AS node ORDER BY m.iata: UndefinedVariable until 1.2.0, rows (nodes, shown by id) in 1.3.0. Property-valued DISTINCT aliases behave the same on both. Flip at 1.3.0."
+  },
+  {
+   "pr": 591,
+   "release": "v1.3.0",
+   "entry": "fix(executor): apply the fulltext index analyzer to stored tokens and the default query (REL8-690)",
+   "status": "not a read-path answer on this data",
+   "note": "full-text index"
+  },
+  {
+   "pr": 617,
+   "release": "v1.3.0",
+   "entry": "fix(executor): PROFILE observes the streamed MATCH chain instead of holding it (REL8-1904)",
+   "status": "not a read-path answer on this data",
+   "note": "PROFILE output"
+  },
+  {
+   "pr": 619,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): a binder inside the expression shadows the outer variable in the static kind rules (REL8-1928)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "RETURN size([p IN nodes(p) WHERE size(labels(p)) > 0]) over a path p: InvalidArgumentType in 1.0.1-1.2.0, 2 in 1.3.0. The PR's own ALL(p IN nodes(p) ...) WHERE form is accepted by every version (PR says it regressed via "
+  },
+  {
+   "pr": 620,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): a subquery body's pattern declaration is not a read of the dropped outer name (REL8-1929)",
+   "status": "reproduced, attributed to #734",
+   "note": "the same rows change in the same release as #734 (a dropped name binding fresh); covered by witnesses/regress/distinct-dropped-name.rl"
+  },
+  {
+   "pr": 623,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): the mixed-projection ambiguity gate covers variables, not shapes (REL8-1891)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 669,
+   "release": "v1.3.0",
+   "entry": "fix(executor,core,error): nameFromElementId unknown-database class, space-separated datetime rejection, regexReplace pattern cache (REL8-1757, REL8-772, REL8-618)",
+   "status": "not a read-path answer on this data",
+   "note": "error class / datetime text / regex cache"
+  },
+  {
+   "pr": 670,
+   "release": "v1.3.0",
+   "entry": "fix(executor): vector int-coord truncation, one memo phase field (REL8-1897)",
+   "status": "not a read-path answer on this data",
+   "note": "vector values"
+  },
+  {
+   "pr": 681,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): a function-call map expression takes the comprehension pipe after a label filter (REL8-1871)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 650,
+   "release": "v1.3.0",
+   "entry": "fix(executor): count a cross-statement tx delete of a created entity instead of netting it negative (REL8-1188)",
+   "status": "not a read-path answer on this data",
+   "note": "write statistics"
+  },
+  {
+   "pr": 684,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): a comprehension WHERE's single pipe yields to the map separator (REL8-1998)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 698,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): composed SHOW CURRENT USER is 51N28 off the system database (REL8-1547)",
+   "status": "answer on 1.0.1, error after the fix",
+   "note": "a stricter rejection; nothing to shrink against an error"
+  },
+  {
+   "pr": 686,
+   "release": "v1.3.0",
+   "entry": "fix(executor): .transaction clock is constant across the transaction",
+   "status": "not a read-path answer on this data",
+   "note": "transaction clock (non-deterministic, refused)"
+  },
+  {
+   "pr": 671,
+   "release": "v1.3.0",
+   "entry": "fix(executor): a user alias spelled `__x` survives star projections (REL8-1732)",
+   "status": "not on this data",
+   "note": "an expression whose answer does not depend on the graph"
+  },
+  {
+   "pr": 706,
+   "release": "v1.3.0",
+   "entry": "fix(executor): a variable-rooted write target's non-entity rejection is the runtime type error (REL8-1813)",
+   "status": "not a read-path answer on this data",
+   "note": "write target"
+  },
+  {
+   "pr": 711,
+   "release": "v1.3.0",
+   "entry": "fix(executor): a bare SetCurrentGraphType record installs its derived catalog rows (REL8-2022)",
+   "status": "not a read-path answer on this data",
+   "note": "graph-type catalog"
+  },
+  {
+   "pr": 712,
+   "release": "v1.3.0",
+   "entry": "fix(executor): batched DELETE over an empty factor, EXISTS probe per-clause uniqueness, repeated-variable scan gate (REL8-2023)",
+   "status": "reproduced, shrunk (both read-path parts)",
+   "witness": [
+    "witnesses/exists-count.rl",
+    "witnesses/regress/cycle-repeated-variable.rl"
+   ],
+   "note": "EXISTS over two MATCH clauses vs COUNT (the earlier exhibit) and a node variable repeated in a cycle"
+  },
+  {
+   "pr": 719,
+   "release": "v1.3.0",
+   "entry": "fix(executor): a UUID operand beside a string is a + type mismatch (REL8-1892)",
+   "status": "answer on 1.0.1, error after the fix",
+   "note": "a stricter rejection; nothing to shrink against an error"
+  },
+  {
+   "pr": 724,
+   "release": "v1.3.0",
+   "entry": "fix(executor): bulk-batched writes keep both relationship orientations and uniqueness (REL8-2027)",
+   "status": "not a read-path answer on this data",
+   "note": "bulk writes"
+  },
+  {
+   "pr": 731,
+   "release": "v1.3.0",
+   "entry": "fix(executor): the contracted kernels observe cancellation inside their loops (REL8-2032)",
+   "status": "not a read-path answer on this data",
+   "note": "cancellation"
+  },
+  {
+   "pr": 730,
+   "release": "v1.3.0",
+   "entry": "fix(executor): one total order over every value kind (REL8-2030)",
+   "status": "reproduced, shrunk",
+   "witness": "witnesses/regress/percentile-disc.rl"
+  },
+  {
+   "pr": 729,
+   "release": "v1.3.0",
+   "entry": "fix(executor): a subquery body's missed reads and unrun NEXT stages (REL8-2028)",
+   "status": "reproduced, not shrinkable",
+   "note": "the answer does not depend on the data (true on 1.0.1, false on 1.3.0 even on an empty graph); Witness refuses such a predicate"
+  },
+  {
+   "pr": 726,
+   "release": "v1.3.0",
+   "entry": "fix(cypher): toStringOrNull renders a homogeneous list, matching live (REL8-2034)",
+   "status": "not on this data",
+   "note": "an expression whose answer does not depend on the graph"
+  },
+  {
+   "pr": 758,
+   "release": "v1.3.0",
+   "entry": "fix(executor): a seek bound must be ready on the entry row (REL8-2074)",
+   "status": "not reproduced on air-routes",
+   "note": "COUNT{}/EXISTS{} bounds on equality, range and id() comparisons over the indexed Airport.id, Country.code, Continent.code, both pattern orders, comma and path patterns: all answers identical on 1.0.1 and 1.3.0. The store"
+  },
+  {
+   "pr": 734,
+   "release": "v1.3.0",
+   "entry": "fix(executor): resolve four name-scope disagreements between the row and the scope (REL8-2029)",
+   "status": "reproduced, shrunk (2 of its 4 cases)",
+   "witness": [
+    "witnesses/regress/null-bound-varlength.rl",
+    "witnesses/regress/distinct-dropped-name.rl"
+   ],
+   "note": "the CALL { } case (60 -> 3,504 Mexican airports) is refused at Witness's read-only door: relate-db 1.0.1 reports query_type 'rw' for CALL; the fourth case is refused on 1.0.1 (error only)"
+  },
+  {
+   "pr": 732,
+   "release": "v1.3.0",
+   "entry": "fix(executor): MATCH-fed ORDER BY-LIMIT and DISTINCT fold into their bounded forms (REL8-2032)",
+   "status": "not reproduced on air-routes",
+   "note": "Bounded-window fold, not a semantic change: 12 deterministic ORDER BY ... LIMIT / DISTINCT / SKIP queries over nodes and relationships gave identical answers on 1.0.1 and 1.3.0 (two also checked on 1.0.2-1.2.0)."
+  },
+  {
+   "pr": 793,
+   "release": "v1.3.0",
+   "entry": "fix(executor): read randomUUID()'s clock through chrono so it runs on wasm32 (REL8-2001)",
+   "status": "not a read-path answer on this data",
+   "note": "randomUUID (non-deterministic, refused)"
+  },
+  {
+   "pr": 389,
+   "release": "v1.1.0",
+   "entry": "fix(cypher): TERMINATE TRANSACTIONS runs on `system` and projects per input row (LABS-873) (size 148)",
+   "status": "not a read-path answer on this data",
+   "note": "TERMINATE TRANSACTIONS"
+  },
+  {
+   "pr": 409,
+   "release": "v1.1.0",
+   "entry": "fix(executor,model): close the plan-metrics stellar findings that merged with LABS-401",
+   "status": "not a read-path answer on this data",
+   "note": "plan metrics"
+  },
+  {
+   "pr": 404,
+   "release": "v1.1.0",
+   "entry": "fix(executor): close the shortest-route stellar findings that merged with LABS-1653",
+   "status": "not reproduced on air-routes",
+   "note": "Refactor/review follow-up, no behaviour change intended (PR body). Shortest-route queries with WHERE-borne endpoints differ only by the 1.0.1 51N23 error, which flips at 1.0.2 (#238), not 1.1.0; answers are identical 1.0"
+  },
+  {
+   "pr": 444,
+   "release": "v1.1.0",
+   "entry": "fix(executor): SHOW TRANSACTIONS' self row reports its session values (size 112)",
+   "status": "not a read-path answer on this data",
+   "note": "SHOW TRANSACTIONS"
+  },
+  {
+   "pr": 477,
+   "release": "v1.1.0",
+   "entry": "fix(cypher): TERMINATE TRANSACTIONS reports live's canonical id and validates its argument (size 204)",
+   "status": "not a read-path answer on this data",
+   "note": "TERMINATE TRANSACTIONS"
+  },
+  {
+   "pr": 498,
+   "release": "v1.1.0",
+   "entry": "fix(cypher): SHOW TRANSACTIONS rejects an unknown YIELD column (LABS-1767)",
+   "status": "answer on 1.0.1, error after the fix",
+   "note": "a stricter rejection; nothing to shrink against an error"
+  },
+  {
+   "pr": 238,
+   "release": "v1.0.2",
+   "entry": "fix(executor): an endpoint WHERE drops a same-node shortest-path pair before 51N23 rejects it (LABS-1454)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "1.0.1 raises ShortestPathCommonEndNodes (51N23) for the fan spelling shortestPath((a {iata:'MZT'})-[*1..2]-(n)) WHERE n <> a; 1.0.2+ return the pair count. Rows are unchanged by design, so no both-rows variant exists. Fl"
+  },
+  {
+   "pr": 202,
+   "release": "v1.0.2",
+   "entry": "fix(executor): the stats estimate prices a delete's count-entry refund (LABS-1386) (size 501)",
+   "status": "not a read-path answer on this data",
+   "note": "delete cost estimate"
+  },
+  {
+   "pr": 224,
+   "release": "v1.0.2",
+   "entry": "fix(front): a temporal reduce element is a compile-time type fault (ADR-0566) (size 330)",
+   "status": "answer on 1.0.1, error after the fix",
+   "note": "a stricter rejection; nothing to shrink against an error"
+  },
+  {
+   "pr": 176,
+   "release": "v1.0.2",
+   "entry": "fix(executor): a delete's sealed-tier growth is charged and never refuses the batch (ADR-0529) (size 694)",
+   "status": "not a read-path answer on this data",
+   "note": "delete memory charging"
+  },
+  {
+   "pr": 255,
+   "release": "v1.0.2",
+   "entry": "fix(front): drop the edge filter the scoped walk replaced (size 7)",
+   "status": "not reproduced on air-routes",
+   "note": "PR body: deletes a dead function (enters_arithmetic_search) that failed the dead-code lint; 'User-facing impact: None', so no Cypher can differ."
+  },
+  {
+   "pr": 241,
+   "release": "v1.0.2",
+   "entry": "fix(cypher): admit only the CYPHER 25 preamble as a no-op and drop version selection (LABS-1405, ADR-0584)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "a spelling the parser now accepts; there is no answer on 1.0.1 to compare"
+  },
+  {
+   "pr": 257,
+   "release": "v1.0.2",
+   "entry": "fix(executor): the delete-spill shape batch \u2014 one span-placement policy, arithmetic founding term, region-first pricing (LABS-1481)",
+   "status": "not a read-path answer on this data",
+   "note": "delete batching"
+  },
+  {
+   "pr": 289,
+   "release": "v1.0.2",
+   "entry": "fix(executor): a fulltext wildcard term over 256 parts is a typed syntax error (LABS-1558, ADR-0583)",
+   "status": "answer on 1.0.1, error after the fix",
+   "note": "a stricter rejection; nothing to shrink against an error"
+  },
+  {
+   "pr": 299,
+   "release": "v1.0.2",
+   "entry": "fix(executor): a fulltext query is bounded to 1024 clauses and a fuzzy expansion keeps its best 50 while scanning (LABS-1568, ADR-0578)",
+   "status": "not a read-path answer on this data",
+   "note": "full-text query bounds"
+  },
+  {
+   "pr": 306,
+   "release": "v1.0.2",
+   "entry": "fix(executor): point.distance answers null for a non-point argument (size 52)",
+   "status": "not on this data",
+   "note": "an expression whose answer does not depend on the graph"
+  },
+  {
+   "pr": 288,
+   "release": "v1.0.2",
+   "entry": "fix(parser): the unsupported-version rejection names the version it accepts (size 64)",
+   "status": "answer on 1.0.1, error after the fix",
+   "note": "a stricter rejection; nothing to shrink against an error"
+  },
+  {
+   "pr": 262,
+   "release": "v1.0.2",
+   "entry": "fix(planner): a composed SHOW DATABASES is rejected off the system database (ADR-0590) (size 542)",
+   "status": "answer on 1.0.1, error after the fix",
+   "note": "a stricter rejection; nothing to shrink against an error"
+  },
+  {
+   "pr": 302,
+   "release": "v1.0.2",
+   "entry": "fix(front): a page statement opening a subquery body is not an importing WITH (size 773)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "1.0.1 rejects CALL { ORDER BY 1 RETURN 1 AS x } with InvalidImportingWith; 1.0.2+ run it. Flip at 1.0.2."
+  },
+  {
+   "pr": 314,
+   "release": "v1.0.2",
+   "entry": "fix(executor): reserve collect and percentile bytes on the workspace ledger",
+   "status": "not a read-path answer on this data",
+   "note": "memory accounting"
+  },
+  {
+   "pr": 316,
+   "release": "v1.0.2",
+   "entry": "fix(cypher): the six reported Neo4j-parity gaps \u2014 subquery WITH scope, aggregate CASE, conditional CALL rows, IN TRANSACTIONS NEXT visibility, SHORTEST self-loops, singular REPEATABLE ELEMENT (LABS-1584)",
+   "status": "error on 1.0.1, answer after the fix",
+   "note": "1.0.1 errors, 1.0.2+ return rows. Gap 1 (WITH b AS z WHERE z... inside CALL (a) {}): UndefinedVariable in 1.0.1. Gap 2 (aggregate CASE, untaken branch 1/0): '/ by zero' in 1.0.1 (also[0]). Gap 5 (SHORTEST over a self-loo"
+  },
+  {
+   "pr": 361,
+   "release": "v1.0.2",
+   "entry": "fix(parser): reject the user, role and privilege administration commands (LABS-873) (size 76)",
+   "status": "answer on 1.0.1, error after the fix",
+   "note": "a stricter rejection; nothing to shrink against an error"
+  },
+  {
+   "pr": 376,
+   "release": "v1.0.2",
+   "entry": "fix(executor): price the frontier cost gate's first hop by the side it leaves and cross multi-type degrees (LABS-1661)",
+   "status": "not a read-path answer on this data",
+   "note": "planner cost"
+  },
+  {
+   "pr": 373,
+   "release": "v1.0.2",
+   "entry": "fix(executor): clause WHERE over the path post-filters keyword shortest selectors (LABS-1655, ADR-0600)",
+   "status": "reproduced, shrunk",
+   "witness": "witnesses/regress/shortest-where.rl"
+  },
+  {
+   "pr": 378,
+   "release": "v1.0.2",
+   "entry": "fix(executor): close the aggregate module's carried stellar findings (LABS-1480)",
+   "status": "not reproduced on air-routes",
+   "note": "Refactor follow-up (percentile pool routing, slot reset, bill accounting), no behaviour change intended. The percentile queries differ between 1.0.1 and 1.3.0 only by percentileDisc returning 1.0 vs 1, which flips at 1.3"
+  }
+ ]
+}

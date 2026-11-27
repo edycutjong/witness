@@ -1,0 +1,84 @@
+{
+  "baseline": {
+    "columns": [
+      "n"
+    ],
+    "rows": [
+      {
+        "n": 1699
+      }
+    ],
+    "sha256": "d2d6f34e53709ca12c8db3143c5ad88053f3ae3192b4168698678a612db7e6d4"
+  },
+  "check": {
+    "check_text": "2 of 2 end the disagreement (2 of 2 relationships, 0 of 0 isolated nodes)",
+    "cli": "relate CLI: sufficiency + 2 of 2 necessity probes cross-checked",
+    "cli_used": true,
+    "disagreements": [],
+    "inconclusive": 0,
+    "other_engine": "relate-db 1.3.0",
+    "probes": [
+      {
+        "cli_necessary": true,
+        "element": "(LAX)-[:HAS_ROUTE]->(MZT)",
+        "i": 1,
+        "kind": "rel",
+        "necessary": true
+      },
+      {
+        "cli_necessary": true,
+        "element": "(MZT)-[:HAS_ROUTE]->(LAX)",
+        "i": 2,
+        "kind": "rel",
+        "necessary": true
+      }
+    ],
+    "reasons": [],
+    "sufficient": true,
+    "verified": true
+  },
+  "comparison": {
+    "float_digits": 12,
+    "rows": "bag",
+    "strict_lists": false
+  },
+  "determinism_claimed": true,
+  "name": "null-bound-varlength",
+  "params": {},
+  "predicate": {
+    "kind": "disagree",
+    "other_baseline_sha256": "ef92fd678b91422e40ac2f7572373a3fb66d052a21d9f05be8b3f867dd82c6a6",
+    "other_engine": "relate-db 1.3.0",
+    "other_engine_spec": "relate-db==1.3.0",
+    "other_statement": "// An OPTIONAL MATCH that binds x to null, then a variable-length MATCH ending at x. Relate v1.3.0: a variable bound to null matches nothing in later patterns (#734).\nMATCH (a:Airport {iata: 'MZT'})\nOPTIONAL MATCH (a)-[:IN_COUNTRY]->(x:Continent)\nMATCH (a)-[:HAS_ROUTE*2]->(x)\nRETURN count(*) AS n"
+  },
+  "reasons": [],
+  "run": {
+    "capped": null,
+    "commits": 15,
+    "inconclusive": 0,
+    "seconds": 1.377,
+    "ties": 0,
+    "trials": 37
+  },
+  "schema": "witness.manifest/v1",
+  "seed": 0,
+  "source": {
+    "nodes": 3748,
+    "path": "data/air-routes.rl",
+    "relationships": 57645,
+    "sha256": "b124cf2c6b3af3075cec11125b0355523ca2817210adfcfe1ac3aa4a650e6734"
+  },
+  "statement": "// An OPTIONAL MATCH that binds x to null, then a variable-length MATCH ending at x. Relate v1.3.0: a variable bound to null matches nothing in later patterns (#734).\nMATCH (a:Airport {iata: 'MZT'})\nOPTIONAL MATCH (a)-[:IN_COUNTRY]->(x:Continent)\nMATCH (a)-[:HAS_ROUTE*2]->(x)\nRETURN count(*) AS n\n",
+  "verified": true,
+  "versions": {
+    "python": "3.12.13",
+    "relate_db": "1.0.1",
+    "witness": "0.1.0"
+  },
+  "witness": {
+    "isolated_nodes": 0,
+    "nodes": 2,
+    "relationships": 2
+  }
+}

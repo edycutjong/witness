@@ -384,13 +384,28 @@ h1,h2{text-wrap:balance}
 .case-stamp{display:inline-block;margin:14px 0 4px;padding:6px 12px;border:2px solid var(--after);color:var(--after);font:700 13px/1.2 var(--font-display);letter-spacing:.14em;text-transform:uppercase}
 @media (max-width:820px){.case-grid{grid-template-columns:minmax(0,1fr)}.case{padding:24px 0;border-left:0;border-top:1.5px solid var(--rule)}.case:first-child{border-top:0;padding-top:0}}
 /* ── Relate in the tab: the engine's state, live/recorded marks, the query box, the engine case on two releases ── */
-.eng{display:flex;align-items:baseline;gap:10px;margin:14px 0 26px;font:400 14px/1.45 var(--font-body);color:var(--muted);max-width:86ch}
-.eng i{flex:none;position:relative;top:1px;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--before);background:transparent}
-.eng b{font:700 12px/1 var(--font-display);letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+.eng{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:start;margin:0 0 14px;padding:12px 16px 12px 14px;background:var(--paper);border:1px solid var(--rule);border-left:4px solid var(--before);border-radius:6px;box-shadow:var(--shadow);transition:border-color .3s}
+.eng i{grid-row:1/3;position:relative;top:5px;width:11px;height:11px;border-radius:50%;border:1.5px solid var(--before);background:transparent}
+.eng-x p{margin:0}
+.eng-k{font:700 12.5px/1.3 var(--font-display);letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+.eng-t{font:400 13.5px/1.45 var(--font-body);color:var(--muted);margin-top:2px!important}
+.eng-m{grid-column:2;margin:4px 0 0;font-size:12.5px;color:var(--muted)}
+.eng-m:empty{display:none}
+.eng-m b{color:var(--ink);font-weight:400}
 .eng[data-state="load"] i{background:var(--before);animation:eng-blink 1s steps(2,end) infinite}
+.eng[data-state="live"]{border-left-color:var(--after)}
 .eng[data-state="live"] i{border-color:var(--after);background:var(--after);box-shadow:0 0 0 0 rgba(180,35,24,.45);animation:eng-pulse 2.4s ease-out infinite}
-.eng[data-state="live"] b{color:var(--after)}
-.eng[data-state="down"] i{border-style:dashed}
+.eng[data-state="live"] .eng-k{color:var(--after)}
+.eng[data-state="down"] i,.eng[data-state="off"] i{border-style:dashed}
+.ex-stamps{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.stamp.par{border-color:currentColor}
+.stamp.par.same{color:var(--after)}
+.stamp.par.diff{color:var(--after);background:rgba(180,35,24,.1)}
+.stamp.par.rec{color:var(--muted)}
+.stl{display:block;color:var(--after);font-weight:400;margin-bottom:6px}
+.ask-tbl.stale{opacity:.4;transition:opacity .2s}
+.ec-btns .btn.on{background:var(--ink);color:var(--bg)}
+@media (hover:none){.kbd-hint{display:none}}
 @keyframes eng-blink{50%{opacity:.25}}
 @keyframes eng-pulse{0%{box-shadow:0 0 0 0 rgba(180,35,24,.45)}70%,100%{box-shadow:0 0 0 9px rgba(180,35,24,0)}}
 .pk{display:inline-block;margin-right:6px;padding:3px 6px 2px;font:700 10.5px/1 var(--font-display);letter-spacing:.16em;text-transform:uppercase;border:1.5px solid currentColor;border-radius:2px;vertical-align:1px}
@@ -409,6 +424,7 @@ h1,h2{text-wrap:balance}
 .ask-try{display:flex;flex-wrap:wrap;gap:8px;min-height:24px}
 .chip.try{cursor:pointer;font-size:12.5px;padding:6px 11px}
 .chip.try:hover{border-color:var(--ink);color:var(--ink)}
+.chip.try:active{transform:translateY(1px)}
 .ask textarea,.ask input{width:100%;font:400 13.5px/1.55 var(--font-data);font-variant-ligatures:none;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:12px 14px;box-shadow:inset 0 1px 0 rgba(31,26,20,.04);transition:border-color .18s,box-shadow .18s}
 .ask textarea{min-height:240px;resize:vertical;white-space:pre;overflow:auto;tab-size:2}
 .ask textarea:focus,.ask input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(31,26,20,.12)}
@@ -426,7 +442,6 @@ h1,h2{text-wrap:balance}
 .ec-live{margin-top:16px}
 .ec-btns{display:flex;gap:10px;flex-wrap:wrap}
 .ec-btns .btn{min-height:40px;font-size:14.5px;padding:0 14px}
-.ec-btns .btn[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .ec-out{font-size:13px;color:var(--muted);margin:12px 0 0;min-height:2.9em}
 .rel-tape tr.live td{background:rgba(180,35,24,.07)}
 .rel-tape tr.live td:first-child{box-shadow:inset 3px 0 0 var(--after);padding-left:8px}
@@ -555,9 +570,13 @@ h1,h2{text-wrap:balance}
   <div class="wrap">
     <p class="lbl">Exhibit A <span>·</span> pull a tag</p>
     <h2 id="ex-h">Pull any tag. <em>The answer moves.</em></h2>
-    <p class="eng" id="eng" data-state="off" aria-live="polite"><i aria-hidden="true"></i><span id="eng-t">Each pull below shows the recorded run. With JavaScript, Relate 1.0.1 runs the pulls live in this tab.</span></p>
     <div class="ex-grid">
       <div class="ex-left">
+        <div class="eng" id="eng" data-state="off">
+          <i aria-hidden="true"></i>
+          <div class="eng-x"><p class="eng-k" id="eng-k">Recorded run</p><p class="eng-t" id="eng-t">With JavaScript, Relate 1.0.1 runs every pull live in this tab.</p></div>
+          <p class="eng-m data" id="eng-m"></p>
+        </div>
         <div class="ex-draw"><svg class="inst" viewBox="56 22 552 312" role="img" aria-labelledby="x-t">
 <title id="x-t">The witness: 22 relationships among 12 nodes (10 airports, 2 countries), the 13 routes carry numbered exhibit tags, the 9 country links show as country codes</title>
 <g class="edges">
@@ -601,16 +620,17 @@ h1,h2{text-wrap:balance}
 <g class="tg" data-n="21" transform="translate(195.4 95.7)"><path d="M-17 0L-10 -10H17V10H-10Z"/><circle cx="-9.5" cy="0" r="2"/><text x="4" y="4.6">21</text></g>
 </g></svg></div>
         <div class="ex-answer">
-          <div class="ex-ahead"><span class="lbl">Answer with exhibit <b id="ex-n">none</b> pulled</span><span class="stamp ink small" id="ex-mark">Unchanged</span></div>
+          <div class="ex-ahead"><span class="lbl">Answer with exhibit <b id="ex-n">none</b> pulled</span><span class="ex-stamps"><span class="stamp small par" id="ex-par" hidden></span><span class="stamp ink small" id="ex-mark">Unchanged</span></span></div>
           <table class="ans-t"><thead><tr><th scope="col">airport</th><th scope="col">hub_countries</th></tr></thead><tbody id="ex-rows"><tr data-a="PBC"><td>PBC</td><td>[MX, US]</td></tr>
 <tr data-a="QRO"><td>QRO</td><td>[MX, US]</td></tr>
 <tr data-a="TLC"><td>TLC</td><td>[MX, US]</td></tr>
 <tr data-a="UPN"><td>UPN</td><td>[MX, US]</td></tr></tbody></table>
-          <p class="ex-proof data" id="ex-proof" aria-live="polite">Pick a tag or a register line. Each answer: one relationship deleted in a Relate transaction, query re-run, rolled back.</p>
+          <p class="ex-proof data" id="ex-proof">Pick a tag or a register line. Each pull deletes that one relationship and re-runs the query on a fresh copy of the witness: live on Relate in this tab, or the recorded run if the engine cannot start.</p>
+          <p class="sr" id="ex-say" aria-live="polite"></p>
         </div>
       </div>
       <div class="ex-right">
-        <p class="lede">The agent's question: <q>Which airports of MX have no direct flight to MEX, yet would still reach it in two flights if any one hub closed?</q> The answer is four airports. The 13 red tags are the witness's routes, the 9 country codes its country links; all 22 are in the register. Pull any one to see the answer without it: Relate 1.0.1, compiled to WebAssembly and running in this tab, rebuilds the witness, deletes that relationship and re-runs the query. If the engine cannot start, the pull replays the recorded run.</p>
+        <p class="lede">The agent's question: <q>Which airports of MX have no direct flight to MEX, yet would still reach it in two flights if any one hub closed?</q> The answer is four airports. The 13 red tags are the witness's routes, the 9 country codes its country links; all 22 are in the register. Pull any one to see the answer without it, computed by Relate 1.0.1 in your tab.</p>
         <div class="reg-head"><span class="lbl">The register</span><span class="lbl">pull it and</span></div>
         <ol class="reg" id="reg"><li data-n="1"><button type="button" class="pull" data-n="1" aria-pressed="false"><span class="no">1</span><code>(ACA)-[:HAS_ROUTE]-&gt;(MEX)</code><span class="fx">TLC drops out</span></button></li>
 <li data-n="2"><button type="button" class="pull" data-n="2" aria-pressed="false"><span class="no">2</span><code>(ACA)-[:IN_COUNTRY]-&gt;(MX)</code><span class="fx">TLC loses MX</span></button></li>
@@ -645,7 +665,7 @@ h1,h2{text-wrap:balance}
     <div class="ask" id="ask">
       <div class="ask-head">
         <h3 id="ask-h">Cross-examine it yourself.</h3>
-        <p>Your own Cypher, run by Relate 1.0.1 in this tab on a fresh copy of the witness (<code>witnesses/two-hub.cypher</code>, 22 relationships), with the tag you pulled above deleted. Reads only: a statement that writes is refused.</p>
+        <p>Your own Cypher, run by Relate 1.0.1 in this tab on a fresh copy of the witness (<code>witnesses/two-hub.cypher</code>, 22 relationships), minus the tag you pulled above, if you pulled one. It only reads: a statement that writes runs on a throwaway copy and is refused, so nothing you see changes.</p>
       </div>
       <div class="ask-grid">
         <div class="ask-in">
@@ -662,11 +682,11 @@ RETURN a.iata AS airport, hub_countries
 ORDER BY airport</textarea>
           <label class="lbl" for="ask-p">Parameters, JSON</label>
           <input id="ask-p" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" value="{&quot;country&quot;: &quot;MX&quot;, &quot;dest&quot;: &quot;MEX&quot;}">
-          <div class="ask-go"><button type="button" class="btn solid" id="ask-run" disabled>Run in this tab</button><span class="fine data"><kbd>Ctrl</kbd> / <kbd>&#8984;</kbd> + <kbd>Enter</kbd></span></div>
-          <p class="ask-on data" id="ask-on">Runs on: the witness, 22 relationships.</p>
+          <div class="ask-go"><button type="button" class="btn solid" id="ask-run" disabled>Run in this tab</button><span class="fine data kbd-hint"><kbd>Ctrl</kbd> / <kbd>&#8984;</kbd> + <kbd>Enter</kbd></span></div>
+          <p class="ask-on data"><span id="ask-on">Runs on: the witness, 22 relationships.</span> <button type="button" class="linkish" id="ask-back" hidden>Put it back</button></p>
         </div>
         <div class="ask-out">
-          <p class="ask-meta data" id="ask-meta" aria-live="polite">Needs JavaScript and WebAssembly. Without them: <code>relate query --database witnesses/two-hub.rl --read-only</code> on a clone gives the same answers.</p>
+          <p class="ask-meta data" id="ask-meta" aria-live="polite">Needs JavaScript and WebAssembly. Without them: <code>relate query --database witnesses/two-hub.rl --read-only</code> on a clone answers the same queries on the full witness.</p>
           <div class="ask-tbl" id="ask-tbl" tabindex="0" role="region" aria-label="Query result"></div>
         </div>
       </div>
@@ -718,8 +738,8 @@ ORDER BY airport</textarea>
         </table>
         <div class="ec-live" id="ec-live" hidden>
           <div class="ec-btns" role="group" aria-label="Run both forms on a Relate release, in this tab">
-            <button type="button" class="btn" data-v="1.0.1" aria-pressed="false">Run on 1.0.1</button>
-            <button type="button" class="btn" data-v="1.3.0" aria-pressed="false">Run on 1.3.0</button>
+            <button type="button" class="btn" data-v="1.0.1">Run on 1.0.1</button>
+            <button type="button" class="btn" data-v="1.3.0">Run on 1.3.0</button>
           </div>
           <p class="ec-out data" id="ec-out" aria-live="polite">Both forms on the two-relationship witness, in this tab, on the release you pick. Each release is its own engine, served from this site.</p>
         </div>
@@ -1001,8 +1021,14 @@ ORDER BY airport</textarea>
       self.w.onerror = function (e) { if (e && e.preventDefault) e.preventDefault(); self.stop((e && e.message) || "the engine worker did not load"); };
       self.call("boot", [self.v], 30000).then(function (i) { self.info = i; res(i); }, rej);
     });
-    self.boot.catch(function (e) { self.dead = String((e && e.message) || e); });
-    return self.boot;
+    var b = self.boot;
+    b.catch(function (e) {
+      var why = String((e && e.message) || e);
+      if (self.boot === b) self.stop(why); // end the worker; the next start() is a fresh one
+      self.fails = (self.fails || 0) + 1;
+      if (!CAN || self.fails >= 2) self.dead = why; // one retry, then the recorded run for good
+    });
+    return b;
   };
   Engine.prototype.call = function (op, args, ms) {
     var self = this, id = ++self.seq;
@@ -1013,29 +1039,49 @@ ORDER BY airport</textarea>
     });
   };
   Engine.prototype.stop = function (why) {
+    var was = !!this.info;
     if (this.w) this.w.terminate();
     this.w = null; this.boot = null; this.info = null;
     var w = this.wait; this.wait = {};
     Object.keys(w).forEach(function (k) { clearTimeout(w[k].t); w[k].rej(new Error(why)); });
+    if (was && this.onstop) this.onstop(why);
   };
   Engine.prototype.run = function (op, args, ms) { var self = this; return self.start().then(function () { return self.call(op, args, ms); }); };
   var engines = {};
   var eng = function (v) { return engines[v] || (engines[v] = new Engine(v)); };
   var A = eng(LV.pin);
-  var st = document.getElementById("eng"), stT = document.getElementById("eng-t");
-  function status(state, h) { if (st) { st.setAttribute("data-state", state); stT.innerHTML = h; } }
+  var st = document.getElementById("eng"), stK = document.getElementById("eng-k"), stT = document.getElementById("eng-t"), stM = document.getElementById("eng-m");
+  var lastMs = null;
+  function status(state, k, t) { if (st) { st.setAttribute("data-state", state); stK.innerHTML = k; stT.innerHTML = t; meter(); } }
+  function meter() {
+    if (!stM) return;
+    var lv = Object.keys(live).length, ls = Object.keys(liveSame).length;
+    stM.innerHTML = lastMs === null || st.getAttribute("data-state") !== "live" ? "" : "last pull <b>" + lastMs.toFixed(1) + " ms</b> · " + ls + " of " + lv + " live pulls = the recording";
+  }
+  var CLONE = "On a clone, <code>relate query --database witnesses/two-hub.rl --read-only</code> runs the same queries.";
+  A.onstop = function (why) { status("off", "Engine stopped", esc(why) + ". Relate restarts on the next pull or query."); };
   function warm() {
     if (A.dead || A.boot) return A.start();
-    status("load", "Loading Relate " + esc(LV.pin) + " into this tab…");
+    status("load", "Loading", "Relate " + esc(LV.pin) + " is loading into this tab…");
     var p = A.start();
     p.then(function (i) {
-      status("live", "<b>Live</b> · Relate " + esc(i.reported) + " (the engine's own answer) is running in this tab as WebAssembly, served from this site · started in " + fmt(i.boot_ms) + " ms · no server");
+      status("live", "Live · Relate " + esc(i.reported) + " in this tab", "Compiled to WebAssembly and served from this site; no server. Started in " + fmt(i.boot_ms) + " ms; the version is the engine's own report.");
+      var rb = document.getElementById("ask-run"); if (rb && rb.getAttribute("data-busy") !== "1") rb.disabled = false;
     }, function (e) {
-      status("down", "<b>Recorded</b> · the engine did not start in this browser (" + esc(e.message) + "), so each pull replays the recorded run");
+      status("down", "Recorded run", "The engine did not start in this browser (" + esc(e.message) + ")" + (A.dead ? ", so each pull replays the recorded run." : "; the next pull tries once more."));
       var rb = document.getElementById("ask-run"), rm = document.getElementById("ask-meta");
-      if (rb) { rb.disabled = true; rm.innerHTML = '<span class="pk rec">Not run</span> The engine did not start in this browser (' + esc(e.message) + "). On a clone, <code>relate query --database witnesses/two-hub.rl --read-only</code> runs the same queries."; }
+      if (rb && A.dead) { rb.disabled = true; rm.innerHTML = '<span class="pk rec">Not run</span> The engine did not start in this browser (' + esc(e.message) + "). " + CLONE; }
     });
     return p;
+  }
+  // why a request to an engine did not come back, in words; a statement's own error comes back as r.error instead
+  function why(e, E) {
+    var m = String((e && e.message) || e);
+    if (/^stopped after/.test(m)) return ["Stopped", "S" + esc(m.slice(1)) + ". Relate's browser build has no statement timeout, so the page ended its worker; the engine restarts on the next run."];
+    if (/WebAssembly trap/.test(m)) return ["Crashed", "The statement crashed the engine (a WebAssembly trap). A fresh engine starts on the next run."];
+    if (/not running/.test(m)) return ["Not run", "The engine was restarting. Run it again."];
+    if (E.dead || !E.info) return ["Not run", "The engine did not start in this browser (" + esc(m) + "). " + CLONE];
+    return ["Relate says", esc(m)];
   }
   var same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
   var names = function (rows) { return rows.length ? rows.map(function (r) { return esc(r.airport); }).join(", ") : "no rows"; };
@@ -1043,7 +1089,15 @@ ORDER BY airport</textarea>
   // ── exhibit A: pull a tag ──
   var ex = $("#exhibit .inst"), rows = document.getElementById("ex-rows"), mark = document.getElementById("ex-mark");
   var proof = document.getElementById("ex-proof"), exn = document.getElementById("ex-n"), tally = document.getElementById("tally");
-  var regStamp = document.getElementById("reg-stamp");
+  var regStamp = document.getElementById("reg-stamp"), par = document.getElementById("ex-par"), sayEl = document.getElementById("ex-say");
+  var say = function (t) { if (sayEl) sayEl.textContent = t; };
+  function showPar(kind) {
+    if (!par) return;
+    par.hidden = false;
+    par.className = "stamp small par " + kind;
+    par.textContent = kind === "same" ? "Live = recorded" : kind === "diff" ? "Live ≠ recorded" : "Recorded";
+    par.classList.remove("flip"); void par.offsetWidth; par.classList.add("flip");
+  }
   var byN = {}; D.tags.forEach(function (t) { byN[t.n] = t; });
   var cur = 0, proven = {}, live = {}, liveSame = {}, pg = 0;
   function renderRows(t) {
@@ -1061,10 +1115,12 @@ ORDER BY airport</textarea>
     $$(".out", ex).forEach(function (x) { x.classList.remove("out"); });
     $$(".pull").forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
   }
-  function pull(n) {
+  function pull(n, keep) {
     var t = byN[n]; if (!t) return;
+    var my = ++pg;
     clearPulled();
-    if (cur === n) { cur = 0; renderRows(null); exn.textContent = "none"; mark.textContent = "Unchanged"; proof.innerHTML = "Exhibit " + n + " put back: the answer is the four rows again."; askOn(); return; }
+    if (par) par.hidden = true;
+    if (cur === n && !keep) { cur = 0; renderRows(null); exn.textContent = "none"; mark.textContent = "Unchanged"; proof.innerHTML = "Exhibit " + n + " put back: the answer is the four rows again."; say("Exhibit " + n + " put back."); askOn(); return; }
     cur = n; askOn();
     var m = t.rel.match(/\((\w+)\)-\[:(\w+)\]->\((\w+)\)/);
     if (m && m[2] === "HAS_ROUTE") { var e = $('.ed[data-n="' + n + '"]', ex), g = $('.tg[data-n="' + n + '"]', ex); if (e) e.classList.add("pulled"); if (g) g.classList.add("pulled"); }
@@ -1075,24 +1131,27 @@ ORDER BY airport</textarea>
     mark.textContent = "Changed"; mark.classList.remove("flip"); void mark.offsetWidth; mark.classList.add("flip");
     var recorded = "Exhibit " + n + " pulled: <b>" + esc(t.rel) + "</b>. " + D.base.length + " rows → " + t.rows.length + " · " + esc(t.fx) + ". ";
     var b = $('.pull[data-n="' + n + '"]'); if (b) { b.setAttribute("aria-pressed", "true"); b.classList.add("done"); }
-    var my = ++pg;
-    if (A.dead) { proof.innerHTML = '<span class="pk rec">Recorded</span> ' + recorded + "Relate transaction, rolled back, " + t.ms.toFixed(2) + " ms."; tick(n); return; }
+    if (A.dead) { proof.innerHTML = '<span class="pk rec">Recorded</span> ' + recorded + "Relate transaction, rolled back, " + t.ms.toFixed(2) + " ms."; showPar("rec"); tick(n); return; }
     proof.innerHTML = '<span class="pk run">Running</span> ' + recorded + "Relate " + esc(LV.pin) + " in this tab is rebuilding the witness without it…";
     warm().then(function () { return A.call("pull", [LV.script, LV.query, LV.params, t.rel], 5000); }).then(function (r) {
       var ok = same(r.rows, t.rows);
-      live[n] = 1; if (ok) liveSame[n] = 1;
+      live[n] = 1; if (ok) liveSame[n] = 1; lastMs = r.ms;
+      if (!same(r.rows, D.base)) proven[n] = 1; // counted from what the engine returned
       if (my !== pg) { tick(); return; }
       if (!ok) { // never paper over a difference: show what the engine returned
         renderRows({ rows: r.rows });
         $$(".out", ex).forEach(function (x) { x.classList.remove("out"); });
         D.base.forEach(function (row) { if (!r.rows.some(function (q) { return q.airport === row.airport; })) { var nd = $('.nd[data-c="' + row.airport + '"]', ex); if (nd) nd.classList.add("out"); } });
       }
-      proof.innerHTML = '<span class="pk live">Live</span> Exhibit ' + n + " pulled: <b>" + esc(t.rel) + "</b>. Relate " + esc(A.info ? A.info.reported : LV.pin) + " rebuilt the witness without it and re-ran the query in " + r.ms.toFixed(2) + " ms: " + D.base.length + " rows → " + r.rows.length + (ok ? " · " + esc(t.fx) + ". <b>Same rows as the recorded run.</b>" : '. <b class="bad">Not the recorded run</b> (' + t.rows.length + " rows there).");
-      tick(n);
+      proof.innerHTML = '<span class="pk live">Live</span> Exhibit ' + n + " pulled: <b>" + esc(t.rel) + "</b>. Relate " + esc(A.info ? A.info.reported : LV.pin) + " rebuilt the witness without it and re-ran the query in " + r.ms.toFixed(1) + " ms: " + D.base.length + " rows → " + r.rows.length + (ok ? " · " + esc(t.fx) + ". <b>Same rows as the recorded run.</b>" : '. <b class="bad">Not the recorded run</b> (' + t.rows.length + " rows there).");
+      showPar(ok ? "same" : "diff");
+      if (!(allT && allT.length)) say("Exhibit " + n + " pulled, live: " + D.base.length + " rows to " + r.rows.length + (ok ? ", same as the recording." : ", not the recording."));
+      tick();
     }, function (e) {
+      tick(n); // the recorded run says this deletion changes the answer
       if (my !== pg) return;
-      proof.innerHTML = '<span class="pk rec">Recorded</span> ' + recorded + "Relate transaction, rolled back, " + t.ms.toFixed(2) + " ms. (Live run unavailable: " + esc(e.message) + ".)";
-      tick(n);
+      proof.innerHTML = '<span class="pk rec">Recorded</span> ' + recorded + "Relate transaction, rolled back, " + t.ms.toFixed(2) + " ms. (Live run unavailable: " + why(e, A)[1] + ")";
+      showPar("rec");
     });
   }
   function tick(n) {
@@ -1100,6 +1159,7 @@ ORDER BY airport</textarea>
     var k = Object.keys(proven).length, lv = Object.keys(live).length, ls = Object.keys(liveSame).length;
     tally.innerHTML = "<b>" + k + "</b> of " + D.tags.length + " change the answer" + (lv ? '<span class="tl"> · ' + lv + " live in this tab, " + ls + " of " + lv + " same as the recorded run</span>" : "");
     if (k === D.tags.length) { regStamp.classList.add("on"); }
+    meter();
   }
   if (ex && CAN) {
     // start the engine once a visitor is near the exhibit AND has scrolled, tapped or typed: a page load alone (or a
@@ -1110,7 +1170,7 @@ ORDER BY airport</textarea>
       var wio = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { wio.disconnect(); near = true; go(); } }, { rootMargin: "600px 0px" });
       wio.observe(document.getElementById("exhibit"));
     } else near = true;
-  } else if (ex) { status("down", "<b>Recorded</b> · this browser has no WebAssembly workers, so each pull replays the recorded run"); A.dead = "no WebAssembly workers"; }
+  } else if (ex) { status("down", "Recorded run", "This browser has no WebAssembly workers, so each pull replays the recorded run."); A.dead = "no WebAssembly workers"; }
   if (ex) {
     tally.innerHTML = "<b>0</b> of " + D.tags.length + " pulled so far";
     $$(".pull").forEach(function (b) { b.addEventListener("click", function () { stopAll(); pull(+b.getAttribute("data-n")); }); });
@@ -1126,7 +1186,7 @@ ORDER BY airport</textarea>
     btn.addEventListener("click", function () {
       if (allT.length) { stopAll(); return; }
       btn.textContent = "Stop";
-      D.tags.forEach(function (t, i) { allT.push(setTimeout(function () { pull(t.n); if (i === D.tags.length - 1) { allT = []; btn.textContent = "Pull all " + D.tags.length + " again"; } }, RM ? i * 40 : i * 520)); });
+      D.tags.forEach(function (t, i) { allT.push(setTimeout(function () { var last = i === D.tags.length - 1; if (last) allT = []; pull(t.n, true); if (last) { btn.textContent = "Pull all " + D.tags.length + " again"; setTimeout(function () { say(tally.textContent); }, 1500); } }, RM ? i * 40 : i * 520)); });
     });
   }
 
@@ -1149,16 +1209,19 @@ ORDER BY airport</textarea>
     return out;
   }
   function askOn() {
-    var el = document.getElementById("ask-on"); if (!el) return;
+    var el = document.getElementById("ask-on"), bk = document.getElementById("ask-back"); if (!el) return;
     var t = cur && byN[cur];
-    el.innerHTML = t ? "Runs on: the witness with exhibit " + t.n + " pulled, <code>" + esc(t.rel) + '</code> deleted, " + (D.tags.length - 1) + " relationships. <button type="button" class="linkish" id="ask-back">Put it back</button>' : "Runs on: the witness, " + D.tags.length + " relationships.";
-    var bk = document.getElementById("ask-back");
-    if (bk) bk.addEventListener("click", function () { pull(cur); });
+    el.innerHTML = t ? "Runs on: the witness with exhibit " + t.n + " pulled (<code>" + esc(t.rel) + "</code> deleted), " + (D.tags.length - 1) + " relationships." : "Runs on: the witness, " + D.tags.length + " relationships.";
+    if (bk) { var had = document.activeElement === bk; bk.hidden = !t; if (had && !t && askRun) askRun.focus(); }
+    if (askTbl && askTbl.innerHTML && !askTbl.classList.contains("stale")) {
+      askTbl.classList.add("stale");
+      askMeta.insertAdjacentHTML("afterbegin", '<b class="stl">The graph above changed since this result: run it again.</b> ');
+    }
   }
   function ask() {
     if (!askRun || askRun.disabled) return;
     var on = cur && byN[cur] ? byN[cur] : null, where = on ? "the witness with exhibit " + on.n + " pulled" : "the witness";
-    askRun.disabled = true;
+    askRun.disabled = true; askRun.setAttribute("data-busy", "1");
     askMeta.textContent = "Relate " + LV.pin + " is running it in this tab on a fresh copy of " + where + "…";
     warm().then(function () { return A.call("ask", [LV.script, askQ.value, askP.value, on ? on.rel : null], 4000); }).then(function (r) {
       var on2 = esc(where) + " (" + r.relationships + " relationships)";
@@ -1170,19 +1233,22 @@ ORDER BY airport</textarea>
         askMeta.innerHTML = '<span class="pk rec">Relate says</span> ' + esc(r.error);
       } else if (r.plan) {
         askTbl.innerHTML = '<pre class="plan">' + esc(planLines(r.plan.root, 0, []).join("\n")) + "</pre>";
-        askMeta.innerHTML = '<span class="pk live">Live</span> The plan Relate would run on ' + on2 + " (<code>" + esc(r.plan.schema) + "</code>), " + r.ms.toFixed(2) + " ms. Witness reads these plans to drop relationship types a query cannot reach.";
+        askMeta.innerHTML = '<span class="pk live">Live</span> The plan Relate would run on ' + on2 + " (<code>" + esc(r.plan.schema) + "</code>), " + r.ms.toFixed(1) + " ms. Witness reads these plans to drop relationship types a query cannot reach.";
       } else {
         var cols = r.columns;
         askTbl.innerHTML = cols.length ? "<table class=\"ans-t\"><thead><tr>" + cols.map(function (c) { return '<th scope="col">' + esc(c) + "</th>"; }).join("") + "</tr></thead><tbody>" +
           r.rows.map(function (row) { return "<tr>" + cols.map(function (c) { return "<td>" + esc(short(row[c])) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>" : "";
-        askMeta.innerHTML = '<span class="pk live">Live</span> ' + fmt(r.total) + (r.total === 1 ? " row" : " rows") + " from " + on2 + " in " + r.ms.toFixed(2) + " ms" + (r.total > r.rows.length ? ", the first " + r.rows.length + " shown" : "") + ".";
+        askMeta.innerHTML = '<span class="pk live">Live</span> ' + fmt(r.total) + (r.total === 1 ? " row" : " rows") + " from " + on2 + " in " + r.ms.toFixed(1) + " ms" + (r.total > r.rows.length ? ", the first " + r.rows.length + " shown" : "") + ".";
       }
     }, function (e) {
       askTbl.innerHTML = "";
-      askMeta.innerHTML = /^stopped/.test(e.message)
-        ? '<span class="pk rec">Stopped</span> after 4 s. Relate\'s browser build has no statement timeout, so the page ended its worker; the engine restarts on the next run.'
-        : '<span class="pk rec">Not run</span> The engine did not start in this browser (' + esc(e.message) + "). On a clone, <code>relate query --database witnesses/two-hub.rl --read-only</code> runs the same query.";
-    }).then(function () { askRun.disabled = !!A.dead; });
+      var w = why(e, A);
+      askMeta.innerHTML = '<span class="pk rec">' + w[0] + "</span> " + w[1];
+    }).then(function () {
+      askRun.removeAttribute("data-busy"); askRun.disabled = !!A.dead; askTbl.classList.remove("stale");
+      var o = askTbl.parentNode, rr = o.getBoundingClientRect(); // on a phone the result sits below the button: bring it into view
+      if (rr.top > window.innerHeight - 60 || rr.bottom < 60) o.scrollIntoView({ block: "nearest", behavior: RM ? "auto" : "smooth" });
+    });
   }
   if (askRun && CAN) {
     askRun.disabled = false;
@@ -1190,10 +1256,12 @@ ORDER BY airport</textarea>
     LV.examples.forEach(function (x, i) {
       var b = document.createElement("button");
       b.type = "button"; b.className = "chip try"; b.textContent = x[0];
-      b.addEventListener("click", function () { askQ.value = x[1]; askP.value = JSON.stringify(x[2]); ask(); });
+      b.addEventListener("click", function () { if (askRun.disabled) return; askQ.value = x[1]; askP.value = JSON.stringify(x[2]); ask(); });
       askTry.appendChild(b);
     });
     askRun.addEventListener("click", ask);
+    var askBack = document.getElementById("ask-back");
+    if (askBack) askBack.addEventListener("click", function () { if (cur) pull(cur); });
     [askQ, askP].forEach(function (f) {
       f.addEventListener("keydown", function (e) { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); ask(); } });
       f.addEventListener("focus", function () { warm().catch(function () {}); }, { once: true });
@@ -1208,17 +1276,18 @@ ORDER BY airport</textarea>
     ecBtns.forEach(function (b) {
       b.addEventListener("click", function () {
         var v = b.getAttribute("data-v"), E = eng(v), rec = LV.ec.recorded[v];
-        ecBtns.forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+        ecBtns.forEach(function (x) { x.classList.toggle("on", x === b); });
         $$(".rel-tape tr[data-v]").forEach(function (tr) { tr.classList.remove("live"); });
         ecOut.innerHTML = E.info ? "Running both forms on Relate " + esc(v) + "…" : "Loading Relate " + esc(v) + " into this tab…";
         E.run("pair", [LV.ec.script, LV.ec.forms, LV.ec.params], 5000).then(function (r) {
           var ok = !!rec && same(r.exists, rec.exists) && same(r.count, rec.count) && r.agree === rec.agree;
-          if (b.getAttribute("aria-pressed") !== "true") return;
-          ecOut.innerHTML = '<span class="pk live">Live</span> Relate <b>' + esc(E.info.reported) + "</b> (the engine's own answer), in this tab: <code>COUNT</code> form → " + names(r.count) + " · <code>EXISTS</code> form → " + names(r.exists) + " · <b class=\"" + (r.agree ? "" : "bad") + "\">" + (r.agree ? "they agree" : "they disagree") + "</b>. " + (ok ? "Same as the recorded row." : "<b class=\"bad\">Not the recorded row.</b>");
+          if (!b.classList.contains("on")) return;
+          ecOut.innerHTML = '<span class="pk live">Live</span> Relate <b>' + esc(E.info.reported) + "</b> (as the engine reports itself), in this tab: <code>COUNT</code> form → " + names(r.count) + " · <code>EXISTS</code> form → " + names(r.exists) + " · <b class=\"" + (r.agree ? "" : "bad") + "\">" + (r.agree ? "they agree" : "they disagree") + "</b>. " + (ok ? "Same as the recorded row." : "<b class=\"bad\">Not the recorded row.</b>");
           var tr = $('.rel-tape tr[data-v="' + v + '"]'); if (tr && ok) tr.classList.add("live");
         }, function (e) {
-          if (b.getAttribute("aria-pressed") !== "true") return;
-          ecOut.innerHTML = '<span class="pk rec">Not run</span> Relate ' + esc(v) + " did not start in this browser (" + esc(e.message) + "). The table holds the recorded run.";
+          if (!b.classList.contains("on")) return;
+          var w = why(e, E);
+          ecOut.innerHTML = '<span class="pk rec">' + w[0] + "</span> Relate " + esc(v) + ": " + w[1].replace(" " + CLONE, "") + " The table holds the recorded run.";
         });
       });
     });

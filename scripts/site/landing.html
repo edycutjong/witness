@@ -93,18 +93,23 @@
   <div class="wrap">
     <p class="lbl">Exhibit A <span>·</span> pull a tag</p>
     <h2 id="ex-h">Pull any tag. <em>The answer moves.</em></h2>
-    <p class="eng" id="eng" data-state="off" aria-live="polite"><i aria-hidden="true"></i><span id="eng-t">Each pull below shows the recorded run. With JavaScript, Relate {{PIN}} runs the pulls live in this tab.</span></p>
     <div class="ex-grid">
       <div class="ex-left">
+        <div class="eng" id="eng" data-state="off">
+          <i aria-hidden="true"></i>
+          <div class="eng-x"><p class="eng-k" id="eng-k">Recorded run</p><p class="eng-t" id="eng-t">With JavaScript, Relate {{PIN}} runs every pull live in this tab.</p></div>
+          <p class="eng-m data" id="eng-m"></p>
+        </div>
         <div class="ex-draw">{{EX_SVG}}</div>
         <div class="ex-answer">
-          <div class="ex-ahead"><span class="lbl">Answer with exhibit <b id="ex-n">none</b> pulled</span><span class="stamp ink small" id="ex-mark">Unchanged</span></div>
+          <div class="ex-ahead"><span class="lbl">Answer with exhibit <b id="ex-n">none</b> pulled</span><span class="ex-stamps"><span class="stamp small par" id="ex-par" hidden></span><span class="stamp ink small" id="ex-mark">Unchanged</span></span></div>
           <table class="ans-t"><thead><tr><th scope="col">airport</th><th scope="col">hub_countries</th></tr></thead><tbody id="ex-rows">{{ANSWER_ROWS}}</tbody></table>
-          <p class="ex-proof data" id="ex-proof" aria-live="polite">Pick a tag or a register line. Each answer: one relationship deleted in a Relate transaction, query re-run, rolled back.</p>
+          <p class="ex-proof data" id="ex-proof">Pick a tag or a register line. Each pull deletes that one relationship and re-runs the query on a fresh copy of the witness: live on Relate in this tab, or the recorded run if the engine cannot start.</p>
+          <p class="sr" id="ex-say" aria-live="polite"></p>
         </div>
       </div>
       <div class="ex-right">
-        <p class="lede">The agent's question: <q>{{QUESTION}}</q> The answer is four airports. The 13 red tags are the witness's routes, the 9 country codes its country links; all 22 are in the register. Pull any one to see the answer without it: Relate {{PIN}}, compiled to WebAssembly and running in this tab, rebuilds the witness, deletes that relationship and re-runs the query. If the engine cannot start, the pull replays the recorded run.</p>
+        <p class="lede">The agent's question: <q>{{QUESTION}}</q> The answer is four airports. The 13 red tags are the witness's routes, the 9 country codes its country links; all 22 are in the register. Pull any one to see the answer without it, computed by Relate {{PIN}} in your tab.</p>
         <div class="reg-head"><span class="lbl">The register</span><span class="lbl">pull it and</span></div>
         <ol class="reg" id="reg">{{REGISTER}}</ol>
         <div class="reg-foot">
@@ -118,7 +123,7 @@
     <div class="ask" id="ask">
       <div class="ask-head">
         <h3 id="ask-h">Cross-examine it yourself.</h3>
-        <p>Your own Cypher, run by Relate {{PIN}} in this tab on a fresh copy of the witness (<code>witnesses/two-hub.cypher</code>, {{W_RELS}} relationships), with the tag you pulled above deleted. Reads only: a statement that writes is refused.</p>
+        <p>Your own Cypher, run by Relate {{PIN}} in this tab on a fresh copy of the witness (<code>witnesses/two-hub.cypher</code>, {{W_RELS}} relationships), minus the tag you pulled above, if you pulled one. It only reads: a statement that writes runs on a throwaway copy and is refused, so nothing you see changes.</p>
       </div>
       <div class="ask-grid">
         <div class="ask-in">
@@ -127,11 +132,11 @@
           <textarea id="ask-q" spellcheck="false" autocapitalize="off" autocomplete="off" rows="11">{{ASK_Q}}</textarea>
           <label class="lbl" for="ask-p">Parameters, JSON</label>
           <input id="ask-p" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" value="{{ASK_P}}">
-          <div class="ask-go"><button type="button" class="btn solid" id="ask-run" disabled>Run in this tab</button><span class="fine data"><kbd>Ctrl</kbd> / <kbd>&#8984;</kbd> + <kbd>Enter</kbd></span></div>
-          <p class="ask-on data" id="ask-on">Runs on: the witness, {{W_RELS}} relationships.</p>
+          <div class="ask-go"><button type="button" class="btn solid" id="ask-run" disabled>Run in this tab</button><span class="fine data kbd-hint"><kbd>Ctrl</kbd> / <kbd>&#8984;</kbd> + <kbd>Enter</kbd></span></div>
+          <p class="ask-on data"><span id="ask-on">Runs on: the witness, {{W_RELS}} relationships.</span> <button type="button" class="linkish" id="ask-back" hidden>Put it back</button></p>
         </div>
         <div class="ask-out">
-          <p class="ask-meta data" id="ask-meta" aria-live="polite">Needs JavaScript and WebAssembly. Without them: <code>relate query --database witnesses/two-hub.rl --read-only</code> on a clone gives the same answers.</p>
+          <p class="ask-meta data" id="ask-meta" aria-live="polite">Needs JavaScript and WebAssembly. Without them: <code>relate query --database witnesses/two-hub.rl --read-only</code> on a clone answers the same queries on the full witness.</p>
           <div class="ask-tbl" id="ask-tbl" tabindex="0" role="region" aria-label="Query result"></div>
         </div>
       </div>
@@ -180,8 +185,8 @@
         </table>
         <div class="ec-live" id="ec-live" hidden>
           <div class="ec-btns" role="group" aria-label="Run both forms on a Relate release, in this tab">
-            <button type="button" class="btn" data-v="{{PIN}}" aria-pressed="false">Run on {{PIN}}</button>
-            <button type="button" class="btn" data-v="{{FIX}}" aria-pressed="false">Run on {{FIX}}</button>
+            <button type="button" class="btn" data-v="{{PIN}}">Run on {{PIN}}</button>
+            <button type="button" class="btn" data-v="{{FIX}}">Run on {{FIX}}</button>
           </div>
           <p class="ec-out data" id="ec-out" aria-live="polite">Both forms on the two-relationship witness, in this tab, on the release you pick. Each release is its own engine, served from this site.</p>
         </div>

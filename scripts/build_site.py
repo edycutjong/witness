@@ -77,19 +77,20 @@ readme = (ROOT / "README.md").read_text()
 QUOTES = [
     (
         'Deletion-minimal means: no single remaining relationship (or kept isolated node) can be removed without changing the\nanswer. It does not mean "smallest possible".',
-        "README · The Solution",
+        "README · What a witness shows, and what it does not",
     ),
     (
         "Because a query with `NOT EXISTS` or aggregation is not monotone, a witness proves its own\nanswer on its own file; it does not prove that every superset of it gives the same answer.",
-        "README · The Solution",
+        "README · What a witness shows, and what it does not",
     ),
     (
         "The gap mostly reflects an embedded engine versus a Dockerised server with a network round trip per statement; it says nothing about Neo4j's query engine.",
         "README · Measured against Neo4j",
     ),
 ]
+_readme_flat = " ".join(readme.replace("**", "").split())
 for q, _ in QUOTES:
-    assert q in readme.replace("**", ""), f"quote not verbatim in README: {q[:50]}"
+    assert " ".join(q.split()) in _readme_flat, f"quote not verbatim in README: {q[:50]}"
 FAQ = [
     (
         "Is the witness the smallest subgraph that gives the answer?",
@@ -167,7 +168,30 @@ def cases_vals() -> dict:
     assert q == {db["statement"].strip(), db["predicate"]["other_statement"].strip()}, "scan queries != receipt queries"
     pair = (db["params"]["country"], db["params"]["dest"])
     assert pair in {(d["country"], d["dest"]) for d in scan["differ"]}, pair
+    ec = json.loads((ROOT / "witnesses" / "exists-count.manifest.json").read_text())
+    vers = [json.loads(ln) for ln in (ROOT / "evidence" / "relate-versions.jsonl").read_text().splitlines()]
+    dis = [v["relate_db"] for v in vers if not v["the_two_forms_agree"]]
+    agr = [v["relate_db"] for v in vers if v["the_two_forms_agree"]]
+    ex = [x["element"] for x in ec["check"]["probes"]]
+    assert ec["verified"] and ec["predicate"]["kind"] == "disagree" and ec["source"]["relationships"] == src_rels
+    assert len(ex) == ec["witness"]["relationships"] == 2 and len(agr) == 1 and dis[0] == ec["versions"]["relate_db"]
+    assert ec["params"] == {"country": "MX"}, "the landing says 'Mexican airports'"
     return {
+        "EC_ENGINE": ec["versions"]["relate_db"],
+        "EC_FIXED": agr[0],
+        "EC_RELS": ec["witness"]["relationships"],
+        "EC_ROWS": len(ec["baseline"]["rows"]),
+        "EC_TRIALS": ec["run"]["trials"],
+        "EC_CHECK": ec["check"]["check_text"].split(" (")[0],
+        "EC_VERSIONS": "\n            ".join(
+            f'<tr class="{"agr" if v["the_two_forms_agree"] else "dis"}"><td>{html.escape(v["relate_db"])}</td>'
+            f"<td>{html.escape(', '.join(r['airport'] for r in v['count-two-match']) or 'no rows')}</td>"
+            f"<td>{html.escape(', '.join(r['airport'] for r in v['exists-two-match']) or 'no rows')}</td>"
+            f"<td>{'agree' if v['the_two_forms_agree'] else 'disagree'}</td></tr>"
+            for v in vers
+        ),
+        "EC_EX1": html.escape(sorted(ex)[0]),
+        "EC_EX2": html.escape(sorted(ex)[1]),
         "C_SRC": fmt(src_rels),
         "DB_RELS": db["witness"]["relationships"],
         "DB_TRIALS": fmt(db["run"]["trials"]),
@@ -182,8 +206,8 @@ def cases_vals() -> dict:
     }
 
 
-DESC = f"When an agent answers from a graph, Witness hands back {w_rels} of its {fmt(src_rels)} relationships that reproduce the answer, and proves deleting any one of them changes it."
-DESC_OG = f"{fmt(src_rels)} relationships → {w_rels} that reproduce an agent's answer. Delete any one of the {w_rels} and it changes."
+DESC = f"When an agent answers from a graph, Witness hands back {w_rels} of its {fmt(src_rels)} relationships that reproduce the answer on their own, and proves each of them is needed."
+DESC_OG = f"{fmt(src_rels)} relationships → {w_rels} that reproduce an agent's answer on their own. Take any one of the {w_rels} away and it changes."
 assert 50 <= len(DESC) <= 160 and len(DESC_OG) <= 125, (len(DESC), len(DESC_OG))
 
 
@@ -292,7 +316,7 @@ CAPS = [  # (code token as in README "Relate capabilities used", the deck's 2-3 
     ("read_only=True", "reruns cannot write", "read_only=True"),
     ("single-file .rl", "the evidence format", "single-file `.rl`"),
     ("relate pull", "fixture mode", "`relate pull` for fixture mode"),
-    ("relate query --mode json", "independent re-check", "relate query --mode json"),
+    ("relate query --mode json", "re-check on the CLI", "relate query --mode json"),
     (
         "MCP · why · check",
         "Witness's own tools, beside relate serve --mcp",
@@ -523,6 +547,47 @@ WA_ROWS, WA_EXP = len(_wa["baseline"]["rows"]), len(_wa["predicate"]["expected_r
 assert _wa["verified"] and _wa["predicate"]["kind"] == "differs" and WA_CHECK.endswith("change the answer")
 det = json.loads((ROOT / "evidence" / "determinism.json").read_text())
 assert det["byte_identical"] is True and man["verified"] and man["check"]["cli_used"]
+# an observed engine disagreement (Relate 1.0.1; the v1.3.0 release notes list the fix), shrunk, and the releases it separates
+_ec = json.loads((ROOT / "witnesses" / "exists-count.manifest.json").read_text())
+EC_RELS, EC_CHECK = _ec["witness"]["relationships"], _ec["check"]["check_text"].split(" (")[0]
+EC_ROWS, EC_TRIALS = len(_ec["baseline"]["rows"]), _ec["run"]["trials"]
+assert _ec["verified"] and _ec["predicate"]["kind"] == "disagree" and EC_CHECK.endswith("end the disagreement")
+assert _ec["source"]["relationships"] == src_rels and _ec["versions"]["relate_db"] == man["versions"]["relate_db"]
+assert _ec["params"] == {"country": man["params"]["country"]}, "the engine case is no longer about the headline's country"
+EC_EXHIBITS = [x["element"] for x in _ec["check"]["probes"]]
+_vers = [json.loads(ln) for ln in (ROOT / "evidence" / "relate-versions.jsonl").read_text().splitlines()]
+VER_DISAGREE = [v["relate_db"] for v in _vers if not v["the_two_forms_agree"]]
+VER_AGREE = [v["relate_db"] for v in _vers if v["the_two_forms_agree"]]
+assert VER_DISAGREE[0] == man["versions"]["relate_db"] and VER_AGREE == ["1.3.0"], (VER_DISAGREE, VER_AGREE)
+assert all(v["relationships"] == EC_RELS and v["count-two-match"] and not (v["exists-two-match"] and v["relate_db"] in VER_DISAGREE) for v in _vers)
+_and = lambda xs: ", ".join(xs[:-1]) + " and " + xs[-1] if len(xs) > 1 else xs[0]  # noqa: E731
+# every relationship of the full graph deleted alone: supports (drop or alter a row) and guards (add one)
+sens = json.loads((ROOT / "evidence" / "full-graph-sensitivity.json").read_text())
+assert sens["relationships_tried"] == src_rels and sens["supports"] + sens["guards"] == sens["change_the_answer"]
+assert sens["bound_by_the_answer_rows"] == fgn["bound"] and sens["change_and_bound"] == fgn["change_the_answer"]
+assert sens["change_and_in_witness"] == FGN_IN and sens["supports"] == sens["supports_in_witness"]
+assert all(c["type"] == "HAS_ROUTE" and len(c["added"]) == 1 for c in sens["changing"] if c["kind"] == "guard")
+# the committed witnesses re-proved on a second engine
+neo = json.loads((ROOT / "evidence" / "neo4j-recheck.json").read_text())
+assert neo["all_agree"] and [w["witness"] for w in neo["witnesses"]] == [
+    f"witnesses/{n}.cypher" for n in ("two-hub", "direction-bug", "wrong-answer")
+]
+NEO_RE = [w["necessary_on_neo4j"] for w in neo["witnesses"]]
+assert NEO_RE == [w["probes"] for w in neo["witnesses"]] == [w["agree_with_relate"] for w in neo["witnesses"]]
+NEO_RE_V = neo["neo4j"][0]["v"]
+# the stores as files: sizes are read from the files themselves and must match the recorded ones
+sbytes = json.loads((ROOT / "evidence" / "store-bytes.json").read_text())
+BYTES = {x["path"]: x["bytes"] for x in sbytes["stores"]}
+assert all((ROOT / q).stat().st_size == n for q, n in BYTES.items()), "evidence/store-bytes.json is stale"
+assert sbytes["rerun"]["cypher_byte_identical"] and sbytes["rerun"]["rl_same_graph"] and not sbytes["rerun"]["rl_byte_identical"]
+assert sbytes["headline_script"]["sha256"] == det["runs"][0]["cypher_sha256"]
+# other query shapes (tests/test_examples.py re-runs the three that shrink)
+oq = json.loads((ROOT / "evidence" / "other-queries.json").read_text())
+OQ = oq["examples"]
+assert [Path(e["query"]).stem for e in OQ] == ["fewest-flights", "longest-nonstop", "domestic-only"]
+assert all(e["verified"] and (ROOT / e["query"]).is_file() for e in OQ)
+OQ_CAP = oq["count_with_the_default_cap"]
+assert OQ_CAP["exit_code"] == 3 and OQ_CAP["run"]["trials"] == 20000
 assert check == f"{w_rels} of {w_rels} change the answer"
 LIVE = SITE_URL + "/"
 EXHIBIT = SITE_URL + "/exhibit/two-hub.html"
@@ -568,7 +633,7 @@ assert (
 )
 _demo_md = (ROOT / "DEMO.md").read_text()
 DEMO_SECTIONS = re.findall(r"^## \d+\. (.+)$", _demo_md, re.M)
-assert len(DEMO_SECTIONS) == 8 and [s.split(":")[0].split(",")[0] for s in DEMO_SECTIONS] == [
+assert len(DEMO_SECTIONS) == 12 and [s.split(":")[0].split(",")[0] for s in DEMO_SECTIONS] == [
     "Headline",
     "Determinism",
     "Relate vs Neo4j",
@@ -577,6 +642,10 @@ assert len(DEMO_SECTIONS) == 8 and [s.split(":")[0].split(",")[0] for s in DEMO_
     "Tests",
     "Two queries disagree",
     "A smaller repro of a wrong answer (`differs`)",
+    "What each deletion does",
+    "An engine disagreement",
+    "Other query shapes",
+    "Re-proved on a second engine",
 ], DEMO_SECTIONS
 _e2e = re.search(r"\(([\d.]+) s end to end", sp.demo)
 assert _e2e
@@ -589,6 +658,17 @@ PLAN_DROP = sp.trace["plan"]["dropped_rels"]
 PLAN_TRIAL = sp.MILESTONES[1][0]
 APPLIED, ROLLED = sp.HOLDS.count("1"), sp.HOLDS.count("0")
 ANSWER = [r["airport"] for r in rows]
+# the answer has a second column, the countries of each airport's hubs, and part of the witness exists only for it
+_hub_c = sorted({c for r in rows for c in r["hub_countries"]})
+assert all(sorted(r["hub_countries"]) == _hub_c for r in rows), "the rows no longer share one hub-country list"
+N_ROUTES, N_COUNTRY = len(sp.ROUTES), len(sp.COUNTRY)
+N_HUB_LINKS = N_COUNTRY - len(ANSWER)
+assert N_ROUTES + N_COUNTRY == w_rels and N_HUB_LINKS > 0
+ANSWER_NOTE = (
+    f"The answer: {', '.join(ANSWER)}, each with the countries of its hubs ({', '.join(_hub_c)}). Of the {w_rels} "
+    f"relationships, {N_ROUTES} are flights and {N_COUNTRY} are country links: {len(ANSWER)} place the answer's airports in "
+    f"{man['params']['country']}, {N_HUB_LINKS} give the hub countries."
+)
 PARAMS_CLI = " ".join(f"--param {k}={v}" for k, v in man["params"].items())
 RUN_CMD = ["git clone " + REPO, "cd witness", "uv run witness demo"]
 ONE_CMD = " && ".join(RUN_CMD)
@@ -625,8 +705,8 @@ RECEIPTS = [
         f"{fmt(src_rels)} → {w_rels}",
         _nb.format(fmt(src_rels)) + _to.format("→") + f"<em>{w_rels}</em>",
         "Relationships in the air-routes graph, then in the witness.",
-        f"{fmt(src_nodes)} nodes → {w_nodes} nodes in the witness graph.",
-        [(_MAN, "")],
+        f"{fmt(src_nodes)} nodes → {w_nodes} nodes in the witness graph. As files: {fmt(BYTES['data/air-routes.rl'])} bytes → {fmt(BYTES['witnesses/two-hub.rl'])}.",
+        [(_MAN, ""), ("evidence/store-bytes.json", "the files")],
     ),
     (
         f"{w_rels} of {w_rels}",
@@ -638,27 +718,45 @@ RECEIPTS = [
     (
         f"{TA['rels']} → {w_rels}",
         _nb.format(TA["rels"]) + _to.format("→") + f"<em>{w_rels}</em>",
-        f"The answer rows bind {TA['rels']} relationships; the witness keeps {w_rels} of them.",
-        f"Deleted from the full graph, only {TA['relate_changed']} of the {TA['rels']} change the answer; the other {TA['rels'] - TA['relate_changed']} change nothing. {FGN_IN} of those {TA['relate_changed']} are in the witness; the other {FGN_OUT} are flights of Mexican airports outside it, whose deletion adds that airport to the answer. Deleted from the witness, each of the {w_rels} changes it.",
+        f"The answer rows match {TA['rels']} relationships; the witness keeps {w_rels} of them.",
+        f"Deleted from the full graph one at a time, {TA['relate_changed']} of the {TA['rels']} change the answer and the other {TA['rels'] - TA['relate_changed']} do not, because other routes back them up. Deleted from the witness, each of the {w_rels} changes it.",
         [
-            (CMP_MD, "targeted pass"),
             ("evidence/full-graph-necessity.json", ""),
+            (CMP_MD, "targeted pass"),
             (_MAN, ""),
-            ("queries/two-hub-bindings.cypher", "the binding query"),
+            ("queries/two-hub-bindings.cypher", "the matching query"),
+        ],
+    ),
+    (
+        f"{sens['change_the_answer']} of {fmt(src_rels)}",
+        f"<em>{sens['change_the_answer']}</em>" + _to.format("of") + _nb.format(fmt(src_rels)),
+        "What the answer depends on in the full graph, and what a witness leaves out.",
+        f"Every relationship of the full graph was deleted alone: {sens['change_the_answer']} change the answer. {sens['supports']} are supports, whose deletion drops or alters an answer row, and all {sens['supports_in_witness']} are in the witness. {sens['guards']} are guards, each the direct flight to {man['params']['dest']} of an airport of {man['params']['country']} that is not in the answer, whose deletion adds that airport as a row. A witness holds what reproduces its rows, not what keeps other rows out.",
+        [("evidence/full-graph-sensitivity.json", ""), ("bench/full_graph_sensitivity.py", "re-records it")],
+    ),
+    (
+        f"{fmt(src_rels)} → {EC_RELS}",
+        _nb.format(fmt(src_rels)) + _to.format("→") + f"<em>{EC_RELS}</em>",
+        "An engine disagreement, observed and shrunk.",
+        f"Relate's v{VER_AGREE[0]} release notes list a fix for `EXISTS` and `COUNT` over two `MATCH` clauses. On the pinned {man['versions']['relate_db']} the two ways of writing one condition return {EC_ROWS} and 0 airports of {_ec['params']['country']}; `{EC_CHECK}`. The {EC_RELS}-relationship script separates the releases: the two disagree on relate-db {_and(VER_DISAGREE)} and agree on {VER_AGREE[0]}.",
+        [
+            ("witnesses/exists-count.manifest.json", ""),
+            ("evidence/exists-count-run.txt", "the run"),
+            ("evidence/relate-versions.jsonl", "the releases"),
         ],
     ),
     (
         f"{fmt(src_rels)} → {DB_RELS}",
         _nb.format(fmt(src_rels)) + _to.format("→") + f"<em>{DB_RELS}</em>",
-        "A second case: two queries disagree.",
+        "A query mistake: two queries disagree.",
         f"A plausible agent mistake written for this case (the first flight matched in either direction) and the headline query disagree on {_db['params']['country']}/{_db['params']['dest']}; `{DB_CHECK}`.",
         [("witnesses/direction-bug.manifest.json", "")],
     ),
     (
         f"{fmt(src_rels)} → {WA_RELS}",
         _nb.format(fmt(src_rels)) + _to.format("→") + f"<em>{WA_RELS}</em>",
-        "A third: a smaller repro of a wrong answer (`differs`).",
-        f"The same mistaken query returns {WA_ROWS} rows where the expected answer has {WA_EXP}, and the repro keeps that wrong answer; `{WA_CHECK}`.",
+        "A wrong answer, reproduced smaller (`differs`).",
+        f"The same mistaken query returns {WA_ROWS} rows where the expected answer has {WA_EXP}, and the repro holds that wrong answer fixed; `{WA_CHECK}`.",
         [("witnesses/wrong-answer.manifest.json", "")],
     ),
     (
@@ -680,6 +778,13 @@ RECEIPTS = [
         [(CMP_MD, "")],
     ),
     (
+        " · ".join(str(n) for n in NEO_RE),
+        _to.format(" · ").join(f"<em>{n}</em>" for n in NEO_RE),
+        f"Re-proved on a second engine: Neo4j {NEO_RE_V}.",
+        f"`witness check` runs on two surfaces of Relate, which rules out a mistake in Witness, not one in the engine. Each rebuild script was loaded into an empty Neo4j and every relationship deleted alone in a rolled-back transaction: {NEO_RE[0]} of {NEO_RE[0]}, {NEO_RE[1]} of {NEO_RE[1]} and {NEO_RE[2]} of {NEO_RE[2]}, each verdict the same as Relate's.",
+        [("evidence/neo4j-recheck.json", ""), ("bench/neo4j_recheck.py", "re-records it")],
+    ),
+    (
         f"{TESTS} tests pass · 100% coverage",
         f"{TESTS}" + _u.format("tests") + _to.format("·") + "100%" + _u.format("coverage"),
         "Tests pass against real Relate, under a 100% line and branch coverage gate.",
@@ -689,9 +794,13 @@ RECEIPTS = [
     (
         "byte-identical",
         "byte-identical",
-        f"The same query and seed give a byte-identical rebuild script (`.cypher`) on {len(det['runs'])} runs.",
-        "",
-        [("evidence/determinism.json", ""), ("scripts/determinism.py", "re-records it")],
+        f"The same query and seed give a byte-identical rebuild script (`.cypher`) on {len(det['runs'])} runs, and CI re-derives it on Linux.",
+        f"A test requires a fresh reduction to write the committed script byte for byte, under Python 3.11 and 3.12 on every push. The `.rl` written from the script is not byte-identical between runs (the same graph and size, {sbytes['rerun']['rl_bytes_that_differ']} bytes differ in the recorded pair), so the hash to pin is the script's.",
+        [
+            ("evidence/determinism.json", ""),
+            ("evidence/store-bytes.json", "the `.rl` comparison"),
+            ("tests/test_cli.py", "the test"),
+        ],
     ),
 ]
 
@@ -713,9 +822,14 @@ CRITERIA = [
                 ["queries/two-hub.cypher"],
             ),
             (
-                "One loop, three predicates.",
-                f"It can hold on to an answer ({w_rels} relationships), a disagreement between two queries ({DB_RELS}), or a wrong answer ({WA_RELS})",
-                [_MAN, "witnesses/direction-bug.manifest.json", "witnesses/wrong-answer.manifest.json"],
+                "One loop, more than one thing to hold on to.",
+                f"An answer ({w_rels} relationships), a disagreement between two queries ({DB_RELS}, and {EC_RELS} for the engine case), or an answer you say is wrong ({WA_RELS}; the same test as the first, applied to a wrong answer)",
+                [_MAN, "witnesses/direction-bug.manifest.json", "witnesses/exists-count.manifest.json", "witnesses/wrong-answer.manifest.json"],
+            ),
+            (
+                "What is borrowed is named.",
+                "The search is delta debugging (Zeller and Hildebrandt, 2002) and the word witness is from data provenance (Buneman, Khanna and Tan, 2001). What Witness does with them: the thing shrunk is a graph store, the test is a Cypher answer found by search (so `NOT EXISTS` and aggregation are covered), each trial is a Relate transaction, and the result is a `.rl` file",
+                ["README.md"],
             ),
         ],
     ),
@@ -724,8 +838,8 @@ CRITERIA = [
         [
             (
                 "Mode: single-file `.rl`.",
-                "The unit of evidence is a file a reviewer opens with plain `relate`. Mode, reason and capabilities are in [How it uses Relate](#how-it-uses-relate)",
-                [],
+                f"The unit of evidence is a file a reviewer opens with plain `relate`: {fmt(BYTES['witnesses/two-hub.rl'])} bytes for the headline witness. Mode, reason and capabilities are in [How it uses Relate](#how-it-uses-relate)",
+                ["evidence/store-bytes.json"],
             ),
             (
                 "Which relationships matter is measured.",
@@ -734,8 +848,13 @@ CRITERIA = [
             ),
             (
                 "The graph is persisted in the repository.",
-                "The source, the witness and the ledger of reductions are committed `.rl` stores",
+                f"The source, {len(list((ROOT / 'witnesses').glob('*.rl')))} witnesses, a fixture and the ledger of reductions are committed `.rl` stores",
                 ["data/air-routes.rl", "witnesses/two-hub.rl", "witness.rl"],
+            ),
+            (
+                "The same verdicts on Neo4j.",
+                f"The rebuild scripts load into Neo4j {NEO_RE_V}, where the same single deletions change the answer: {NEO_RE[0]} of {NEO_RE[0]}, {NEO_RE[1]} of {NEO_RE[1]}, {NEO_RE[2]} of {NEO_RE[2]}",
+                ["evidence/neo4j-recheck.json"],
             ),
             (
                 "Beside Relate's own MCP server.",
@@ -754,8 +873,13 @@ CRITERIA = [
             ),
             (
                 "More than the demo.",
-                "`witness why` on any read-only query, `check`, `rerun`, `export`, `review`, fixture mode and an MCP server",
+                "`witness why` on any read-only query and any `.rl` (`--store`), `check`, `rerun`, `export`, `review`, fixture mode and an MCP server",
                 ["src/witness/cli.py", "src/witness/mcp_server.py"],
+            ),
+            (
+                "Other query shapes.",
+                f"A path question (`allShortestPaths`, {fmt(src_rels)} relationships → {OQ[0]['witness']['relationships']}), a top-k with `ORDER BY` + `LIMIT` (→ {OQ[1]['witness']['relationships']}) and an `EXISTS` / `NOT EXISTS` pair (→ {OQ[2]['witness']['relationships']}), each re-run by a test; and one that does not shrink, a count over the whole graph, which stops at the trial cap and says NOT verified",
+                ["evidence/other-queries.json", "tests/test_examples.py"],
             ),
             (
                 "Tested against real Relate.",
@@ -774,8 +898,13 @@ CRITERIA = [
         [
             (
                 "Who it is for.",
-                f"The developer whose agent answers from a graph and who has to show why an answer is right before anyone acts on it: a reviewer reads {w_rels} relationships instead of {fmt(src_rels)}",
+                f"The developer whose agent answers from a graph and who has to show what an answer rests on before anyone acts on it: a reviewer reads {w_rels} relationships, not {fmt(src_rels)} and not the {TA['rels']} a listing of the matched paths would show. And the developer who has to hand a wrong or surprising answer to someone else as a graph small enough to read",
                 [],
+            ),
+            (
+                "A real engine disagreement, shrunk to a repro.",
+                f"On Relate {man['versions']['relate_db']} two ways of writing one condition return {EC_ROWS} and 0 rows on the air-routes graph (the v{VER_AGREE[0]} release notes list the fix). Witness hands back the {EC_RELS} relationships that still show it, and that script tells the releases apart: {_and(VER_DISAGREE)} disagree, {VER_AGREE[0]} agrees",
+                ["witnesses/exists-count.manifest.json", "evidence/relate-versions.jsonl"],
             ),
             (
                 "An agent attached the evidence itself.",
@@ -789,8 +918,8 @@ CRITERIA = [
             ),
             (
                 "A second use: test fixtures.",
-                f"`relate pull` brought {fmt(fix['source']['relationships'])} relationships in from Neo4j once, and Witness kept the {fix['witness']['relationships']} the test needs",
-                ["fixtures/mex-foreign.manifest.json"],
+                f"`relate pull` brought {fmt(fix['source']['relationships'])} relationships in from Neo4j once, and Witness kept the {fix['witness']['relationships']} the test needs. The same run, repeated against a Neo4j created from scratch, wrote the same fixture",
+                ["fixtures/mex-foreign.manifest.json", "evidence/fixture-run-2026-11-27.txt"],
             ),
         ],
     ),
@@ -804,7 +933,7 @@ CRITERIA = [
             ),
             (
                 "Commands, not only claims.",
-                f"`DEMO.md` gives the command or the recorded run for {len(DEMO_SECTIONS)} sets of numbers: the headline, determinism, the Neo4j comparison, fixture mode, the MCP tools, the tests, the disagreement and the wrong-answer repro",
+                f"`DEMO.md` gives the command or the recorded run for {len(DEMO_SECTIONS)} sets of numbers: the headline, determinism, the Neo4j comparison, fixture mode (with the commands to create the Neo4j it pulls from), the MCP tools, the tests, the query disagreement, the wrong-answer repro, what each deletion does, the engine disagreement, other query shapes and the Neo4j re-proof",
                 [],
             ),
             (
@@ -873,7 +1002,7 @@ CAP_USE = [
         '"pull"',
     ),
     (
-        f"The independent re-check: when the Relate CLI is installed, sufficiency and the necessity probes run again on it, outside the Python API. In the committed run, all {w_rels}.",
+        f"A second surface: when the Relate CLI is installed, sufficiency and the necessity probes run again on it, outside the Python API (in the committed run, all {w_rels}). It is the same engine, so it rules out a mistake in Witness, not one in Relate; for that see the Neo4j re-proof in the receipts.",
         ["src/witness/check.py"],
         '"--mode", "json"',
     ),
@@ -902,20 +1031,43 @@ STORES = [  # (store, what it is, nodes, relationships): the persisted graphs a 
     ),
     ("witnesses/wrong-answer.rl", "the smaller repro of a wrong answer", _wa["witness"]["nodes"], WA_RELS),
     (
+        "witnesses/exists-count.rl",
+        f"the witness of an engine disagreement (Relate {man['versions']['relate_db']})",
+        _ec["witness"]["nodes"],
+        EC_RELS,
+    ),
+    (
         "fixtures/mex-foreign.rl",
         "a test fixture: pulled from Neo4j once, then shrunk",
         _fx["nodes"],
         _fx["relationships"],
     ),
 ]
-STORES_ALSO = "Also committed: `witness.rl`, the ledger of reductions, where a review verdict is recorded."
 assert all((ROOT / s[0]).is_file() for s in STORES) and (ROOT / "witness.rl").is_file()
+assert all(s[0] in BYTES for s in STORES) and "witness.rl" in BYTES
+# what the committed ledger holds, read from the store itself (it is a graph too)
+import relate  # noqa: E402
+
+_led = relate.Database(str(ROOT / "witness.rl"), read_only=True)
+try:
+    LEDGER_REDUCTIONS = _led.execute("MATCH (r:Reduction)-[:PRODUCED]->(:Witness) RETURN count(r) AS n").data[0]["n"]
+    LEDGER_REVIEWS = _led.execute("MATCH (v:Review)-[:ON]->(:Reduction) RETURN count(v) AS n").data[0]["n"]
+finally:
+    _led.close()
+assert LEDGER_REDUCTIONS >= 1
+_reviews = "no review recorded yet" if LEDGER_REVIEWS == 0 else f"{LEDGER_REVIEWS} reviewed"
+STORES_ALSO = (
+    f"Also committed: `witness.rl` ({fmt(BYTES['witness.rl'])} bytes), the ledger, a small graph of its own: "
+    f"`(:Reduction)-[:PRODUCED]->(:Witness)`, and `(:Review)-[:ON]->(:Reduction)` when a person accepts or disputes one with "
+    f"`witness review`. It holds {LEDGER_REDUCTIONS} reduction, {_reviews}."
+)
 # the drawing of witnesses/two-hub.rl (site_parts asserts each of these counts against the register)
 WIT_CAP = (
     f"`witnesses/two-hub.rl`, drawn: {len(sp.EDGES)} relationships among {len(sp.SCH) + sp.N_COUNTRIES} nodes "
     f"({len(sp.SCH)} airports, {sp.N_COUNTRIES} countries). The {len(sp.ROUTES)} routes carry numbered exhibit tags; the "
-    f"{len(sp.COUNTRY)} country links show as country codes. Delete any one and the answer changes: "
-    f"[pull a tag yourself]({LIVE}#exhibit)."
+    f"{len(sp.COUNTRY)} country links show as country codes: {len(ANSWER)} place the answer's airports in "
+    f"{man['params']['country']} and {N_HUB_LINKS} give the hub countries the answer lists. Delete any one and the answer "
+    f"changes: [pull a tag yourself]({LIVE}#exhibit)."
 )
 assert (len(sp.EDGES), len(sp.SCH) + sp.N_COUNTRIES) == (w_rels, w_nodes) and 'id="exhibit"' in page
 
@@ -941,6 +1093,12 @@ VERIFY = [
         "Needs the Relate CLI. No Witness code runs: the witness is an ordinary `.rl` file.",
     ),
     (
+        "Ask it something else",
+        [e["command"] for e in OQ],
+        _and([f"`{e['check'].split(' (')[0]}`" for e in OQ]) + ", each ending `VERIFIED`, exit 0.",
+        f"Three other query shapes on the same graph: a path question ({OQ[0]['question'][0].lower() + OQ[0]['question'][1:].rstrip('?')}), a top-k with `ORDER BY` + `LIMIT` ({OQ[1]['question'][0].lower() + OQ[1]['question'][1:].rstrip('?')}) and an `EXISTS` / `NOT EXISTS` pair ({OQ[2]['question'][0].lower() + OQ[2]['question'][1:].rstrip('?')}). Or bring your own graph: `uv run witness why -f Q.cypher --store YOUR.rl`.",
+    ),
+    (
         "Run the tests",
         ["uv run pytest --cov=witness"],
         f"{TESTS} passed and 100% line and branch coverage; {SKIPPED} more need a local Neo4j in Docker and skip without it.",
@@ -948,20 +1106,23 @@ VERIFY = [
     ),
 ]
 assert "VERIFIED" in sp.demo.splitlines()[-1]
-VERIFY_MORE = "More commands, one section per set of numbers: `DEMO.md`. The two receipts it does not cover have their own scripts: `scripts/pull_each_tag.py` and `bench/full_graph_necessity.py`. The files behind every figure on this page: `evidence/`, `witnesses/`."
+VERIFY_MORE = "More commands, one section per set of numbers: `DEMO.md`. The files behind every figure on this page: `evidence/`, `witnesses/`."
 # the sections of this page in order, with what each one holds (every count is a list's own length)
 INDEX = [
     ("The receipts", "#the-receipts", f"{len(RECEIPTS)} receipts, each with its file"),
     ("How it uses Relate", "#how-it-uses-relate", f"mode, reason, {len(CAPS)} capabilities"),
-    ("Verify it yourself", "#verify-it-yourself", f"{len(VERIFY)} commands, on your machine"),
+    ("Verify it yourself", "#verify-it-yourself", f"{len(VERIFY)} steps, on your machine"),
     ("By criterion", "#by-criterion", f"where to look for each of the {len(CRITERIA)}"),
 ]
 assert "MEX" not in sp.COUNTRY, "MEX now has a country link in the witness: the limitation below names it"
 LIMITS = [
+    "Verified is about the evidence, not the query: exit 0 says the witness is deletion-minimal for its predicate. It does not say the query asks the right question; the repro of a wrong answer is verified too.",
+    f"Supports, not guards: a witness holds what reproduces the rows it has, not what keeps other rows out. In the full graph {sens['guards']} single relationships each keep another airport out of the headline answer, and {sens['guards'] - sens['guards_in_witness']} of them are not in the witness (`evidence/full-graph-sensitivity.json`).",
     "Deletion-minimal, not smallest: no single remaining relationship can be removed without changing the answer; a smaller witness may exist.",
     "Its own answer, on its own file: because a query with `NOT EXISTS` or aggregation is not monotone, a witness does not prove that every graph containing it gives the same answer. It also leaves out true facts the answer does not need: MEX has no country link in `witnesses/two-hub.rl`.",
     "Read-only Cypher only, with no clock or randomness: Witness refuses writes, procedures, clocks and randomness (exit 2) rather than guess. Dependence on storage order is caught by a heuristic (the same answer from a store built in reverse order), not proven absent.",
-    "One graph (a public air-routes dataset, Apache-2.0): the headline query, one disagreement case and one wrong-answer repro. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
+    f"Answers that rest on thousands of facts do not shrink: a count over the whole graph ran to the default cap of {fmt(OQ_CAP['run']['trials'])} trials ({round(OQ_CAP['run']['seconds'] / 60)} minutes here) and exited 3, NOT verified, with {fmt(OQ_CAP['witness']['relationships'])} relationships left (`evidence/other-queries.json`).",
+    f"One graph (a public air-routes dataset, Apache-2.0): the headline query, three more cases and three more query shapes. The one mistaken query was written for the case; the engine disagreement is observed, and only on Relate {_and(VER_DISAGREE)}. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
 ]
 DECK_SLIDES = (SITE / "deck" / "index.html").read_text().count('<div class="pfoot">')  # the deck written just above
 assert DECK_SLIDES == 10
@@ -1078,11 +1239,11 @@ md += [
     "",
     "The graph is persisted. Stores committed in this repository:",
     "",
-    "| Store | What it is | Nodes | Relationships |",
-    "|---|---|---|---|",
+    "| Store | What it is | Nodes | Relationships | Bytes |",
+    "|---|---|---|---|---|",
 ]
-md += [f"| {md_inline(f'`{p}`')} | {what} | {fmt(n)} | {fmt(r)} |" for p, what, n, r in STORES]
-md += ["", md_inline(STORES_ALSO), "", f"The question: {QUESTION} The answer: {', '.join(ANSWER)}.", ""]
+md += [f"| {md_inline(f'`{p}`')} | {what} | {fmt(n)} | {fmt(r)} | {fmt(BYTES[p])} |" for p, what, n, r in STORES]
+md += ["", md_inline(STORES_ALSO), "", f"The question: {QUESTION} {ANSWER_NOTE}", ""]
 md += ["## Verify it yourself", ""]
 for i, (t, lines, expect, note) in enumerate(VERIFY, 1):
     md += [f"{i}. **{t}.** {md_inline(note)}", "", "   ```bash"]
@@ -1209,7 +1370,7 @@ def judge_page() -> str:
         for i, ((code, _, _), (use, files, _)) in enumerate(zip(CAPS, CAP_USE, strict=True), 1)
     ]
     stores = [
-        f'<tr role="row"><td role="cell" class="path">{chip(p)}</td><td role="cell" class="role">{html.escape(what[0].upper() + what[1:])}</td>'
+        f'<tr role="row"><td role="cell" class="path">{chip(p)}</td><td role="cell" class="role">{html.escape(what[0].upper() + what[1:])} · {fmt(BYTES[p])} bytes</td>'
         f'<td role="cell" class="n" data-l="nodes">{fmt(n)}</td><td role="cell" class="n" data-l="relationships">{fmt(r)}</td></tr>'
         for p, what, n, r in STORES
     ]
@@ -1273,7 +1434,8 @@ def judge_page() -> str:
         "STORES": "\n              ".join(stores),
         "STORES_ALSO": inline(STORES_ALSO),
         "QUESTION": html.escape(QUESTION),
-        "ANSWER": " ".join(f"<b>{html.escape(a)}</b>" for a in ANSWER),
+        "ANSWER": " ".join(f"<b>{html.escape(a)}</b>" for a in ANSWER)
+        + f" · each with its hubs' countries: {html.escape(', '.join(_hub_c))}",
         "WIT_SVG": sp.schematic("j", ghost=False),
         "WIT_CAP": inline(WIT_CAP),
         "VERIFY": "\n        ".join(verify),

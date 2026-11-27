@@ -138,11 +138,30 @@
 
 <section class="cases" id="cases" aria-labelledby="cases-h">
   <div class="wrap">
-    <p class="lbl">Exhibits B and C <span>·</span> same loop, the other two predicates</p>
-    <h2 id="cases-h">When the agent's query is wrong, <em>the evidence still shrinks.</em></h2>
+    <p class="lbl">Exhibits B, C and D <span>·</span> the same loop, holding on to something else</p>
+    <h2 id="cases-h">When two answers disagree, <em>the evidence still shrinks.</em></h2>
+    <article class="case lead">
+      <div>
+        <p class="case-k data">An engine disagreement, observed · Relate {{EC_ENGINE}}</p>
+        <p class="case-n"><span>{{C_SRC}}</span><span class="to">→</span><em>{{EC_RELS}}</em></p>
+        <p>Relate's v{{EC_FIXED}} release notes list a fix: <code>EXISTS</code> over two <code>MATCH</code> clauses agrees with <code>COUNT</code> on relationship uniqueness. On the pinned {{EC_ENGINE}}, the two ways of writing one condition return {{EC_ROWS}} and 0 Mexican airports on this graph. Witness hands back the {{EC_RELS}} relationships that still show it: <code class="rel">{{EC_EX1}}</code> and <code class="rel">{{EC_EX2}}</code>.</p>
+        <p class="case-stamp">{{EC_CHECK}}</p>
+        <p class="cap"><code>--predicate disagree</code> · {{EC_TRIALS}} trials. The fix is Relate's; the two-relationship repro is what Witness adds. <code>witnesses/exists-count.manifest.json</code></p>
+      </div>
+      <figure class="rel-tape">
+        <figcaption class="lbl">The same two relationships, release by release</figcaption>
+        <table>
+          <thead><tr><th scope="col">relate-db</th><th scope="col"><code>COUNT</code> form</th><th scope="col"><code>EXISTS</code> form</th><th scope="col"><span class="sr">Verdict</span></th></tr></thead>
+          <tbody>
+            {{EC_VERSIONS}}
+          </tbody>
+        </table>
+        <p class="cap">Each row rebuilds the witness's script under that release and runs both forms. <code>bench/relate_versions.py</code> · <code>evidence/relate-versions.jsonl</code></p>
+      </figure>
+    </article>
     <div class="case-grid">
       <article class="case">
-        <p class="case-k data">Two queries disagree · India, DEL</p>
+        <p class="case-k data">A query mistake: two queries disagree · India, DEL</p>
         <p class="case-n"><span>{{C_SRC}}</span><span class="to">→</span><em>{{DB_RELS}}</em></p>
         <p>An agent's version of the question matches the first flight in either direction. It disagrees with the reference query on {{SCAN_DIFFER}} of {{SCAN_PAIRS}} country and busiest-airport pairs. For India and DEL, {{DB_RELS}} relationships keep the two disagreeing, and one of them is the flight the agent's query read backwards: <code class="rel">(VNS)-[:HAS_ROUTE]-&gt;(AGR)</code>, as if Agra flew to VNS.</p>
         <p class="case-stamp">{{DB_CHECK}}</p>

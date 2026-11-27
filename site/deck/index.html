@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Witness · pitch deck</title>
-<meta name="description" content="When an agent answers from a graph, Witness hands back 22 of its 57,645 relationships that reproduce the answer, and proves deleting any one of them changes it.">
+<meta name="description" content="When an agent answers from a graph, Witness hands back 22 of its 57,645 relationships that reproduce the answer on their own, and proves each of them is needed.">
 <meta name="author" content="edycutjong">
 <meta name="theme-color" content="#F2E8D5">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
@@ -12,7 +12,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Witness">
 <meta property="og:title" content="Witness · pitch deck">
-<meta property="og:description" content="57,645 relationships → 22 that reproduce an agent&#x27;s answer. Delete any one of the 22 and it changes.">
+<meta property="og:description" content="57,645 relationships → 22 that reproduce an agent&#x27;s answer on their own. Take any one of the 22 away and it changes.">
 <meta property="og:url" content="https://witness.edycu.dev/deck/">
 <meta property="og:image" content="https://witness.edycu.dev/og-image.png?v=4e6a2d4838">
 <meta property="og:image:width" content="1200">
@@ -531,7 +531,7 @@ ORDER BY airport</pre>
     <h2>The loop runs inside Relate, <em>and the proof is a Relate file.</em></h2>
   </div>
   <div class="caps-lead"><span class="no">1</span><code>begin_transaction · rollback_transaction</code><span>the inner loop: 371 trials in the headline run</span></div>
-  <ol class="caps"><li class="big"><span class="no">2</span><code>QueryResult.query_type</code><span>refuse writes</span></li><li class="big"><span class="no">3</span><code>EXPLAIN</code><span>prune unreachable types</span></li><li class="big"><span class="no">4</span><code>read_only=True</code><span>reruns cannot write</span></li><li class="sm"><span class="no">5</span><code>single-file .rl</code><span>the evidence format</span></li><li class="sm"><span class="no">6</span><code>relate pull</code><span>fixture mode</span></li><li class="sm"><span class="no">7</span><code>relate query --mode json</code><span>independent re-check</span></li><li class="sm"><span class="no">8</span><code>MCP · why · check</code><span>Witness's own tools, beside relate serve --mcp</span></li></ol>
+  <ol class="caps"><li class="big"><span class="no">2</span><code>QueryResult.query_type</code><span>refuse writes</span></li><li class="big"><span class="no">3</span><code>EXPLAIN</code><span>prune unreachable types</span></li><li class="big"><span class="no">4</span><code>read_only=True</code><span>reruns cannot write</span></li><li class="sm"><span class="no">5</span><code>single-file .rl</code><span>the evidence format</span></li><li class="sm"><span class="no">6</span><code>relate pull</code><span>fixture mode</span></li><li class="sm"><span class="no">7</span><code>relate query --mode json</code><span>re-check on the CLI</span></li><li class="sm"><span class="no">8</span><code>MCP · why · check</code><span>Witness's own tools, beside relate serve --mcp</span></li></ol>
   <aside class="notes">Seven Relate capabilities plus Witness's own MCP tools beside Relate's MCP server; the README names the file that uses each. The inner loop is Relate's own transactions; Relate's query_type must report read-only after Witness's own token check; names from the query and its EXPLAIN plan prune; the single-file .rl is the evidence format; relate query on the CLI re-checks every probe independently.</aside>
 <div class="pfoot"><span><b>Witness</b> · v0.1.0 · witness.edycu.dev</span><span>6 / 10</span></div>
 </section>
@@ -544,7 +544,7 @@ ORDER BY airport</pre>
   <div class="proofs">
     <div class="pf"><b><em>22</em><i>of</i>22</b><span>change the answer, on relate-db and on the Relate CLI</span><code>witnesses/two-hub.manifest.json</code></div>
     <div class="pf"><b>2<i>runs</i></b><span>byte-identical rebuild script (.cypher) from the same query and seed</span><code>evidence/determinism.json</code></div>
-    <div class="pf"><b>517</b><span>tests on real Relate, 100% line and branch coverage</span><code>evidence/pytest-2026-11-27.txt</code></div>
+    <div class="pf"><b>525</b><span>tests on real Relate, 100% line and branch coverage</span><code>evidence/pytest-2026-11-27.txt</code></div>
   </div>
   <aside class="notes">witness check re-proves sufficiency and every necessity probe on the Python API and again through the Relate CLI. Determinism is claimed only because two runs gave a byte-identical .cypher rebuild script. The test suite runs on real Relate; relate pull is stood in because it needs a Neo4j server.</aside>
 <div class="pfoot"><span><b>Witness</b> · v0.1.0 · witness.edycu.dev</span><span>7 / 10</span></div>

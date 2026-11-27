@@ -1,0 +1,283 @@
+{
+ "name": "d037-relate-1.3.0",
+ "phases": {
+  "after_a": [
+   1,
+   0
+  ],
+  "after_b": [
+   1,
+   0
+  ],
+  "after_plan": [
+   3504,
+   0
+  ],
+  "commits": 13,
+  "final_counts": [
+   1,
+   0
+  ],
+  "fixpoint_rounds": 0,
+  "inconclusive": 0,
+  "isolate_restarts": 0,
+  "other_engine_ms_p50": 0.578,
+  "phase_a_removed": 3503,
+  "phase_b_removed": 0,
+  "phase_c_removed": 0,
+  "seconds": 2.234,
+  "seed": 0,
+  "start_counts": [
+   3748,
+   57645
+  ],
+  "ties": 0,
+  "trial_ms_p50": 1.873,
+  "trial_ms_p95": 115.421,
+  "trials": 28
+ },
+ "plan": {
+  "dropped_labels": [
+   "Continent",
+   "Country"
+  ],
+  "dropped_nodes": 244,
+  "dropped_rels": 57645,
+  "dropped_types": [
+   "HAS_ROUTE",
+   "IN_COUNTRY",
+   "ON_CONTINENT"
+  ],
+  "kept": false,
+  "names": [
+   "Airport"
+  ]
+ },
+ "schema": "witness.trace/v1",
+ "trials": [
+  {
+   "holds": false,
+   "ms": 115.421,
+   "n": 1,
+   "nodes": 3748,
+   "phase": "empty-graph",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 684.927,
+   "n": 2,
+   "nodes": 244,
+   "phase": "plan",
+   "rels": 57645
+  },
+  {
+   "holds": true,
+   "ms": 45.812,
+   "n": 3,
+   "nodes": 1752,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 28.565,
+   "n": 4,
+   "nodes": 1752,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 16.616,
+   "n": 5,
+   "nodes": 876,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 15.556,
+   "n": 6,
+   "nodes": 876,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 9.809,
+   "n": 7,
+   "nodes": 438,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 8.821,
+   "n": 8,
+   "nodes": 438,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 5.451,
+   "n": 9,
+   "nodes": 219,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 5.344,
+   "n": 10,
+   "nodes": 219,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 3.33,
+   "n": 11,
+   "nodes": 109,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 3.01,
+   "n": 12,
+   "nodes": 110,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 1.901,
+   "n": 13,
+   "nodes": 55,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 1.873,
+   "n": 14,
+   "nodes": 55,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 1.495,
+   "n": 15,
+   "nodes": 27,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 1.64,
+   "n": 16,
+   "nodes": 28,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 1.251,
+   "n": 17,
+   "nodes": 14,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 1.419,
+   "n": 18,
+   "nodes": 14,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 1.042,
+   "n": 19,
+   "nodes": 7,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 1.05,
+   "n": 20,
+   "nodes": 7,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.735,
+   "n": 21,
+   "nodes": 3,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.988,
+   "n": 22,
+   "nodes": 4,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.729,
+   "n": 23,
+   "nodes": 2,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.795,
+   "n": 24,
+   "nodes": 2,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": true,
+   "ms": 0.733,
+   "n": 25,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.75,
+   "n": 26,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.701,
+   "n": 27,
+   "nodes": 1,
+   "phase": "A",
+   "rels": 0
+  },
+  {
+   "holds": false,
+   "ms": 0.734,
+   "n": 28,
+   "nodes": 1,
+   "phase": "C",
+   "rels": 0
+  }
+ ]
+}

@@ -185,6 +185,8 @@ def print_outcome(o, extra: str | None = None) -> None:
     for n in o.isolated:
         print(f"   ·  ({n})  isolated node")
     print(f"\nCHECK  {o.check.text}")
+    for line in o.check.on_w_lines(f"relate-db {relate_version()}"):
+        print(line)
     print(f"  {o.check.cli_status}")
 
 
@@ -293,6 +295,8 @@ def cmd_check(args) -> int:
     print(f"CHECK  {shown(w)}  (query, parameters and baseline from {src})")
     if res.other_engine:
         print(f"  the same query on relate-db {relate_version()} and on {res.other_engine}")
+        for line in res.on_w_lines(f"relate-db {relate_version()}"):
+            print(line)
     print(f"  answer reproduced on W: {'yes' if res.sufficient else 'NO'}")
     print(f"  {res.text}")
     print(f"  {res.cli_status}")

@@ -194,6 +194,16 @@ class CheckResult:
     reasons: list[str] = field(default_factory=list)
     change_phrase: str = "change the answer"
     other_engine: str | None = None
+    # two engines: what each answers on W, as canonical text. The predicate is "they differ", so the difference on W
+    # need not be the one seen on the full graph; printing both answers shows which one the witness holds
+    answers_on_w: list | None = None
+
+    def on_w_lines(self, this_engine: str) -> list[str]:
+        if not self.other_engine or not self.answers_on_w:
+            return []
+        names = (this_engine, self.other_engine)
+        shown = [("no answer" if a is None else a if len(a) <= 200 else a[:199] + "…") for a in self.answers_on_w]
+        return [f"  on W, {n} answers  {a}" for n, a in zip(names, shown, strict=True)]
 
     @property
     def inconclusive(self) -> int:
@@ -243,7 +253,7 @@ class CheckResult:
             "disagreements": self.disagreements,
             "reasons": self.reasons,
             "probes": self.probes,
-        } | ({"other_engine": self.other_engine} if self.other_engine else {})
+        } | ({"other_engine": self.other_engine, "answers_on_w": self.answers_on_w} if self.other_engine else {})
 
 
 def _answers(sc: Scratch, spec: CheckSpec) -> tuple[list, list]:
@@ -356,6 +366,7 @@ def check(
                 out.other_engine = eng.label
                 on_w = eng.answer()
                 ans_w[1] = on_w.answer
+                out.answers_on_w = [None if a is None else repr(a) for a in ans_w]
                 if on_w.error is not None:  # sufficiency is inconclusive: say why
                     out.reasons.append(f"{eng.label} could not answer on W: {on_w.error}"[:200])
             if raw_w[0] is not None:

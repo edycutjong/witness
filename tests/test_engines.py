@@ -385,7 +385,12 @@ def test_reduce_and_check_against_relate_1_3_0(tmp_path, capsys):
     assert o.check.text.startswith("2 of 2 end the disagreement")
     w = str(tmp_path / "engines.rl")
     assert main(["check", w, "--no-cli"]) == 0
-    assert "and on relate-db 1.3.0" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "and on relate-db 1.3.0" in out
+    # the witness says what each engine answers on it: nothing on the pinned release, MZT on 1.3.0
+    assert f"on W, relate-db {relate.__version__} answers  ()" in out
+    assert "on W, relate-db 1.3.0 answers  ((('airport', 'MZT'),),)" in out
+    assert o.check.to_dict()["answers_on_w"] == ["()", "((('airport', 'MZT'),),)"]
     assert main(["check", w, "--no-cli", "--other-engine", "relate-db==1.2.0"]) == 1
     assert "the predicate does not hold on W" in capsys.readouterr().out
     qf = tmp_path / "q.cypher"
@@ -686,6 +691,11 @@ def test_check_keeps_the_other_engines_error_and_always_closes_it(tiny_rl, monke
     monkeypatch.setattr(engines, "open_engine", lambda *a, **k: stub)
     res = check_mod.check(tiny_rl, spec(), use_cli=False)
     assert stub.closed and not res.verified and res.sufficient is None
+    assert res.on_w_lines("relate-db here")[1] == "  on W, stub 1 answers  no answer" and res.answers_on_w[1] is None
+    long_answer = check_mod.CheckResult(other_engine="other", answers_on_w=["x" * 300, "y"])
+    assert (
+        long_answer.on_w_lines("this")[0].endswith("x" * 199 + "…") and check_mod.CheckResult().on_w_lines("this") == []
+    )
     assert "stub 1 could not answer on W: TrialTimeout" in res.reasons[0]
     assert all(p["necessary"] is None and p["error"].startswith("stub 1: TrialTimeout") for p in res.probes)
 

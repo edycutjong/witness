@@ -336,7 +336,8 @@ class _Session:
             return _Res(types.SimpleNamespace(columns=["v"], data=[{"v": "stand-in"}]))
         return _Res(self.drv.db.execute(stmt, {**(params or {}), **kw}))
 
-    def begin_transaction(self):
+    def begin_transaction(self, timeout=None):
+        self.drv.timeouts.append(timeout)
         return _Tx(self.drv.db)
 
     def __enter__(self):
@@ -350,6 +351,7 @@ class _Driver:
     def __init__(self, path):
         self.db = relate.Database(str(path))
         self.closed = False
+        self.timeouts = []
 
     def session(self, database=None):
         return _Session(self)
@@ -363,9 +365,10 @@ def test_neo4j_engine_against_a_stand_in(tiny_rl, tmp_path):
     sc = Scratch.open_copy(tiny_rl)
     drv = _Driver(tmp_path / "neo.rl")
     try:
-        eng = Neo4jEngine(sc, gq(), driver=drv)
+        eng = Neo4jEngine(sc, gq(), driver=drv, timeout=7.0)
         assert eng.label == "Neo4j stand-in" and eng.counts == sc.counts()
         full = eng.answer()
+        assert full.error is None and drv.timeouts == [7.0]  # every trial carries the deadline to the server
         a_key = next(k for i, k in sc.node_keys.items() if sc.node_props[i]["name"] == "A")
         rel = next(iter(sc.rel_keys.values()))
         assert repr(eng.answer([rel], []).answer) == repr(full.answer)
@@ -379,6 +382,7 @@ def test_neo4j_engine_against_a_stand_in(tiny_rl, tmp_path):
         assert node_q.answer().error is None
         eng.close()
         assert drv.closed and eng.node_ids == {}
+        eng.close()  # once: a second close touches nothing
     finally:
         sc.close()
 
@@ -398,6 +402,34 @@ def test_neo4j_engine_refuses_a_non_empty_database(tiny_rl, tmp_path):
 def test_neo4j_graph_values_are_refused():
     graph = type("Node", (), {"__module__": "neo4j.graph"})()
     assert engines._graph_value([{"a": graph}]) and not engines._graph_value([1, {"a": "b"}])
+
+
+def test_neo4j_driver_only_values_are_inconclusive(tiny_rl, tmp_path, monkeypatch):
+    """A date from the Neo4j driver and the same date from relate-db have different reprs: never a disagreement."""
+    import datetime
+
+    date = type("Date", (), {"__module__": "neo4j.time"})()
+    assert engines._driver_value({"d": [date]}) and not engines._driver_value([datetime.date(2020, 1, 2), 1.5, "x"])
+    sc = Scratch.open_copy(tiny_rl)
+    eng = Neo4jEngine(sc, gq(), driver=_Driver(tmp_path / "g.rl"))
+    monkeypatch.setattr(engines, "_driver_value", lambda v: True)
+    try:
+        assert eng.answer().answer is None and "temporal or spatial value" in eng.answer().error
+    finally:
+        eng.close()
+        sc.close()
+
+
+def test_neo4j_load_that_loses_an_element_is_refused(tiny_rl, tmp_path, monkeypatch):
+    sc = Scratch.open_copy(tiny_rl)
+    drv = _Driver(tmp_path / "short.rl")
+    monkeypatch.setattr(Neo4jEngine, "_load", lambda self, sc: None)
+    try:
+        with pytest.raises(Refused, match="holds 0 nodes and 0 relationships after the load, this side 5 and 6"):
+            Neo4jEngine(sc, gq(), driver=drv)
+        assert drv.closed
+    finally:
+        sc.close()
 
 
 def test_neo4j_graph_value_answer_is_an_error(tiny_rl, tmp_path, monkeypatch):

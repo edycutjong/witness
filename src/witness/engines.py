@@ -215,12 +215,19 @@ DEL_NODES = "UNWIND $ids AS i MATCH (n) WHERE elementId(n) = i DETACH DELETE n"
 
 
 class Neo4jEngine:
-    """The same query on Neo4j over Bolt. The graph comes from ``sc`` (a ``store.Scratch``), loaded once."""
+    """The same query on Neo4j over Bolt. The graph comes from ``sc`` (a ``store.Scratch``), loaded once.
 
-    def __init__(self, sc, gq: GuardedQuery, *, strict_lists=False, digits=12, driver=None, settings=None):
+    ``close()`` removes what was loaded. A run that is killed outright cannot do that: the graph stays in the
+    database, and the next run refuses it as not empty until it is cleared by hand."""
+
+    def __init__(
+        self, sc, gq: GuardedQuery, *, strict_lists=False, digits=12, driver=None, settings=None, timeout=30.0
+    ):
         self.gq = gq
         self.strict_lists = strict_lists
         self.digits = digits
+        self.timeout = timeout
+        self.closed = False
         if driver is None:
             try:
                 from neo4j import GraphDatabase  # type: ignore[import-not-found]
@@ -242,15 +249,22 @@ class Neo4jEngine:
                 if s.run("MATCH (n) RETURN count(n) AS c").single()["c"]:
                     raise Refused(
                         "--other-engine neo4j: the Neo4j database is not empty; Witness loads the graph into an empty "
-                        "database and removes it again on close",
+                        "database and removes it again on close (a run that was killed leaves its graph behind: "
+                        "clear that database first)",
                         "other-engine",
                     )
             self.label = f"Neo4j {self.version}"
             self._load(sc)
-        except Exception:
+            self.counts = (len(self.node_ids), len(self.rel_ids))
+            if self.counts != (len(sc.node_keys), len(sc.rel_keys)):  # every element came back with its id
+                raise Refused(
+                    f"--other-engine neo4j: {self.label} holds {self.counts[0]} nodes and {self.counts[1]} "
+                    f"relationships after the load, this side {len(sc.node_keys)} and {len(sc.rel_keys)}",
+                    "other-engine",
+                )
+        except BaseException:
             self.close()
             raise
-        self.counts = (len(self.node_ids), len(self.rel_ids))
 
     def _load(self, sc, batch: int = 2000) -> None:
         from .canon import cypher_name
@@ -300,7 +314,7 @@ class Neo4jEngine:
         try:
             rids, nids = self._ids(rel_keys, node_keys)
             with self.driver.session(database=self.database) as s:
-                tx = s.begin_transaction()
+                tx = s.begin_transaction(timeout=self.timeout)  # the server ends a trial that runs longer
                 try:
                     if rids:
                         tx.run(DEL_RELS, ids=rids).consume()
@@ -313,6 +327,8 @@ class Neo4jEngine:
                     tx.rollback()
             if any(_graph_value(v) for r in rows for v in r.values()):
                 raise ValueError("Neo4j returned graph values; return properties or ids to compare across engines")
+            if any(_driver_value(v) for r in rows for v in r.values()):
+                raise ValueError(DRIVER_VALUE)
             ans = answer_of(self.gq, rows, cols, strict_lists=self.strict_lists, digits=self.digits)
         except Exception as e:  # noqa: BLE001 - any engine error is inconclusive
             return EngineAnswer(None, f"{type(e).__name__}: {str(e)[:300]}", (time.perf_counter() - t0) * 1000)
@@ -334,28 +350,52 @@ class Neo4jEngine:
             self.node_ids.pop(k, None)
 
     def close(self) -> None:
-        """Remove every node this engine created (its relationships go with it), then close the driver."""
+        """Remove every node this engine created (its relationships go with it), then close the driver. Once."""
+        if self.closed:
+            return
+        self.closed = True
         try:
             ids = list(self.node_ids.values())
             if ids:
                 with self.driver.session(database=self.database) as s:
                     for i in range(0, len(ids), 2000):
                         s.run(DEL_NODES, ids=ids[i : i + 2000]).consume()
-            self.node_ids, self.rel_ids = {}, {}
         finally:
+            self.node_ids, self.rel_ids = {}, {}
             self.driver.close()
 
 
-def _graph_value(v) -> bool:
+def _in_module(v, prefix: str) -> bool:
     if isinstance(v, list):
-        return any(_graph_value(x) for x in v)
+        return any(_in_module(x, prefix) for x in v)
     if isinstance(v, dict):
-        return any(_graph_value(x) for x in v.values())
-    return type(v).__module__.startswith("neo4j.graph")
+        return any(_in_module(x, prefix) for x in v.values())
+    return type(v).__module__.startswith(prefix)
 
 
-def open_engine(spec: str, source: str | Path, gq: GuardedQuery, *, sc=None, strict_lists=False, digits=12):
-    """Open the other engine on ``source`` (a worker) or from ``sc`` (Neo4j loads the graph the Scratch holds)."""
+def _graph_value(v) -> bool:
+    return _in_module(v, "neo4j.graph")
+
+
+# A date, time, duration or point comes back as the Neo4j driver's own class, and Relate's as Python's or its own. The
+# canonical form of such a value is its repr, so two equal values would compare unequal: a difference between two
+# drivers, published as a difference between two engines. Refused instead (inconclusive).
+DRIVER_VALUE = (
+    "Neo4j returned a temporal or spatial value, which each driver renders its own way; "
+    "return toString(...) or a component of it to compare across engines"
+)
+
+
+def _driver_value(v) -> bool:
+    return _in_module(v, "neo4j.")
+
+
+def open_engine(
+    spec: str, source: str | Path, gq: GuardedQuery, *, sc=None, strict_lists=False, digits=12, timeout=30.0
+):
+    """Open the other engine on ``source`` (a worker) or from ``sc`` (Neo4j loads the graph the Scratch holds).
+
+    ``timeout``: seconds the Neo4j server gives one trial before it ends it (that trial is then inconclusive)."""
     kind, _ = parse_engine(spec)
     if kind == "neo4j":
         from .store import Scratch
@@ -363,7 +403,7 @@ def open_engine(spec: str, source: str | Path, gq: GuardedQuery, *, sc=None, str
         own = sc is None
         sc = Scratch.open_copy(source) if own else sc
         try:
-            return Neo4jEngine(sc, gq, strict_lists=strict_lists, digits=digits)
+            return Neo4jEngine(sc, gq, strict_lists=strict_lists, digits=digits, timeout=timeout)
         finally:
             if own:
                 sc.close()

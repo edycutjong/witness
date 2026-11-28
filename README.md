@@ -29,7 +29,9 @@
 
 ## 💡 The Problem & Solution
 
-**Use case:** an agent answered a question from a graph of 57,645 relationships. Witness hands back the 22 that reproduce
+### Use case
+
+An agent answered a question from a graph of 57,645 relationships. Witness hands back the 22 that reproduce
 the answer and shows that each of the 22 is needed. A reviewer reads 22 relationships: not the 57,645 in the graph, and not
 the 68 that a listing of the matched paths would show.
 
@@ -76,8 +78,12 @@ It shows what the rows of an answer rest on. It does not judge the query, and it
   Witness also keeps a small graph of its own, the ledger: `(:Reduction)-[:PRODUCED]->(:Witness)` and, when a person reviews
   a reduction, `(:Review {verdict, reason})-[:ON]->(:Reduction)`. "Which answers has nobody reviewed" is one query with plain
   `relate`: `MATCH (r:Reduction) WHERE NOT EXISTS { (:Review)-[:ON]->(r) } RETURN r.id, r.statement`.
-- **Where the data lives:** `data/air-routes.rl` (the source), `witnesses/*.rl` (four committed witnesses; the headline is
-  `witnesses/two-hub.rl`), `witness.rl` (the ledger: one reduction recorded, no review yet), `fixtures/` (fixture-mode stores).
+
+### Where the data lives
+
+The persistent stores are committed, single-file `.rl`: `data/air-routes.rl` (the source), `witnesses/*.rl` (four committed
+witnesses; the headline is `witnesses/two-hub.rl`), `witness.rl` (the ledger: one reduction recorded, no review yet),
+`fixtures/` (fixture-mode stores).
 
 Relate capabilities used:
 

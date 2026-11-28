@@ -247,9 +247,15 @@ unpulled witness gives the manifest's answer; the engine case gives the recorded
 1.3.0 (they agree); a `CREATE` in the query box is refused. `tests/test_wasm_parity.py` runs it under pytest when Node
 is installed and requires the committed evidence to match the fresh run. `scripts/browser_live.mjs` drives the page itself
 in headless Chrome (puppeteer is not a dependency of this repository) and records what it showed: in the committed run,
-all 22 pulls live and the same as the recording, the four example queries answered (on the witness with the last tag
-pulled), a write refused, a runaway query stopped after 4 s and the next one answered, and both engine releases live with
-their recorded rows; no engine worker at page load (the strip says ready; the engine starts once the visitor is near the
-exhibit and has scrolled, tapped or typed, or pulls a tag or runs a query); no request to a third party other than the
-version chip's call to GitHub's releases API, and no console error. The run records the SHA-256 of the served page and
-of `site/relate/live.js` and `worker.js`; the site build refuses a browser run older than the live steps it ships.
+all 22 pulls live and the same as the recording, the four example queries answered on the whole witness (the last tag is
+put back first), a write refused, a runaway query stopped after 4 s and the next one answered, and both engine releases
+live with their recorded rows; no engine worker at page load (the strip says ready; the engine starts once the visitor
+is within 600 px of the exhibit and has scrolled, tapped or typed, or pulls a tag or runs a query; the run records
+which of the two it saw after a first short scroll); no request off the site at all, no failed response and no
+console error. A page cannot see what its worker requests, so each engine's worker reports the addresses it fetched to
+start, and the run records them: five files per release, all under `/relate/`. The run also hashes the page's own
+script, `site/relate/live.js`, `worker.js` and every served engine file (compared with `site/relate/engines.json`); the
+site build refuses a browser run that is older than the page script or the live steps it ships. After a change to any
+of those, `scripts/build_site.py --before-browser-run` builds the page for the run to record. The engine files
+themselves are checked against the npm registry by `uv run python scripts/vendor_relate_wasm.py --verify`, which
+downloads the two pinned tarballs again and compares every served file with them, byte for byte.

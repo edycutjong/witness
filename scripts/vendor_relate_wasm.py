@@ -5,8 +5,14 @@ The landing runs the witness on Relate in the visitor's tab. The engine is the p
 site, so the page makes no request to a third party to run it. Only the four entries Relate's browser guide says
 to serve are copied (relate.js, relate_bg.wasm, trap.js, snippets/), plus package.json for the version and licence.
 
-    uv run python scripts/vendor_relate_wasm.py          # fetch, verify, write site/relate/<v>/ + engines.json
-    uv run python scripts/vendor_relate_wasm.py --check  # offline: the committed files match engines.json
+    uv run python scripts/vendor_relate_wasm.py           # fetch, verify, write site/relate/<v>/ + engines.json
+    uv run python scripts/vendor_relate_wasm.py --check   # offline: the committed files match engines.json
+    uv run python scripts/vendor_relate_wasm.py --verify  # online, writes nothing: the committed files are the
+                                                          # registry's, byte for byte (what "unmodified" rests on)
+
+--check cannot prove "unmodified" by itself: it compares the files with engines.json, both of which are in this
+repository. --verify downloads each pinned tarball again, checks it against the registry's sha512 and compares every
+served file with it.
 
 1.0.1 is the release every committed witness was reduced on (the relate-db pin). 1.3.0 is the release whose notes
 list the fix for the engine case (EXISTS against COUNT over two MATCH clauses), so the page can run both forms on
@@ -34,6 +40,9 @@ PINS = {
     "1.3.0": "sha512-8jjuA1w7WUWF8gTFybsoRiEpzCZIKeI3nlidAgF4uqsiV4KmXEDcFiwznzNCvDa+sV4iSQQx993tOy5AHkbRnQ==",
 }
 KEEP = ("relate.js", "relate_bg.wasm", "trap.js", "package.json")
+# The npm tarballs carry no licence file of their own (package.json names Apache-2.0), so the site serves the text of
+# the Apache License 2.0 beside the engines: this repository's LICENSE, which is that same text.
+LICENSE_TEXT = OUT / "LICENSE.txt"
 
 
 def tarball_url(version: str) -> str:
@@ -102,6 +111,7 @@ def write() -> dict:
         engines[v] = manifest_entry(v, files)
         print(f"{PACKAGE}@{v}: {len(files)} files, integrity ok -> {d.relative_to(ROOT)}")
     (OUT / "engines.json").write_text(json.dumps(engines, indent=2) + "\n")
+    LICENSE_TEXT.write_bytes((ROOT / "LICENSE").read_bytes())
     return engines
 
 
@@ -109,11 +119,15 @@ def check() -> list[str]:
     """Problems with the committed engines; empty when every file matches engines.json."""
     engines = json.loads((OUT / "engines.json").read_text())
     bad = []
+    if not LICENSE_TEXT.is_file() or LICENSE_TEXT.read_bytes() != (ROOT / "LICENSE").read_bytes():
+        bad.append("site/relate/LICENSE.txt is not this repository's LICENSE (the Apache License 2.0 text)")
     if sorted(engines) != sorted(PINS):
         bad.append(f"engines.json lists {sorted(engines)}, the pins are {sorted(PINS)}")
     for v, e in engines.items():
         if e.get("integrity") != PINS.get(v):
             bad.append(f"{v}: integrity in engines.json is not the pin")
+        if (e.get("package"), e.get("version"), e.get("tarball")) != (PACKAGE, v, tarball_url(v)):
+            bad.append(f"{v}: package, version or tarball in engines.json is not {PACKAGE}@{v} from the registry")
         on_disk = {p.relative_to(OUT / v).as_posix() for p in (OUT / v).rglob("*") if p.is_file()}
         if on_disk != set(e["files"]):
             bad.append(f"{v}: files on disk {sorted(on_disk ^ set(e['files']))} differ from engines.json")
@@ -124,13 +138,32 @@ def check() -> list[str]:
     return bad
 
 
+def verify() -> list[str]:
+    """Problems against the registry itself; empty when every served file is the pinned tarball's, byte for byte.
+    Downloads each tarball (checked against the registry's sha512 in ``fetch``) and writes nothing."""
+    bad = check()
+    for v in PINS:
+        files = fetch(v)
+        on_disk = {p.relative_to(OUT / v).as_posix(): p.read_bytes() for p in (OUT / v).rglob("*") if p.is_file()}
+        if set(on_disk) != set(files):
+            bad.append(f"{v}: served files {sorted(set(on_disk) ^ set(files))} are not the tarball's")
+        bad += [f"{v}/{rel}: differs from the registry's tarball" for rel in files if on_disk.get(rel) != files[rel]]
+    return bad
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--check", action="store_true", help="verify the committed files offline")
+    ap.add_argument("--verify", action="store_true", help="download the pinned tarballs and compare, writing nothing")
     a = ap.parse_args()
-    if a.check:
-        bad = check()
-        print("\n".join(bad) or "site/relate: every engine file matches engines.json")
+    if a.check or a.verify:
+        bad = verify() if a.verify else check()
+        ok = (
+            "every served file is the registry's, byte for byte"
+            if a.verify
+            else "every engine file matches engines.json"
+        )
+        print("\n".join(bad) or f"site/relate: {ok}")
         sys.exit(1 if bad else 0)
     write()
 

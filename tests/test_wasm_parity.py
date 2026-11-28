@@ -45,6 +45,31 @@ def test_vendor_only_takes_the_served_entries():
         assert vrw.wanted(name) is None, name
 
 
+def test_verify_compares_every_served_file_with_the_registry_tarball(monkeypatch):
+    """--verify is what "unmodified" rests on. Here the registry is stood in by the committed files (no network in
+    tests); the real download is one command: uv run python scripts/vendor_relate_wasm.py --verify."""
+
+    def committed(v):
+        return {p.relative_to(vrw.OUT / v).as_posix(): p.read_bytes() for p in (vrw.OUT / v).rglob("*") if p.is_file()}
+
+    def tampered(v):
+        files = committed(v)
+        files["relate.js"] += b"// changed"
+        files.pop("trap.js")
+        return files
+
+    monkeypatch.setattr(vrw, "fetch", committed)
+    assert vrw.verify() == []
+    monkeypatch.setattr(vrw, "fetch", tampered)
+    bad = vrw.verify()
+    assert any("relate.js: differs from the registry's tarball" in b for b in bad), bad
+    assert any("trap.js" in b and "are not the tarball's" in b for b in bad), bad
+    monkeypatch.setattr(vrw, "PACKAGE", "@someone/else")
+    assert any("package, version or tarball" in b for b in vrw.check())
+    monkeypatch.setattr(vrw, "LICENSE_TEXT", vrw.OUT / "no-such-file.txt")  # the licence text travels with the engines
+    assert any("LICENSE.txt" in b for b in vrw.check())
+
+
 def test_the_page_serves_the_live_steps_it_was_checked_with():
     for f in ("live.js", "worker.js"):
         assert (ROOT / "site" / "relate" / f).read_bytes() == (ROOT / "scripts" / "site" / f).read_bytes()

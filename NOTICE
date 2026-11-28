@@ -11,4 +11,6 @@ The landing page (site/relate/1.0.1/ and site/relate/1.3.0/) serves, unmodified,
 @relate/relate-wasm versions 1.0.1 and 1.3.0 (relate.js, relate_bg.wasm, trap.js, snippets/, package.json),
 Relate compiled to WebAssembly, published under the Apache License 2.0 (https://github.com/relatedb/relate).
 Their source tarballs, registry integrity hashes and per-file SHA-256 are listed in site/relate/engines.json;
-scripts/vendor_relate_wasm.py fetches and verifies them.
+scripts/vendor_relate_wasm.py fetches and verifies them, and its --verify mode downloads the pinned tarballs again and
+compares every served file with them, byte for byte. The tarballs carry no licence file of their own, so the text of
+the Apache License 2.0 is served beside the engines as site/relate/LICENSE.txt.

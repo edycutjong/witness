@@ -6,8 +6,10 @@ literal CREATE) into an EMPTY Neo4j database and repeats the proof there: the pr
 (sufficiency), and with each relationship deleted alone inside a transaction that is rolled back, it stops holding
 (necessity). Every verdict is compared with the one the manifest records for Relate.
 
-The only statement difference is dialect: Neo4j has no `coll.sort()`, so the hub countries are ordered before
-`collect()` (the rewrite `queries/two-hub.neo4j.cypher` already uses; asserted identical below).
+The statement is the manifest's own, with its comments stripped and nothing else changed. It calls `coll.sort()`,
+which Neo4j has in Cypher 25 and not in Cypher 5, so the script refuses a database whose default language is not
+Cypher 25. (The first record of this run, 2026-11-27, ordered the hub countries before `collect()` instead; the
+verdicts were the same.)
 
     docker run -d --rm --name witness-recheck -p 127.0.0.1:7690:7687 -e NEO4J_AUTH=neo4j/$NEO4J_PASSWORD \\
         neo4j:2026.10.2-community
@@ -39,19 +41,8 @@ from witness.guard import strip_comments  # noqa: E402
 from witness.predicates import answer_sha  # noqa: E402
 
 WITNESSES = ("two-hub", "direction-bug", "wrong-answer")
-RELATE_LINE = "WITH a, count(DISTINCT hub) AS hubs, coll.sort(collect(DISTINCT hc.code)) AS hub_countries"
-NEO4J_LINES = (
-    "WITH a, hub, hc ORDER BY hc.code WITH a, count(DISTINCT hub) AS hubs, collect(DISTINCT hc.code) AS hub_countries"
-)
 DELETE_ONE = "MATCH ()-[r]->() WHERE elementId(r) = $id DELETE r RETURN count(*) AS n"
 RELS = "MATCH (a)-[r]->(b) RETURN elementId(r) AS id, properties(a) AS a, type(r) AS t, properties(b) AS b"
-
-
-def neo4j_dialect(statement: str) -> str:
-    """The statement for Neo4j: comments stripped, `coll.sort(collect(...))` replaced by ORDER BY before collect()."""
-    flat = strip_comments(statement)
-    assert flat.count(RELATE_LINE) == 1, "the statement no longer has the one line this rewrite knows"
-    return flat.replace(RELATE_LINE, NEO4J_LINES)
 
 
 def recheck(session, name: str) -> dict:
@@ -62,7 +53,7 @@ def recheck(session, name: str) -> dict:
     kind = pred["kind"]
     assert kind in ("keep", "disagree") or (kind == "differs" and not pred["loose"]), pred
     statements = [man["statement"]] + ([pred["other_statement"]] if kind == "disagree" else [])
-    queries = [neo4j_dialect(s) for s in statements]
+    queries = [strip_comments(s) for s in statements]  # the statement Relate ran, unchanged
     columns = man["baseline"]["columns"]
 
     def answers(run) -> list:
@@ -136,16 +127,17 @@ def main() -> int:
     password = os.environ.get("NEO4J_PASSWORD")
     if not password:
         raise SystemExit("set NEO4J_PASSWORD in the environment")
-    q = neo4j_dialect((ROOT / "queries" / "two-hub.cypher").read_text())
-    committed = strip_comments((ROOT / "queries" / "two-hub.neo4j.cypher").read_text())
-    assert " ".join(q.split()) == " ".join(committed.split()), "the rewrite differs from queries/two-hub.neo4j.cypher"
     driver = GraphDatabase.driver(a.bolt, auth=(a.user, password))
     driver.verify_connectivity()
     t0 = time.perf_counter()
     with driver.session() as s:
         comps = s.run(
-            "CALL dbms.components() YIELD name, versions, edition RETURN name, versions[0] AS v, edition"
+            "CALL dbms.components() YIELD name, versions, edition RETURN name, versions, edition"
         ).data()
+        lang = s.run("SHOW DATABASES YIELD name, defaultLanguage, home WHERE home RETURN defaultLanguage AS l").single()
+        language = lang["l"] if lang else None
+        if language != "CYPHER 25":
+            raise SystemExit(f"the database's default language is {language}; the statements need Cypher 25")
         results = [recheck(s, name) for name in WITNESSES]
     driver.close()
     ok = all(
@@ -157,7 +149,8 @@ def main() -> int:
         "relationship deleted alone in a rolled-back transaction; verdicts compared with the manifest's (Relate)",
         "generated": time.strftime("%Y-%m-%d %H:%M:%S %z"),
         "neo4j": comps,
-        "dialect": "coll.sort(collect(DISTINCT hc.code)) -> ORDER BY hc.code before collect(DISTINCT hc.code)",
+        "default_language": language,
+        "statement": "each manifest's statement with its comments stripped, otherwise as Relate ran it",
         "machine": f"{platform.system()} {platform.release()} {platform.machine()}, Python {platform.python_version()}",
         "seconds": round(time.perf_counter() - t0, 1),
         "all_agree": ok,

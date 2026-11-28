@@ -1,5 +1,5 @@
-// two-hub.cypher in Neo4j's dialect: identical semantics, but Neo4j has no coll.sort(), so the hub countries are
-// ordered by an ORDER BY before collect(). Used only by bench/neo4j_compare.py (W5).
+// two-hub.cypher with the hub countries ordered by an ORDER BY before collect() instead of coll.sort(): the same answer.
+// Used only by bench/neo4j_compare.py, written when coll.sort() was believed missing on Neo4j; Cypher 25 has it.
 MATCH (a:Airport)-[:IN_COUNTRY]->(:Country {code: $country})
 WHERE a.iata <> $dest
   AND NOT EXISTS { MATCH (a)-[:HAS_ROUTE]->(:Airport {iata: $dest}) }

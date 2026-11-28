@@ -6,7 +6,10 @@ Relate runs in this process, on a file-backed scratch copy of data/air-routes.rl
 Scratch.open_copy the reducer uses; not `:memory:`). Neo4j runs in Docker (loopback Bolt, one explicit
 transaction per trial; driver round trips are included, which is the honest cost of a server). Neither side is tuned:
 Neo4j keeps its default heap and page cache, with the Airport.id/Country.code/Continent.code constraints.
-The ONLY query difference is dialect: Neo4j has no coll.sort(), so queries/two-hub.neo4j.cypher orders before collect().
+The ONLY query difference: queries/two-hub.neo4j.cypher orders the hub countries before collect() where the Relate
+query calls coll.sort(). It was written on the belief that Neo4j has no coll.sort(); Cypher 25 has it (Cypher 5 does
+not), and bench/neo4j_recheck.py runs the unchanged statement. The baseline rows of the two forms are checked
+identical before the loop.
 
     uv run --with neo4j python bench/neo4j_compare.py [--trials 1000] [--runs 3]
         -> evidence/neo4j-compare-<date>.json + neo4j-compare-rows.jsonl

@@ -7,6 +7,11 @@ Raw: `neo4j-compare-2026-11-24.json` (3 runs × 1,000 trials, per-run summaries,
 _Correction 2026-11-24 (arch review r1): the Relate column first said "`:memory:` copy". The bench ran Relate on a file-backed
 scratch copy in a temp dir (`Scratch.open_copy`, the reducer's own path). The label is fixed; no number changed._
 
+_Correction 2026-11-28: "Neo4j has no `coll.sort()`" under "What differs" is wrong for this image. Its default language is
+Cypher 25, which has `coll.sort()`; Cypher 5 does not. The benchmark ran `queries/two-hub.neo4j.cypher` as described (the hub
+countries ordered before `collect()`), and the baseline rows of the two forms were checked identical, so the numbers stand.
+`bench/neo4j_recheck.py` now runs the unchanged statement on Neo4j, with the same verdicts (`evidence/neo4j-recheck.json`)._
+
 **Loop, identical on both sides:** begin → delete one relationship → run the headline query (`queries/two-hub.cypher`,
 `MX`/`MEX`), fetch every row → rollback → check node and relationship counts are back. Same 1,000 relationships in the same order
 (seeded sample, resolved to Neo4j element ids outside the timed loop), 100 warm-up trials discarded on each side.
@@ -29,7 +34,7 @@ cannot run rollback trials. It runs them fine and returned the same answers.
 engines). Because that sample barely changes the answer, a targeted pass ran the 68 relationships the headline query actually
 binds: 20 change the answer on Relate and the same 20 on Neo4j, 68/68 identical.
 
-**What differs, stated:** (1) dialect: Neo4j has no `coll.sort()`, so `queries/two-hub.neo4j.cypher` orders before `collect()`;
+**What differs, stated:** (1) the statement: `queries/two-hub.neo4j.cypher` orders before `collect()` where the Relate query calls `coll.sort()` (this line first said Neo4j has no `coll.sort()`; see the correction above);
 baseline rows are identical (checked before the loop). (2) Neo4j keeps its default heap and page cache; both graphs carry the same
 three uniqueness constraints; `Airport.iata` is unindexed on both. (3) Machine: Apple M1 Max, 32 GB; Docker VM 10 CPUs / 9.7 GiB.
 (4) Single machine, single query, one graph (57,645 relationships): a measurement, not a benchmark suite.

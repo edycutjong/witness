@@ -1,22 +1,28 @@
 {
  "schema": "witness.neo4j-recheck/v1",
  "what": "each committed witness's rebuild script loaded into an empty Neo4j database; sufficiency, then every relationship deleted alone in a rolled-back transaction; verdicts compared with the manifest's (Relate)",
- "generated": "2026-11-27 21:00:42 +0700",
+ "generated": "2026-11-28 10:31:47 +0700",
  "neo4j": [
   {
    "name": "Neo4j Kernel",
-   "v": "2026.10.2",
+   "versions": [
+    "2026.10.2"
+   ],
    "edition": "community"
   },
   {
    "name": "Cypher",
-   "v": "5",
+   "versions": [
+    "5",
+    "25"
+   ],
    "edition": ""
   }
  ],
- "dialect": "coll.sort(collect(DISTINCT hc.code)) -> ORDER BY hc.code before collect(DISTINCT hc.code)",
+ "default_language": "CYPHER 25",
+ "statement": "each manifest's statement with its comments stripped, otherwise as Relate ran it",
  "machine": "Darwin 27.2.0 arm64, Python 3.12.13",
- "seconds": 4.1,
+ "seconds": 1.4,
  "all_agree": true,
  "witnesses": [
   {

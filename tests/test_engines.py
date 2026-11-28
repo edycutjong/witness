@@ -467,3 +467,36 @@ def test_open_engine_worker(tiny_rl):
     eng = open_engine(SELF, tiny_rl, gq())
     assert isinstance(eng, WorkerEngine)
     eng.close()
+
+
+def test_check_keeps_the_other_engines_error_and_always_closes_it(tiny_rl, monkeypatch):
+    from witness import check as check_mod
+
+    q = gq()
+
+    def spec():
+        return check_mod.CheckSpec(queries=[q, q], kind="disagree", baseline_sha="", other_engine=SELF)
+
+    stub = _Stub(EngineAnswer(None, "TrialTimeout: no answer within 30 s", 0.0))
+    stub.label = "stub 1"
+    monkeypatch.setattr(engines, "open_engine", lambda *a, **k: stub)
+    res = check_mod.check(tiny_rl, spec(), use_cli=False)
+    assert stub.closed and not res.verified and res.sufficient is None
+    assert "stub 1 could not answer on W: TrialTimeout" in res.reasons[0]
+    assert all(p["necessary"] is None and p["error"].startswith("stub 1: TrialTimeout") for p in res.probes)
+
+    class Interrupted(_Stub):
+        calls = 0
+
+        def answer(self, rels=(), nodes=()):
+            Interrupted.calls += 1
+            if Interrupted.calls > 1:
+                raise KeyboardInterrupt
+            return EngineAnswer(Remote("()"), None, 0.0)
+
+    stub2 = Interrupted(None)
+    stub2.label = "stub 2"
+    monkeypatch.setattr(engines, "open_engine", lambda *a, **k: stub2)
+    with pytest.raises(KeyboardInterrupt):
+        check_mod.check(tiny_rl, spec(), use_cli=False)
+    assert stub2.closed  # Ctrl-C in the middle of the probes still ends the other engine

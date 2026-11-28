@@ -244,9 +244,17 @@ class CheckResult:
 
 
 def _answers(sc: Scratch, spec: CheckSpec) -> tuple[list, list]:
-    """Canonical answers (cut applied, Tie on a boundary tie) and raw rows of each query on ``sc``."""
-    answers, raws = [], []
-    for gq in spec.queries:
+    """Canonical answers (cut applied, Tie on a boundary tie) and raw rows of each query on ``sc``.
+
+    With ``--other-engine`` the second query is the first one, answered by the other engine: this relate-db does not
+    run it again, and its slot stays None until the caller fills it in."""
+    answers: list = []
+    raws: list = []
+    for i, gq in enumerate(spec.queries):
+        if spec.other_engine and i:
+            answers.append(None)
+            raws.append(None)
+            continue
         try:
             res = sc.run(gq.exec_text, gq.params)
             answers.append(
@@ -339,7 +347,10 @@ def check(
                 cmp_opts = {"strict_lists": spec.strict_lists, "digits": spec.digits}
                 eng = open_engine(spec.other_engine, w_rl, spec.queries[0], sc=base, **cmp_opts)
                 out.other_engine = eng.label
-                ans_w[1] = eng.answer().answer
+                on_w = eng.answer()
+                ans_w[1] = on_w.answer
+                if on_w.error is not None:  # sufficiency is inconclusive: say why
+                    out.reasons.append(f"{eng.label} could not answer on W: {on_w.error}"[:200])
             if raw_w[0] is not None:
                 spec.resolve(list(raw_w[0].columns))
             suff = spec.holds(ans_w)
@@ -386,30 +397,36 @@ def check(
             elements = []
             out.reasons.append("necessity not checked (partial witness from a capped run)")
         # ---- Python necessity: one fresh copy of W per probe ----------------------------------------------------
-        for i, (kind, eid) in enumerate(elements, 1):
-            sc = Scratch.open_copy(w_rl, tmp)
-            try:
-                sc.commit_delete([eid] if kind == "rel" else [], [eid] if kind == "node" else [])
-                ans, raws = _answers(sc, spec)
-                if eng is not None:
-                    k = [keys[eid]]
-                    ans[1] = eng.answer(k if kind == "rel" else [], k if kind == "node" else []).answer
-                h = spec.holds(ans)
-                probe: dict[str, Any] = {
-                    "i": i,
-                    "kind": kind,
-                    "element": labels[eid],
-                    "necessary": None if h is None else (not h),
-                }
-                probe["_raw"] = [raw_bag(r.data) if r is not None else None for r in raws]
-                probe["_canon"] = ans
-            except Exception as e:  # noqa: BLE001
-                probe = {"i": i, "kind": kind, "element": labels[eid], "necessary": None, "error": str(e)[:200]}
-            finally:
-                sc.close()
-            out.probes.append(probe)
-        if eng is not None:
-            eng.close()
+        try:
+            for i, (kind, eid) in enumerate(elements, 1):
+                sc = Scratch.open_copy(w_rl, tmp)
+                try:
+                    sc.commit_delete([eid] if kind == "rel" else [], [eid] if kind == "node" else [])
+                    ans, raws = _answers(sc, spec)
+                    other = None
+                    if eng is not None:
+                        k = [keys[eid]]
+                        other = eng.answer(k if kind == "rel" else [], k if kind == "node" else [])
+                        ans[1] = other.answer
+                    h = spec.holds(ans)
+                    probe: dict[str, Any] = {
+                        "i": i,
+                        "kind": kind,
+                        "element": labels[eid],
+                        "necessary": None if h is None else (not h),
+                    }
+                    if other is not None and other.error is not None:  # why this probe proves nothing
+                        probe["error"] = f"{out.other_engine}: {other.error}"[:200]
+                    probe["_raw"] = [raw_bag(r.data) if r is not None else None for r in raws]
+                    probe["_canon"] = ans
+                except Exception as e:  # noqa: BLE001
+                    probe = {"i": i, "kind": kind, "element": labels[eid], "necessary": None, "error": str(e)[:200]}
+                finally:
+                    sc.close()
+                out.probes.append(probe)
+        finally:  # every way out of the probes, Ctrl-C included, ends the other engine
+            if eng is not None:
+                eng.close()
 
         # ---- CLI surface ----------------------------------------------------------------------------------------
         cli, status = relate_cli() if use_cli else (None, "CLI cross-check off")

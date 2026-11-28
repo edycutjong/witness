@@ -887,7 +887,7 @@ assert check == f"{w_rels} of {w_rels} change the answer"
 LIVE = SITE_URL + "/"
 EXHIBIT = SITE_URL + "/exhibit/two-hub.html"
 DECK = SITE_URL + "/deck/"
-VIDEO = "https://youtu.be/GYbci7TseJw"
+VIDEO = "https://youtu.be/4jHk1ALajRs"
 assert VIDEO in readme, "the README names a different demo video"
 _vlen = re.search(r"Demo video \((\d+:\d\d)\)", readme)
 VIDEO_LEN = f" ({_vlen.group(1)})" if _vlen else ""  # the README's own figure, or none

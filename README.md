@@ -7,7 +7,7 @@
   <br/>
 
   [![For Judges](https://img.shields.io/badge/⚖️_For-Judges-B42318?style=for-the-badge)](https://witness.edycu.dev/judge/)
-  [![Demo Video](https://img.shields.io/badge/🎬_Demo-Video-ef4444?style=for-the-badge)](https://youtu.be/GYbci7TseJw)
+  [![Demo Video](https://img.shields.io/badge/🎬_Demo-Video-ef4444?style=for-the-badge)](https://youtu.be/4jHk1ALajRs)
   [![Live Site](https://img.shields.io/badge/🚀_Live-Site-1F1A14?style=for-the-badge)](https://witness.edycu.dev)
   [![Pitch Deck](https://img.shields.io/badge/📊_Pitch-Deck-f59e0b?style=for-the-badge)](https://witness.edycu.dev/deck/)
   [![dev.to Write-up](https://img.shields.io/badge/📝_dev.to-Write--up-0A0A0A?style=for-the-badge)](https://dev.to/edycutjong/57645-relationships-to-22-shrinking-a-graph-answer-with-rollback-3jdb)
@@ -610,7 +610,7 @@ For judges: [JUDGE.md](JUDGE.md), also served at <https://witness.edycu.dev/judg
 
 ## 📽️ Demo Materials
 
-- Demo video (1:55): https://youtu.be/GYbci7TseJw
+- Demo video (1:55): https://youtu.be/4jHk1ALajRs
 - Landing page: https://witness.edycu.dev (`site/`). Relate runs in the tab there: pull any of the 22 tags and Relate 1.0.1,
   compiled to WebAssembly and served from the site, rebuilds the witness without it and re-runs the query; each answer is
   compared on screen with the recorded run (in headless Chrome, 22 of 22 live and the same: `evidence/browser-live.json`;

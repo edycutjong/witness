@@ -11,7 +11,7 @@ Witness is a Python CLI and MCP server built on Relate. Every trial is a Relate 
 3. [Open the exhibit page](https://witness.edycu.dev/exhibit/two-hub.html): the register of kept relationships, each tagged as one whose deletion changes the answer.
 4. Optional, one command: `git clone https://github.com/edycutjong/witness && cd witness && uv run witness demo` (needs uv). Expect `22 of 22 change the answer` and exit 0.
 
-Prefer to watch? [Demo video (1:55)](https://youtu.be/GYbci7TseJw) · [pitch deck](https://witness.edycu.dev/deck/)
+Prefer to watch? [Demo video (1:55)](https://youtu.be/4jHk1ALajRs) · [pitch deck](https://witness.edycu.dev/deck/)
 
 ## The receipts
 
@@ -182,7 +182,7 @@ The [listing](https://relate.devpost.com/)'s five criteria, each with the files 
 - **The README answers the listing's question.** How Witness uses Relate, which mode, and why ([`README.md`](README.md)).
 - **Commands, not only claims.** [`DEMO.md`](DEMO.md) gives the command or the recorded run for 15 sets of numbers: the headline, determinism, the Neo4j comparison, fixture mode (with the commands to create the Neo4j it pulls from), the MCP tools, the tests, the query disagreement, the wrong-answer repro, what each deletion does, the engine disagreement, other query shapes, the Neo4j re-proof, the two-engine door with the changelog fixtures, the differential run, and the live pulls in the browser against the recording.
 - **The page cannot drift from the evidence.** This page and [`JUDGE.md`](JUDGE.md) are written by [`scripts/build_site.py`](scripts/build_site.py) from the committed files; CI rebuilds both and fails on any difference ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
-- **Shown running.** The [demo video (1:55)](https://youtu.be/GYbci7TseJw) and the [pitch deck](https://witness.edycu.dev/deck/). What the stamp does not say is in [Honest limitations](#honest-limitations).
+- **Shown running.** The [demo video (1:55)](https://youtu.be/4jHk1ALajRs) and the [pitch deck](https://witness.edycu.dev/deck/). What the stamp does not say is in [Honest limitations](#honest-limitations).
 
 ## Honest limitations
 
@@ -200,7 +200,7 @@ The [listing](https://relate.devpost.com/)'s five criteria, each with the files 
 
 - Repository: https://github.com/edycutjong/witness · the source, the evidence and the commit history
 - Live site: https://witness.edycu.dev/ · the landing: replay the reduction, pull a tag yourself
-- Demo video: https://youtu.be/GYbci7TseJw · watch it run (1:55)
+- Demo video: https://youtu.be/4jHk1ALajRs · watch it run (1:55)
 - Pitch deck: https://witness.edycu.dev/deck/ · 10 slides, every number read from the same files
 - Exhibit page: https://witness.edycu.dev/exhibit/two-hub.html · the page Witness writes beside every witness
 - README: https://github.com/edycutjong/witness/blob/main/README.md · how it uses Relate, and why

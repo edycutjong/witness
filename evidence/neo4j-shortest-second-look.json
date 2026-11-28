@@ -1,0 +1,395 @@
+{
+ "schema": "witness.neo4j-second-look/v1",
+ "what": "the shortest-path queries Neo4j did not finish in the differential run: the plan Neo4j chooses and what it answers, without constraints, with the store's three, and with one more on Airport.iata",
+ "queries": {
+  "d158": "MATCH p = SHORTEST 1 (a:Airport {iata:'ZQN'})-[:HAS_ROUTE]->+(b:Airport {iata:'HEL'}) RETURN length(p) AS hops",
+  "d159": "MATCH p = ALL SHORTEST (a:Airport {iata:'ZQN'})-[:HAS_ROUTE]->+(b:Airport {iata:'AUS'}) RETURN count(p) AS n, min(length(p)) AS l",
+  "d160": "MATCH p = SHORTEST 3 (a:Airport {iata:'ZQN'})-[:HAS_ROUTE]->+(b:Airport {iata:'AKL'}) RETURN length(p) AS l ORDER BY l",
+  "d162": "MATCH p = ANY SHORTEST (a:Airport {iata:'ZQN'})-[r:HAS_ROUTE WHERE r.dist < 5000]->+(b:Airport {iata:'AUS'}) RETURN length(p) AS l",
+  "d164": "MATCH p = SHORTEST 2 (a:Airport {iata:'AAT'})-[:HAS_ROUTE]-+(b:Airport {iata:'ZQN'}) RETURN length(p) AS l ORDER BY l"
+ },
+ "timeout_s": 20.0,
+ "recorded_run": {
+  "d158": {
+   "kind": "timeout",
+   "ended_after_ms": 23142.34
+  },
+  "d159": {
+   "kind": "timeout",
+   "ended_after_ms": 1054807.75
+  },
+  "d160": {
+   "kind": "timeout",
+   "ended_after_ms": 695810.98
+  },
+  "d162": {
+   "kind": "timeout",
+   "ended_after_ms": 37778.62
+  },
+  "d164": {
+   "kind": "timeout",
+   "ended_after_ms": 871026.33
+  }
+ },
+ "setups": {
+  "as_recorded": {
+   "constraints": [],
+   "plans": {
+    "d158": {
+     "operators": [
+      "ProduceResults",
+      "Projection",
+      "StatefulShortestPath(All, Trail)",
+      "Filter",
+      "NodeByLabelScan"
+     ],
+     "shortest": "StatefulShortestPath(All, Trail)"
+    },
+    "d159": {
+     "operators": [
+      "ProduceResults",
+      "EagerAggregation",
+      "StatefulShortestPath(All, Trail)",
+      "Filter",
+      "NodeByLabelScan"
+     ],
+     "shortest": "StatefulShortestPath(All, Trail)"
+    },
+    "d160": {
+     "operators": [
+      "ProduceResults",
+      "Sort",
+      "Projection",
+      "StatefulShortestPath(All, Trail)",
+      "Filter",
+      "NodeByLabelScan"
+     ],
+     "shortest": "StatefulShortestPath(All, Trail)"
+    },
+    "d162": {
+     "operators": [
+      "ProduceResults",
+      "Projection",
+      "StatefulShortestPath(All, Trail)",
+      "Filter",
+      "NodeByLabelScan"
+     ],
+     "shortest": "StatefulShortestPath(All, Trail)"
+    },
+    "d164": {
+     "operators": [
+      "ProduceResults",
+      "Sort",
+      "Projection",
+      "StatefulShortestPath(All, Trail)",
+      "Filter",
+      "NodeByLabelScan"
+     ],
+     "shortest": "StatefulShortestPath(All, Trail)"
+    }
+   },
+   "ran": false
+  },
+  "store": {
+   "constraints": [
+    "airport_id: Airport.id",
+    "continent_code: Continent.code",
+    "country_code: Country.code"
+   ],
+   "plans": {
+    "d158": {
+     "operators": [
+      "ProduceResults",
+      "Projection",
+      "StatefulShortestPath(All, Trail)",
+      "Filter",
+      "NodeByLabelScan"
+     ],
+     "shortest": "StatefulShortestPath(All, Trail)"
+    },
+    "d159": {
+     "operators": [
+      "ProduceResults",
+      "EagerAggregation",
+      "StatefulShortestPath(All, Trail)",
+      "Filter",
+      "NodeByLabelScan"
+     ],
+     "shortest": "StatefulShortestPath(All, Trail)"
+    },
+    "d160": {
+     "operators": [
+      "ProduceResults",
+      "Sort",
+      "Projection",
+      "StatefulShortestPath(All, Trail)",
+      "Filter",
+      "NodeByLabelScan"
+     ],
+     "shortest": "StatefulShortestPath(All, Trail)"
+    },
+    "d162": {
+     "operators": [
+      "ProduceResults",
+      "Projection",
+      "StatefulShortestPath(All, Trail)",
+      "Filter",
+      "NodeByLabelScan"
+     ],
+     "shortest": "StatefulShortestPath(All, Trail)"
+    },
+    "d164": {
+     "operators": [
+      "ProduceResults",
+      "Sort",
+      "Projection",
+      "StatefulShortestPath(All, Trail)",
+      "Filter",
+      "NodeByLabelScan"
+     ],
+     "shortest": "StatefulShortestPath(All, Trail)"
+    }
+   },
+   "ran": true,
+   "answers": {
+    "d158": {
+     "id": "d158",
+     "kind": "timeout",
+     "error": "ClientError: The transaction has been terminated. Retry your operation in a new transaction, and you should see a successful result. The transaction has not completed within the timeout specified at its start by the client. You may want to retry with a longer timeout. ",
+     "ms": 23181.39
+    },
+    "d159": {
+     "id": "d159",
+     "kind": "timeout",
+     "error": "ClientError: The transaction has been terminated. Retry your operation in a new transaction, and you should see a successful result. The transaction has not completed within the timeout specified at its start by the client. You may want to retry with a longer timeout. ",
+     "ms": 1109427.04
+    },
+    "d160": {
+     "id": "d160",
+     "kind": "timeout",
+     "error": "ClientError: The transaction has been terminated. Retry your operation in a new transaction, and you should see a successful result. The transaction has not completed within the timeout specified at its start by the client. You may want to retry with a longer timeout. ",
+     "ms": 710868.56
+    },
+    "d162": {
+     "id": "d162",
+     "kind": "timeout",
+     "error": "ClientError: The transaction has been terminated. Retry your operation in a new transaction, and you should see a successful result. The transaction has not completed within the timeout specified at its start by the client. You may want to retry with a longer timeout. ",
+     "ms": 38335.34
+    },
+    "d164": {
+     "id": "d164",
+     "kind": "timeout",
+     "error": "ClientError: The transaction has been terminated. Retry your operation in a new transaction, and you should see a successful result. The transaction has not completed within the timeout specified at its start by the client. You may want to retry with a longer timeout. ",
+     "ms": 916623.92
+    }
+   },
+   "against_the_recorded_relate_answers": {
+    "d158": {
+     "relate_1_0_1": "answer/timeout",
+     "relate_1_3_0": "answer/timeout"
+    },
+    "d159": {
+     "relate_1_0_1": "answer/timeout",
+     "relate_1_3_0": "answer/timeout"
+    },
+    "d160": {
+     "relate_1_0_1": "timeout/timeout",
+     "relate_1_3_0": "answer/timeout"
+    },
+    "d162": {
+     "relate_1_0_1": "timeout/timeout",
+     "relate_1_3_0": "timeout/timeout"
+    },
+    "d164": {
+     "relate_1_0_1": "timeout/timeout",
+     "relate_1_3_0": "answer/timeout"
+    }
+   }
+  },
+  "store_iata": {
+   "constraints": [
+    "airport_iata: Airport.iata",
+    "airport_id: Airport.id",
+    "continent_code: Continent.code",
+    "country_code: Country.code"
+   ],
+   "plans": {
+    "d158": {
+     "operators": [
+      "ProduceResults",
+      "Projection",
+      "ShortestPath",
+      "CartesianProduct",
+      "NodeUniqueIndexSeek",
+      "NodeUniqueIndexSeek"
+     ],
+     "shortest": "ShortestPath"
+    },
+    "d159": {
+     "operators": [
+      "ProduceResults",
+      "EagerAggregation",
+      "ShortestPath",
+      "CartesianProduct",
+      "NodeUniqueIndexSeek",
+      "NodeUniqueIndexSeek"
+     ],
+     "shortest": "ShortestPath"
+    },
+    "d160": {
+     "operators": [
+      "ProduceResults",
+      "Sort",
+      "Projection",
+      "StatefulShortestPath(Into, Trail)",
+      "CartesianProduct",
+      "NodeUniqueIndexSeek",
+      "NodeUniqueIndexSeek"
+     ],
+     "shortest": "StatefulShortestPath(Into, Trail)"
+    },
+    "d162": {
+     "operators": [
+      "ProduceResults",
+      "Projection",
+      "ShortestPath",
+      "CartesianProduct",
+      "NodeUniqueIndexSeek",
+      "NodeUniqueIndexSeek"
+     ],
+     "shortest": "ShortestPath"
+    },
+    "d164": {
+     "operators": [
+      "ProduceResults",
+      "Sort",
+      "Projection",
+      "StatefulShortestPath(Into, Trail)",
+      "CartesianProduct",
+      "NodeUniqueIndexSeek",
+      "NodeUniqueIndexSeek"
+     ],
+     "shortest": "StatefulShortestPath(Into, Trail)"
+    }
+   },
+   "ran": true,
+   "answers": {
+    "d158": {
+     "id": "d158",
+     "kind": "answer",
+     "answer": "((('hops', 3),),)",
+     "ordered": "bdc67ab067f6a9a8",
+     "n": 1,
+     "head": [
+      {
+       "hops": 3
+      }
+     ],
+     "ms": 220.09
+    },
+    "d159": {
+     "id": "d159",
+     "kind": "answer",
+     "answer": "((('n', 20), ('l', 3)),)",
+     "ordered": "37cd63a9726b71ec",
+     "n": 1,
+     "head": [
+      {
+       "n": 20,
+       "l": 3
+      }
+     ],
+     "ms": 93.82
+    },
+    "d160": {
+     "id": "d160",
+     "kind": "answer",
+     "answer": "((('l', 1),), (('l', 2),), (('l', 2),))",
+     "ordered": "5696fc279bbccae0",
+     "n": 3,
+     "head": [
+      {
+       "l": 1
+      },
+      {
+       "l": 2
+      },
+      {
+       "l": 2
+      }
+     ],
+     "ms": 85.81
+    },
+    "d162": {
+     "id": "d162",
+     "kind": "answer",
+     "answer": "((('l', 3),),)",
+     "ordered": "f9cde86919e20a10",
+     "n": 1,
+     "head": [
+      {
+       "l": 3
+      }
+     ],
+     "ms": 61.0
+    },
+    "d164": {
+     "id": "d164",
+     "kind": "answer",
+     "answer": "((('l', 4),), (('l', 4),))",
+     "ordered": "b0c1234cceab27cc",
+     "n": 2,
+     "head": [
+      {
+       "l": 4
+      },
+      {
+       "l": 4
+      }
+     ],
+     "ms": 50.06
+    }
+   },
+   "against_the_recorded_relate_answers": {
+    "d158": {
+     "relate_1_0_1": "same",
+     "relate_1_3_0": "same"
+    },
+    "d159": {
+     "relate_1_0_1": "same",
+     "relate_1_3_0": "same"
+    },
+    "d160": {
+     "relate_1_0_1": "timeout/answer",
+     "relate_1_3_0": "same"
+    },
+    "d162": {
+     "relate_1_0_1": "timeout/answer",
+     "relate_1_3_0": "timeout/answer"
+    },
+    "d164": {
+     "relate_1_0_1": "timeout/answer",
+     "relate_1_3_0": "same"
+    }
+   }
+  }
+ },
+ "airport_iata": {
+  "airports": 3504,
+  "distinct_iata": 3504
+ },
+ "neo4j": {
+  "version": "Neo4j 2026.10.2",
+  "default_language": "CYPHER 25",
+  "python_driver": "6.4.1",
+  "settings": {
+   "dbms.memory.transaction.total.max": "1.00GiB",
+   "server.memory.heap.max_size": "2.00GiB",
+   "server.memory.pagecache.size": "512.00MiB"
+  },
+  "graph": "loaded by Witness from data/air-routes.rl, as in the recorded run"
+ },
+ "machine": "Darwin arm64",
+ "python": "3.12.13",
+ "recorded": "2026-11-28 11:18 +0700"
+}

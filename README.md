@@ -6,9 +6,16 @@
 
   <br/>
 
-  [![Live Site](https://img.shields.io/badge/🚀_Live-Site-B42318?style=for-the-badge)](https://witness.edycu.dev)
-  [![For judges](https://img.shields.io/badge/For_judges-open_%2Fjudge-1F1A14?style=for-the-badge)](https://witness.edycu.dev/judge/)
-  [![Relate by Neo4j Hackathon](https://img.shields.io/badge/Devpost-Relate_by_Neo4j_Hackathon-1F1A14?style=for-the-badge)](https://relate.devpost.com/)
+  [![For judges](https://img.shields.io/badge/⚖️_For_judges-open_%2Fjudge-B42318?style=for-the-badge)](https://witness.edycu.dev/judge/)
+  [![Live Site](https://img.shields.io/badge/🚀_Live-Site-1F1A14?style=for-the-badge)](https://witness.edycu.dev)
+  [![Devpost](https://img.shields.io/badge/Devpost-Witness-003E54?style=for-the-badge&logo=devpost&logoColor=white)](https://devpost.com/software/witness-why-does-this-query-return-this-row)
+  [![Demo video](https://img.shields.io/badge/▶_Demo-Video-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/GYbci7TseJw)
+
+  <br/>
+
+  [![dev.to](https://img.shields.io/badge/dev.to-Read_the_write--up-0A0A0A?style=flat&logo=devdotto&logoColor=white)](https://dev.to/edycutjong/57645-relationships-to-22-shrinking-a-graph-answer-with-rollback-3jdb)
+  [![X](https://img.shields.io/badge/X-Post-000000?style=flat&logo=x&logoColor=white)](https://x.com/edycutjong/status/2126468870508790243)
+  [![Relate by Neo4j Hackathon](https://img.shields.io/badge/Hackathon-Relate_by_Neo4j-1F1A14?style=flat)](https://relate.devpost.com/)
 
   <br/>
 

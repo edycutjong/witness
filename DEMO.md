@@ -210,15 +210,24 @@ once; the worker opens its own byte copy of the store.
 
 ```bash
 uv run --with neo4j python bench/differential.py --reduce           # = evidence/differential.json + differential-answers.jsonl
+uv run --with neo4j python bench/differential.py --reduce-only      # shrink the committed answers' disagreements again
+uv run --with neo4j witness why -f queries/exists-two-match.cypher --param country=MX --other-engine neo4j \
+  --name exists-neo4j --out /tmp/w --no-ledger                       # 57,645 -> 2 in 49 trials (evidence/exists-neo4j-run.txt)
 for v in 1.0.1 1.3.0 1.2.0; do
   uv run --no-project --with relate-db==$v python bench/any_shortest_inline.py
 done                                                                 # = evidence/any-shortest-inline.jsonl
 ```
 
 `bench/differential.py` runs the 219 queries of `queries/differential.jsonl` on relate-db 1.0.1, relate-db 1.3.0 and,
-when `NEO4J_BOLT` / `NEO4J_USER` / `NEO4J_PASSWORD` point at an empty Neo4j, Neo4j; each query has a 20 s watchdog. The
-committed run has no Neo4j leg (`"neo4j": "not run: ..."` in `evidence/differential.json`). `bench/any_shortest_inline.py`
-runs each size in its own process with an 8 s watchdog, because the slow form does not return on 40 relationships.
+when `NEO4J_BOLT` / `NEO4J_USER` / `NEO4J_PASSWORD` point at an empty Neo4j, Neo4j. The committed run has all three
+(Neo4j 2026.10.2 in Docker; the `docker run` line with its memory limits is in the script's docstring, and the limits
+Neo4j reported are in `evidence/differential.json`). Every query runs in a transaction that is rolled back and has
+20 s: a relate-db process that has not answered by then is killed, and Neo4j is given a 20 s transaction timeout,
+which it can take minutes to act on (the `ms` of those rows is the wall clock). An engine's reply is recorded as an
+answer, an error, a timeout or a crash, and only two answers are ever compared. The whole run took about 47 minutes
+here, nearly all of it Neo4j ending five timed-out shortest-path queries. `bench/any_shortest_inline.py` runs each
+size in its own process with an 8 s watchdog that starts when the query does, because the slow form does not return
+on 40 relationships.
 
 
 ## 15. Relate in the tab: the landing's pulls, run live, against the recording

@@ -1,25 +1,78 @@
 {
- "schema": "witness.differential/v1",
+ "schema": "witness.differential/v2",
  "queries": 219,
+ "queries_sha256": "0189b72456c64d5df795c229b41553fd291a697d6d2c40a718701cd7b05baece",
+ "queries_with_order_by": 92,
+ "timeout_s": 20.0,
  "query_source": "queries/differential.jsonl, written by an AI agent from the schema before any comparison",
  "engines": {
   "relate_1_0_1": "1.0.1",
   "relate_1_3_0": "1.3.0",
-  "neo4j": "not run: ServiceUnavailable: Couldn't connect to 127.0.0.1:7691 (resolved to ('127.0.0.1:7691',)):\nFailed to establish connection to ResolvedIPv4Addr"
+  "neo4j": {
+   "version": "Neo4j 2026.10.2",
+   "default_language": "CYPHER 25",
+   "python_driver": "6.4.1",
+   "settings": {
+    "dbms.memory.transaction.total.max": "1.00GiB",
+    "server.memory.heap.max_size": "2.00GiB",
+    "server.memory.pagecache.size": "512.00MiB"
+   },
+   "transaction_timeout_s": 20.0
+  }
  },
  "tally": {
   "relate_1_0_1_vs_1_3_0": {
    "same": 207,
    "differ": 1,
-   "both-error": 9,
-   "error:first": 2
+   "error/error": 8,
+   "timeout/answer": 2,
+   "timeout/timeout": 1
+  },
+  "relate_1_0_1_vs_neo4j": {
+   "same": 204,
+   "differ": 2,
+   "error/error": 8,
+   "answer/timeout": 2,
+   "timeout/timeout": 3
+  },
+  "relate_1_3_0_vs_neo4j": {
+   "same": 205,
+   "differ": 1,
+   "error/error": 8,
+   "answer/timeout": 4,
+   "timeout/timeout": 1
   }
  },
- "answer_seconds": 1.0,
+ "order": {
+  "relate_1_0_1_vs_1_3_0": {
+   "same order": 89
+  },
+  "relate_1_0_1_vs_neo4j": {
+   "same order": 89
+  },
+  "relate_1_3_0_vs_neo4j": {
+   "same order": 89
+  }
+ },
+ "answer_seconds": 2812.9,
  "machine": "Darwin arm64",
  "python": "3.12.13",
- "recorded": "2026-11-28 04:03 +0700",
+ "recorded": "2026-11-28 09:21 +0700",
  "reductions": [
+  {
+   "id": "d037",
+   "engine": "neo4j",
+   "name": "d037-neo4j",
+   "verified": true,
+   "relationships": 0,
+   "nodes": 1,
+   "trials": 28,
+   "inconclusive": 0,
+   "seconds": 8.472,
+   "check": "1 of 1 end the disagreement (0 of 0 relationships, 1 of 1 isolated nodes)",
+   "reasons": [],
+   "relate_1_3_0_on_witness": "differs from 1.0.1"
+  },
   {
    "id": "d037",
    "engine": "relate-db==1.3.0",
@@ -29,9 +82,16 @@
    "nodes": 1,
    "trials": 28,
    "inconclusive": 0,
-   "seconds": 6.488,
+   "seconds": 6.996,
    "check": "1 of 1 end the disagreement (0 of 0 relationships, 1 of 1 isolated nodes)",
    "reasons": []
+  },
+  {
+   "id": "d105",
+   "engine": "neo4j",
+   "refused": "the predicate holds on the empty graph: the answer does not depend on the data",
+   "door": "query"
   }
- ]
+ ],
+ "reductions_recorded": "2026-11-28 09:23 +0700"
 }

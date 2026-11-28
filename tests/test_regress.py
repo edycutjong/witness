@@ -39,6 +39,8 @@ def test_committed_regression_witness(man_path, capsys):
     if spec.startswith("relate-db==") and shutil.which("uv") is None:
         pytest.skip("needs uv to fetch the other release")
     w = man_path.with_name(man_path.name.replace(".manifest.json", ".rl"))
-    assert main(["check", str(w), "--no-cli"]) == 0
+    # a manifest may name a relate-db release; Neo4j is named here, by the caller who set NEO4J_BOLT
+    engine = ["--other-engine", "neo4j"] if spec == "neo4j" else []
+    assert main(["check", str(w), "--no-cli", *engine]) == 0
     out = capsys.readouterr().out
     assert f"{n} of {n} end the disagreement" in out and "VERIFIED" in out

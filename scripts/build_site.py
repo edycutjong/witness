@@ -694,18 +694,78 @@ for _m in _rg:  # each witness changes its answer exactly once, at the release i
     _rows = [r for r in _rv if r["witness"].endswith("/" + _m["name"])]
     assert {r["cypher_sha256"] for r in _rows} == {hashlib.sha256((ROOT / "witnesses" / "regress" / f"{_m['name']}.cypher").read_bytes()).hexdigest()}, _m["name"]
     assert len({r["graph_sha256"] for r in _rows}) == 1 and len(_rows) == len(RV_RELEASES), _m["name"]
-# the differential run (agent-written queries, relate-db 1.0.1 vs 1.3.0; Neo4j when it was reachable)
+# the differential run (agent-written queries on relate-db 1.0.1, relate-db 1.3.0 and Neo4j; bench/differential.py).
+# What an engine gave is an answer, an error, a timeout, a crash or something uncomparable; two engines are compared
+# only where both answered. Every word the receipt prints about the split is read from the rows below.
 _df = json.loads((ROOT / "evidence" / "differential.json").read_text())
-DF_Q, DF_T = _df["queries"], _df["tally"]["relate_1_0_1_vs_1_3_0"]
-DF_SAME, DF_DIFF, DF_BOTH_ERR = DF_T.get("same", 0), DF_T.get("differ", 0), DF_T.get("both-error", 0)
-DF_ONLY_130 = DF_T.get("error:first", 0)
+assert _df["schema"] == "witness.differential/v2"
+assert (_df["engines"]["relate_1_0_1"], _df["engines"]["relate_1_3_0"]) == ("1.0.1", "1.3.0"), _df["engines"]
+assert _df["queries_sha256"] == hashlib.sha256((ROOT / "queries" / "differential.jsonl").read_bytes()).hexdigest(), "evidence/differential.json is of other queries: re-run bench/differential.py"
+DF_Q = _df["queries"]
 _dfa = [json.loads(ln) for ln in (ROOT / "evidence" / "differential-answers.jsonl").read_text().splitlines()]
-DF_BOTH_TIMEOUT = sum(1 for r in _dfa if r["relate_1_0_1_vs_1_3_0"] == "both-error" and "timeout" in r["relate_1_3_0"].get("error", ""))
-DF_BOTH_REFUSED = DF_BOTH_ERR - DF_BOTH_TIMEOUT
-DF_NEO = "relate_1_0_1_vs_neo4j" in _df["tally"]
-assert DF_SAME + DF_DIFF + DF_BOTH_ERR + DF_ONLY_130 + DF_T.get("error:second", 0) == DF_Q
-DF_NEO_NOTE = "" if DF_NEO else "; the Neo4j leg was not run"
-DF_RED = [r for r in _df.get("reductions", []) if r.get("verified")]
+assert len(_dfa) == DF_Q == len({r["id"] for r in _dfa})
+DF_TIMEOUT_S = f"{_df['timeout_s']:g}"
+
+
+def _df_tally(pair: str, allowed: set) -> dict:
+    """One pair's tally, recounted from the rows; a kind the receipt has no words for stops the build."""
+    t = _df["tally"][pair]
+    counted: dict = {}
+    for r in _dfa:
+        counted[r[pair]] = counted.get(r[pair], 0) + 1
+    assert t == counted and sum(t.values()) == DF_Q and set(t) <= allowed, (pair, t, counted)
+    return t
+
+
+def _df_order(pair: str) -> int:
+    """ORDER BY queries whose rows agree on this pair: all of them must also agree on the order of the rows."""
+    o = _df["order"].get(pair, {})
+    assert set(o) <= {"same order"} and sum(o.values()) == sum(1 for r in _dfa if r.get(pair + "_order")), (pair, o)
+    return o.get("same order", 0)
+
+
+DF_T = _df_tally("relate_1_0_1_vs_1_3_0", {"same", "differ", "error/error", "timeout/timeout", "timeout/answer"})
+DF_SAME, DF_DIFF = DF_T["same"], DF_T.get("differ", 0)
+DF_BOTH_REFUSED, DF_BOTH_TIMEOUT, DF_ONLY_130 = DF_T.get("error/error", 0), DF_T.get("timeout/timeout", 0), DF_T.get("timeout/answer", 0)
+DF_ORDERED = _df_order("relate_1_0_1_vs_1_3_0")
+DF_RED = [r for r in _df.get("reductions", []) if r["engine"] == "relate-db==1.3.0"]
+assert len(DF_RED) == DF_DIFF == 1 and DF_RED[0].get("verified") and (DF_RED[0]["relationships"], DF_RED[0]["nodes"]) == (0, 1), DF_RED
+# "differs in value type (a float on 1.0.1, an integer on 1.3.0)": the same numbers, another type, read from the two answers
+_dd = next(r for r in _dfa if r["relate_1_0_1_vs_1_3_0"] == "differ")
+_h101, _h130 = _dd["relate_1_0_1"]["head"][0], _dd["relate_1_3_0"]["head"][0]
+_changed = [c for c in _h101 if type(_h101[c]) is not type(_h130[c])]
+assert _changed and all(_h101[c] == _h130[c] and isinstance(_h101[c], float) and isinstance(_h130[c], int) for c in _changed), (_h101, _h130)
+DF_NEO = bool(isinstance(_df["engines"]["neo4j"], dict) and _df["engines"]["neo4j"].get("version"))
+DF_NEO_TEXT = " The Neo4j leg is not in the committed run."
+DF_ENGINES = "Relate 1.0.1 against 1.3.0; the Neo4j leg was not run"
+if DF_NEO:
+    _neo = _df["engines"]["neo4j"]
+    _pairs = {"same", "differ", "error/error", "timeout/timeout", "answer/timeout"}
+    NT = _df_tally("relate_1_0_1_vs_neo4j", _pairs)
+    NT3 = _df_tally("relate_1_3_0_vs_neo4j", _pairs)
+    assert _df_order("relate_1_0_1_vs_neo4j") == NT["same"] - sum(1 for r in _dfa if r["relate_1_0_1_vs_neo4j"] == "same" and not r.get("relate_1_0_1_vs_neo4j_order")) and _df_order("relate_1_3_0_vs_neo4j") >= 0
+    NEO_RED = [r for r in _df["reductions"] if r["engine"] == "neo4j"]
+    NEO_SHRUNK, NEO_NOTHING = [r for r in NEO_RED if r.get("verified")], [r for r in NEO_RED if "empty graph" in r.get("refused", "")]
+    assert len(NEO_RED) == NT.get("differ", 0) == len(NEO_SHRUNK) + len(NEO_NOTHING) and len(NEO_SHRUNK) == len(NEO_NOTHING) == 1, NEO_RED
+    # the shrunk one is the same query the two releases differ on, and there Neo4j answers as 1.3.0 does
+    assert NEO_SHRUNK[0]["id"] == _dd["id"] and _dd["relate_1_3_0_vs_neo4j"] == "same" and NEO_SHRUNK[0]["relate_1_3_0_on_witness"] == "differs from 1.0.1"
+    assert (NEO_SHRUNK[0]["relationships"], NEO_SHRUNK[0]["nodes"]) == (0, 1)
+    # the other is how toString prints a float: both Relate releases one way, Neo4j the other, on no data at all
+    _dt = next(r for r in _dfa if r["id"] == NEO_NOTHING[0]["id"])
+    _tr, _tn = _dt["relate_1_3_0"]["head"][0], _dt["neo4j"]["head"][0]
+    _tcols = [c for c in _tr if _tr[c] != _tn[c]]
+    assert _dt["relate_1_0_1_vs_1_3_0"] == "same" and _dt["relate_1_3_0_vs_neo4j"] == "differ" and _tcols and all(isinstance(_tr[c], str) and "E" in _tn[c] and "E" not in _tr[c] for c in _tcols), (_tr, _tn)
+    DF_TOSTRING = " and ".join(f"`{_tr[c]}` on Relate is `{_tn[c]}` on Neo4j" for c in _tcols)
+    DF_ENGINES = f"Relate 1.0.1, Relate 1.3.0 and {_neo['version']}"
+    NEO_ONLY_RELATE, NEO_NEITHER = NT.get("answer/timeout", 0), NT.get("timeout/timeout", 0)
+    assert all(r["feature"] == "shortest" for r in _dfa if "timeout" in r["relate_1_0_1_vs_neo4j"]), "'shortest-path queries'"
+    DF_NEO_TEXT = (
+        f" Against {_neo['version']} ({_neo['default_language'].title().replace('Cypher', 'Cypher')}, in a Docker container with a {_neo['settings']['server.memory.heap.max_size']} heap): "
+        f"{NT['same']} agree with 1.0.1, {NT.get('error/error', 0)} end in an error on both, {NT.get('differ', 0)} differ, and {NEO_ONLY_RELATE + NEO_NEITHER} shortest-path queries are not compared "
+        f"because Neo4j did not finish them within the run's {DF_TIMEOUT_S} s ({NEO_NEITHER} of those 1.0.1 did not finish either). One difference is the same value type: there Neo4j answers as 1.3.0 does, and it "
+        f"shrinks to {NEO_SHRUNK[0]['nodes']} node against Neo4j too. The other is how `toString` prints a float ({DF_TOSTRING}), the same on both Relate releases; it holds on an empty graph, so there is nothing to shrink. "
+        f"Wherever a query with `ORDER BY` gives the same rows on two engines, it gives them in the same order ({DF_ORDERED} of {DF_ORDERED} between the releases)."
+    )
 # a slowdown still present on 1.3.0, measured on small graphs (ANY SHORTEST + an inline relationship predicate)
 _as = [json.loads(ln) for ln in (ROOT / "evidence" / "any-shortest-inline.jsonl").read_text().splitlines()]
 _as13 = [r for r in _as if r["relate_db"] == "1.3.0"]
@@ -928,7 +988,7 @@ RECEIPTS = [
         f"{DF_Q} queries",
         f"<em>{DF_Q}</em>" + _to.format("queries"),
         "A differential run of agent-written queries.",
-        f"{DF_Q} read queries written by an AI agent from the schema before the releases were compared, on relate-db 1.0.1 and 1.3.0: {DF_SAME} agree, {DF_BOTH_REFUSED} end in an error on both, {DF_BOTH_TIMEOUT} gives no answer within 20 s on either, {DF_ONLY_130} answer only on 1.3.0, {DF_DIFF} differs in value type (a float on 1.0.1, an integer on 1.3.0) and shrinks to {DF_RED[0]['nodes']} node." + ("" if DF_NEO else " The Neo4j leg is not in the committed run."),
+        f"{DF_Q} read queries written by an AI agent from the schema before any engine compared them, each run in a transaction that is rolled back. relate-db 1.0.1 against 1.3.0: {DF_SAME} agree, {DF_BOTH_REFUSED} end in an error on both, {DF_BOTH_TIMEOUT} gives no answer within {DF_TIMEOUT_S} s on either, {DF_ONLY_130} answer only on 1.3.0, {DF_DIFF} differs in value type (a float on 1.0.1, an integer on 1.3.0) and shrinks to {DF_RED[0]['nodes']} node." + DF_NEO_TEXT,
         [("evidence/differential.json", ""), ("evidence/differential-answers.jsonl", "the answers per query"), ("queries/differential.jsonl", "the queries")],
     ),
     (
@@ -1106,7 +1166,7 @@ CRITERIA = [
             ),
             (
                 "For the people who maintain the engine, and anyone moving a query between releases.",
-                f"`--other-engine` shrinks what makes two engines answer one query differently. Relate's own release notes became {RG_N} regression fixtures of at most {RG_MAX_RELS} relationships, each changing its answer exactly at the release that fixed it, and a differential run of {DF_Q} agent-written queries (Relate 1.0.1 against 1.3.0{DF_NEO_NOTE}) found a slowdown still present on 1.3.0",
+                f"`--other-engine` shrinks what makes two engines answer one query differently. Relate's own release notes became {RG_N} regression fixtures of at most {RG_MAX_RELS} relationships, each changing its answer exactly at the release that fixed it, and a differential run of {DF_Q} agent-written queries ({DF_ENGINES}) found a slowdown still present on Relate 1.3.0",
                 ["evidence/release-notes-fixes.json", "evidence/regression-releases.jsonl", "evidence/differential.json"],
             ),
             (

@@ -159,11 +159,25 @@ repro, and the answer to "which release changed this", is what Witness adds.
 queries/exists-two-match.cypher --param country=MX --other-engine relate-db==1.3.0` runs the query on the pinned 1.0.1 in
 process and on relate-db 1.3.0 in a worker (`uv run --with relate-db==1.3.0`), deletes the same relationships on both
 sides in every trial, and keeps what makes the two releases answer differently: 57,645 relationships to the same 2, in 49
-trials (`evidence/exists-engines-run.txt`). The other engine can be any relate-db release (`relate-db==X.Y.Z`, or
-`python:/path/to/python`) or Neo4j over Bolt (`neo4j`: an empty database; the graph is loaded once and removed
-afterwards; implemented and tested against a stand-in driver, not yet run against a real Neo4j). Each deletion is sent to
-the other engine as the relationship's type, properties and end nodes, never as an internal id (`TwoEngines` in
-`src/witness/engines.py`). `witness check W.rl --other-engine relate-db==1.2.0` re-checks a witness against another release.
+trials (`evidence/exists-engines-run.txt`). Against Neo4j 2026.10.2 over Bolt (`--other-engine neo4j`) the same query
+shrinks to the same 2 relationships, in 49 trials, and the report says what each engine answers on them: nothing on
+relate-db 1.0.1, MZT on Neo4j (`evidence/exists-neo4j-run.txt`). The other engine can be any relate-db release
+(`relate-db==X.Y.Z`, or `python:/path/to/python`) or Neo4j 5 or later (`neo4j`: an empty database; the graph is loaded
+once and removed afterwards).
+
+What keeps the comparison honest (`src/witness/engines.py`):
+
+- Each deletion is sent to the other engine as the relationship's type, properties and end nodes, never as an internal
+  id. Before the first trial the other engine must hold the same graph (the same counts and one hash over every such
+  key) and, for a release, be the release that was asked for; otherwise the run is refused.
+- relate-db has no statement timeout, so each answer of the other engine has a deadline (`--trial-timeout`, 30 s). A
+  worker that misses it, or crashes, is ended with everything it started and a fresh one replays the deletions made so
+  far. That trial is inconclusive, never a disagreement; so is an error, and so is a value only one driver can render
+  (a date or a point from the Neo4j driver).
+- A witness is a file someone may send you, so its manifest never chooses what runs. `witness check W.rl` takes a
+  relate-db release number from a manifest (and fetches that release from PyPI through `uv`); an interpreter path or a
+  Neo4j server comes from your own `--other-engine` only, and the MCP `check` tool never opens another engine.
+  `witness check W.rl --other-engine relate-db==1.2.0` re-checks a witness against another release.
 
 **Relate's changelog, as regression fixtures.** Every read-path fix entry in Relate's release notes from v1.0.2 to v1.3.0
 (72 entries, each with its status in `evidence/release-notes-fixes.json`) was tried on air-routes against 1.0.1. Seven
@@ -190,20 +204,35 @@ Witness refuses it), and a change to the same rows as the scope fix in the same 
 `CALL { }` subquery (60 Mexican airports on 1.0.1, 3,504 on 1.3.0), is refused at the read-only door: relate-db 1.0.1
 reports `query_type` `'rw'` for it.
 
-**A differential run, Relate 1.0.1 against 1.3.0 (Neo4j not run yet).** 219 read queries, written by an AI agent from
-the air-routes schema, with a copy of the store to check that each one runs on 1.0.1, before the two releases were
-compared (`queries/differential.jsonl`, the prompt in `evidence/differential-prompt.md`; no query was edited afterwards).
-On relate-db 1.0.1 and 1.3.0 (`bench/differential.py`, `evidence/differential.json`):
+**A differential run on three engines: Relate 1.0.1, Relate 1.3.0 and Neo4j 2026.10.2.** 219 read queries, written
+by an AI agent from the air-routes schema, with a copy of the store to check that each one runs on 1.0.1, before any
+engine was compared (`queries/differential.jsonl`, the prompt in `evidence/differential-prompt.md`; no query was edited
+afterwards). Each query runs in a transaction that is rolled back, with 20 s to answer; what an engine gave is recorded
+as an answer, an error, a timeout or a crash, and two engines are compared only where both answered
+(`bench/differential.py`, `evidence/differential.json`, the answers per query in `evidence/differential-answers.jsonl`).
 
-- 207 give the same answer, 8 end in an error on both (7 type errors, such as a division by zero; 1 syntax error; the
-  answers per query: `evidence/differential-answers.jsonl`), 1 gives no answer within 20 s on either;
-- 2 `SHORTEST` queries answer only on 1.3.0 (1.0.1 gives no answer within 20 s); a run that never answers cannot be shrunk,
-  so these two stay as recorded timeouts;
+Relate 1.0.1 against Relate 1.3.0:
+
+- 207 give the same answer, 8 end in an error on both (7 type errors, such as a division by zero; 1 syntax error),
+  1 gives no answer within 20 s on either;
+- 2 `SHORTEST` queries answer only on 1.3.0 (1.0.1 gives no answer within 20 s); a run that never answers cannot be
+  shrunk, so these two stay as recorded timeouts;
 - 1 differs in value type: `percentileDisc` over airport altitudes is a float on 1.0.1 and an integer on 1.3.0, shrunk to
-  1 node (`witnesses/differential/`).
+  1 node (`witnesses/differential/d037-relate-1.3.0.*`).
 
-The script also has a Neo4j leg that shrinks each disagreement with `--other-engine neo4j`; the local Neo4j was not
-available, so there is no Neo4j comparison in the committed run.
+Relate 1.0.1 against Neo4j 2026.10.2 (community, in Docker with a 2 GiB heap, default language Cypher 25; the graph
+is loaded from the same store, without the store's three uniqueness constraints and their indexes):
+
+- 204 give the same answer and the same 8 end in an error on both;
+- 5 shortest-path queries are not compared, because Neo4j did not finish them within the run's 20 s (3 of those 1.0.1
+  did not finish either). This run compares answers, not speed: the limit and the container are the run's own;
+- 2 differ. One is the same `percentileDisc` value type: Neo4j answers as Relate 1.3.0 does, and the difference shrinks
+  to 1 node against Neo4j too (`witnesses/differential/d037-neo4j.*`). The other is how `toString` prints a float:
+  `100000000000000000000.0` on both Relate releases is `1.0E20` on Neo4j, and `0.0000001` is `1.0E-7`. It holds on an
+  empty graph, so Witness refuses it: there is nothing to shrink.
+
+Rows are compared as a bag, so for every query with `ORDER BY` whose rows agree the order of the rows is compared as
+well: 89 of 89 come in the same order, on every pair of engines.
 
 **Found on the current release.** One differential query gave no answer on 1.3.0 either. Narrowed down: `ANY SHORTEST`
 over `->+` with an inline relationship predicate, even one every relationship satisfies, takes 85.9 ms on a 24-relationship

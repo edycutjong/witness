@@ -21,6 +21,10 @@
     "sha256": "b23cbdaaf836d09c429b7fc8405815862bfe4b621ced6eb19004f05ca088d23d"
   },
   "check": {
+    "answers_on_w": [
+      "((('d0', 963.0), ('d50', 963.0), ('d90', 963.0), ('d100', 963.0), ('c50', 963.0), ('c25', 963.0)),)",
+      "((('d0', 963), ('d50', 963), ('d90', 963), ('d100', 963), ('c50', 963.0), ('c25', 963.0)),)"
+    ],
     "check_text": "1 of 1 end the disagreement (0 of 0 relationships, 1 of 1 isolated nodes)",
     "cli": "relate CLI: sufficiency + 1 of 1 necessity probes cross-checked",
     "cli_used": true,
@@ -60,7 +64,7 @@
     "capped": null,
     "commits": 13,
     "inconclusive": 0,
-    "seconds": 2.234,
+    "seconds": 2.333,
     "ties": 0,
     "trials": 28
   },

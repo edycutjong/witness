@@ -1,0 +1,21 @@
+# Recorded 2026-11-28 09:23 +0700 on Darwin arm64, relate-db 1.0.1 in process, Neo4j 2026.10.2 (community, Docker, default language CYPHER 25) over Bolt with the neo4j Python driver 6.4.1, Relate CLI v1.0.1. Command (from the repo root, NEO4J_BOLT / NEO4J_USER / NEO4J_PASSWORD in the environment):
+# uv run --with neo4j witness why -f queries/exists-two-match.cypher --store data/air-routes.rl --param country=MX --other-engine neo4j --name exists-neo4j --out <temp dir> --no-ledger
+# The one query, on two engines: relate-db 1.0.1 returns no airport, Neo4j returns MZT on the witness (the lines 'on W'). Neo4j's database was empty before the run and is empty after it. The output files were not committed; witnesses/exists-count.* holds the same 2 relationships.
+ANSWER  0 rows on the full graph
+  airport
+
+WITNESS  2 relationships · 3 nodes, out of 57,645 · 3,748
+  reduced in 2.369 s · 49 trials · 0 inconclusive · seed 0 (8.943 s end to end: copy, guard, order check, reduce, check)
+
+EXHIBITS  (register order; every one is needed)
+   1  (MZT)-[:HAS_ROUTE]->(LAX)
+   2  (MZT)-[:IN_COUNTRY]->(MX)
+
+CHECK  2 of 2 end the disagreement (2 of 2 relationships, 0 of 0 isolated nodes)
+  on W, relate-db 1.0.1 answers  ()
+  on W, Neo4j 2026.10.2 answers  ((('airport', 'MZT'),),)
+  relate CLI: sufficiency + 2 of 2 necessity probes cross-checked
+
+FILES  <temp dir>/exists-neo4j.rl (+ .cypher .manifest.json .html .trace.json)
+
+VERIFIED · deletion-minimal: no single relationship can be removed without ending the disagreement · determinism claimed

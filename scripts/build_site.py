@@ -772,6 +772,9 @@ assert _ar_13 and "ms" not in _ar[("1.0.1", "inline")] and _ar[("1.0.1", "inline
 AR_13_S = _ar_13.group(1)
 AR_END_GB = round(_ar[(AS_CUR, "inline")]["peak_resident_mb"] / 1024)
 AR_MACHINE = {"Darwin arm64": "macOS arm64"}[_ar[(AS_CUR, "inline")]["machine"]]
+# the machine's memory is on record with the Neo4j comparison (the same machine: the same CPU architecture and OS)
+assert cmp["machine"]["arch"] == "arm64" and cmp["machine"]["os"].startswith("Darwin")
+AR_RAM_GB = round(int(cmp["machine"]["mem_bytes"]) / 2**30)
 # the differential run's queries on the newest release (bench/differential_release.py), against the recorded answers
 _r14 = json.loads((ROOT / "evidence" / f"differential-relate-{AS_CUR}.json").read_text())
 assert _r14["release"] == AS_CUR and _r14["queries"] == DF_Q and _r14["queries_sha256"] == _df["queries_sha256"]
@@ -780,6 +783,9 @@ assert sum(R14_T.values()) == DF_Q and set(R14_T) == {"same", "error/error", "ti
 _r14_left = [x for x in _r14["not_same"]["relate_1_3_0"] if x["is"] != "error/error"]
 assert len(_r14_left) == 1 and _r14_left[0]["cypher"] == _ar[(AS_CUR, "inline")]["query"], "the query the newest release does not answer is the slow one"
 assert set(_r14["order"]["relate_1_3_0"]) == {"same order"}
+# "in both recorded runs": the differential run on this release recorded a crash for that query as well
+_r14a = [json.loads(ln) for ln in (ROOT / "evidence" / f"differential-answers-relate-{AS_CUR}.jsonl").read_text().splitlines()]
+assert len(_r14a) == DF_Q and [r["kind"] for r in _r14a if r["id"] == _r14_left[0]["id"]] == ["crash"]
 # when that release was published, and that the stores, the headline and the CLI were checked on it
 REL_CUR_TXT = f"evidence/relate-{AS_CUR}-2026-11-28.txt"
 _rc = (ROOT / REL_CUR_TXT).read_text()
@@ -1111,7 +1117,7 @@ RECEIPTS = [
         f"Relate {AS_CUR}",
         f"<em>{AS_CUR}</em>",
         f"Relate {AS_CUR}, checked on {REL_CUR_CHECKED}, the day after it shipped.",
-        f"Relate {AS_CUR} was published on {REL_CUR_DATE}, during the contest. On it the engine case and the {RG_N} regression witnesses answer as they do on 1.3.0, the headline reduction gives the same {w_rels} relationships in the same {trials} trials, and of the {DF_Q} differential queries {R14_T['same']} give the same answer as on 1.3.0 and {R14_T['error/error']} end in an error on both. The one left is the slow query of the next row.",
+        f"Relate {AS_CUR} was published on {REL_CUR_DATE}, during the contest. On it the engine case and the {RG_N} regression witnesses answer as they do on 1.3.0, the headline reduction gives the same {w_rels} relationships in the same {trials} trials, and of the {DF_Q} differential queries {R14_T['same']} give the same answer as on 1.3.0 and {R14_T['error/error']} end in an error on both releases. The one left is the slow query of the next row.",
         [
             (f"evidence/differential-relate-{AS_CUR}.json", f"the {DF_Q} queries"),
             (REL_CUR_TXT, "stores, headline, CLI"),
@@ -1122,7 +1128,7 @@ RECEIPTS = [
         f"{AS_LAST_OK['ms']:,} ms",
         f"<em>{AS_LAST_OK['ms']:,}</em>" + _to.format("ms"),
         f"A slowdown still present on Relate {AS_CUR}, found by that run.",
-        f"`ANY SHORTEST` over `->+` with an inline relationship predicate that every relationship satisfies, on a small ring graph: {AS_LAST_OK['ms']:,} ms on {AS_LAST_OK['rels']} relationships, no answer within {AS_WATCHDOG} s on {AS_HANG['rels']} (one run per size); without the predicate, under 1 ms. The same shape on {AS_OTHER}, so it is not a regression. On air-routes the query it came from ends the process on {AS_CUR} ({AR_SIGNAL}, after {AR_END_S} s at about {AR_END_GB} GB resident, on {AR_MACHINE}); on 1.3.0 the process held over 8 GiB after {AR_13_S} s and was stopped. Without the predicate each release tried answers in under 10 ms.",
+        f"`ANY SHORTEST` over `->+` with an inline relationship predicate that every relationship satisfies, on a small ring graph: {AS_LAST_OK['ms']:,} ms on {AS_LAST_OK['rels']} relationships, no answer within {AS_WATCHDOG} s on {AS_HANG['rels']} (one run per size); without the predicate, under 1 ms. The same shape on {AS_OTHER}, so it is not a regression. On air-routes the query it came from ended the process on {AS_CUR} in both recorded runs ({AR_SIGNAL}, after {AR_END_S} s at about {AR_END_GB} GB resident, on a {AR_RAM_GB} GB {AR_MACHINE} machine); on 1.3.0 the process held over 8 GiB after {AR_13_S} s and was stopped. Without the predicate each release tried answers in under 10 ms.",
         [
             ("evidence/any-shortest-inline.jsonl", ""),
             ("bench/any_shortest_inline.py", "re-records it"),

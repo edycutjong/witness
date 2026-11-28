@@ -38,8 +38,8 @@ the answer and shows that each one is needed in it. The headline question here a
 reach MEX if any one hub closed, and 22 relationships reproduce its answer: that is what a reviewer reads, not the 57,645
 in the graph and not the 68 that a listing of the matched paths would show.
 
-The size follows the claim. A real model asked the same question also reported how many hubs each airport has, and for
-that answer all 68 are needed, 68 of 68 (`evidence/mcp-agent-session.md`).
+The size depends on what the answer reports. A real model asked the same question also reported how many hubs each
+airport has, and for that answer all 68 matched relationships are needed, 68 of 68 (`evidence/mcp-agent-session.md`).
 
 <p align="center"><img src="docs/assets/witness-broll.gif" alt="Witness on its landing page: the air-routes graph thins from 57,645 relationships to the 22 that reproduce the answer (PBC, QRO, TLC, UPN), each tagged as an exhibit, while the answer stays unchanged. Pulling exhibit 15, (TIJ)-[:HAS_ROUTE]-&gt;(MEX), strikes PBC, QRO and UPN from the answer; pulling all 22 one at a time ends on the stamp 22 of 22 change the answer." width="100%"><br>
 <sub>Rendered frame by frame from the landing page's own drawing, answer table and script, arranged into one frame. On the page the reduction is a replay of <code>witnesses/two-hub.trace.json</code> (the run itself takes 1.1 s), and each pull is live: Relate 1.0.1, compiled to WebAssembly, re-runs the query in your tab without that relationship, and the page compares the answer with the one recorded in a Relate transaction (<code>evidence/pull-each-tag.json</code>). This clip shows the recorded answers.</sub></p>
@@ -96,7 +96,7 @@ QRO, UPN), DFW→MEX and DFW in US two each (PBC, QRO). So the witness holds 28 
 |---|---|---|
 | An engine disagreement | Relate 1.0.1 to 1.2.0: one condition written with `COUNT` returns 59 airports, written with `EXISTS` none; fixed in 1.3.0 | 2 relationships, and which release answers what |
 | Relate's release notes, as regression fixtures | 72 read-path fix entries (v1.0.2 to v1.3.0) tried on air-routes; 7 change an answer here | 6 witnesses of at most 3 relationships, each changing its answer at the release the notes name |
-| A slowdown still present on Relate 1.4.0 | `ANY SHORTEST` with an inline relationship predicate: 5,000.2 ms on 36 relationships, no answer within 8 s on 40 | a measurement; a query that never answers cannot be shrunk |
+| A slowdown still present on Relate 1.4.0 | `ANY SHORTEST` with an inline relationship predicate: 5,000.2 ms on 36 relationships, no answer within 8 s on 40 (one run per size) | a measurement; a query that never answers cannot be shrunk |
 
 A witness shows what the rows of an answer rest on. It does not judge the query, and it does not list what keeps other rows out:
 [what a witness shows, and what it does not](#what-a-witness-shows-and-what-it-does-not).
@@ -329,10 +329,11 @@ On 1.4.0 it takes 79.1 ms on 24 relationships, 591.8 ms on 32 and 5,000.2 ms on 
 (one run per size); without the predicate each answers in under 1 ms. The same shape on 1.0.1, 1.2.0 and 1.3.0 (5,566.7 ms
 on 36 on 1.3.0), so it is not a regression (`bench/any_shortest_inline.py`, `evidence/any-shortest-inline.jsonl`).
 
-On air-routes the differential query itself (ZQN to AUS over routes with `dist` under 5,000) ends the process on 1.4.0:
-signal 10 (SIGBUS) after 0.7 s, at about 4 GB resident, on macOS arm64. On 1.3.0 the process held over 8 GiB after 1 s and
-was stopped, and on 1.0.1 it gave no answer in 10 s. Without the predicate each of the three answers 3 hops in under 10 ms
-(`bench/any_shortest_air_routes.py`, `evidence/any-shortest-air-routes.jsonl`). Witness cannot shrink a query that never
+On air-routes the differential query itself (ZQN to AUS over routes with `dist` under 5,000) ended the process on 1.4.0
+in both recorded runs: exit 138 in the differential run, and in the scripted measurement signal 10 (SIGBUS) after 0.7 s at
+about 4 GB resident, on a 32 GB macOS arm64 machine. On 1.3.0 the process held over 8 GiB after 1 s and was stopped; on
+1.0.1 it reached about 6 GB and gave no answer in 10 s. Without the predicate each of the three answers 3 hops in under
+10 ms (`bench/any_shortest_air_routes.py`, `evidence/any-shortest-air-routes.jsonl`; one run per release). Witness cannot shrink a query that never
 answers; the measurement is the repro.
 
 **A query mistake.** A plausible agent mistake, written for this case: the headline question with the first
@@ -373,9 +374,9 @@ Two more debts. The 10 relationships among the 45 whose deletion on its own drop
 work on causality in databases calls counterfactual causes (Meliou, Gatterbauer, Moore and Suciu, "The Complexity of
 Causality and Responsibility for Query Answers and Non-Answers", 2010, for conjunctive queries); the 35 guards, whose
 deletion adds a row, come from `NOT EXISTS`, which that definition does not cover. And asking one query of two engines to
-find where they differ is differential testing (McKeeman, "Differential Testing for Software", 1998), which GDsmith (2023)
-applies to graph database engines with generated Cypher queries; GDBMeter (2023) tests one engine by query partitioning
-instead. What Witness adds there is the step after a difference is found: the data shrunk to a few relationships, as a
+find where they differ is differential testing (McKeeman, "Differential Testing for Software", 1998), which GDsmith (ISSTA 2023)
+applies to graph database engines with generated Cypher queries; GDBMeter (ISSTA 2023) needs no second engine and tests
+each engine on its own, by query partitioning. What Witness adds there is the step after a difference is found: the data shrunk to a few relationships, as a
 file.
 
 ## 🏗️ Architecture & Tech Stack
@@ -422,6 +423,9 @@ Then re-run the witness yourself with plain `relate`:
 ```bash
 relate query --database witnesses/two-hub.rl --read-only --param country=MX --param dest=MEX < queries/two-hub.cypher
 ```
+
+No `relate` on your PATH? `uv run witness rerun witnesses/two-hub.rl -f queries/two-hub.cypher --param country=MX --param dest=MEX`
+re-runs the query on the witness read-only and prints the same four rows.
 
 And look at the graph itself: this lists the witness's 22 relationships, from `ACA,HAS_ROUTE,MEX` to `UPN,IN_COUNTRY,MX`.
 

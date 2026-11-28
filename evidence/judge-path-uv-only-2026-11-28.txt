@@ -1,0 +1,37 @@
+# The judge path on a machine with uv and nothing else. Recorded 2026-11-28 on Darwin arm64.
+# A fresh clone, with PATH holding only uv and the system directories (/usr/bin:/bin:/usr/sbin:/sbin): no relate CLI,
+# no Node.js, no Docker. uv chose the interpreter itself (Python 3.13.13 here; the project asks for 3.11 or newer).
+
+## 1. uv run witness demo   (exit 0)
+Witness 0.1.0 · Python 3.13.13 · relate-db 1.0.1
+  relate not on PATH (the cross-check needs the v1.0.1 CLI: binaries at https://github.com/relatedb/relate/releases/tag/v1.0.1; WITNESS_RELATE_BIN can point at one) — Python checks only; the CLI is optional
+WITNESS  22 relationships · 12 nodes, out of 57,645 · 3,748
+  reduced in 1.044 s · 371 trials · 0 inconclusive · seed 0 (4.966 s end to end: copy, guard, order check, reduce, check)
+CHECK  22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)
+  CLI cross-check skipped: relate not on PATH (the cross-check needs the v1.0.1 CLI: binaries at https://github.com/relatedb/relate/releases/tag/v1.0.1; WITNESS_RELATE_BIN can point at one)
+VERIFIED · deletion-minimal: no single relationship can be removed without changing the answer · determinism claimed
+
+## 2. uv run pytest   (exit 0)
+544 passed, 28 skipped in 102.23s (0:01:42)
+# what was skipped, and why:
+#   24  pinned relate CLI not on PATH
+#    2  local Neo4j (Docker) is not running
+#    1  Neo4j witness: set NEO4J_BOLT / NEO4J_USER / NEO4J_PASSWORD to re-check it
+#    1  needs Node.js to run Relate's browser build outside a browser
+# With `--cov=witness` the same run ends with exit 1 at 96.62%: the coverage gate (100% line and branch) counts the lines that
+# only the relate CLI cross-check and fixture mode reach, and those tests are skipped here. With the v1.0.1 relate CLI
+# on PATH and Node.js installed the gate is met (the newest evidence/pytest-*.txt, and CI on every push).
+
+## 3. The same clone on newer interpreters: uv run --python <v> witness demo   (each exit 0)
+python 3.13 demo exit 0
+CHECK  22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)
+VERIFIED · deletion-minimal: no single relationship can be removed without changing the answer · determinism claimed
+python 3.14 demo exit 0
+CHECK  22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)
+VERIFIED · deletion-minimal: no single relationship can be removed without changing the answer · determinism claimed
+python 3.15 demo exit 0
+CHECK  22 of 22 change the answer (22 of 22 relationships, 0 of 0 isolated nodes)
+VERIFIED · deletion-minimal: no single relationship can be removed without changing the answer · determinism claimed
+# relate-db 1.0.1 ships one abi3 wheel per platform (cp39-abi3: macOS x86_64 and arm64, Linux x86_64 and aarch64,
+# Windows amd64; uv.lock), so the interpreter version does not pick the wheel. CI runs Python 3.11 and 3.12 on Linux;
+# these three ran on macOS arm64. Windows was not run.

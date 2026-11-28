@@ -10,6 +10,7 @@ import sys
 
 import pytest
 
+from witness.check import relate_cli
 from witness.cli import main
 from witness.fixture import build_fixture, pull_slice, which_docker_note
 from witness.guard import Refused
@@ -46,6 +47,8 @@ os.execv("{real}", ["{real}"] + args)
 @pytest.fixture
 def pull_env(tmp_path, tiny_rl, monkeypatch):
     """Put the stand-in relate first in WITNESS_RELATE_BIN; return its call log path."""
+    if relate_cli()[0] is None:  # the stand-in hands everything but `pull` to the real, pinned CLI
+        pytest.skip("pinned relate CLI not on PATH")
     stub = tmp_path / "bin" / "relate"
     stub.parent.mkdir()
     stub.write_text(STUB.format(python=sys.executable, real=shutil.which("relate")))

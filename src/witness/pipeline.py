@@ -359,11 +359,16 @@ def reduce_request(req: Request, progress=None) -> Outcome:
         manifest["predicate"]["expected_rows"] = plain(
             req.expected if isinstance(req.expected, list) else json.loads(req.expected)
         )
+    spec = spec_from_manifest(manifest)
     if req.other_engine:
-        manifest["predicate"]["other_engine_spec"] = req.other_engine
+        from .engines import recorded_spec
+
+        manifest["predicate"]["other_engine_spec"] = recorded_spec(req.other_engine, backend.engine.version)
+        spec.engine_named = manifest["predicate"]["other_engine_spec"]
+        spec.other_engine = req.other_engine  # from this run's caller, not from the manifest
     chk = check(
         files["rl"],
-        spec_from_manifest(manifest),
+        spec,
         use_cli=req.use_cli,
         require_cli=req.require_cli,
         necessity=not capped,

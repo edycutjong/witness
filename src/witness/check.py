@@ -118,7 +118,10 @@ class CheckSpec:
     strict_lists: bool = False
     digits: int = 12
     expect_rows: list | None = None  # no manifest: the stated answer, resolved against W's columns at check time
-    other_engine: str | None = None  # disagree across engines: queries[1] is queries[0], answered by this engine
+    # disagree across engines: queries[1] is queries[0], answered by this engine. Set by a caller only (the command
+    # line, the reducer that was given it): opening an engine starts a program or connects to a server
+    other_engine: str | None = None
+    engine_named: str | None = None  # what the manifest says W was reduced against: data, never a command
 
     def resolve(self, columns: list[str]) -> None:
         if self.expect_rows is None or self.baseline_sha:
@@ -161,7 +164,7 @@ def spec_from_manifest(manifest: dict) -> CheckSpec:
         loose=bool(pred.get("loose")),
         strict_lists=bool(cmp_.get("strict_lists")),
         digits=int(cmp_.get("float_digits", 12)),
-        other_engine=pred.get("other_engine_spec"),
+        engine_named=pred.get("other_engine_spec"),
     )
 
 
@@ -329,6 +332,10 @@ def check(
 ) -> CheckResult:
     """``necessity=False`` (a trial-capped run's partial W, possibly huge) checks sufficiency only: never verified."""
     w_rl = Path(w_rl)
+    if spec.engine_named and not spec.other_engine:  # a manifest never chooses what runs
+        raise Refused(
+            f"this witness compares two engines (its manifest names {spec.engine_named}): pass --other-engine", "check"
+        )
     out = CheckResult(change_phrase=spec.change_phrase)
     w_cypher = w_rl.with_suffix(".cypher")
     with tempfile.TemporaryDirectory(prefix="witness-check-") as tmp_name:

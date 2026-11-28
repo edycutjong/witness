@@ -28,6 +28,7 @@ import contextlib
 import hashlib
 import json
 import os
+import re
 import select
 import signal
 import subprocess
@@ -104,6 +105,24 @@ def parse_engine(spec: str) -> tuple[str, str]:
     raise Refused(
         f"unknown --other-engine {spec!r}; use relate-db==X.Y.Z, python:/path/to/python or neo4j", "other-engine"
     )
+
+
+RELEASE = re.compile(r"relate-db==(\d+\.\d+\.\d+)")
+
+
+def release_spec(spec: str | None) -> str | None:
+    """The release of an exact ``relate-db==X.Y.Z`` spec, or None for anything else."""
+    m = RELEASE.fullmatch((spec or "").strip())
+    return m.group(1) if m else None
+
+
+def recorded_spec(spec: str, version: str) -> str:
+    """What a manifest records for ``--other-engine``. ``python:/path`` is a path on one machine: the manifest keeps
+    the release that interpreter reported instead (or the bare word ``python`` when that is not a plain release), so
+    no local path is published and a later check can name the same release."""
+    if parse_engine(spec)[0] != "python":
+        return spec
+    return f"relate-db=={version}" if release_spec(f"relate-db=={version}") else "python"
 
 
 def graph_shape(sc) -> tuple[int, int, str]:

@@ -313,6 +313,18 @@ def test_check_worker_runs_an_agents_own_statement_against_the_baseline(stay_in_
     assert kind == "ok" and payload["verified"] is False  # a different answer is not the baseline
 
 
+def test_check_worker_never_opens_an_engine_a_manifest_names(stay_in_this_session, monkeypatch):
+    """An agent hands over a path; the manifest beside it may name an interpreter or a server. Over MCP no engine is
+    ever started: a two-engine witness is refused, with the reason."""
+    from witness import engines
+
+    monkeypatch.setattr(engines, "open_engine", lambda *a, **k: pytest.fail("the MCP server opened an engine"))
+    w = ROOT / "witnesses" / "regress" / "paren-projection.rl"
+    args = {**check_args(manifest=w.with_suffix(".manifest.json")), "witness": str(w)}
+    kind, payload = run_inline(_check_worker, args)
+    assert kind == "refused" and payload["kind"] == "check" and "compares two engines" in payload["message"]
+
+
 def test_check_worker_turns_a_refused_statement_into_a_refusal_not_a_crash(stay_in_this_session):
     kind, payload = run_inline(_check_worker, check_args(statement="CREATE (n:X) RETURN n"))
     assert kind == "refused" and payload["kind"] == "check" and payload["message"]

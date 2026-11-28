@@ -268,12 +268,24 @@ def cmd_check(args) -> int:
     else:
         raise Refused(f"no {man_path.name} beside {w.name}: pass -f, --param and --expect", "check")
     if args.other_engine:
-        if not spec.other_engine and not (args.file and len(spec.queries) == 1):
+        if not spec.engine_named and not (args.file and len(spec.queries) == 1):
             raise Refused("--other-engine re-checks a witness reduced with --other-engine (or one -f query)", "check")
         if len(spec.queries) == 1:
             spec.queries.append(spec.queries[0])
             spec.kind = "disagree"
         spec.other_engine = args.other_engine
+    elif spec.engine_named:
+        # The manifest is a file someone may have sent: it can pick a relate-db release (a version number, fetched
+        # from PyPI through uv), never an interpreter path or a server to connect to.
+        from .engines import release_spec
+
+        if not release_spec(spec.engine_named):
+            raise Refused(
+                f"the manifest names {spec.engine_named!r} as the other engine; only a relate-db release is taken "
+                "from a manifest: pass --other-engine yourself",
+                "check",
+            )
+        spec.other_engine = spec.engine_named
     res = check(w, spec, use_cli=not args.no_cli, require_cli=args.require_cli)
     if args.json:
         print(json.dumps(res.to_dict(), indent=2, sort_keys=True))

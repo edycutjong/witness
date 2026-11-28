@@ -39,6 +39,8 @@ from witness.engines import (
     query_from_spec,
     query_spec,
     read_env_file,
+    recorded_spec,
+    release_spec,
     wire_answer,
     worker_command,
 )
@@ -65,6 +67,19 @@ def test_parse_engine_forms():
     for bad in ("relate-db==1.3", "relate-db==latest", "relate-db==", "python:", "mysql", ""):
         with pytest.raises(Refused):
             parse_engine(bad)
+
+
+def test_what_a_manifest_records_and_what_is_taken_from_one():
+    assert release_spec("relate-db==1.3.0") == "1.3.0" and release_spec(" relate-db==1.2.0 ") == "1.2.0"
+    for other in ("python:/usr/bin/python3", "neo4j", "python", "relate-db==1.3", "relate-db==1.3.0; rm", "", None):
+        assert release_spec(other) is None, other
+    # a manifest never holds a path on one machine: the release that interpreter reported, or the bare word
+    assert recorded_spec("python:/Users/someone/.venv/bin/python", "1.3.0") == "relate-db==1.3.0"
+    assert recorded_spec("python:/opt/dev/bin/python", "1.4.0.dev3") == "python"
+    assert (
+        recorded_spec("relate-db==1.3.0", "1.3.0") == "relate-db==1.3.0"
+        and recorded_spec("neo4j", "2026.10.2") == "neo4j"
+    )
 
 
 def test_query_spec_round_trip_keeps_the_cut():
@@ -379,6 +394,37 @@ def test_check_override_refused_without_an_engine_witness(tmp_path, capsys):
     w = ROOT / "witnesses" / "two-hub.rl"
     assert main(["check", str(w), "--no-cli", "--other-engine", SELF]) == 2
     assert "re-checks a witness reduced with --other-engine" in capsys.readouterr().err
+
+
+def test_a_manifest_never_chooses_what_runs(tmp_path, capsys, monkeypatch):
+    """A witness is a file someone may have sent. Its manifest names the other engine; it must not start one."""
+    from witness import check as check_mod
+
+    src = ROOT / "witnesses" / "regress" / "paren-projection"
+    for ext in (".rl", ".cypher", ".manifest.json"):
+        shutil.copyfile(f"{src}{ext}", tmp_path / f"w{ext}")
+    man_path = tmp_path / "w.manifest.json"
+    man = json.loads(man_path.read_text())
+    assert man["predicate"]["other_engine_spec"] == "relate-db==1.2.0"
+    opened = []
+
+    def never(spec, *a, **k):
+        opened.append(spec)
+        raise AssertionError(f"an engine was opened: {spec}")
+
+    monkeypatch.setattr(engines, "open_engine", never)
+    # the library: a spec read from a manifest carries the name as data, and check() refuses to act on it
+    spec = check_mod.spec_from_manifest(man)
+    assert spec.other_engine is None and spec.engine_named == "relate-db==1.2.0"
+    with pytest.raises(Refused, match="compares two engines .*pass --other-engine"):
+        check_mod.check(tmp_path / "w.rl", spec, use_cli=False)
+    # the command line: an interpreter path or a server named by the manifest is refused, never run or connected to
+    for named in (f"python:{tmp_path / 'anything'}", "neo4j", "python", "relate-db==1.2", "sh -c 'x'"):
+        man["predicate"]["other_engine_spec"] = named
+        man_path.write_text(json.dumps(man))
+        assert main(["check", str(tmp_path / "w.rl"), "--no-cli"]) == 2, named
+        assert "only a relate-db release is taken from a manifest" in capsys.readouterr().err
+    assert opened == []
 
 
 # ---- Neo4j over Bolt, against a stand-in driver that runs each statement on a real Relate store ------------------

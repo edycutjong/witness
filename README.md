@@ -414,6 +414,10 @@ For judges: [JUDGE.md](JUDGE.md), also served at <https://witness.edycu.dev/judg
   the page's steps under Node: `evidence/wasm-parity.json`). A query box takes your own read queries on the witness, and
   the engine disagreement runs live on 1.0.1 and on 1.3.0, one button each.
 - Reproduce steps: [DEMO.md](DEMO.md)
+- Devpost project: https://devpost.com/software/witness-why-does-this-query-return-this-row (built for the
+  [Relate by Neo4j Hackathon](https://relate.devpost.com/))
+- Write-up on dev.to: https://dev.to/edycutjong/57645-relationships-to-22-shrinking-a-graph-answer-with-rollback-3jdb
+- Post on X: https://x.com/edycutjong/status/2126468870508790243
 
 ## 🧰 Tools and AI use
 

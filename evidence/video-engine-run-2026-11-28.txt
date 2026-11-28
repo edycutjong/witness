@@ -1,5 +1,5 @@
-# recorded 2026-11-28 06:59 +0700 in a fresh clone of edycutjong/witness at 5d962a3 on a terminal (TTY, 100 columns), Apple M1 Max · macOS 27.2.1 · the demo video's engine-case run (relate CLI v1.0.1, relate-db 1.0.1, DO_NOT_TRACK=1)
-# the 'reducing · trial …' lines are the live counter's updates (one per 50 ms, each overwritten on screen by the next)
+# recorded 2026-11-28 06:59 +0700 in a fresh clone of edycutjong/witness (its HEAD was 5d962a3; the commits since are docs and evidence only) on a terminal (TTY, 100 columns), Apple M1 Max · macOS 27.2.1 · the demo video's engine-case run (relate CLI v1.0.1, relate-db 1.0.1, DO_NOT_TRACK=1)
+# the 'reducing · trial …' lines are the live counter's updates as the terminal received them (each overwritten on screen by the next)
 # the first two commands are plain relate on the full graph: the EXISTS form returns rows[0], the COUNT form rows[59]
 witness $ relate query --database data/air-routes.rl --read-only --param country=MX < queries/exists-two-match.cypher | grep 'rows\['
 rows[0]{airport}:

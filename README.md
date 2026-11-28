@@ -185,8 +185,8 @@ the air-routes schema, with a copy of the store to check that each one runs on 1
 compared (`queries/differential.jsonl`, the prompt in `evidence/differential-prompt.md`; no query was edited afterwards).
 On relate-db 1.0.1 and 1.3.0 (`bench/differential.py`, `evidence/differential.json`):
 
-- 207 give the same answer, 8 end in an error on both (6 at run time, such as a division by zero; 2 at parse or plan time),
-  1 gives no answer within 20 s on either;
+- 207 give the same answer, 8 end in an error on both (7 type errors, such as a division by zero; 1 syntax error; the
+  answers per query: `evidence/differential-answers.jsonl`), 1 gives no answer within 20 s on either;
 - 2 `SHORTEST` queries answer only on 1.3.0 (1.0.1 gives no answer within 20 s); a run that never answers cannot be shrunk,
   so these two stay as recorded timeouts;
 - 1 differs in value type: `percentileDisc` over airport altitudes is a float on 1.0.1 and an integer on 1.3.0, shrunk to

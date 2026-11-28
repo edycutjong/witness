@@ -209,6 +209,11 @@ once; the worker opens its own byte copy of the store.
 ## 14. The differential run, and a slowdown still on Relate 1.3.0
 
 ```bash
+# an empty Neo4j for the third engine; the memory limits make a runaway query fail inside Neo4j
+docker run -d --rm --name witness-diff -p 127.0.0.1:7691:7687 -m 4g -e NEO4J_AUTH=neo4j/<a password> \
+  -e NEO4J_server_memory_heap_max__size=2g -e NEO4J_server_memory_pagecache_size=512m \
+  -e NEO4J_dbms_memory_transaction_total_max=1g neo4j:2026.10.2-community
+export NEO4J_BOLT=bolt://127.0.0.1:7691 NEO4J_USER=neo4j NEO4J_PASSWORD=<that password>
 uv run --with neo4j python bench/differential.py --reduce           # = evidence/differential.json + differential-answers.jsonl
 uv run --with neo4j python bench/differential.py --reduce-only      # shrink the committed answers' disagreements again
 uv run --with neo4j witness why -f queries/exists-two-match.cypher --param country=MX --other-engine neo4j \
@@ -224,8 +229,10 @@ when `NEO4J_BOLT` / `NEO4J_USER` / `NEO4J_PASSWORD` point at an empty Neo4j, Neo
 Neo4j reported are in `evidence/differential.json`). Every query runs in a transaction that is rolled back and has
 20 s: a relate-db process that has not answered by then is killed, and Neo4j is given a 20 s transaction timeout,
 which it can take minutes to act on (the `ms` of those rows is the wall clock). An engine's reply is recorded as an
-answer, an error, a timeout or a crash, and only two answers are ever compared. The whole run took about 47 minutes
-here, nearly all of it Neo4j ending five timed-out shortest-path queries. `bench/any_shortest_inline.py` runs each
+answer, an error, a timeout or a crash, and only two answers are ever compared. The 219 answers took about 47 minutes
+here (the reductions after them, under a minute), nearly all of it Neo4j ending five timed-out shortest-path queries.
+The 16 GB figure for the slow query on air-routes is a recorded session (`evidence/any-shortest-air-routes.txt`), not a
+script. `bench/any_shortest_inline.py` runs each
 size in its own process with an 8 s watchdog that starts when the query does, because the slow form does not return
 on 40 relationships.
 

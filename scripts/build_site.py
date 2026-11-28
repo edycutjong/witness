@@ -743,7 +743,7 @@ if DF_NEO:
     _pairs = {"same", "differ", "error/error", "timeout/timeout", "answer/timeout"}
     NT = _df_tally("relate_1_0_1_vs_neo4j", _pairs)
     NT3 = _df_tally("relate_1_3_0_vs_neo4j", _pairs)
-    assert _df_order("relate_1_0_1_vs_neo4j") == NT["same"] - sum(1 for r in _dfa if r["relate_1_0_1_vs_neo4j"] == "same" and not r.get("relate_1_0_1_vs_neo4j_order")) and _df_order("relate_1_3_0_vs_neo4j") >= 0
+    assert _df_order("relate_1_0_1_vs_neo4j") == _df_order("relate_1_3_0_vs_neo4j") == DF_ORDERED, "'on every pair of engines'"
     NEO_RED = [r for r in _df["reductions"] if r["engine"] == "neo4j"]
     NEO_SHRUNK, NEO_NOTHING = [r for r in NEO_RED if r.get("verified")], [r for r in NEO_RED if "empty graph" in r.get("refused", "")]
     assert len(NEO_RED) == NT.get("differ", 0) == len(NEO_SHRUNK) + len(NEO_NOTHING) and len(NEO_SHRUNK) == len(NEO_NOTHING) == 1, NEO_RED
@@ -760,11 +760,11 @@ if DF_NEO:
     NEO_ONLY_RELATE, NEO_NEITHER = NT.get("answer/timeout", 0), NT.get("timeout/timeout", 0)
     assert all(r["feature"] == "shortest" for r in _dfa if "timeout" in r["relate_1_0_1_vs_neo4j"]), "'shortest-path queries'"
     DF_NEO_TEXT = (
-        f" Against {_neo['version']} ({_neo['default_language'].title().replace('Cypher', 'Cypher')}, in a Docker container with a {_neo['settings']['server.memory.heap.max_size']} heap): "
+        f" Against {_neo['version']} ({_neo['default_language'].title()}, in a Docker container with a {_neo['settings']['server.memory.heap.max_size']} heap and {_neo['settings']['dbms.memory.transaction.total.max']} of transaction memory, the graph loaded without the store's constraints and indexes, one run): "
         f"{NT['same']} agree with 1.0.1, {NT.get('error/error', 0)} end in an error on both, {NT.get('differ', 0)} differ, and {NEO_ONLY_RELATE + NEO_NEITHER} shortest-path queries are not compared "
-        f"because Neo4j did not finish them within the run's {DF_TIMEOUT_S} s ({NEO_NEITHER} of those 1.0.1 did not finish either). One difference is the same value type: there Neo4j answers as 1.3.0 does, and it "
+        f"because Neo4j did not finish them within the run's {DF_TIMEOUT_S} s ({NEO_NEITHER} of those 1.0.1 did not finish either; why was not investigated, so read it as a limit of this setup, not of Neo4j). One difference is the same value type: there Neo4j answers as 1.3.0 does, and it "
         f"shrinks to {NEO_SHRUNK[0]['nodes']} node against Neo4j too. The other is how `toString` prints a float ({DF_TOSTRING}), the same on both Relate releases; it holds on an empty graph, so there is nothing to shrink. "
-        f"Wherever a query with `ORDER BY` gives the same rows on two engines, it gives them in the same order ({DF_ORDERED} of {DF_ORDERED} between the releases)."
+        f"Wherever a query with `ORDER BY` gives the same rows on two engines, it gives them in the same order ({DF_ORDERED} of {DF_ORDERED} on every pair of engines)."
     )
 # a slowdown still present on 1.3.0, measured on small graphs (ANY SHORTEST + an inline relationship predicate)
 _as = [json.loads(ln) for ln in (ROOT / "evidence" / "any-shortest-inline.jsonl").read_text().splitlines()]

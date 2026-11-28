@@ -155,7 +155,8 @@ The two-relationship script then separates the releases: the two forms disagree 
 agree on 1.3.0 (`bench/relate_versions.py`, `evidence/relate-versions.jsonl`). The fix is Relate's; the two-relationship
 repro, and the answer to "which release changed this", is what Witness adds.
 
-**One query, two engines (`--other-engine`).** The same disagreement, without writing the query twice: `witness why -f
+**One query, two engines (`--other-engine`).** Give Witness one query and a second engine, and it shrinks the data to
+what makes the two engines answer differently. The disagreement above, without writing the query twice: `witness why -f
 queries/exists-two-match.cypher --param country=MX --other-engine relate-db==1.3.0` runs the query on the pinned 1.0.1 in
 process and on relate-db 1.3.0 in a worker (`uv run --with relate-db==1.3.0`), deletes the same relationships on both
 sides in every trial, and keeps what makes the two releases answer differently: 57,645 relationships to the same 2, in 49
@@ -168,13 +169,15 @@ once and removed afterwards).
 What keeps the comparison honest (`src/witness/engines.py`):
 
 - Each deletion is sent to the other engine as the relationship's type, properties and end nodes, never as an internal
-  id. Before the first trial the other engine must hold the same graph (the same counts and one hash over every such
-  key) and, for a release, be the release that was asked for; otherwise the run is refused.
+  id. Before the first trial a relate-db worker must hold the same graph (the same counts and one hash over every such
+  key) and be the release that was asked for; Neo4j is loaded by Witness from those keys and must return every node
+  and relationship, counted. Otherwise the run is refused.
 - relate-db has no statement timeout, so each answer of the other engine has a deadline (`--trial-timeout`, 30 s). A
-  worker that misses it, or crashes, is ended with everything it started and a fresh one replays the deletions made so
-  far. That trial is inconclusive, never a disagreement; so is an error, and so is a value only one driver can render
-  (a date or a point from the Neo4j driver).
-- A witness is a file someone may send you, so its manifest never chooses what runs. `witness check W.rl` takes a
+  worker that misses it, or crashes, is ended with everything it started and a fresh one replays the deletions
+  committed so far. For Neo4j the deadline is a transaction timeout, which the server can take much longer to act on.
+  A trial without an answer is inconclusive, never a disagreement; so is an error, and so is a value only one driver
+  can render (a date or a point from the Neo4j driver).
+- A witness is a file someone may send you, so its manifest never chooses a command or a server. `witness check W.rl` takes a
   relate-db release number from a manifest (and fetches that release from PyPI through `uv`); an interpreter path or a
   Neo4j server comes from your own `--other-engine` only, and the MCP `check` tool never opens another engine.
   `witness check W.rl --other-engine relate-db==1.2.0` re-checks a witness against another release.
@@ -220,12 +223,15 @@ Relate 1.0.1 against Relate 1.3.0:
 - 1 differs in value type: `percentileDisc` over airport altitudes is a float on 1.0.1 and an integer on 1.3.0, shrunk to
   1 node (`witnesses/differential/d037-relate-1.3.0.*`).
 
-Relate 1.0.1 against Neo4j 2026.10.2 (community, in Docker with a 2 GiB heap, default language Cypher 25; the graph
-is loaded from the same store, without the store's three uniqueness constraints and their indexes):
+Relate 1.0.1 against Neo4j 2026.10.2 (community image in Docker on the same machine: 2 GiB heap, 1 GiB transaction
+memory, 512 MiB page cache, default language Cypher 25; the graph is loaded from the same store, without the store's
+three uniqueness constraints and their indexes; one run):
 
 - 204 give the same answer and the same 8 end in an error on both;
 - 5 shortest-path queries are not compared, because Neo4j did not finish them within the run's 20 s (3 of those 1.0.1
-  did not finish either). This run compares answers, not speed: the limit and the container are the run's own;
+  did not finish either). Neo4j ended them between 23 s and 17.6 minutes after they started, not at 20 s. Why was not
+  investigated (no plan was read, no index on `Airport.iata` exists on either side), so read it as a limit of this
+  setup, not of Neo4j: this run compares answers, not speed;
 - 2 differ. One is the same `percentileDisc` value type: Neo4j answers as Relate 1.3.0 does, and the difference shrinks
   to 1 node against Neo4j too (`witnesses/differential/d037-neo4j.*`). The other is how `toString` prints a float:
   `100000000000000000000.0` on both Relate releases is `1.0E20` on Neo4j, and `0.0000001` is `1.0E-7`. It holds on an
@@ -238,7 +244,8 @@ well: 89 of 89 come in the same order, on every pair of engines.
 over `->+` with an inline relationship predicate, even one every relationship satisfies, takes 85.9 ms on a 24-relationship
 graph, 655.3 ms on 32, 5,566.7 ms on 36 and gives no answer within 8 s on 40; without the predicate each answers in under
 1 ms. The same on 1.0.1 and 1.2.0 (`bench/any_shortest_inline.py`, `evidence/any-shortest-inline.jsonl`). On air-routes the
-process held about 16 GB (16,264,832 KB resident) 2 s after start (`evidence/any-shortest-air-routes.txt`). Witness cannot shrink a query that never answers;
+process held about 16 GB (16,264,832 KB resident) 2 s after start (`evidence/any-shortest-air-routes.txt`, a recorded
+session, not a script). Witness cannot shrink a query that never answers;
 the measurement is the repro.
 
 **A query mistake.** A plausible agent mistake, written for this case: the headline question with the first

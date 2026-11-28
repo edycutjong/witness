@@ -32,10 +32,30 @@ const workersAtLoad = page.workers().length;
 const stateAtLoad = await page.$eval("#eng", (e) => e.dataset.state);
 const sha = async (path) => crypto.createHash("sha256").update(Buffer.from(await (await fetch(new URL(path, url))).arrayBuffer())).digest("hex");
 const served = { "index.html": await sha("/"), "relate/live.js": await sha("/relate/live.js"), "relate/worker.js": await sha("/relate/worker.js") };
+// The page's own logic (scripts/site/landing.js) is inlined in index.html. index.html also prints numbers from this very
+// file, so its hash changes with every recorded run; the script's text does not, and the site build requires it to be
+// the landing.js it inlines now (trimmed, as the build compares it).
+const PAGE_JS = "landing.js (inlined in index.html)";
+const inlined = await page.evaluate(() => { const s = Array.from(document.scripts).find((x) => !x.src && x.textContent.includes('getElementById("wdata")')); return s ? s.textContent.trim() : null; });
+served[PAGE_JS] = inlined === null ? null : crypto.createHash("sha256").update(inlined, "utf8").digest("hex");
+// the engines as served: every file engines.json lists, hashed here and compared with the SHA-256 it records
+const enginesJson = await (await fetch(new URL("/relate/engines.json", url))).json();
+const engineFiles = { checked: 0, mismatches: [] };
+for (const [v, e] of Object.entries(enginesJson)) {
+  for (const [rel, want] of Object.entries(e.files)) {
+    engineFiles.checked += 1;
+    if ((await sha(`/relate/${v}/${rel}`)) !== want) engineFiles.mismatches.push(`${v}/${rel}`);
+  }
+}
 const text = (sel) => page.$eval(sel, (e) => e.innerText.replace(/\s+/g, " ").trim());
 const until = (fn, ms = 30000) => page.waitForFunction(fn, { timeout: ms });
 const click = (sel) => page.$eval(sel, (e) => e.click());
 
+// a visitor who acts away from the exhibit (a short scroll, a key) must not start the engine either
+await page.mouse.wheel({ deltaY: 120 });
+await page.keyboard.press("Tab");
+await new Promise((r) => setTimeout(r, 1500));
+const actedAway = { exhibit_px_below_viewport: Math.round(await page.$eval("#exhibit", (e) => e.getBoundingClientRect().top - innerHeight)), engine_workers: page.workers().length, plate: await page.$eval("#eng", (e) => e.dataset.state) };
 await page.evaluate(() => { document.documentElement.style.scrollBehavior = "auto"; document.getElementById("exhibit").scrollIntoView(); window.dispatchEvent(new Event("scroll")); });
 await until(() => ["live", "down"].includes(document.getElementById("eng").dataset.state));
 const engine = { state: await page.$eval("#eng", (e) => e.dataset.state), plate: await text("#eng") };
@@ -49,6 +69,8 @@ for (let i = 1; i <= n; i++) {
   pulls.push({ n: i, live: /^LIVE/i.test(proof), same_rows: /Same rows as the recorded run/.test(proof), proof });
 }
 const tally = await text("#tally");
+await click(`.pull[data-n="${n}"]`); // put the last exhibit back: the query box below runs on the whole witness
+await until(() => document.getElementById("ex-n").textContent === "none");
 
 const ask = [];
 for (const [i, label] of (await page.$$eval("#ask-try .chip", (c) => c.map((x) => x.textContent))).entries()) {
@@ -88,18 +110,23 @@ const report = {
   write: { refused: /^REFUSED/i.test(write.meta), meta: write.meta },
   stop: { ms: stop.ms, stopped: /^STOPPED/i.test(stop.meta), meta: stop.meta, next_run: after.meta },
   engine_case: engineCase,
-  third_party_requests: requests.filter((u) => !u.startsWith(origin) && !u.startsWith("data:") && !/^https:\/\/api\.github\.com\//.test(u)),
+  acted_away: actedAway,
+  engine_files: engineFiles,
+  third_party_requests: requests.filter((u) => !u.startsWith(origin) && !u.startsWith("data:")),
   console_errors: consoleErrors,
   failed_responses: failed,
 };
-// the version chip asks api.github.com for the latest release and keeps its baked text when that fails (rate limit);
-// Chrome logs that failure as a console error, which says nothing about the engine
-const chipOnly = failed.length > 0 && failed.every((f) => f.url.startsWith("https://api.github.com/"));
-const engineErrors = consoleErrors.filter((m) => !(chipOnly && /^Failed to load resource/.test(m)));
-report.console_errors_not_from_the_version_chip = engineErrors;
+// what each engine's worker fetched to start, as the worker itself reports it (the page's listeners above cannot see
+// a worker's requests); the page keeps the list in an attribute
+report.engine_worker_requests = await page.evaluate(() => Object.fromEntries(Array.from(document.documentElement.attributes)
+  .filter((a) => a.name.startsWith("data-engine-fetched-")).map((a) => [a.name.slice("data-engine-fetched-".length).replace(/-/g, "."), a.value.split(" ").filter(Boolean)])));
+const workerOffSite = Object.values(report.engine_worker_requests).flat().filter((u) => !u.startsWith(origin));
 report.engine_workers_at_end = page.workers().length; // engine workers the page created that Chrome still lists at the end
 report.ok = engine.state === "live" && report.pulls.live === n && report.pulls.same_rows === n && report.write.refused && report.stop.stopped &&
-  /^LIVE/i.test(after.meta) && engineCase.every((e) => e.live && e.same_as_recorded) && report.third_party_requests.length === 0 && engineErrors.length === 0 && workersAtLoad === 0 && stateAtLoad === "ready" && report.engine_workers_at_end >= 1;
+  /^LIVE/i.test(after.meta) && engineCase.every((e) => e.live && e.same_as_recorded) && report.third_party_requests.length === 0 && consoleErrors.length === 0 && failed.length === 0 &&
+  workersAtLoad === 0 && stateAtLoad === "ready" && report.engine_workers_at_end >= 1 && engineFiles.mismatches.length === 0 && engineFiles.checked > 0 && served[PAGE_JS] !== null &&
+  Object.keys(report.engine_worker_requests).length === engineCase.length && workerOffSite.length === 0 &&
+  (actedAway.exhibit_px_below_viewport <= 600 || (actedAway.engine_workers === 0 && actedAway.plate === "ready"));
 await browser.close();
 if (OUT) fs.writeFileSync(OUT, JSON.stringify(report, null, 2) + "\n");
 console.log(`browser: ${report.run.browser}; engine ${engine.state}; ${report.pulls.live} of ${n} pulls live, ${report.pulls.same_rows} same as the recording; ` +

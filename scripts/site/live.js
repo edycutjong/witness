@@ -66,7 +66,9 @@ export function pull(db, script, query, params, rel) {
 
 // Run any statement on a fresh copy of the witness (minus one pulled tag, if given). paramsText is the visitor's
 // JSON as typed; Relate parses it and answers "invalid params JSON" itself when it does not parse. A statement that
-// writes is refused: it ran on a throwaway copy, which is dropped before anything is shown.
+// writes is refused: it ran on a throwaway copy, which is dropped before anything is shown. The page tells a write
+// from a read by the envelope's stats (both pinned releases send them with every reply, an error included); a reply
+// without stats is refused too, since nothing then says it only read.
 export function ask(db, script, statement, paramsText, rel) {
   const built = load(db, script);
   if (rel) cut(db, rel);
@@ -75,9 +77,9 @@ export function ask(db, script, statement, paramsText, rel) {
   const took = ms(t);
   const writes = {};
   WRITE_COUNTERS.forEach((k) => { if (env.stats && env.stats[k] > 0) writes[k] = env.stats[k]; });
-  if (Object.keys(writes).length) {
+  if (!env.stats || Object.keys(writes).length) {
     db.reset();
-    return { refused: true, writes, ms: took, relationships: built.relationships - (rel ? 1 : 0) };
+    return { refused: true, untold: !env.stats, writes, ms: took, relationships: built.relationships - (rel ? 1 : 0) };
   }
   const rows = env.rows || [];
   return {

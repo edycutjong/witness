@@ -7,14 +7,6 @@
   var fmt = function (n) { return n.toLocaleString("en-US"); };
   document.documentElement.classList.add("js");
 
-  // version chip: baked text stays if the releases API is unreachable (private repo → 404)
-  var v = document.getElementById("ver");
-  if (v && v.hasAttribute("data-live") && window.fetch) {
-    fetch("https://api.github.com/repos/edycutjong/witness/releases/latest", { headers: { Accept: "application/vnd.github+json" } })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { if (j && j.tag_name) { $$('a[href$="/releases/latest"].chip').forEach(function (c) { c.textContent = j.tag_name; }); } })
-      .catch(function () {});
-  }
 
   // copy buttons
   $$(".copy").forEach(function (b) {
@@ -153,7 +145,12 @@
         if (m.ok) p.res(m.value); else { p.rej(new Error(m.trap ? "WebAssembly trap: " + m.error : m.error)); if (m.trap) self.stop("the engine stopped (a WebAssembly trap); it restarts on the next run", m.id); }
       };
       self.w.onerror = function (e) { if (e && e.preventDefault) e.preventDefault(); self.stop((e && e.message) || "the engine worker did not load"); };
-      self.call("boot", [self.v], 30000).then(function (i) { self.info = i; res(i); }, rej);
+      self.call("boot", [self.v], 30000).then(function (i) {
+        self.info = i;
+        // what the engine's worker fetched to start, as the worker reports it; kept on the page for anyone who looks
+        document.documentElement.setAttribute("data-engine-fetched-" + self.v.replace(/\./g, "-"), (i.fetched || []).join(" "));
+        res(i);
+      }, rej);
     });
     var b = self.boot;
     b.catch(function (e) {
@@ -277,18 +274,25 @@
     bar(n, null);
     var go = function () { return warm().then(function () { return A.call("pull", [LV.script, LV.query, LV.params, t.rel], 5000); }); };
     go().catch(function (e) { if (e && e.collateral && my === pg) return go(); throw e; }).then(function (r) {
+      if (!r || !Array.isArray(r.rows)) throw new Error("the engine returned no rows"); // a failed live run, shown as one
+      return r;
+    }).then(function (r) {
       var ok = same(r.rows, t.rows);
-      live[n] = 1; if (ok) liveSame[n] = 1; lastMs = r.ms;
+      live[n] = 1; if (ok) liveSame[n] = 1; else delete liveSame[n]; lastMs = r.ms;
       if (!same(r.rows, D.base)) proven[n] = 1; // counted from what the engine returned
       if (my !== pg) { tick(); return; }
-      if (!ok) { // never paper over a difference: show what the engine returned
-        renderRows({ rows: r.rows });
-        $$(".out", ex).forEach(function (x) { x.classList.remove("out"); });
-        D.base.forEach(function (row) { if (!r.rows.some(function (q) { return q.airport === row.airport; })) { var nd = $('.nd[data-c="' + row.airport + '"]', ex); if (nd) nd.classList.add("out"); } });
-      }
+      // the verdict first, then the drawing: nothing below can leave the line at "Running"
       proof.innerHTML = '<span class="pk live">Live</span> Exhibit ' + n + " pulled: <b>" + esc(t.rel) + "</b>. Relate " + esc(A.info ? A.info.reported : LV.pin) + " rebuilt the witness (" + r.build_ms.toFixed(1) + " ms), deleted that relationship and re-ran the query in " + r.ms.toFixed(1) + " ms: " + D.base.length + " rows → " + r.rows.length + (ok ? " · " + esc(t.fx) + ". <b>Same rows as the recorded run.</b>" : '. <b class="bad">Not the recorded run</b> (' + t.rows.length + " rows there).");
       showPar(ok ? "same" : "diff");
       bar(n, { rows: r.rows.length, ok: ok });
+      if (!ok) { // never paper over a difference: show what the engine returned
+        mark.textContent = same(r.rows, D.base) ? "Unchanged" : "Changed";
+        try {
+          renderRows({ rows: r.rows });
+          $$(".out", ex).forEach(function (x) { x.classList.remove("out"); });
+          D.base.forEach(function (row) { if (!r.rows.some(function (q) { return q.airport === row.airport; })) { var nd = $('.nd[data-c="' + row.airport + '"]', ex); if (nd) nd.classList.add("out"); } });
+        } catch (e) { rows.innerHTML = '<tr><td colspan="2">The live rows could not be drawn here; the result line says what the engine returned.</td></tr>'; }
+      }
       if (!(allT && allT.length)) say("Exhibit " + n + " pulled, live: " + D.base.length + " rows to " + r.rows.length + (ok ? ", same as the recording." : ", not the recording."));
       tick();
     }, function (e) {
@@ -311,7 +315,8 @@
   function tick(n) {
     if (n) proven[n] = 1;
     var k = Object.keys(proven).length, lv = Object.keys(live).length, ls = Object.keys(liveSame).length;
-    tally.innerHTML = "<b>" + k + "</b> of " + D.tags.length + " change the answer" + (lv ? '<span class="tl"> · ' + lv + " live in this tab, " + ls + " of " + lv + " same as the recorded run</span>" : "");
+    var rc = Object.keys(proven).filter(function (x) { return !live[x]; }).length; // counted from the recording, not run here
+    tally.innerHTML = "<b>" + k + "</b> of " + D.tags.length + " change the answer" + (lv ? '<span class="tl"> · ' + lv + " live in this tab, " + ls + " of " + lv + " same as the recorded run</span>" : "") + (rc ? '<span class="tl"> · ' + rc + " from the recorded run</span>" : "");
     if (k === D.tags.length) { regStamp.classList.add("on"); }
     meter();
   }
@@ -382,7 +387,7 @@
       var on2 = esc(where) + " (" + r.relationships + " relationships)";
       if (r.refused) {
         askTbl.innerHTML = "";
-        askMeta.innerHTML = '<span class="pk rec">Refused</span> This box reads; it does not write. Relate ran the statement on a throwaway copy and reported ' + Object.keys(r.writes).map(function (k) { return esc(k) + " " + r.writes[k]; }).join(", ") + ". The page dropped that copy; the witness is rebuilt before every run.";
+        askMeta.innerHTML = '<span class="pk rec">Refused</span> This box reads; it does not write. Relate ran the statement on a throwaway copy and ' + (r.untold ? "did not report what it changed, so the page cannot show it as a read" : "reported " + Object.keys(r.writes).map(function (k) { return esc(k) + " " + esc(String(r.writes[k])); }).join(", ")) + ". The page dropped that copy; the witness is rebuilt before every run.";
       } else if (r.error) {
         askTbl.innerHTML = "";
         askMeta.innerHTML = '<span class="pk rec">Relate says</span> ' + esc(r.error);

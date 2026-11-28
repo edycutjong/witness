@@ -12,7 +12,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Witness">
 <meta property="og:title" content="Witness · cross-examine the graph behind an agent's answer">
-<meta property="og:description" content="57,645 relationships → 22 that reproduce an agent&#x27;s answer on their own. Take any one of the 22 away and it changes.">
+<meta property="og:description" content="57,645 relationships → 22 that reproduce a graph answer on their own. Take any one of the 22 away and it changes.">
 <meta property="og:url" content="https://witness.edycu.dev/">
 <meta property="og:image" content="https://witness.edycu.dev/og-image.png?v=4e6a2d4838">
 <meta property="og:image:width" content="1200">
@@ -20,7 +20,7 @@
 <meta property="og:image:alt" content="Witness: 57,645 relationships reduced to 22, each tagged as an exhibit; 22 of 22 change the answer">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Witness · cross-examine the graph behind an agent's answer">
-<meta name="twitter:description" content="57,645 relationships → 22 that reproduce an agent&#x27;s answer on their own. Take any one of the 22 away and it changes.">
+<meta name="twitter:description" content="57,645 relationships → 22 that reproduce a graph answer on their own. Take any one of the 22 away and it changes.">
 <meta name="twitter:image" content="https://witness.edycu.dev/og-image.png?v=4e6a2d4838">
 <link rel="preload" href="/fonts/old-standard-tt-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/source-sans-3-var.woff2" as="font" type="font/woff2" crossorigin>
@@ -575,7 +575,7 @@ h1,h2{text-wrap:balance}
     <div class="rc"><b><span data-count="68">68</span><span class="to">→</span><em>22</em></b><span>relationships the answer rows bind, then the witness: deleted from the full graph, only 20 of the 68 change the answer (11 of them in the witness); deleted from the witness, all 22 do</span></div>
     <div class="rc"><b><span data-count="569">569</span><span class="to">·</span>100%</b><span>tests against real Relate · line and branch coverage</span></div>
   </div>
-  <p class="wrap rc-src data">Read from <code>witnesses/two-hub.manifest.json</code>, <code>evidence/pull-each-tag.json</code>, <code>evidence/neo4j-compare-2026-11-24.md</code>, <code>evidence/pytest-2026-11-28c.txt</code>. Relate 1.0.1 · Python 3.12.13.</p>
+  <p class="wrap rc-src data">Read from <code>witnesses/two-hub.manifest.json</code>, <code>evidence/pull-each-tag.json</code>, <code>evidence/neo4j-compare-2026-11-24.md</code>, <code>evidence/pytest-2026-11-28d.txt</code>. Relate 1.0.1 · Python 3.12.13.</p>
 </section>
 
 <section class="exhibit" id="exhibit" aria-labelledby="ex-h">
@@ -744,9 +744,11 @@ ORDER BY airport</textarea>
           <thead><tr><th scope="col">relate-db</th><th scope="col"><code>COUNT</code> form</th><th scope="col"><code>EXISTS</code> form</th><th scope="col"><span class="sr">Verdict</span></th></tr></thead>
           <tbody>
             <tr class="dis" data-v="1.0.1"><td>1.0.1</td><td>MZT</td><td>no rows</td><td>disagree</td></tr>
+            <tr class="dis" data-v="1.0.2"><td>1.0.2</td><td>MZT</td><td>no rows</td><td>disagree</td></tr>
             <tr class="dis" data-v="1.1.0"><td>1.1.0</td><td>MZT</td><td>no rows</td><td>disagree</td></tr>
             <tr class="dis" data-v="1.2.0"><td>1.2.0</td><td>MZT</td><td>no rows</td><td>disagree</td></tr>
             <tr class="agr" data-v="1.3.0"><td>1.3.0</td><td>MZT</td><td>MZT</td><td>agree</td></tr>
+            <tr class="agr" data-v="1.4.0"><td>1.4.0</td><td>MZT</td><td>MZT</td><td>agree</td></tr>
           </tbody>
         </table>
         <div class="ec-live" id="ec-live" hidden>

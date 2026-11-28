@@ -92,11 +92,16 @@ It needs a Claude Code login, so it is a recorded run, not a step of the judge p
 ## 6. Tests: 569 pass, 100% coverage
 
 ```bash
-uv run pytest --cov=witness   # fails below 100% line + branch coverage (pyproject.toml)
+uv run pytest                 # with uv alone: 544 passed, 28 skipped
+uv run pytest --cov=witness   # with the v1.0.1 relate CLI on PATH and Node.js: 569 passed; fails below 100% line + branch coverage (pyproject.toml)
 ```
 
-The run is recorded in `evidence/pytest-2026-11-28c.txt` (569 passed; the 2 fixture-pull tests and the re-check of the
-committed Neo4j witness need a Neo4j and skip without one). GitHub Actions runs the same suite on every push, on Linux under Python 3.11 and 3.12, with ruff, mypy,
+The full run is recorded in `evidence/pytest-2026-11-28d.txt` (569 passed; the 2 fixture-pull tests and the re-check of the
+committed Neo4j witness need a Neo4j and skip without one). It needs the v1.0.1 `relate` CLI on PATH (24 tests call it: the
+CLI cross-check, and fixture mode, whose stand-in hands everything but `pull` to the real CLI) and Node.js (1 test runs
+Relate's WebAssembly build); `uv` fetches relate-db 1.3.0 from PyPI for the engine tests. With `uv` alone those tests are
+skipped and the coverage gate, which counts the lines they reach, is not met: `evidence/judge-path-uv-only-2026-11-28.txt`
+(544 passed, 28 skipped; the same file has `witness demo` on Python 3.13, 3.14 and 3.15). GitHub Actions runs the same suite on every push, on Linux under Python 3.11 and 3.12, with ruff, mypy,
 pip-audit, gitleaks, the wheel build and a throughput floor (`.github/workflows/ci.yml`).
 
 ## 7. Two queries disagree: 57,645 → 5, "5 of 5 end the disagreement"
@@ -147,17 +152,17 @@ row). 25 of the guards are outside the 68, and 34 are outside the witness.
 ```bash
 uv run witness why -f queries/count-two-match.cypher --other queries/exists-two-match.cypher --predicate disagree \
   --param country=MX --name exists-count
-for v in 1.0.1 1.1.0 1.2.0 1.3.0; do
+for v in 1.0.1 1.0.2 1.1.0 1.2.0 1.3.0 1.4.0; do
   uv run --no-project --python 3.12 --with relate-db==$v python bench/relate_versions.py
 done
 ```
 
 The two query files state one condition two ways, `EXISTS { MATCH … MATCH … }` and `COUNT { MATCH … MATCH … } > 0`. On the
-pinned Relate 1.0.1 they return 0 and 59 Mexican airports; Relate's v1.3.0 release notes list the fix ("`EXISTS` over two
+pinned Relate 1.0.1 the `EXISTS` form returns no Mexican airport and the `COUNT` form 59; Relate's v1.3.0 release notes list the fix ("`EXISTS` over two
 `MATCH` clauses agrees with `COUNT` on relationship uniqueness"). Expect exit 0, `2 of 2 end the disagreement`, 49 trials
 (`witnesses/exists-count.manifest.json`; recorded run: `evidence/exists-count-run.txt`). The loop rebuilds that
-2-relationship graph under four releases: the two forms disagree on 1.0.1, 1.1.0 and 1.2.0 and agree on 1.3.0
-(`evidence/relate-versions.jsonl`).
+2-relationship graph under six releases: the two forms disagree on 1.0.1, 1.0.2, 1.1.0 and 1.2.0 and agree on 1.3.0 and
+1.4.0 (`evidence/relate-versions.jsonl`).
 
 ## 11. Other query shapes, and one that does not shrink
 
@@ -185,9 +190,11 @@ docker stop witness-recheck
 
 The script needs an empty database and leaves it empty. It loads each witness's rebuild script (`witnesses/<name>.cypher`),
 checks that the predicate holds, then deletes every relationship alone in a rolled-back transaction and compares each verdict
-with the one the manifest records for Relate (`evidence/neo4j-recheck.json`). The only statement difference is dialect:
-Neo4j has no `coll.sort()`, so the hub countries are ordered before `collect()`. The engine-disagreement witness of section 10
-is not part of this: its claim is about Relate 1.0.1.
+with the one the manifest records for Relate (`evidence/neo4j-recheck.json`). The statement is the manifest's own, with its comments
+stripped and nothing else changed. It calls `coll.sort()`, which Neo4j has in Cypher 25 (the default language of this image)
+and not in Cypher 5, so the script refuses a database whose default language is not Cypher 25. The first record of this run
+ordered the hub countries before `collect()` instead, on the mistaken belief that Neo4j has no `coll.sort()`; every verdict
+is the same. The engine-disagreement witness of section 10 is not part of this: its claim is about Relate 1.0.1.
 
 ## 13. One query on two engines, and Relate's changelog as regression fixtures
 
@@ -196,8 +203,8 @@ uv run witness why -f queries/exists-two-match.cypher --param country=MX --other
   --name exists-engines --out /tmp/w --no-ledger                     # 57,645 -> 2 in 49 trials (evidence/exists-engines-run.txt)
 uv run witness check witnesses/regress/cycle-repeated-variable.rl    # 3 of 3, against relate-db 1.3.0 (from the manifest)
 uv run witness check witnesses/regress/cycle-repeated-variable.rl --other-engine relate-db==1.2.0   # NOT verified: on this witness 1.2.0 gives 1.0.1's row (evidence/regression-releases.jsonl)
-for v in 1.0.1 1.0.2 1.1.0 1.2.0 1.3.0; do
-  uv run --no-project --with relate-db==$v python bench/regression_table.py
+for v in 1.0.1 1.0.2 1.1.0 1.2.0 1.3.0 1.4.0; do
+  uv run --no-project --python 3.12 --with relate-db==$v python bench/regression_table.py
 done                                                                 # = evidence/regression-releases.jsonl (one row per witness and release)
 ```
 
@@ -206,7 +213,7 @@ query in `queries/regress/`, against the release that fixed it). The triage of a
 to v1.3.0 release notes, with the status of each: `evidence/release-notes-fixes.json`. `uv` fetches each Relate release
 once; the worker opens its own byte copy of the store.
 
-## 14. The differential run, and a slowdown still on Relate 1.3.0
+## 14. The differential run, a second look at Neo4j, Relate 1.4.0, and a slowdown still on it
 
 ```bash
 # an empty Neo4j for the third engine; the memory limits make a runaway query fail inside Neo4j
@@ -218,23 +225,41 @@ uv run --with neo4j python bench/differential.py --reduce           # = evidence
 uv run --with neo4j python bench/differential.py --reduce-only      # shrink the committed answers' disagreements again
 uv run --with neo4j witness why -f queries/exists-two-match.cypher --param country=MX --other-engine neo4j \
   --name exists-neo4j --out /tmp/w --no-ledger                       # 57,645 -> 2 in 49 trials (evidence/exists-neo4j-run.txt)
-for v in 1.0.1 1.3.0 1.2.0; do
-  uv run --no-project --with relate-db==$v python bench/any_shortest_inline.py
+uv run --with neo4j python bench/neo4j_shortest_second_look.py      # = evidence/neo4j-shortest-second-look.json: the five Neo4j did not finish
+uv run python bench/differential_release.py 1.4.0                   # = evidence/differential-relate-1.4.0.json (+ answers): the 219 on a new release
+for v in 1.0.1 1.3.0 1.2.0 1.4.0; do
+  uv run --no-project --python 3.12 --with relate-db==$v python bench/any_shortest_inline.py
 done                                                                 # = evidence/any-shortest-inline.jsonl
+for v in 1.0.1 1.3.0 1.4.0; do
+  uv run --no-project --python 3.12 --with relate-db==$v python bench/any_shortest_air_routes.py
+done                                                                 # = evidence/any-shortest-air-routes.jsonl
 ```
 
 `bench/differential.py` runs the 219 queries of `queries/differential.jsonl` on relate-db 1.0.1, relate-db 1.3.0 and,
 when `NEO4J_BOLT` / `NEO4J_USER` / `NEO4J_PASSWORD` point at an empty Neo4j, Neo4j. The committed run has all three
 (Neo4j 2026.10.2 in Docker; the `docker run` line with its memory limits is in the script's docstring, and the limits
 Neo4j reported are in `evidence/differential.json`). Every query runs in a transaction that is rolled back and has
-20 s: a relate-db process that has not answered by then is killed, and Neo4j is given a 20 s transaction timeout,
-which it can take minutes to act on (the `ms` of those rows is the wall clock). An engine's reply is recorded as an
+20 s: a relate-db process that has not answered by then is killed, and Neo4j is given a 20 s transaction timeout; in
+this run it ended those transactions between 23 s and 17.6 minutes after they started (the `ms` of those rows is the wall
+clock). An engine's reply is recorded as an
 answer, an error, a timeout or a crash, and only two answers are ever compared. The 219 answers took about 47 minutes
 here (`answer_seconds` in `evidence/differential.json`; the reductions after them, under a minute), nearly all of it Neo4j ending five timed-out shortest-path queries.
-The 16 GB figure for the slow query on air-routes is a recorded session (`evidence/any-shortest-air-routes.txt`), not a
-script. `bench/any_shortest_inline.py` runs each
-size in its own process with an 8 s watchdog that starts when the query does, because the slow form does not return
-on 40 relationships.
+
+`bench/neo4j_shortest_second_look.py` goes back to the five shortest-path queries Neo4j did not finish. In the same
+container it reads the plan Neo4j chooses for each, without constraints, with the store's three, and with one more on
+`Airport.iata`, the property each query finds its airports by; then it asks them with that constraint (50 to 220 ms each)
+and, last, with the store's three alone, which repeats the long waits of the first run (`--skip-slow` leaves that out).
+
+`bench/differential_release.py X.Y.Z` asks the same 219 queries of one more relate-db release and compares each answer
+with the three recorded ones; nothing recorded is asked again. Relate 1.4.0 was published on 2026-11-27 and run the next
+day; `evidence/relate-1.4.0-2026-11-28.txt` has the committed stores, the headline reduction, the test suite and the
+v1.4.0 CLI on it.
+
+`bench/any_shortest_inline.py` runs each size in its own process with an 8 s watchdog that starts when the query does,
+because the slow form does not return on 40 relationships. `bench/any_shortest_air_routes.py` asks the slow query itself
+on air-routes, each form in its own process under a watchdog that samples resident memory (10 s, or 8 GiB): on 1.4.0 the
+process ends on its own with signal 10. An earlier session on 1.3.0, recorded by hand, is
+`evidence/any-shortest-air-routes.txt`.
 
 
 ## 15. Relate in the tab: the landing's pulls, run live, against the recording

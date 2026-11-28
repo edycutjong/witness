@@ -59,7 +59,7 @@ ratio = cmp["ratio_trials_per_s"]
 fmt = lambda n: f"{n:,}"  # noqa: E731
 # the claim as /judge's hero prints it (the numbers stand above it there), and with this run's numbers for JUDGE.md
 CLAIM_HERO = "When an agent answers from a graph, Witness hands back a small graph that reproduces the answer, and proves that deleting any one of its relationships changes the answer."
-CLAIM = CLAIM_HERO.replace("the answer,", f"the answer (here, {fmt(src_rels)} relationships → {w_rels}),", 1)
+CLAIM = CLAIM_HERO.replace("the answer,", f"the answer ({fmt(src_rels)} relationships → {w_rels} for the headline question here),", 1)
 assert CLAIM != CLAIM_HERO
 
 
@@ -226,7 +226,8 @@ def cases_vals() -> dict:
     agr = [v["relate_db"] for v in vers if v["the_two_forms_agree"]]
     ex = [x["element"] for x in ec["check"]["probes"]]
     assert ec["verified"] and ec["predicate"]["kind"] == "disagree" and ec["source"]["relationships"] == src_rels
-    assert len(ex) == ec["witness"]["relationships"] == 2 and len(agr) == 1 and dis[0] == ec["versions"]["relate_db"]
+    assert len(ex) == ec["witness"]["relationships"] == 2 and agr and dis[0] == ec["versions"]["relate_db"]
+    assert dis + agr == [v["relate_db"] for v in vers], "the releases disagree up to one release and agree from it on"
     assert ec["params"] == {"country": "MX"}, "the landing says 'Mexican airports'"
     return {
         "EC_ENGINE": ec["versions"]["relate_db"],
@@ -259,7 +260,7 @@ def cases_vals() -> dict:
 
 
 DESC = f"When an agent answers from a graph, Witness hands back {w_rels} of its {fmt(src_rels)} relationships that reproduce the answer on their own, and proves each of them is needed."
-DESC_OG = f"{fmt(src_rels)} relationships → {w_rels} that reproduce an agent's answer on their own. Take any one of the {w_rels} away and it changes."
+DESC_OG = f"{fmt(src_rels)} relationships → {w_rels} that reproduce a graph answer on their own. Take any one of the {w_rels} away and it changes."
 assert 50 <= len(DESC) <= 160 and len(DESC_OG) <= 125, (len(DESC), len(DESC_OG))
 
 
@@ -421,7 +422,10 @@ CAPS = [  # (code token as in README "Relate capabilities used", the deck's 2-3 
         "Witness's own tools, beside relate serve --mcp",
         "MCP: Witness's own tools `why` and `check`",
     ),
+    ("@relate/relate-wasm", "Relate in the reader's tab", "@relate/relate-wasm"),
+    ("--other-engine relate-db==X.Y.Z", "another release beside the pin", "`--other-engine relate-db==X.Y.Z`"),
 ]
+CAPS_DECK = CAPS[:8]  # the deck's slide lists the first eight
 
 
 def _ln(e: str, cls: str = "") -> str:
@@ -543,7 +547,7 @@ def deck_page() -> str:
         ),
         "CAPS": "".join(
             f'<li class="{"big" if i <= 4 else "sm"}"><span class="no">{i}</span><code>{html.escape(c)}</code><span>{d}</span></li>'
-            for i, (c, d, _) in enumerate(CAPS[1:], 2)
+            for i, (c, d, _) in enumerate(CAPS_DECK[1:], 2)
         ),
         "DET_RUNS": len(det["runs"]) if isinstance(det["runs"], list) else det["runs"],
         "TESTS": TESTS,
@@ -659,7 +663,11 @@ EC_EXHIBITS = [x["element"] for x in _ec["check"]["probes"]]
 _vers = [json.loads(ln) for ln in (ROOT / "evidence" / "relate-versions.jsonl").read_text().splitlines()]
 VER_DISAGREE = [v["relate_db"] for v in _vers if not v["the_two_forms_agree"]]
 VER_AGREE = [v["relate_db"] for v in _vers if v["the_two_forms_agree"]]
-assert VER_DISAGREE[0] == man["versions"]["relate_db"] and VER_AGREE == ["1.3.0"], (VER_DISAGREE, VER_AGREE)
+assert VER_DISAGREE[0] == man["versions"]["relate_db"] and VER_AGREE[0] == "1.3.0", (VER_DISAGREE, VER_AGREE)
+assert VER_DISAGREE + VER_AGREE == [v["relate_db"] for v in _vers], "the releases disagree up to one release and agree from it on"
+# which form gives the rows: the manifest's first statement is the COUNT form, the other the EXISTS form
+assert "COUNT" in _ec["statement"].upper() and "EXISTS" in _ec["predicate"]["other_statement"].upper()
+assert len(_ec["baseline"]["rows"]) == EC_ROWS and EC_ROWS > 0
 assert all(v["relationships"] == EC_RELS and v["count-two-match"] and not (v["exists-two-match"] and v["relate_db"] in VER_DISAGREE) for v in _vers)
 _and = lambda xs: ", ".join(xs[:-1]) + " and " + xs[-1] if len(xs) > 1 else xs[0]  # noqa: E731
 # Relate's release notes as regression fixtures (--other-engine against the release that fixed each one)
@@ -678,6 +686,8 @@ RG_MAX_RELS = max(r for r, _ in RG_SIZES)
 _named = [w for f in _rn["fixes"] if f["status"].startswith("reproduced, shrunk") for w in ([f["witness"]] if isinstance(f["witness"], str) else f["witness"])]
 assert sorted(w for w in _named if w.startswith("witnesses/regress/")) == sorted(f"witnesses/regress/{m['name']}.rl" for m in _rg), _named
 assert all(n in (1, 2) for r, n in RG_SIZES if r == 0), RG_SIZES  # "one or two nodes are all they need"
+# the engine case is one half of a release-notes entry whose other half is a regression witness
+assert sum(1 for f in _rn["fixes"] if f["status"].startswith("reproduced, shrunk") and "witnesses/exists-count.rl" in f["witness"] and any(w.startswith("witnesses/regress/") for w in f["witness"])) == 1
 _rv = [json.loads(ln) for ln in (ROOT / "evidence" / "regression-releases.jsonl").read_text().splitlines()]
 RV_RELEASES = sorted({r["relate_db"] for r in _rv}, key=lambda v: tuple(map(int, v.split("."))))
 for _m in _rg:  # each witness changes its answer exactly once, at the release it was reduced against
@@ -735,6 +745,51 @@ _dd = next(r for r in _dfa if r["relate_1_0_1_vs_1_3_0"] == "differ")
 _h101, _h130 = _dd["relate_1_0_1"]["head"][0], _dd["relate_1_3_0"]["head"][0]
 _changed = [c for c in _h101 if type(_h101[c]) is not type(_h130[c])]
 assert _changed and all(_h101[c] == _h130[c] and isinstance(_h101[c], float) and isinstance(_h130[c], int) for c in _changed), (_h101, _h130)
+# a slowdown still present on 1.3.0, measured on small graphs (ANY SHORTEST + an inline relationship predicate)
+_as = [json.loads(ln) for ln in (ROOT / "evidence" / "any-shortest-inline.jsonl").read_text().splitlines()]
+_vkey = lambda v: tuple(map(int, v.split(".")))  # noqa: E731
+AS_CUR = max({r["relate_db"] for r in _as}, key=_vkey)  # the newest release it was measured on
+_as13 = [r for r in _as if r["relate_db"] == AS_CUR]
+AS_LAST_OK = max((r for r in _as13 if r["form"] == "inline" and "ms" in r), key=lambda r: r["nodes"])
+_as_others = sorted({r["relate_db"] for r in _as} - {AS_CUR}, key=_vkey)
+AS_OTHER = _and(_as_others)
+AS_HANG = min((r for r in _as13 if r["form"] == "inline" and "ms" not in r), key=lambda r: r["nodes"])
+AS_WATCHDOG = re.fullmatch(r"no answer within ([\d.]+) s \(killed\)", AS_HANG["result"]).group(1)  # type: ignore[union-attr]
+assert all("ms" in r and r["ms"] < 1 for r in _as if r["form"] == "plain"), "'without the predicate, under 1 ms'"
+for _v in _as_others:  # "The same on": no answer at the same size and an answer at every smaller one, on each release
+    _in = [r for r in _as if r["relate_db"] == _v and r["form"] == "inline"]
+    assert {r["nodes"] for r in _in if "ms" not in r} == {r["nodes"] for r in _as13 if r["form"] == "inline" and "ms" not in r}, _v
+    assert all(r.get("result") == AS_HANG["result"] for r in _in if "ms" not in r), _v
+# the same form on the air-routes graph itself (bench/any_shortest_air_routes.py): what each release did with it
+_ar = {(r["relate_db"], r["form"]): r for r in (json.loads(ln) for ln in (ROOT / "evidence" / "any-shortest-air-routes.jsonl").read_text().splitlines())}
+assert max({v for v, _ in _ar}, key=_vkey) == AS_CUR and all(r["rels"] == src_rels for r in _ar.values())
+assert all(r["rows"] == _ar[(AS_CUR, "plain")]["rows"] and r["ms"] < 10 for (_, f), r in _ar.items() if f == "plain"), "'without it, each release answers in under 10 ms'"
+_ar_end = re.fullmatch(r"no answer: the process ended on its own after ([\d.]+) s, signal (\d+) \((SIG[A-Z]+)\)", _ar[(AS_CUR, "inline")]["result"])
+assert _ar_end, _ar[(AS_CUR, "inline")]
+AR_END_S, AR_SIGNAL = _ar_end.group(1), f"signal {_ar_end.group(2)}, {_ar_end.group(3)}"
+_ar_13 = re.fullmatch(r"no answer: ended by the watchdog after ([\d.]+) s, holding over 8 GiB", _ar[("1.3.0", "inline")]["result"])
+assert _ar_13 and "ms" not in _ar[("1.0.1", "inline")] and _ar[("1.0.1", "inline")]["result"].startswith("no answer within")
+AR_13_S = _ar_13.group(1)
+AR_END_GB = round(_ar[(AS_CUR, "inline")]["peak_resident_mb"] / 1024)
+AR_MACHINE = {"Darwin arm64": "macOS arm64"}[_ar[(AS_CUR, "inline")]["machine"]]
+# the differential run's queries on the newest release (bench/differential_release.py), against the recorded answers
+_r14 = json.loads((ROOT / "evidence" / f"differential-relate-{AS_CUR}.json").read_text())
+assert _r14["release"] == AS_CUR and _r14["queries"] == DF_Q and _r14["queries_sha256"] == _df["queries_sha256"]
+R14_T = _r14["tally"]["relate_1_3_0"]
+assert sum(R14_T.values()) == DF_Q and set(R14_T) == {"same", "error/error", "timeout/crash"} and R14_T["timeout/crash"] == 1, R14_T
+_r14_left = [x for x in _r14["not_same"]["relate_1_3_0"] if x["is"] != "error/error"]
+assert len(_r14_left) == 1 and _r14_left[0]["cypher"] == _ar[(AS_CUR, "inline")]["query"], "the query the newest release does not answer is the slow one"
+assert set(_r14["order"]["relate_1_3_0"]) == {"same order"}
+# when that release was published, and that the stores, the headline and the CLI were checked on it
+REL_CUR_TXT = f"evidence/relate-{AS_CUR}-2026-11-28.txt"
+_rc = (ROOT / REL_CUR_TXT).read_text()
+_pub = re.search(rf"Relate v{re.escape(AS_CUR)} was published on (\d{{4}}-\d\d-\d\d)", _rc)
+assert _pub and f"relate-db {AS_CUR}" in _rc and f"{w_rels} relationships" in _rc and f"{trials} trials" in _rc and f"Relate v{AS_CUR}" in _rc
+REL_CUR_DATE = _pub.group(1)
+_chk = re.search(r"Recorded (\d{4}-\d\d-\d\d) on", _rc)
+assert _chk and _chk.group(1) > REL_CUR_DATE
+REL_CUR_CHECKED = _chk.group(1)
+assert RV_RELEASES[-1] == AS_CUR == VER_AGREE[-1], "the release tables stop at another release than the slowdown record"
 DF_NEO = bool(isinstance(_df["engines"]["neo4j"], dict) and _df["engines"]["neo4j"].get("version"))
 DF_NEO_TEXT = " The Neo4j leg is not in the committed run."
 DF_ENGINES = "Relate 1.0.1 against 1.3.0; the Neo4j leg was not run"
@@ -759,26 +814,41 @@ if DF_NEO:
     DF_ENGINES = f"Relate 1.0.1, Relate 1.3.0 and {_neo['version']}"
     NEO_ONLY_RELATE, NEO_NEITHER = NT.get("answer/timeout", 0), NT.get("timeout/timeout", 0)
     assert all(r["feature"] == "shortest" for r in _dfa if "timeout" in r["relate_1_0_1_vs_neo4j"]), "'shortest-path queries'"
-    DF_NEO_TEXT = (
-        f" Against {_neo['version']} ({_neo['default_language'].title()}, in a Docker container with a {_neo['settings']['server.memory.heap.max_size']} heap and {_neo['settings']['dbms.memory.transaction.total.max']} of transaction memory, the graph loaded without the store's constraints and indexes, one run): "
-        f"{NT['same']} agree with 1.0.1, {NT.get('error/error', 0)} end in an error on both, {NT.get('differ', 0)} differ, and {NEO_ONLY_RELATE + NEO_NEITHER} shortest-path queries are not compared "
-        f"because Neo4j did not finish them within the run's {DF_TIMEOUT_S} s ({NEO_NEITHER} of those 1.0.1 did not finish either; why was not investigated, so read it as a limit of this setup, not of Neo4j). One difference is the same value type: there Neo4j answers as 1.3.0 does, and it "
-        f"shrinks to {NEO_SHRUNK[0]['nodes']} node against Neo4j too. The other is how `toString` prints a float ({DF_TOSTRING}), the same on both Relate releases; it holds on an empty graph, so there is nothing to shrink. "
-        f"Wherever a query with `ORDER BY` gives the same rows on two engines, it gives them in the same order ({DF_ORDERED} of {DF_ORDERED} on every pair of engines)."
+    # the second look at the queries Neo4j did not finish (bench/neo4j_shortest_second_look.py): the plan, and what
+    # it answers once Airport.iata has a uniqueness constraint
+    _sl = json.loads((ROOT / "evidence" / "neo4j-shortest-second-look.json").read_text())
+    _sl_ids = sorted(r["id"] for r in _dfa if r["neo4j"]["kind"] == "timeout")
+    assert sorted(_sl["queries"]) == _sl_ids and len(_sl_ids) == NEO_ONLY_RELATE + NEO_NEITHER and _sl["timeout_s"] == _df["timeout_s"]
+    assert _sl["neo4j"]["version"] == _neo["version"] and _sl["neo4j"]["settings"] == _neo["settings"], "the second look ran in another setup"
+    assert all("iata:" in q or "iata :" in q for q in _sl["queries"].values()), "'finds its two airports by iata'"
+    assert _sl["airport_iata"]["airports"] == _sl["airport_iata"]["distinct_iata"]
+    _sl_rec, _sl_store, _sl_iata = (_sl["setups"][k] for k in ("as_recorded", "store", "store_iata"))
+    assert _sl_rec["constraints"] == [] and len(_sl_store["constraints"]) == 3 and len(_sl_iata["constraints"]) == 4
+    assert all("NodeByLabelScan" in pl["operators"] for pl in _sl_rec["plans"].values()) and _sl_store["plans"] == _sl_rec["plans"], "'the store's own three constraints leave the plan unchanged'"
+    assert all(pl["operators"].count("NodeUniqueIndexSeek") == 2 for pl in _sl_iata["plans"].values())
+    assert _sl_iata["ran"] and all(a["kind"] == "answer" for a in _sl_iata["answers"].values())
+    SL_N = len(_sl_ids)
+    SL_MS = sorted(a["ms"] for a in _sl_iata["answers"].values())
+    _sl_vs = [v["relate_1_3_0"] for v in _sl_iata["against_the_recorded_relate_answers"].values()]
+    SL_SAME_130 = _sl_vs.count("same")
+    assert set(_sl_vs) == {"same", "timeout/answer"} and _sl_vs.count("timeout/answer") == 1, _sl_vs
+    assert all(v["relate_1_0_1"] in ("same", "timeout/answer") for v in _sl_iata["against_the_recorded_relate_answers"].values())
+    # the one Neo4j answers and no Relate release does is the slow query of the next receipt
+    _sl_only = next(i for i, v in _sl_iata["against_the_recorded_relate_answers"].items() if v["relate_1_3_0"] != "same")
+    assert _sl["queries"][_sl_only] == _ar[(AS_CUR, "inline")]["query"]
+    SL_STORE_RAN = bool(_sl_store["ran"])
+    if SL_STORE_RAN:  # run with the store's own constraints only: the same five still do not finish
+        assert all(a["kind"] == "timeout" for a in _sl_store["answers"].values()), "'with the store's own three constraints the same queries still do not finish'"
+    SL_STORE = (
+        "The store's own three constraints (on `Airport.id`, `Country.code` and `Continent.code`) change neither the plan nor the outcome"
+        if SL_STORE_RAN
+        else "The store's own three constraints (on `Airport.id`, `Country.code` and `Continent.code`) leave the plan unchanged"
     )
-# a slowdown still present on 1.3.0, measured on small graphs (ANY SHORTEST + an inline relationship predicate)
-_as = [json.loads(ln) for ln in (ROOT / "evidence" / "any-shortest-inline.jsonl").read_text().splitlines()]
-_as13 = [r for r in _as if r["relate_db"] == "1.3.0"]
-AS_LAST_OK = max((r for r in _as13 if r["form"] == "inline" and "ms" in r), key=lambda r: r["nodes"])
-_as_others = sorted({r["relate_db"] for r in _as} - {"1.3.0"})
-AS_OTHER = _and(_as_others)
-AS_HANG = min((r for r in _as13 if r["form"] == "inline" and "ms" not in r), key=lambda r: r["nodes"])
-AS_WATCHDOG = re.fullmatch(r"no answer within ([\d.]+) s \(killed\)", AS_HANG["result"]).group(1)  # type: ignore[union-attr]
-assert all("ms" in r and r["ms"] < 1 for r in _as if r["form"] == "plain"), "'without the predicate, under 1 ms'"
-for _v in _as_others:  # "The same on": no answer at the same size and an answer at every smaller one, on each release
-    _in = [r for r in _as if r["relate_db"] == _v and r["form"] == "inline"]
-    assert {r["nodes"] for r in _in if "ms" not in r} == {r["nodes"] for r in _as13 if r["form"] == "inline" and "ms" not in r}, _v
-    assert all(r.get("result") == AS_HANG["result"] for r in _in if "ms" not in r), _v
+    DF_NEO_TEXT = (
+        f" 1.0.1 against {_neo['version']} (in Docker, one run): {NT['same']} agree, {NT.get('error/error', 0)} end in an error on both, and {NT.get('differ', 0)} differ: that value type, where Neo4j answers as 1.3.0 does, and how `toString` prints a float ({DF_TOSTRING}). "
+        f"Neo4j did not finish {NEO_ONLY_RELATE + NEO_NEITHER} shortest-path queries in that run: the graph had been loaded without a uniqueness constraint on `Airport.iata`, the property each of them finds its airports by. {SL_STORE}; with one on `Airport.iata` Neo4j answers all {SL_N} in {SL_MS[0]:.0f} to {SL_MS[-1]:.0f} ms, the same as Relate 1.3.0 on the {SL_SAME_130} it answers. The README has the plans and the order check."
+    )
+    assert DF_ORDERED > 0  # "the order check": rows of every ORDER BY query that agree also agree in order, on every pair
 # every relationship of the full graph deleted alone: supports (drop or alter a row) and guards (add one)
 sens = json.loads((ROOT / "evidence" / "full-graph-sensitivity.json").read_text())
 assert sens["relationships_tried"] == src_rels and sens["supports"] + sens["guards"] == sens["change_the_answer"]
@@ -792,7 +862,8 @@ assert neo["all_agree"] and [w["witness"] for w in neo["witnesses"]] == [
 ]
 NEO_RE = [w["necessary_on_neo4j"] for w in neo["witnesses"]]
 assert NEO_RE == [w["probes"] for w in neo["witnesses"]] == [w["agree_with_relate"] for w in neo["witnesses"]]
-NEO_RE_V = neo["neo4j"][0]["v"]
+NEO_RE_V = neo["neo4j"][0]["versions"][0]
+assert neo["default_language"] == "CYPHER 25" and "unchanged" not in neo.get("dialect", "")
 # the stores as files: sizes are read from the files themselves and must match the recorded ones
 sbytes = json.loads((ROOT / "evidence" / "store-bytes.json").read_text())
 BYTES = {x["path"]: x["bytes"] for x in sbytes["stores"]}
@@ -874,6 +945,11 @@ E2E_S, DEMO_MACHINE = _e2e.group(1), sp.DEMO_HEADER.split(" · ")[1]
 NEO_V = cmp["neo4j"]["components"][0]["v"]
 CMP_MD = f"evidence/{cmp_path.with_suffix('.md').name}"
 PYTEST = f"evidence/{pytest_log.name}"
+# the same suite on a machine with uv and nothing else: no relate CLI, no Node.js, no Neo4j
+UV_ONLY_TXT = "evidence/judge-path-uv-only-2026-11-28.txt"
+_uv = re.search(r"^(\d+) passed, (\d+) skipped", (ROOT / UV_ONLY_TXT).read_text(), flags=re.M)
+assert _uv, UV_ONLY_TXT
+UV_PASSED, UV_SKIPPED = int(_uv.group(1)), int(_uv.group(2))
 DEMO_TXT = f"evidence/{sp.demo_path.name}"
 PLAN_DROP = sp.trace["plan"]["dropped_rels"]
 PLAN_TRIAL = sp.MILESTONES[1][0]
@@ -890,6 +966,32 @@ ANSWER_NOTE = (
     f"relationships, {N_ROUTES} are flights and {N_COUNTRY} are country links: {len(ANSWER)} place the answer's airports in "
     f"{man['params']['country']}, {N_HUB_LINKS} give the hub countries."
 )
+
+
+def _short(rel: str) -> str:
+    """`(PBC)-[:HAS_ROUTE]->(DFW)` as `PBC→DFW`, `(PBC)-[:IN_COUNTRY]->(MX)` as `PBC in MX`."""
+    a, rest = rel[1:].split(")-[:", 1)
+    t, b = rest.split("]->(")
+    return f"{a}→{b.rstrip(')')}" if t == "HAS_ROUTE" else f"{a} in {b.rstrip(')')}"
+
+
+# each answer row rests on some of the witness's relationships: without one the row leaves the answer or changes
+ROW_RESTS: dict = {}
+for _a, _r in ((r["airport"], r) for r in sp.pulls["baseline_rows"]):
+    _drops = [_short(t["rel"]) for t in sp.pulls["tags"] if _a not in {x["airport"] for x in t["rows"]}]
+    _alters = [_short(t["rel"]) for t in sp.pulls["tags"] if any(x["airport"] == _a and x != _r for x in t["rows"])]
+    ROW_RESTS[_a] = (_drops, _alters)
+ROW_N = {len(d) + len(a) for d, a in ROW_RESTS.values()}
+assert ROW_N == {7} and all(len(a) == 2 for _, a in ROW_RESTS.values()), "'every answer row rests on seven of them'"
+assert sum(7 for _ in ROW_RESTS) - w_rels == 6 and set(ROW_RESTS) == set(ANSWER)
+for _a, (_d, _al) in ROW_RESTS.items():  # the README's table says the same, row by row
+    _line = next(ln for ln in readme.splitlines() if ln.startswith(f"| {_a} | "))
+    assert all(x in _line.split(" | ")[1] for x in _d) and all(x in _line.split(" | ")[2] for x in _al), _a
+_first = ANSWER[0]
+ANSWER_NOTE += (
+    f" Each answer row rests on seven of the {w_rels}: its two flights to a hub, each hub's flight to {man['params']['dest']}, its own country link and its two hubs' country links. "
+    f"For {_first}: {', '.join(sorted(ROW_RESTS[_first][0] + ROW_RESTS[_first][1], key=lambda x: (' in ' in x, x)))} (`evidence/pull-each-tag.json`)."
+)
 PARAMS_CLI = " ".join(f"--param {k}={v}" for k, v in man["params"].items())
 RUN_CMD = ["git clone " + REPO, "cd witness", "uv run witness demo"]
 ONE_CMD = " && ".join(RUN_CMD)
@@ -901,12 +1003,21 @@ assert RELATE_CMD.replace(" \\\n  ", " ") in readme, "the README's plain-relate 
 
 WHAT = "Witness is a Python CLI and MCP server built on Relate."
 BUILT = "Every trial is a Relate transaction, and the witness is one `.rl` file you open with plain `relate`. Built for the Relate by Neo4j hackathon."
+# the pull the 30-second path asks for: the tag whose deletion takes the most rows out of the answer
+PULL_TAG = max(sp.pulls["tags"], key=lambda t: len(t["drops"]))
+assert len(PULL_TAG["drops"]) == 3 and PULL_TAG["changed"] and not PULL_TAG["appears"], PULL_TAG
 PATH30 = [
     (
         "Open the landing page",
         "Open landing",
         LIVE,
-        f"the answer, the {w_rels} relationships that reproduce it, and the check line; nothing to install",
+        f"pull tag {PULL_TAG['n']}, {PULL_TAG['rel']}. Relate, running in your tab, re-runs the query without it, and {_and(PULL_TAG['drops'])} leave the answer. Nothing to install",
+    ),
+    (
+        "On the same page, run one question on two Relate releases",
+        "Engine case",
+        LIVE + "#cases",
+        f"two buttons run the engine case in your tab, on Relate {man['versions']['relate_db']} and on {VER_AGREE[0]}: the two forms disagree on the first and agree on the second",
     ),
     (
         "Open the exhibit page",
@@ -966,7 +1077,7 @@ RECEIPTS = [
         f"{fmt(src_rels)} → {EC_RELS}",
         _nb.format(fmt(src_rels)) + _to.format("→") + f"<em>{EC_RELS}</em>",
         "An engine disagreement, observed and shrunk.",
-        f"Relate's v{VER_AGREE[0]} release notes list a fix for `EXISTS` and `COUNT` over two `MATCH` clauses. On the pinned {man['versions']['relate_db']} the two ways of writing one condition return {EC_ROWS} and 0 airports of {_ec['params']['country']}; `{EC_CHECK}`. The {EC_RELS}-relationship script separates the releases: the two disagree on relate-db {_and(VER_DISAGREE)} and agree on {VER_AGREE[0]}.",
+        f"Relate's v{VER_AGREE[0]} release notes list a fix for `EXISTS` and `COUNT` over two `MATCH` clauses. On the pinned {man['versions']['relate_db']} the `COUNT` form of one condition returns {EC_ROWS} airports of {_ec['params']['country']} and the `EXISTS` form returns none; `{EC_CHECK}`. The {EC_RELS}-relationship script separates the releases: the two forms disagree on relate-db {_and(VER_DISAGREE)} and agree on {_and(VER_AGREE)}.",
         [
             ("witnesses/exists-count.manifest.json", ""),
             ("evidence/exists-count-run.txt", "the run"),
@@ -977,7 +1088,7 @@ RECEIPTS = [
         f"{RN_ENTRIES} → {RN_CHANGE} → {RN_SHRUNK}",
         _nb.format(RN_ENTRIES) + _to.format("→") + _nb.format(RN_CHANGE) + _to.format("→") + f"<em>{RN_SHRUNK}</em>",
         "Relate's own release notes, as regression fixtures.",
-        f"Every read-path fix entry from v1.0.2 to v1.3.0 ({RN_ENTRIES}) was tried on air-routes against the pinned release: {RN_CHANGE} change an answer, and {RN_SHRUNK} of those fixes shrink with `--other-engine` against the release that fixed them, to {RG_N} witnesses of at most {RG_MAX_RELS} relationships ({sum(1 for r, _ in RG_SIZES if r == 0)} of them hold only one or two nodes: those answers turn on a property or a column name). Rebuilt on {_and(RV_RELEASES)}, each changes its answer exactly at the release its notes name.",
+        f"Every read-path fix entry from v1.0.2 to v1.3.0 ({RN_ENTRIES}) was tried on air-routes against the pinned release: {RN_CHANGE} change an answer, and {RN_SHRUNK} of those fixes shrink with `--other-engine` against the release that fixed them, to {RG_N} witnesses of at most {RG_MAX_RELS} relationships ({sum(1 for r, _ in RG_SIZES if r == 0)} of them hold only one or two nodes: those answers turn on a property or a column name). Rebuilt on {_and(RV_RELEASES)}, each changes its answer exactly at the release its notes name. One of the {RN_SHRUNK} entries also lists the engine case above.",
         [
             ("evidence/release-notes-fixes.json", "all the entries"),
             ("evidence/regress-runs.txt", "the runs"),
@@ -988,15 +1099,36 @@ RECEIPTS = [
         f"{DF_Q} queries",
         f"<em>{DF_Q}</em>" + _to.format("queries"),
         "A differential run of agent-written queries.",
-        f"{DF_Q} read queries written by an AI agent from the schema before any engine compared them, each run in a transaction that is rolled back. relate-db 1.0.1 against 1.3.0: {DF_SAME} agree, {DF_BOTH_REFUSED} end in an error on both, {DF_BOTH_TIMEOUT} gives no answer within {DF_TIMEOUT_S} s on either, {DF_ONLY_130} answer only on 1.3.0, {DF_DIFF} differs in value type (a float on 1.0.1, an integer on 1.3.0) and shrinks to {DF_RED[0]['nodes']} node." + DF_NEO_TEXT,
-        [("evidence/differential.json", ""), ("evidence/differential-answers.jsonl", "the answers per query"), ("queries/differential.jsonl", "the queries")],
+        f"{DF_Q} read queries written by an AI agent from the schema, with a copy of the store to try them on, before any engine was compared; each runs in a rolled-back transaction with {DF_TIMEOUT_S} s to answer, and two engines are compared only where both answered. 1.0.1 against 1.3.0: {DF_SAME} agree, {DF_BOTH_REFUSED} end in an error on both, {DF_BOTH_TIMEOUT} gets no answer from either, {DF_ONLY_130} answer only on 1.3.0, and {DF_DIFF} differs in value type (`percentileDisc`, a fix the release notes list; it shrinks to {DF_RED[0]['nodes']} node)." + DF_NEO_TEXT,
+        [
+            ("evidence/differential.json", ""),
+            ("evidence/differential-answers.jsonl", "the answers per query"),
+            ("queries/differential.jsonl", "the queries"),
+            ("evidence/neo4j-shortest-second-look.json", "the second look"),
+        ],
+    ),
+    (
+        f"Relate {AS_CUR}",
+        f"<em>{AS_CUR}</em>",
+        f"Relate {AS_CUR}, checked on {REL_CUR_CHECKED}, the day after it shipped.",
+        f"Relate {AS_CUR} was published on {REL_CUR_DATE}, during the contest. On it the engine case and the {RG_N} regression witnesses answer as they do on 1.3.0, the headline reduction gives the same {w_rels} relationships in the same {trials} trials, and of the {DF_Q} differential queries {R14_T['same']} give the same answer as on 1.3.0 and {R14_T['error/error']} end in an error on both. The one left is the slow query of the next row.",
+        [
+            (f"evidence/differential-relate-{AS_CUR}.json", f"the {DF_Q} queries"),
+            (REL_CUR_TXT, "stores, headline, CLI"),
+            ("bench/differential_release.py", "re-records it"),
+        ],
     ),
     (
         f"{AS_LAST_OK['ms']:,} ms",
         f"<em>{AS_LAST_OK['ms']:,}</em>" + _to.format("ms"),
-        "A slowdown still present on Relate 1.3.0, found by that run.",
-        f"`ANY SHORTEST` over `->+` with an inline relationship predicate that every relationship satisfies: {AS_LAST_OK['ms']:,} ms on {AS_LAST_OK['rels']} relationships, no answer within {AS_WATCHDOG} s on {AS_HANG['rels']}; without the predicate, under 1 ms. The same on {AS_OTHER}.",
-        [("evidence/any-shortest-inline.jsonl", ""), ("bench/any_shortest_inline.py", "re-records it")],
+        f"A slowdown still present on Relate {AS_CUR}, found by that run.",
+        f"`ANY SHORTEST` over `->+` with an inline relationship predicate that every relationship satisfies, on a small ring graph: {AS_LAST_OK['ms']:,} ms on {AS_LAST_OK['rels']} relationships, no answer within {AS_WATCHDOG} s on {AS_HANG['rels']} (one run per size); without the predicate, under 1 ms. The same shape on {AS_OTHER}, so it is not a regression. On air-routes the query it came from ends the process on {AS_CUR} ({AR_SIGNAL}, after {AR_END_S} s at about {AR_END_GB} GB resident, on {AR_MACHINE}); on 1.3.0 the process held over 8 GiB after {AR_13_S} s and was stopped. Without the predicate each release tried answers in under 10 ms.",
+        [
+            ("evidence/any-shortest-inline.jsonl", ""),
+            ("bench/any_shortest_inline.py", "re-records it"),
+            ("evidence/any-shortest-air-routes.jsonl", "on air-routes"),
+            ("bench/any_shortest_air_routes.py", "re-records it"),
+        ],
     ),
     (
         f"{fmt(src_rels)} → {DB_RELS}",
@@ -1027,7 +1159,7 @@ RECEIPTS = [
         f"{relate_tps} vs {neo_tps}",
         f"{relate_tps}" + _to.format("vs") + f"{neo_tps}" + _u.format("trials/s"),
         f"Trials per second: Relate in-process, then Neo4j {NEO_V} in Docker.",
-        f"The same loop and query on one machine, median of {len(cmp['runs'])} runs, the same answer on every trial. It measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
+        f"The same loop and query on one machine, median of {len(cmp['runs'])} runs, the same answer on every trial. The throughput counts each side's check of the counts after the rollback, which is two more Bolt round trips per trial on Neo4j; from begin to rollback alone a trial takes {cmp['median_trial_ms_p50']['relate_in_process']:.2f} ms on Relate and {cmp['median_trial_ms_p50']['neo4j_docker']:.2f} ms on Neo4j (p50). It measures this setup, an embedded engine against a server in a Docker VM with a Bolt round trip per statement, not Neo4j's query engine.",
         [(CMP_MD, "")],
     ),
     (
@@ -1041,8 +1173,8 @@ RECEIPTS = [
         f"{TESTS} tests pass · 100% coverage",
         f"{TESTS}" + _u.format("tests") + _to.format("·") + "100%" + _u.format("coverage"),
         "Tests pass against real Relate, under a 100% line and branch coverage gate.",
-        f"The graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach rare branches. {SKIPPED} more tests need a local Neo4j in Docker and skip without it.",
-        [(PYTEST, "`pytest --cov=witness`"), ("pyproject.toml", "the gate")],
+        f"The graph store, rollback and queries are never mocked. `relate pull` (needs a Neo4j server) is stood in, the Neo4j client is tested against a stand-in driver that runs each statement on a real Relate store, and a few tests substitute timers, process calls, a failing CLI, a database wrapper that injects engine faults, or one reducer phase to reach rare branches. The full count needs the v1.0.1 `relate` CLI on your PATH and Node.js; {SKIPPED} more tests need a Neo4j server. With `uv` alone, `uv run pytest` gives {UV_PASSED} passed and {UV_SKIPPED} skipped, and the coverage gate, which counts lines only the CLI reaches, is not met.",
+        [(PYTEST, "`pytest --cov=witness`"), ("pyproject.toml", "the gate"), (UV_ONLY_TXT, "with `uv` alone")],
     ),
     (
         "byte-identical",
@@ -1080,6 +1212,11 @@ CRITERIA = [
                 [_MAN, "witnesses/direction-bug.manifest.json", "witnesses/exists-count.manifest.json", "witnesses/wrong-answer.manifest.json"],
             ),
             (
+                "Relate's own changelog, used as a test corpus.",
+                f"A release note that fixes a read-path answer is a claim about an engine. `--other-engine` turned {RN_SHRUNK} of them into {RG_N} files of at most {RG_MAX_RELS} relationships, each changing its answer exactly at the release its notes name; when Relate {AS_CUR} shipped, it was checked by running them again",
+                ["evidence/release-notes-fixes.json", "evidence/regression-releases.jsonl", REL_CUR_TXT],
+            ),
+            (
                 "What is borrowed is named.",
                 "The search is delta debugging (Zeller and Hildebrandt, 2002) and the word witness is from data provenance (Buneman, Khanna and Tan, 2001). What Witness does with them: the thing shrunk is a graph store, the test is a Cypher answer found by search (so `NOT EXISTS` and aggregation are covered), each trial is a Relate transaction, and the result is a `.rl` file",
                 ["README.md"],
@@ -1106,7 +1243,7 @@ CRITERIA = [
             ),
             (
                 "The graph is persisted in the repository.",
-                f"The source, {len(list((ROOT / 'witnesses').glob('*.rl')))} witnesses, a fixture and the ledger of reductions are committed `.rl` stores",
+                f"The source, {len(list((ROOT / 'witnesses').rglob('*.rl')))} witnesses, a fixture and the ledger of reductions are committed `.rl` stores",
                 ["data/air-routes.rl", "witnesses/two-hub.rl", "witness.rl"],
             ),
             (
@@ -1156,17 +1293,17 @@ CRITERIA = [
         [
             (
                 "Who it is for.",
-                f"The developer whose agent answers from a graph and who has to show what an answer rests on before anyone acts on it: a reviewer reads {w_rels} relationships, not {fmt(src_rels)} and not the {TA['rels']} a listing of the matched paths would show. And the developer who has to hand a wrong or surprising answer to someone else as a graph small enough to read",
+                f"The developer whose agent answers from a graph and who has to show what an answer rests on before anyone acts on it: on the headline question a reviewer reads {w_rels} relationships, not {fmt(src_rels)} and not the {TA['rels']} a listing of the matched paths would show. And the developer who has to hand a wrong or surprising answer to someone else as a graph small enough to read",
                 [],
             ),
             (
                 "A real engine disagreement, shrunk to a repro.",
-                f"On Relate {man['versions']['relate_db']} two ways of writing one condition return {EC_ROWS} and 0 rows on the air-routes graph (the v{VER_AGREE[0]} release notes list the fix). Witness hands back the {EC_RELS} relationships that still show it, and that script tells the releases apart: {_and(VER_DISAGREE)} disagree, {VER_AGREE[0]} agrees",
+                f"On Relate {man['versions']['relate_db']} one condition written with `COUNT` returns {EC_ROWS} rows on the air-routes graph and written with `EXISTS` returns none (the v{VER_AGREE[0]} release notes list the fix). Witness hands back the {EC_RELS} relationships that still show it, and that script tells the releases apart: {_and(VER_DISAGREE)} disagree, {_and(VER_AGREE)} agree",
                 ["witnesses/exists-count.manifest.json", "evidence/relate-versions.jsonl"],
             ),
             (
                 "For the people who maintain the engine, and anyone moving a query between releases.",
-                f"`--other-engine` shrinks what makes two engines answer one query differently. Relate's own release notes became {RG_N} regression fixtures of at most {RG_MAX_RELS} relationships, each changing its answer exactly at the release that fixed it, and a differential run of {DF_Q} agent-written queries ({DF_ENGINES}) found a slowdown still present on Relate 1.3.0",
+                f"`--other-engine` shrinks what makes two engines answer one query differently. Relate's own release notes became {RG_N} regression fixtures of at most {RG_MAX_RELS} relationships, each changing its answer exactly at the release that fixed it, and a differential run of {DF_Q} agent-written queries ({DF_ENGINES}) found a slowdown still present on Relate {AS_CUR}, published on {REL_CUR_DATE}",
                 ["evidence/release-notes-fixes.json", "evidence/regression-releases.jsonl", "evidence/differential.json"],
             ),
             (
@@ -1274,6 +1411,16 @@ CAP_USE = [
         ["src/witness/mcp_server.py", "evidence/mcp-transcript.md", "evidence/mcp-agent-session.md"],
         "def why",
     ),
+    (
+        "The landing serves Relate's own WebAssembly build, unmodified and pinned by checksum: each pull of a tag, the reader's own read queries and the engine case on two releases run in the reader's tab, and every pull is compared with the recorded run.",
+        ["scripts/site/live.js", "site/relate/engines.json", "evidence/browser-live.json"],
+        "export function load",
+    ),
+    (
+        f"`--other-engine` runs the same query on another relate-db release, in a worker that `uv` fetches, beside the pinned one. The engine case, the {RG_N} regression witnesses and the release tables rest on it.",
+        ["src/witness/engines.py", "src/witness/engine_worker.py", "evidence/regression-releases.jsonl"],
+        "relate-db==",
+    ),
 ]
 assert len(CAP_USE) == len(CAPS)
 for (_code, _, _), (_, _files, _tok) in zip(CAPS, CAP_USE, strict=True):
@@ -1308,6 +1455,19 @@ STORES = [  # (store, what it is, nodes, relationships): the persisted graphs a 
 ]
 assert all((ROOT / s[0]).is_file() for s in STORES) and (ROOT / "witness.rl").is_file()
 assert all(s[0] in BYTES for s in STORES) and "witness.rl" in BYTES
+# the witnesses shrunk against another engine: one row each, read from its manifest and from the file itself
+for _m in _rg:
+    _fix = _m["predicate"]["other_engine_spec"].split("==")[1]
+    STORES.append((f"witnesses/regress/{_m['name']}.rl", f"a regression witness: its answer changes at Relate {_fix}", _m["witness"]["nodes"], _m["witness"]["relationships"]))
+for _p in sorted((ROOT / "witnesses" / "differential").glob("*.manifest.json")):
+    _m = json.loads(_p.read_text())
+    _spec = _m["predicate"]["other_engine_spec"]
+    _other = "Neo4j" if _spec == "neo4j" else "Relate " + _spec.split("==")[1]
+    STORES.append((f"witnesses/differential/{_m['name']}.rl", f"the differential run's value-type difference, against {_other}", _m["witness"]["nodes"], _m["witness"]["relationships"]))
+for _s in STORES:
+    BYTES.setdefault(_s[0], (ROOT / _s[0]).stat().st_size)
+N_WITNESSES = sum(1 for _s in STORES if _s[0].startswith("witnesses/"))
+assert N_WITNESSES == len(list((ROOT / "witnesses").rglob("*.rl"))), "a committed witness is missing from the table"
 # what the committed ledger holds, read from the store itself (it is a graph too)
 import relate  # noqa: E402
 
@@ -1334,6 +1494,14 @@ WIT_CAP = (
 )
 assert (len(sp.EDGES), len(sp.SCH) + sp.N_COUNTRIES) == (w_rels, w_nodes) and 'id="exhibit"' in page
 
+# the recorded two-engine run of the engine case, for the verify step below
+_ee = (ROOT / "evidence" / "exists-engines-run.txt").read_text()
+_ee_w = re.search(r"^WITNESS  (\d+) relationships", _ee, flags=re.M)
+_ee_c = re.search(r"^CHECK  (\d+ of \d+ end the disagreement)", _ee, flags=re.M)
+_ee_t = re.search(r"· (\d+) trials ·", _ee)
+assert _ee_w and _ee_c and _ee_t and f"relate-db=={VER_AGREE[0]}" in _ee and "VERIFIED" in _ee.strip().splitlines()[-1]
+EE_RELS, EE_CHECK, EE_TRIALS = int(_ee_w.group(1)), _ee_c.group(1), _ee_t.group(1)
+assert EE_RELS == EC_RELS
 # (what to do, the command lines, what to expect, a note)
 VERIFY = [
     (
@@ -1353,7 +1521,7 @@ VERIFY = [
         "Re-run it with plain Relate",
         [RELATE_CMD],
         f"the same {len(ANSWER)} airports the full graph gives: {', '.join(ANSWER)}.",
-        "Needs the Relate CLI (checked with v1.0.1 and v1.3.0, `evidence/relate-1.3.0-2026-11-27.txt`). No Witness code runs: the witness is an ordinary `.rl` file.",
+        f"Needs the Relate CLI (checked with v1.0.1, v1.3.0 and v{AS_CUR}: `evidence/relate-1.3.0-2026-11-27.txt`, `{REL_CUR_TXT}`). No Witness code runs: the witness is an ordinary `.rl` file. To see the graph itself, list its {w_rels} relationships: `relate query --database witnesses/two-hub.rl --read-only < queries/every-relationship.cypher`.",
     ),
     (
         "Ask it something else",
@@ -1362,13 +1530,20 @@ VERIFY = [
         f"Three other query shapes on the same graph: a path question ({OQ[0]['question'][0].lower() + OQ[0]['question'][1:].rstrip('?')}), a top-k with `ORDER BY` + `LIMIT` ({OQ[1]['question'][0].lower() + OQ[1]['question'][1:].rstrip('?')}) and an `EXISTS` / `NOT EXISTS` pair ({OQ[2]['question'][0].lower() + OQ[2]['question'][1:].rstrip('?')}). Or bring your own graph: `uv run witness why -f Q.cypher --store YOUR.rl`.",
     ),
     (
+        "Shrink what makes two Relate releases disagree",
+        [f"uv run witness why -f queries/exists-two-match.cypher --param country={_ec['params']['country']} --other-engine relate-db=={VER_AGREE[0]}"],
+        f"`{fmt(src_rels)}` relationships down to `{EE_RELS}`, `{EE_CHECK}`, a last line that starts `VERIFIED`, and exit 0.",
+        f"One query, two engines: the pinned {man['versions']['relate_db']} in process and relate-db {VER_AGREE[0]} in a worker that `uv` fetches from PyPI (network, once). Every trial deletes the same relationships on both, and what is left is what makes the two releases answer differently (the recorded run: `evidence/exists-engines-run.txt`, {EE_TRIALS} trials).",
+    ),
+    (
         "Run the tests",
-        ["uv run pytest --cov=witness"],
-        f"{TESTS} passed and 100% line and branch coverage; {SKIPPED} more need a Neo4j server and skip without one.",
-        "CI and deterministic replay, not the product path.",
+        ["uv run pytest"],
+        f"with `uv` alone, {UV_PASSED} passed and {UV_SKIPPED} skipped: those need the v1.0.1 `relate` CLI, Node.js or a Neo4j server. With that CLI on your PATH and Node.js, `uv run pytest --cov=witness` gives {TESTS} passed and 100% line and branch coverage, and {SKIPPED} more need a Neo4j server.",
+        f"CI and deterministic replay, not the product path. The coverage gate counts lines only the CLI cross-check and fixture mode reach, so `--cov` passes only with the v1.0.1 CLI installed (binaries on the v1.0.1 release; `WITNESS_RELATE_BIN` can point at one). The run with `uv` alone is recorded in `{UV_ONLY_TXT}`.",
     ),
 ]
 assert "VERIFIED" in sp.demo.splitlines()[-1]
+assert UV_PASSED + UV_SKIPPED == TESTS + SKIPPED, "the run with uv alone is of another suite: re-record it"
 VERIFY_MORE = "More commands, one section per set of numbers: `DEMO.md`. The files behind every figure on this page: `evidence/`, `witnesses/`."
 # the sections of this page in order, with what each one holds (every count is a list's own length)
 INDEX = [
@@ -1385,7 +1560,9 @@ LIMITS = [
     "Its own answer, on its own file: because a query with `NOT EXISTS` or aggregation is not monotone, a witness does not prove that every graph containing it gives the same answer. It also leaves out true facts the answer does not need: MEX has no country link in `witnesses/two-hub.rl`.",
     "Read-only Cypher only, with no clock or randomness: Witness refuses writes, procedures, clocks and randomness (exit 2) rather than guess. Dependence on storage order is caught by a heuristic (the same answer from a store built in reverse order), not proven absent.",
     f"Answers that rest on thousands of facts do not shrink: a count over the whole graph ran to the default cap of {fmt(OQ_CAP['run']['trials'])} trials ({round(OQ_CAP['run']['seconds'] / 60)} minutes here) and exited 3, NOT verified, with {fmt(OQ_CAP['witness']['relationships'])} relationships left (`evidence/other-queries.json`).",
-    f"One graph (a public air-routes dataset, Apache-2.0): the headline query, three more cases and three more query shapes. The one mistaken query was written for the case; the engine disagreement is observed, and only on Relate {_and(VER_DISAGREE)}. The Neo4j comparison is one machine, one query, one graph; it measures this setup (Docker VM, Bolt round trip), not a limit of Neo4j.",
+    f"One graph: a public air-routes dataset (Apache-2.0). On it, the headline query, three more cases, three more query shapes, {RG_N} regression witnesses from Relate's release notes, and a differential run of {DF_Q} queries from one prompt, run once. The one mistaken query was written for the case. Each engine difference is observed on the releases named beside it and claimed for no other.",
+    f"One Neo4j setup: a single Docker container on the same machine, with a 2 GiB heap. The throughput figure measures that setup, an embedded engine against a server behind a Bolt round trip, not Neo4j's query engine; and the {SL_N} queries Neo4j did not finish in the differential run were held up by a constraint this setup had left out.",
+    f"Engines move: every figure names its release. Relate {AS_CUR} was checked on {REL_CUR_CHECKED}, the day after it was published; the fix entries of its own release notes are not yet turned into regression witnesses.",
 ]
 DECK_SLIDES = (SITE / "deck" / "index.html").read_text().count('<div class="pfoot">')  # the deck written just above
 assert DECK_SLIDES == 10

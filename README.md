@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/assets/icon.svg" alt="Witness Icon" width="144">
+  <img src="docs/assets/icon-animated.svg" alt="Witness Icon" width="144">
   <h1>Witness 🔎</h1>
   <p><em>Witness: why does this query return this row? A deletion-minimal graph that reproduces the answer (57,645 relationships → 22): deleting any one of its relationships changes the answer.</em></p>
   <img src="docs/assets/readme-hero-animated.svg" alt="Witness reduces the graph behind an agent's answer to the relationships that reproduce it. Thousands of graphite lines fade; a handful stay, each tagged with a red exhibit number; the answer above never moves." width="100%">
@@ -7,21 +7,21 @@
   <br/>
 
   [![For Judges](https://img.shields.io/badge/⚖️_For-Judges-B42318?style=for-the-badge)](https://witness.edycu.dev/judge/)
+  [![Demo Video](https://img.shields.io/badge/🎬_Demo-Video-ef4444?style=for-the-badge)](https://youtu.be/GYbci7TseJw)
   [![Live Site](https://img.shields.io/badge/🚀_Live-Site-1F1A14?style=for-the-badge)](https://witness.edycu.dev)
   [![Pitch Deck](https://img.shields.io/badge/📊_Pitch-Deck-f59e0b?style=for-the-badge)](https://witness.edycu.dev/deck/)
-  [![Demo Video](https://img.shields.io/badge/🎬_Demo-Video-ef4444?style=for-the-badge)](https://youtu.be/GYbci7TseJw)
-  [![Built for Relate by Neo4j](https://img.shields.io/badge/Devpost-Relate_by_Neo4j-003E54?style=for-the-badge)](https://devpost.com/software/witness-why-does-this-query-return-this-row)
   [![dev.to Write-up](https://img.shields.io/badge/📝_dev.to-Write--up-0A0A0A?style=for-the-badge)](https://dev.to/edycutjong/57645-relationships-to-22-shrinking-a-graph-answer-with-rollback-3jdb)
   [![X Post](https://img.shields.io/badge/𝕏_Post-Share-000000?style=for-the-badge)](https://x.com/edycutjong/status/2126468870508790243)
+  [![Built for Relate by Neo4j](https://img.shields.io/badge/Devpost-Relate_by_Neo4j-003E54?style=for-the-badge)](https://devpost.com/software/witness-why-does-this-query-return-this-row)
 
   <br/>
 
   [![CI](https://github.com/edycutjong/witness/actions/workflows/ci.yml/badge.svg)](https://github.com/edycutjong/witness/actions/workflows/ci.yml)
-  [![Release](https://img.shields.io/github/v/release/edycutjong/witness?sort=semver)](https://github.com/edycutjong/witness/releases/latest)
   ![Python](https://img.shields.io/badge/Python_3.11_|_3.12-3776AB?style=flat&logo=python&logoColor=white)
   ![Relate](https://img.shields.io/badge/Relate_1.0.1-1F1A14?style=flat)
   ![Tests](https://img.shields.io/badge/tests-557_passed-2ea043?style=flat)
   [![License](https://img.shields.io/badge/License-Apache_2.0-yellow)](LICENSE)
+  [![Release](https://img.shields.io/github/v/release/edycutjong/witness?sort=semver)](https://github.com/edycutjong/witness/releases/latest)
 
 </div>
 

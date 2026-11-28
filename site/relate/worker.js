@@ -27,7 +27,10 @@ self.onmessage = async (ev) => {
   try {
     if (op === "boot") {
       e = await boot(args[0]);
-      self.postMessage({ id, ok: true, value: { reported: e.reported, boot_ms: e.boot_ms } });
+      // every address this worker fetched to start (its own Resource Timing entries): the page cannot see a worker's
+      // requests, so the worker says them itself
+      const fetched = performance.getEntriesByType("resource").map((r) => r.name);
+      self.postMessage({ id, ok: true, value: { reported: e.reported, boot_ms: e.boot_ms, fetched } });
       return;
     }
     if (!engine || OPS.indexOf(op) < 0) throw new Error("unknown request: " + op);

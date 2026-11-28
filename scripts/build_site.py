@@ -83,12 +83,31 @@ assert WASM["baseline_same"] and WASM["write_refused"] and all(e["same_as_record
 assert LIVE_PIN in ENGINES and len(LIVE_FIX) == 1, sorted(ENGINES)
 # the page itself in a browser (scripts/browser_live.mjs, headless Chrome): every pull live and the same as the recording
 BL = json.loads((ROOT / "evidence" / "browser-live.json").read_text())
+BEFORE_BROWSER_RUN = "--before-browser-run" in sys.argv[1:]
 assert BL["ok"] and BL["pulls"]["live"] == BL["pulls"]["same_rows"] == BL["pulls"]["of"] == sp.pulls["of"], BL["pulls"]
 assert BL["write"]["refused"] and BL["stop"]["stopped"] and all(e["live"] and e["same_as_recorded"] for e in BL["engine_case"])
-assert not BL["third_party_requests"] and not BL["console_errors_not_from_the_version_chip"]
+# nothing off this site, nothing failed, nothing on the console: with no exception (the page calls no one else)
+assert not BL["third_party_requests"] and not BL["console_errors"] and not BL["failed_responses"], "the browser run saw a request off the site, a failed response or a console error"
+# the engine files as served are the ones engines.json lists (hashed by the browser run), and each engine's worker
+# fetched only from the site it was served from (the worker reports its own requests; a page cannot see them)
+assert BEFORE_BROWSER_RUN or (BL["engine_files"]["checked"] == sum(len(e["files"]) for e in ENGINES.values()) and not BL["engine_files"]["mismatches"]), BL.get("engine_files")
+_origin = BL["url"].split("/", 3)[0] + "//" + BL["url"].split("/", 3)[2]
+BL_FETCHED = {} if BEFORE_BROWSER_RUN else BL["engine_worker_requests"]
+assert BEFORE_BROWSER_RUN or (sorted(BL_FETCHED) == sorted(ENGINES) and all(u.startswith(_origin + "/relate/") for us in BL_FETCHED.values() for u in us) and all(BL_FETCHED.values())), BL_FETCHED
+# A page load alone starts no engine (at_load, below). After a first scroll or key the engine starts only when the
+# exhibit is within the page's 600 px margin; the run records which case it saw, and the two must agree.
+assert BEFORE_BROWSER_RUN or ((BL["acted_away"]["engine_workers"] == 0) == (BL["acted_away"]["exhibit_px_below_viewport"] > 600)), BL.get("acted_away")
 assert BL["at_load"] == {"engine_workers": 0, "plate": "ready"} and BL["engine_workers_at_end"] >= 1, BL["at_load"]
-for _f in ("live.js", "worker.js"):  # the browser run is of the live steps shipped now
-    assert BL["served_sha256"][f"relate/{_f}"] == hashlib.sha256((PARTS / _f).read_bytes()).hexdigest(), f"evidence/browser-live.json predates scripts/site/{_f}: re-run scripts/browser_live.mjs"
+# The browser run must be of the code shipped now: the live steps (live.js, worker.js) and the page's own logic
+# (landing.js, inlined in index.html; index.html itself prints numbers from that run, so its hash cannot be bound).
+# A change to any of the three needs a page to record against first: `build_site.py --before-browser-run` builds it
+# without these three checks; serve site/, run scripts/browser_live.mjs on it, then build again without the flag. CI
+# never passes the flag.
+PAGE_JS = "landing.js (inlined in index.html)"
+_shipped = {f"relate/{_f}": hashlib.sha256((PARTS / _f).read_bytes()).hexdigest() for _f in ("live.js", "worker.js")}
+_shipped[PAGE_JS] = hashlib.sha256((PARTS / "landing.js").read_text().strip().encode("utf-8")).hexdigest()
+for _f, _sha in _shipped.items():
+    assert BEFORE_BROWSER_RUN or BL["served_sha256"].get(_f) == _sha, f"evidence/browser-live.json predates {_f}: build with --before-browser-run, serve site/, re-run scripts/browser_live.mjs, build again"
 BL_CHROME = BL["run"]["browser"].replace("/", " ")
 assert WASM["live_js_sha256"] == hashlib.sha256((PARTS / "live.js").read_bytes()).hexdigest(), "evidence/wasm-parity.json is older than scripts/site/live.js: run node scripts/wasm_parity.mjs --out evidence/wasm-parity.json"
 LIVE_FIX_V = LIVE_FIX[0]
@@ -654,6 +673,10 @@ assert all(m["source"]["relationships"] == src_rels for m in _rg)
 RG_N = len(_rg)
 RG_SIZES = sorted((m["witness"]["relationships"], m["witness"]["isolated_nodes"]) for m in _rg)
 RG_MAX_RELS = max(r for r, _ in RG_SIZES)
+# the fixes marked "reproduced, shrunk" name exactly the committed regression witnesses (one fix can have two)
+_named = [w for f in _rn["fixes"] if f["status"].startswith("reproduced, shrunk") for w in ([f["witness"]] if isinstance(f["witness"], str) else f["witness"])]
+assert sorted(w for w in _named if w.startswith("witnesses/regress/")) == sorted(f"witnesses/regress/{m['name']}.rl" for m in _rg), _named
+assert all(n in (1, 2) for r, n in RG_SIZES if r == 0), RG_SIZES  # "one or two nodes are all they need"
 _rv = [json.loads(ln) for ln in (ROOT / "evidence" / "regression-releases.jsonl").read_text().splitlines()]
 RV_RELEASES = sorted({r["relate_db"] for r in _rv}, key=lambda v: tuple(map(int, v.split("."))))
 for _m in _rg:  # each witness changes its answer exactly once, at the release it was reduced against
@@ -677,8 +700,15 @@ DF_RED = [r for r in _df.get("reductions", []) if r.get("verified")]
 _as = [json.loads(ln) for ln in (ROOT / "evidence" / "any-shortest-inline.jsonl").read_text().splitlines()]
 _as13 = [r for r in _as if r["relate_db"] == "1.3.0"]
 AS_LAST_OK = max((r for r in _as13 if r["form"] == "inline" and "ms" in r), key=lambda r: r["nodes"])
-AS_OTHER = _and(sorted({r["relate_db"] for r in _as} - {"1.3.0"}))
+_as_others = sorted({r["relate_db"] for r in _as} - {"1.3.0"})
+AS_OTHER = _and(_as_others)
 AS_HANG = min((r for r in _as13 if r["form"] == "inline" and "ms" not in r), key=lambda r: r["nodes"])
+AS_WATCHDOG = re.fullmatch(r"no answer within ([\d.]+) s \(killed\)", AS_HANG["result"]).group(1)  # type: ignore[union-attr]
+assert all("ms" in r and r["ms"] < 1 for r in _as if r["form"] == "plain"), "'without the predicate, under 1 ms'"
+for _v in _as_others:  # "The same on": no answer at the same size and an answer at every smaller one, on each release
+    _in = [r for r in _as if r["relate_db"] == _v and r["form"] == "inline"]
+    assert {r["nodes"] for r in _in if "ms" not in r} == {r["nodes"] for r in _as13 if r["form"] == "inline" and "ms" not in r}, _v
+    assert all(r.get("result") == AS_HANG["result"] for r in _in if "ms" not in r), _v
 # every relationship of the full graph deleted alone: supports (drop or alter a row) and guards (add one)
 sens = json.loads((ROOT / "evidence" / "full-graph-sensitivity.json").read_text())
 assert sens["relationships_tried"] == src_rels and sens["supports"] + sens["guards"] == sens["change_the_answer"]
@@ -840,7 +870,7 @@ RECEIPTS = [
         f"{BL['pulls']['same_rows']} of {BL['pulls']['of']} live",
         f"<em>{BL['pulls']['same_rows']}</em>" + _to.format("of") + f"{BL['pulls']['of']}" + _u.format("live"),
         f"The same pulls, run in a browser by Relate {LIVE_PIN} compiled to WebAssembly.",
-        f"The landing's pull-a-tag runs `@relate/relate-wasm` {LIVE_PIN}, pinned and served from the site, in a module worker: it rebuilds the witness from `witnesses/two-hub.cypher`, deletes the tag and re-runs the query, where the Python run rolls back a transaction (the browser build has none). In headless {BL_CHROME} (`scripts/browser_live.mjs`) the page showed all {BL['pulls']['of']} pulls live and the same as the recording, both engine releases live with their recorded rows, a write refused and a runaway query stopped after {round(BL['stop']['ms'] / 1000)} s; under Node, `scripts/wasm_parity.mjs` runs the page's own steps (`site/relate/live.js`) on the same engine files and gets the recorded rows on {WASM['pulls']['same_rows']} of {WASM['pulls']['of']} pulls. A query box runs your own Cypher on the witness; a statement that writes runs on a throwaway copy and is refused.",
+        f"The landing's pull-a-tag runs `@relate/relate-wasm` {LIVE_PIN}, pinned and served from the site, in a module worker: it rebuilds the witness from `witnesses/two-hub.cypher`, deletes the tag and re-runs the query, where the Python run rolls back a transaction (the browser build has none). In headless {BL_CHROME} (`scripts/browser_live.mjs`) the page showed all {BL['pulls']['of']} pulls live and the same as the recording, both engine releases live with their recorded rows, a write refused and a runaway query stopped after {round(BL['stop']['ms'] / 1000)} s, with no request off the site (each engine's worker reports what it fetched), no failed response and no console error; under Node, `scripts/wasm_parity.mjs` runs the page's own steps (`site/relate/live.js`) on the same engine files and gets the recorded rows on {WASM['pulls']['same_rows']} of {WASM['pulls']['of']} pulls. A query box runs your own Cypher on the witness; a statement that writes runs on a throwaway copy and is refused.",
         [("evidence/browser-live.json", "the browser run"), ("evidence/wasm-parity.json", "under Node"), ("site/relate/engines.json", "the pinned engines")],
     ),
     (
@@ -895,7 +925,7 @@ RECEIPTS = [
         f"{AS_LAST_OK['ms']:,} ms",
         f"<em>{AS_LAST_OK['ms']:,}</em>" + _to.format("ms"),
         "A slowdown still present on Relate 1.3.0, found by that run.",
-        f"`ANY SHORTEST` over `->+` with an inline relationship predicate that every relationship satisfies: {AS_LAST_OK['ms']:,} ms on {AS_LAST_OK['rels']} relationships, no answer within 8 s on {AS_HANG['nodes'] * 2}; without the predicate, under 1 ms. The same on {AS_OTHER}.",
+        f"`ANY SHORTEST` over `->+` with an inline relationship predicate that every relationship satisfies: {AS_LAST_OK['ms']:,} ms on {AS_LAST_OK['rels']} relationships, no answer within {AS_WATCHDOG} s on {AS_HANG['rels']}; without the predicate, under 1 ms. The same on {AS_OTHER}.",
         [("evidence/any-shortest-inline.jsonl", ""), ("bench/any_shortest_inline.py", "re-records it")],
     ),
     (

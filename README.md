@@ -206,8 +206,8 @@ The script also has a Neo4j leg that shrinks each disagreement with `--other-eng
 available, so there is no Neo4j comparison in the committed run.
 
 **Found on the current release.** One differential query gave no answer on 1.3.0 either. Narrowed down: `ANY SHORTEST`
-over `->+` with an inline relationship predicate, even one every relationship satisfies, takes 85.8 ms on a 24-relationship
-graph, 649.9 ms on 32, 5,389.4 ms on 36 and gives no answer within 8 s on 40; without the predicate each answers in under
+over `->+` with an inline relationship predicate, even one every relationship satisfies, takes 85.9 ms on a 24-relationship
+graph, 655.3 ms on 32, 5,566.7 ms on 36 and gives no answer within 8 s on 40; without the predicate each answers in under
 1 ms. The same on 1.0.1 and 1.2.0 (`bench/any_shortest_inline.py`, `evidence/any-shortest-inline.jsonl`). On air-routes the
 process held about 16 GB (16,264,832 KB resident) 2 s after start (`evidence/any-shortest-air-routes.txt`). Witness cannot shrink a query that never answers;
 the measurement is the repro.

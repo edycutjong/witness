@@ -91,14 +91,17 @@ def from_wire(d: dict) -> EngineAnswer:
     return EngineAnswer(ans, None, d.get("ms", 0.0))
 
 
+RELEASE = re.compile(r"relate-db==([0-9]+\.[0-9]+\.[0-9]+)")  # ASCII digits only: a version number, nothing else
+
+
 def parse_engine(spec: str) -> tuple[str, str]:
     """``relate-db==1.3.0`` -> ("relate", "1.3.0"); ``python:/p`` -> ("python", "/p"); ``neo4j`` -> ("neo4j", "")."""
     s = (spec or "").strip()
     if s.startswith("relate-db=="):
-        v = s[len("relate-db==") :]
-        if not v or not all(part.isdigit() for part in v.split(".")) or v.count(".") != 2:
+        v = RELEASE.fullmatch(s)
+        if v is None:
             raise Refused(f"--other-engine relate-db==X.Y.Z needs an exact release, got {spec!r}", "other-engine")
-        return "relate", v
+        return "relate", v.group(1)
     if s.startswith("python:") and len(s) > len("python:"):
         return "python", s[len("python:") :]
     if s == "neo4j":
@@ -106,9 +109,6 @@ def parse_engine(spec: str) -> tuple[str, str]:
     raise Refused(
         f"unknown --other-engine {spec!r}; use relate-db==X.Y.Z, python:/path/to/python or neo4j", "other-engine"
     )
-
-
-RELEASE = re.compile(r"relate-db==(\d+\.\d+\.\d+)")
 
 
 def release_spec(spec: str | None) -> str | None:
@@ -243,6 +243,8 @@ class WorkerEngine:
         if hello is None:
             self._kill()  # first, so everything it wrote to stderr is in the file
             raise self._refuse(f"the worker did not start: {self._stderr_tail()}")
+        if not {"relate_db", "nodes", "relationships", "keys_sha256"} <= set(hello):  # some other JSON on stdout
+            raise self._refuse("the worker's first line is not its hello")
         self.version = hello["relate_db"]
         self.label = f"relate-db {self.version}"
         self.counts = (hello["nodes"], hello["relationships"])
@@ -275,22 +277,22 @@ class WorkerEngine:
         assert self.proc.stdout is not None
         fd = self.proc.stdout.fileno()
         deadline = time.monotonic() + timeout
-        while b"\n" not in self._buf:
-            left = deadline - time.monotonic()
-            if left <= 0 or not select.select([fd], [], [], left)[0]:
-                raise TimeoutError
-            chunk = os.read(fd, 1 << 16)
-            if not chunk:
-                return None
-            self._buf += chunk
-        line, _, self._buf = self._buf.partition(b"\n")
-        try:
-            got = json.loads(line)
-        except ValueError:
-            got = None
-        if not isinstance(got, dict):  # something else printed to stdout (a notice, a banner): not ours, read on
-            return self._read(max(deadline - time.monotonic(), 0.0))
-        return got
+        while True:
+            while b"\n" not in self._buf:
+                left = deadline - time.monotonic()
+                if left <= 0 or not select.select([fd], [], [], left)[0]:
+                    raise TimeoutError
+                chunk = os.read(fd, 1 << 16)
+                if not chunk:
+                    return None
+                self._buf += chunk
+            line, _, self._buf = self._buf.partition(b"\n")
+            try:
+                got = json.loads(line)
+            except ValueError:
+                got = None
+            if isinstance(got, dict):  # anything else on stdout (a notice, a banner) is not ours: read on
+                return got
 
     def _kill(self) -> None:
         """End the worker and everything it started. ``uv run`` keeps the interpreter as its child, so the signal goes

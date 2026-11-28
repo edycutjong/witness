@@ -64,14 +64,15 @@ def test_parse_engine_forms():
     assert parse_engine("relate-db==1.3.0") == ("relate", "1.3.0")
     assert parse_engine("python:/x/python") == ("python", "/x/python")
     assert parse_engine("neo4j") == ("neo4j", "")
-    for bad in ("relate-db==1.3", "relate-db==latest", "relate-db==", "python:", "mysql", ""):
+    for bad in ("relate-db==1.3", "relate-db==latest", "relate-db==", "python:", "mysql", "", "relate-db==١.٢.٣"):
         with pytest.raises(Refused):
             parse_engine(bad)
 
 
 def test_what_a_manifest_records_and_what_is_taken_from_one():
     assert release_spec("relate-db==1.3.0") == "1.3.0" and release_spec(" relate-db==1.2.0 ") == "1.2.0"
-    for other in ("python:/usr/bin/python3", "neo4j", "python", "relate-db==1.3", "relate-db==1.3.0; rm", "", None):
+    others = ("python:/usr/bin/python3", "neo4j", "python", "relate-db==1.3", "relate-db==1.3.0; rm", "", None)
+    for other in (*others, "relate-db==١.٢.٣"):  # digits of another script are not a version number either
         assert release_spec(other) is None, other
     # a manifest never holds a path on one machine: the release that interpreter reported, or the bare word
     assert recorded_spec("python:/Users/someone/.venv/bin/python", "1.3.0") == "relate-db==1.3.0"
@@ -216,12 +217,17 @@ def test_worker_start_refusals(tiny_rl, monkeypatch, capsys):
         WorkerEngine("relate-db==9.9.9", tiny_rl, gq())
     assert "starting relate-db 9.9.9 through uv" in capsys.readouterr().err  # uv is quiet: say what is happening
     # something else on the worker's stdout (a notice, a banner) is not a protocol line: skipped, not a crash
-    banner = "print('relate: a notice on stdout', flush=True); print('[1, 2]', flush=True); import sys; "
+    banner = "print('relate: a notice on stdout\\n' * 3000 + '[1, 2]', flush=True); import sys; "
     chatty = [sys.executable, "-c", banner + "boot = sys.argv[2]; sys.argv = sys.argv[:1] + sys.argv[3:]; exec(boot)"]
     monkeypatch.setattr(engines, "worker_command", lambda kind, arg: chatty)
     eng = WorkerEngine(SELF, tiny_rl, gq(), expect=(n, r, digest))
     assert eng.answer().error is None
     eng.close()
+    # a first line that is JSON but not a hello (something else writing to stdout) is refused, and the process ended
+    stranger = [sys.executable, "-c", "import time; print('{\"ready\": true}', flush=True); time.sleep(60)", "--"]
+    monkeypatch.setattr(engines, "worker_command", lambda kind, arg: stranger)
+    with pytest.raises(Refused, match="first line is not its hello"):
+        WorkerEngine(SELF, tiny_rl, gq())
     monkeypatch.setattr(WorkerEngine, "START_TIMEOUT", 0.3)
     sleeper = [sys.executable, "-c", "import time; time.sleep(60)", "--"]
     monkeypatch.setattr(engines, "worker_command", lambda kind, arg: sleeper)

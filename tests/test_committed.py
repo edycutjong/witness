@@ -176,16 +176,18 @@ def test_committed_engine_disagreement_witness_checks():
 
 
 def test_the_release_bisect_record_matches_the_committed_witness():
-    """evidence/relate-versions.jsonl: the two forms disagree on the witness up to 1.2.0 and agree on 1.3.0; the row
-    for the pinned engine is what this suite's own Relate returns."""
+    """evidence/relate-versions.jsonl: the two forms disagree on the witness up to 1.2.0 and agree from 1.3.0 on; the
+    row for the pinned engine is what this suite's own Relate returns."""
     import relate
 
     rows = [json.loads(ln) for ln in (ROOT / "evidence" / "relate-versions.jsonl").read_text().splitlines()]
     assert [(r["relate_db"], r["the_two_forms_agree"]) for r in rows] == [
         ("1.0.1", False),
+        ("1.0.2", False),
         ("1.1.0", False),
         ("1.2.0", False),
         ("1.3.0", True),
+        ("1.4.0", True),
     ]
     pinned = next(r for r in rows if r["relate_db"] == relate.__version__)
     db = relate.Database(str(EC), read_only=True)

@@ -5,8 +5,8 @@ forms of one condition disagree on relate-db 1.0.1 (`queries/count-two-match.cyp
 `queries/exists-two-match.cypher` returns nothing). This script rebuilds that graph in `:memory:` on whatever
 relate-db the interpreter has and runs both forms. It imports nothing from Witness, so it runs under any release:
 
-    for v in 1.0.1 1.1.0 1.2.0 1.3.0; do
-      uv run --no-project --with relate-db==$v python bench/relate_versions.py
+    for v in 1.0.1 1.0.2 1.1.0 1.2.0 1.3.0 1.4.0; do
+      uv run --no-project --python 3.12 --with relate-db==$v python bench/relate_versions.py
     done > evidence/relate-versions.jsonl
 
 The v1.3.0 release notes list the fix ("EXISTS over two MATCH clauses agrees with COUNT on relationship uniqueness").

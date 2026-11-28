@@ -17,8 +17,8 @@ counts and the same hash over every canonical key (``graph_shape``), or the run 
 repr of their canonical form, the relation ``same_answer`` compares. An answer the other engine cannot give (an error,
 a tie at a cut, no answer within the deadline, a value only its driver can render) is inconclusive, never proof.
 
-relate-db has no statement timeout, so the deadline lives here: a worker that has not answered within ``timeout``
-seconds is killed with everything it started, and a fresh one replays the deletions committed so far.
+relate-db 1.0.1 has no statement timeout (1.4.0 added one), so the deadline lives here: a worker that has not answered
+within ``timeout`` seconds is killed with everything it started, and a fresh one replays the deletions committed so far.
 """
 
 from __future__ import annotations
@@ -164,9 +164,9 @@ def _end_live_workers() -> None:
 class WorkerEngine:
     """The same query on another relate-db, in a worker process speaking JSON lines (see ``engine_worker``).
 
-    Every request has a deadline (``timeout`` seconds; relate-db has no statement timeout of its own). A worker that
-    misses it, or dies, is killed with its whole process group and replaced by a fresh one that replays the committed
-    deletions (``log``); the request that was lost is an error, so that trial is inconclusive."""
+    Every request has a deadline (``timeout`` seconds; relate-db 1.0.1 has no statement timeout of its own). A worker
+    that misses it, or dies, is killed with its whole process group and replaced by a fresh one that replays the
+    committed deletions (``log``); the request that was lost is an error, so that trial is inconclusive."""
 
     START_TIMEOUT = 300.0  # the first run on a release has to download it
     STOP_TIMEOUT = 2.0  # how long close() waits for a goodbye before it kills

@@ -5,8 +5,8 @@ the pinned 1.0.1 and the release that fixed the bug disagree on it, and every re
 This script rebuilds each witness from its .cypher script in `:memory:` on whatever relate-db the interpreter has and
 runs the witness's query. It imports only Witness's canonical form, so it runs under any release:
 
-    for v in 1.0.1 1.0.2 1.1.0 1.2.0 1.3.0; do
-      uv run --no-project --with relate-db==$v python bench/regression_table.py
+    for v in 1.0.1 1.0.2 1.1.0 1.2.0 1.3.0 1.4.0; do
+      uv run --no-project --python 3.12 --with relate-db==$v python bench/regression_table.py
     done > evidence/regression-releases.jsonl
 
 One JSON line per witness and release: the rows, their canonical digest, or the error. Each line also carries the

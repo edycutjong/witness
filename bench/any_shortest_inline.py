@@ -8,8 +8,9 @@ graph: n nodes in a ring, each with a second edge 7 ahead (2n relationships, eve
 clock starts when the child says the graph is built and the query is about to run, so "no answer within 8 s" is 8 s of
 the query alone, the same span the reported `ms` covers; a child that ends on its own is recorded as a crash:
 
-    for v in 1.0.1 1.3.0 1.2.0; do uv run --no-project --with relate-db==$v python bench/any_shortest_inline.py; done \\
-        > evidence/any-shortest-inline.jsonl
+    for v in 1.0.1 1.3.0 1.2.0 1.4.0; do
+      uv run --no-project --python 3.12 --with relate-db==$v python bench/any_shortest_inline.py
+    done > evidence/any-shortest-inline.jsonl
 """
 
 from __future__ import annotations

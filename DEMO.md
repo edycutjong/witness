@@ -89,14 +89,14 @@ With a real model in the loop: `evidence/mcp-agent-session.md` records claude-so
 MCP servers enabled) writing its own Cypher and attaching the witness; the exact command, `mcp.json` and prompt are in that file.
 It needs a Claude Code login, so it is a recorded run, not a step of the judge path.
 
-## 6. Tests: 557 pass, 100% coverage
+## 6. Tests: 569 pass, 100% coverage
 
 ```bash
 uv run pytest --cov=witness   # fails below 100% line + branch coverage (pyproject.toml)
 ```
 
-The run is recorded in `evidence/pytest-2026-11-28b.txt` (557 passed; the 2 fixture-pull tests need a local Neo4j in Docker and
-skip without it). GitHub Actions runs the same suite on every push, on Linux under Python 3.11 and 3.12, with ruff, mypy,
+The run is recorded in `evidence/pytest-2026-11-28c.txt` (569 passed; the 2 fixture-pull tests and the re-check of the
+committed Neo4j witness need a Neo4j and skip without one). GitHub Actions runs the same suite on every push, on Linux under Python 3.11 and 3.12, with ruff, mypy,
 pip-audit, gitleaks, the wheel build and a throughput floor (`.github/workflows/ci.yml`).
 
 ## 7. Two queries disagree: 57,645 → 5, "5 of 5 end the disagreement"
@@ -230,7 +230,7 @@ Neo4j reported are in `evidence/differential.json`). Every query runs in a trans
 20 s: a relate-db process that has not answered by then is killed, and Neo4j is given a 20 s transaction timeout,
 which it can take minutes to act on (the `ms` of those rows is the wall clock). An engine's reply is recorded as an
 answer, an error, a timeout or a crash, and only two answers are ever compared. The 219 answers took about 47 minutes
-here (the reductions after them, under a minute), nearly all of it Neo4j ending five timed-out shortest-path queries.
+here (`answer_seconds` in `evidence/differential.json`; the reductions after them, under a minute), nearly all of it Neo4j ending five timed-out shortest-path queries.
 The 16 GB figure for the slow query on air-routes is a recorded session (`evidence/any-shortest-air-routes.txt`), not a
 script. `bench/any_shortest_inline.py` runs each
 size in its own process with an 8 s watchdog that starts when the query does, because the slow form does not return

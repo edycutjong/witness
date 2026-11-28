@@ -19,7 +19,7 @@
   [![CI](https://github.com/edycutjong/witness/actions/workflows/ci.yml/badge.svg)](https://github.com/edycutjong/witness/actions/workflows/ci.yml)
   ![Python](https://img.shields.io/badge/Python_3.11_|_3.12-3776AB?style=flat&logo=python&logoColor=white)
   ![Relate](https://img.shields.io/badge/Relate_1.0.1-1F1A14?style=flat)
-  ![Tests](https://img.shields.io/badge/tests-557_passed-2ea043?style=flat)
+  ![Tests](https://img.shields.io/badge/tests-569_passed-2ea043?style=flat)
   [![License](https://img.shields.io/badge/License-Apache_2.0-yellow)](LICENSE)
   [![Release](https://img.shields.io/github/v/release/edycutjong/witness?sort=semver)](https://github.com/edycutjong/witness/releases/latest)
 
@@ -223,8 +223,8 @@ Relate 1.0.1 against Relate 1.3.0:
 - 1 differs in value type: `percentileDisc` over airport altitudes is a float on 1.0.1 and an integer on 1.3.0, shrunk to
   1 node (`witnesses/differential/d037-relate-1.3.0.*`).
 
-Relate 1.0.1 against Neo4j 2026.10.2 (community image in Docker on the same machine: 2 GiB heap, 1 GiB transaction
-memory, 512 MiB page cache, default language Cypher 25; the graph is loaded from the same store, without the store's
+Relate 1.0.1 against Neo4j 2026.10.2 (community image in Docker on the same machine, the container limited to 4 GiB:
+2 GiB heap, 1 GiB transaction memory, 512 MiB page cache, default language Cypher 25; the graph is loaded from the same store, without the store's
 three uniqueness constraints and their indexes; one run):
 
 - 204 give the same answer and the same 8 end in an error on both;
@@ -432,7 +432,7 @@ rolled-back transaction: 22 of 22, 5 of 5 and 92 of 92, each verdict the same as
 
 ```bash
 make ci                          # ruff, mypy, pytest with the 100% coverage gate, pip-audit, gitleaks
-uv run pytest --cov=witness      # 557 pass against real Relate (2 more need a local Neo4j), 100% line + branch coverage
+uv run pytest --cov=witness      # 569 pass against real Relate (3 more need a Neo4j), 100% line + branch coverage
 ```
 
 Reproduce every number in this README: [DEMO.md](DEMO.md). Raw evidence and the machine/version of each run:

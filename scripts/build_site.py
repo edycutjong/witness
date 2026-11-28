@@ -1364,7 +1364,7 @@ VERIFY = [
     (
         "Run the tests",
         ["uv run pytest --cov=witness"],
-        f"{TESTS} passed and 100% line and branch coverage; {SKIPPED} more need a local Neo4j in Docker and skip without it.",
+        f"{TESTS} passed and 100% line and branch coverage; {SKIPPED} more need a Neo4j server and skip without one.",
         "CI and deterministic replay, not the product path.",
     ),
 ]

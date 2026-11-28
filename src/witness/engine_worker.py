@@ -25,7 +25,7 @@ def serve(spec: dict, inp, out) -> int:
     from .store import Scratch
 
     gq = query_from_spec(spec["query"])
-    sc = Scratch.open_copy(spec["source"])
+    sc = Scratch.open_copy(spec["source"], spec.get("tmpdir"))  # the parent's directory: removed with it
 
     def send(d: dict) -> None:
         out.write(json.dumps(d) + "\n")

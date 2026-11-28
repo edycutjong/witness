@@ -198,7 +198,7 @@ def test_worker_that_misses_the_deadline_is_replaced(tiny_rl, monkeypatch):
     assert eng.proc.returncode is not None and eng not in engines._LIVE
 
 
-def test_worker_start_refusals(tiny_rl, monkeypatch):
+def test_worker_start_refusals(tiny_rl, monkeypatch, capsys):
     """The worker must say hello in time, run the release that was asked for, and hold the same graph."""
     assert worker_command("relate", "1.3.0")[-3:] == ["--with", "relate-db==1.3.0", "python"]
     assert worker_command("python", "/x/python") == ["/x/python"]
@@ -214,6 +214,14 @@ def test_worker_start_refusals(tiny_rl, monkeypatch):
     monkeypatch.setattr(engines, "worker_command", lambda kind, arg: [sys.executable])
     with pytest.raises(Refused, match=f"runs relate-db {relate.__version__}, not the release that was asked for"):
         WorkerEngine("relate-db==9.9.9", tiny_rl, gq())
+    assert "starting relate-db 9.9.9 through uv" in capsys.readouterr().err  # uv is quiet: say what is happening
+    # something else on the worker's stdout (a notice, a banner) is not a protocol line: skipped, not a crash
+    banner = "print('relate: a notice on stdout', flush=True); print('[1, 2]', flush=True); import sys; "
+    chatty = [sys.executable, "-c", banner + "boot = sys.argv[2]; sys.argv = sys.argv[:1] + sys.argv[3:]; exec(boot)"]
+    monkeypatch.setattr(engines, "worker_command", lambda kind, arg: chatty)
+    eng = WorkerEngine(SELF, tiny_rl, gq(), expect=(n, r, digest))
+    assert eng.answer().error is None
+    eng.close()
     monkeypatch.setattr(WorkerEngine, "START_TIMEOUT", 0.3)
     sleeper = [sys.executable, "-c", "import time; time.sleep(60)", "--"]
     monkeypatch.setattr(engines, "worker_command", lambda kind, arg: sleeper)
@@ -483,8 +491,9 @@ class _Session:
         self.drv = drv
 
     def run(self, stmt, params=None, **kw):
-        if "dbms.components" in stmt:
-            return _Res(types.SimpleNamespace(columns=["v"], data=[{"v": "stand-in"}]))
+        if "dbms.components" in stmt:  # as a real server answers: the kernel, then Cypher and its language versions
+            rows = [{"name": "Cypher", "v": "5"}, {"name": "Neo4j Kernel", "v": "stand-in"}]
+            return _Res(types.SimpleNamespace(columns=["name", "v"], data=rows))
         return _Res(self.drv.db.execute(stmt, {**(params or {}), **kw}))
 
     def begin_transaction(self, timeout=None):
@@ -568,6 +577,24 @@ def test_neo4j_driver_only_values_are_inconclusive(tiny_rl, tmp_path, monkeypatc
         assert eng.answer().answer is None and "temporal or spatial value" in eng.answer().error
     finally:
         eng.close()
+        sc.close()
+
+
+def test_neo4j_before_5_is_refused_not_a_driver_traceback(tiny_rl, tmp_path, monkeypatch):
+    sc = Scratch.open_copy(tiny_rl)
+    drv = _Driver(tmp_path / "old.rl")
+    old = _Res(types.SimpleNamespace(columns=["name", "v"], data=[{"name": "Neo4j Kernel", "v": "4.4.12"}]))
+    run = _Session.run
+
+    def old_server(self, stmt, params=None, **kw):
+        return old if "dbms.components" in stmt else run(self, stmt, params, **kw)
+
+    monkeypatch.setattr(_Session, "run", old_server)
+    try:
+        with pytest.raises(Refused, match="needs Neo4j 5 or later .*this server is 4.4.12"):
+            Neo4jEngine(sc, gq(), driver=drv)
+        assert drv.closed
+    finally:
         sc.close()
 
 

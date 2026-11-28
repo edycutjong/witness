@@ -32,6 +32,7 @@ import re
 import select
 import signal
 import subprocess
+import sys
 import tempfile
 import time
 from dataclasses import asdict, dataclass
@@ -144,9 +145,11 @@ def worker_command(kind: str, arg: str) -> list[str]:
 
 
 # The worker imports this copy of Witness from the END of its path, so a copy installed beside the pinned relate-db
-# can never put that relate-db in front of the release the worker was started for.
+# can never put that relate-db in front of the release the worker was started for; and the current directory comes
+# off the path (``-c`` puts it first), so a ``relate`` folder where the command was run cannot stand in either.
 WORKER_BOOT = (
-    "import sys; sys.path.append(sys.argv[1]); from witness.engine_worker import main; sys.exit(main(sys.argv[2:]))"
+    "import sys; sys.path[:] = [p for p in sys.path if p]; sys.path.append(sys.argv[1]); "
+    "from witness.engine_worker import main; sys.exit(main(sys.argv[2:]))"
 )
 
 _LIVE: set = set()  # workers still running; ended at interpreter exit if a caller never reached close()
@@ -195,10 +198,14 @@ class WorkerEngine:
                     "query": query_spec(gq),
                     "strict_lists": strict_lists,
                     "digits": digits,
+                    # the worker's copy of the store lives here, so it goes with this directory even after a kill
+                    "tmpdir": self._tmp.name,
                 }
             )
         )
         self._err_path = Path(self._tmp.name) / "stderr.txt"
+        if self.kind == "relate":  # uv is quiet, and the first use of a release is a download
+            print(f"witness: starting relate-db {self.arg} through uv (its first use downloads it)", file=sys.stderr)
         src_dir = str(Path(__file__).resolve().parent.parent)
         self._argv = [*worker_command(self.kind, self.arg), "-c", WORKER_BOOT, src_dir, str(spec_path)]
         try:
@@ -277,7 +284,13 @@ class WorkerEngine:
                 return None
             self._buf += chunk
         line, _, self._buf = self._buf.partition(b"\n")
-        return json.loads(line)
+        try:
+            got = json.loads(line)
+        except ValueError:
+            got = None
+        if not isinstance(got, dict):  # something else printed to stdout (a notice, a banner): not ours, read on
+            return self._read(max(deadline - time.monotonic(), 0.0))
+        return got
 
     def _kill(self) -> None:
         """End the worker and everything it started. ``uv run`` keeps the interpreter as its child, so the signal goes
@@ -343,7 +356,7 @@ class WorkerEngine:
                 self._send({"op": "stop"})
                 self._read(self.STOP_TIMEOUT)
         self._kill()
-        self._tmp.cleanup()
+        self._tmp.cleanup()  # the worker's own copy of the store is in here too
 
 
 def read_env_file(path: Path) -> dict:
@@ -406,8 +419,15 @@ class Neo4jEngine:
         self.rel_ids: dict[str, str] = {}
         try:
             with self.driver.session(database=self.database) as s:
-                rec = s.run("CALL dbms.components() YIELD versions RETURN versions[0] AS v").single()
-                self.version = rec["v"] if rec else "unknown"
+                # one row per component (a real server also lists Cypher, with its language versions)
+                comps = "CALL dbms.components() YIELD name, versions RETURN name, versions[0] AS v"
+                found = {rec["name"]: rec["v"] for rec in s.run(comps)}
+                self.version = found.get("Neo4j Kernel") or next(iter(found.values()), "unknown")
+                if self.version.split(".")[0].isdigit() and int(self.version.split(".")[0]) < 5:
+                    raise Refused(
+                        f"--other-engine neo4j needs Neo4j 5 or later (elementId); this server is {self.version}",
+                        "other-engine",
+                    )
                 if s.run("MATCH (n) RETURN count(n) AS c").single()["c"]:
                     raise Refused(
                         "--other-engine neo4j: the Neo4j database is not empty; Witness loads the graph into an empty "
@@ -487,10 +507,9 @@ class Neo4jEngine:
                     rows = [dict(zip(cols, rec.values(), strict=True)) for rec in res]
                 finally:
                     tx.rollback()
-            if any(_graph_value(v) for r in rows for v in r.values()):
-                raise ValueError("Neo4j returned graph values; return properties or ids to compare across engines")
-            if any(_driver_value(v) for r in rows for v in r.values()):
-                raise ValueError(DRIVER_VALUE)
+            why = uncomparable(rows)
+            if why:
+                raise ValueError(why)
             ans = answer_of(self.gq, rows, cols, strict_lists=self.strict_lists, digits=self.digits)
         except Exception as e:  # noqa: BLE001 - any engine error is inconclusive
             return EngineAnswer(None, f"{type(e).__name__}: {str(e)[:300]}", (time.perf_counter() - t0) * 1000)
@@ -550,6 +569,18 @@ DRIVER_VALUE = (
 
 def _driver_value(v) -> bool:
     return _in_module(v, "neo4j.")
+
+
+GRAPH_VALUE = "Neo4j returned graph values; return their properties to compare across engines"
+
+
+def uncomparable(rows: list[dict]) -> str | None:
+    """Why rows from Neo4j cannot be compared with another engine's, or None when they can."""
+    if any(_graph_value(v) for r in rows for v in r.values()):
+        return GRAPH_VALUE
+    if any(_driver_value(v) for r in rows for v in r.values()):
+        return DRIVER_VALUE
+    return None
 
 
 def open_engine(

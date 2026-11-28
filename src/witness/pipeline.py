@@ -215,6 +215,7 @@ def reduce_request(req: Request, progress=None) -> Outcome:
             answers.append(first.answer)
             results.append(results[0])
             out.guard_notes.append(f"other engine: {engine.label}")
+            out.guard_notes.append("order check and determinism: this relate-db only; the other engine is asked once")
         base, res0 = answers[0], results[0]
         if len(base) == 0 and req.predicate != "disagree":
             # two queries can disagree while the first returns nothing: Predicate() refuses only when both agree

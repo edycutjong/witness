@@ -642,7 +642,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="off by default; a run it stops is NOT verified and claims no determinism",
     )
     w.add_argument("--isolate", action="store_true", help="run each trial in a child process (with --trial-timeout)")
-    w.add_argument("--trial-timeout", type=float, default=30.0)
+    w.add_argument(
+        "--trial-timeout",
+        type=float,
+        default=30.0,
+        help="seconds one trial may take with --isolate, and one answer of the other engine with --other-engine",
+    )
     w.add_argument("--name", default="witness", help="output file stem (default: the query file's stem)")
     w.add_argument("--out", default="out")
     w.add_argument("--ledger", help="ledger .rl (default: <out>/ledger.rl)")

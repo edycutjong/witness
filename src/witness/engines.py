@@ -12,16 +12,24 @@ different answers. Two kinds of other engine:
   is an explicit transaction (delete, query, rollback) and the loaded graph is removed on close.
 
 Deletions cross the boundary as canonical keys (labels, type, properties and endpoints), never as element ids, so the
-two sides never need to agree on ids. Answers cross back as the repr of their canonical form, the relation
-``same_answer`` compares. An answer the other engine cannot give (an error, a tie at a cut) is inconclusive, never
-proof.
+two sides never need to agree on ids. Before the first trial the other engine must hold the same graph: the same
+counts and the same hash over every canonical key (``graph_shape``), or the run is refused. Answers cross back as the
+repr of their canonical form, the relation ``same_answer`` compares. An answer the other engine cannot give (an error,
+a tie at a cut, no answer within the deadline, a value only its driver can render) is inconclusive, never proof.
+
+relate-db has no statement timeout, so the deadline lives here: a worker that has not answered within ``timeout``
+seconds is killed with everything it started, and a fresh one replays the deletions committed so far.
 """
 
 from __future__ import annotations
 
+import atexit
 import contextlib
+import hashlib
 import json
 import os
+import select
+import signal
 import subprocess
 import tempfile
 import time
@@ -98,15 +106,67 @@ def parse_engine(spec: str) -> tuple[str, str]:
     )
 
 
-class WorkerEngine:
-    """The same query on another relate-db, in a worker process speaking JSON lines (see ``engine_worker``)."""
+def graph_shape(sc) -> tuple[int, int, str]:
+    """Counts and one hash over every canonical key a ``Scratch`` holds. Two engines that report the same shape hold
+    the same labels, types, properties and endpoints, so a deletion by key removes the same element on both."""
+    h = hashlib.sha256()
+    for keys in (sc.node_keys, sc.rel_keys):
+        for k in sorted(keys.values()):
+            h.update(k.encode("utf-8") + b"\n")
+        h.update(b"--\n")
+    return len(sc.node_keys), len(sc.rel_keys), h.hexdigest()
 
-    def __init__(self, spec: str, source: str | Path, gq: GuardedQuery, *, strict_lists=False, digits=12):
-        kind, arg = parse_engine(spec)
-        if kind == "relate":
-            cmd = ["uv", "run", "--no-project", "--quiet", "--with", f"relate-db=={arg}", "python"]
-        else:
-            cmd = [arg]
+
+def worker_command(kind: str, arg: str) -> list[str]:
+    """The interpreter a worker runs on: uv's environment for one relate-db release, or the one the caller named."""
+    if kind == "relate":
+        return ["uv", "run", "--no-project", "--quiet", "--with", f"relate-db=={arg}", "python"]
+    return [arg]
+
+
+# The worker imports this copy of Witness from the END of its path, so a copy installed beside the pinned relate-db
+# can never put that relate-db in front of the release the worker was started for.
+WORKER_BOOT = (
+    "import sys; sys.path.append(sys.argv[1]); from witness.engine_worker import main; sys.exit(main(sys.argv[2:]))"
+)
+
+_LIVE: set = set()  # workers still running; ended at interpreter exit if a caller never reached close()
+
+
+@atexit.register
+def _end_live_workers() -> None:
+    for w in list(_LIVE):
+        w._kill()
+
+
+class WorkerEngine:
+    """The same query on another relate-db, in a worker process speaking JSON lines (see ``engine_worker``).
+
+    Every request has a deadline (``timeout`` seconds; relate-db has no statement timeout of its own). A worker that
+    misses it, or dies, is killed with its whole process group and replaced by a fresh one that replays the committed
+    deletions (``log``); the request that was lost is an error, so that trial is inconclusive."""
+
+    START_TIMEOUT = 300.0  # the first run on a release has to download it
+    STOP_TIMEOUT = 2.0  # how long close() waits for a goodbye before it kills
+
+    def __init__(
+        self,
+        spec: str,
+        source: str | Path,
+        gq: GuardedQuery,
+        *,
+        strict_lists=False,
+        digits=12,
+        timeout=30.0,
+        expect=None,
+    ):
+        self.spec = spec
+        self.kind, self.arg = parse_engine(spec)
+        self.timeout = timeout
+        self.expect = tuple(expect) if expect is not None else None  # graph_shape() of the graph on this side
+        self.log: list[tuple[list, list]] = []  # deletions committed so far, replayed into a restarted worker
+        self.restarts = 0
+        self.dead: str | None = None
         self._tmp = tempfile.TemporaryDirectory(prefix="witness-engine-")
         spec_path = Path(self._tmp.name) / "spec.json"
         spec_path.write_text(
@@ -119,68 +179,151 @@ class WorkerEngine:
                 }
             )
         )
+        self._err_path = Path(self._tmp.name) / "stderr.txt"
         src_dir = str(Path(__file__).resolve().parent.parent)
-        env = {**os.environ, "DO_NOT_TRACK": "1", "PYTHONPATH": src_dir + os.pathsep + os.environ.get("PYTHONPATH", "")}
+        self._argv = [*worker_command(self.kind, self.arg), "-c", WORKER_BOOT, src_dir, str(spec_path)]
+        try:
+            self._start()
+        except BaseException:
+            self._tmp.cleanup()
+            raise
+
+    def _refuse(self, why: str) -> Refused:
+        self._kill()
+        return Refused(f"--other-engine {self.spec}: {why}", "other-engine")
+
+    def _start(self) -> None:
+        """Start a worker and check that it runs the release, and holds the graph, that were asked for."""
+        # stderr goes to a file: nobody reads it while the worker runs, and a pipe nobody reads fills up and blocks
+        self._errf = self._err_path.open("wb")
         try:
             self.proc = subprocess.Popen(
-                [*cmd, "-m", WORKER_MODULE, str(spec_path)],
+                self._argv,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                env=env,
+                stderr=self._errf,
+                env={**os.environ, "DO_NOT_TRACK": "1"},
                 start_new_session=True,
             )
         except OSError as e:
-            self._tmp.cleanup()
-            raise Refused(f"--other-engine {spec}: cannot start the worker ({e})", "other-engine") from e
-        hello = self._read()
+            self._errf.close()
+            raise Refused(f"--other-engine {self.spec}: cannot start the worker ({e})", "other-engine") from e
+        self._buf = b""
+        _LIVE.add(self)
+        try:
+            hello = self._read(self.START_TIMEOUT)
+        except TimeoutError:
+            raise self._refuse(f"the worker did not start within {self.START_TIMEOUT:g} s") from None
         if hello is None:
-            err = self._stderr_tail()
-            self.close()
-            raise Refused(f"--other-engine {spec}: the worker did not start: {err}", "other-engine")
+            self._kill()  # first, so everything it wrote to stderr is in the file
+            raise self._refuse(f"the worker did not start: {self._stderr_tail()}")
         self.version = hello["relate_db"]
         self.label = f"relate-db {self.version}"
         self.counts = (hello["nodes"], hello["relationships"])
+        if self.kind == "relate" and self.version != self.arg:
+            raise self._refuse(f"the worker runs relate-db {self.version}, not the release that was asked for")
+        shape = (*self.counts, hello["keys_sha256"])
+        if self.expect is not None and shape != self.expect:
+            raise self._refuse(
+                f"{self.label} reads a different graph from the same store ({shape[0]} nodes and {shape[1]} "
+                f"relationships there, {self.expect[0]} and {self.expect[1]} here"
+                + ("; the same counts, other properties or labels" if shape[:2] == self.expect[:2] else "")
+                + "), so a deletion could not be mirrored"
+            )
 
     def _stderr_tail(self) -> str:
-        """The last stderr line of a worker that has stopped answering (it is killed first, so this never blocks)."""
-        self.proc.kill()
-        self.proc.wait(5)
-        assert self.proc.stderr is not None
-        lines = self.proc.stderr.read().strip().splitlines()
+        """The last line a worker that has ended wrote to stderr."""
+        lines = self._err_path.read_text(errors="replace").strip().splitlines()
         return lines[-1][:200] if lines else "no output"
 
-    def _read(self) -> dict | None:
+    def _send(self, msg: dict) -> None:
+        assert self.proc.stdin is not None
+        self.proc.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
+        self.proc.stdin.flush()
+
+    def _read(self, timeout: float) -> dict | None:
+        """One JSON line from the worker; None at end of file; ``TimeoutError`` when none came within ``timeout`` s.
+
+        Read straight from the descriptor into our own buffer: ``select`` cannot see lines a buffered reader already
+        holds, which would turn an answered trial into a timeout."""
         assert self.proc.stdout is not None
-        line = self.proc.stdout.readline()
-        return json.loads(line) if line else None
+        fd = self.proc.stdout.fileno()
+        deadline = time.monotonic() + timeout
+        while b"\n" not in self._buf:
+            left = deadline - time.monotonic()
+            if left <= 0 or not select.select([fd], [], [], left)[0]:
+                raise TimeoutError
+            chunk = os.read(fd, 1 << 16)
+            if not chunk:
+                return None
+            self._buf += chunk
+        line, _, self._buf = self._buf.partition(b"\n")
+        return json.loads(line)
+
+    def _kill(self) -> None:
+        """End the worker and everything it started. ``uv run`` keeps the interpreter as its child, so the signal goes
+        to the whole process group (the worker leads its own session), and only while the leader has not been reaped:
+        until then the group id cannot belong to anyone else."""
+        _LIVE.discard(self)
+        if self.proc.returncode is None:
+            with contextlib.suppress(ProcessLookupError, PermissionError):  # already gone / only a zombie is left
+                os.killpg(self.proc.pid, signal.SIGKILL)
+            self.proc.wait()
+        for f in (self.proc.stdin, self.proc.stdout, self._errf):
+            with contextlib.suppress(OSError):  # closing stdin flushes into a worker that may be gone
+                f.close()  # type: ignore[union-attr]
+
+    def _restart(self) -> None:
+        """A fresh worker on the same store, brought to the same graph by replaying the committed deletions."""
+        self._kill()
+        self.restarts += 1
+        try:
+            self._start()
+            for rels, nodes in self.log:
+                self._send({"op": "commit", "rels": rels, "nodes": nodes})
+                out = self._read(self.timeout)
+                if not out or out.get("error"):
+                    raise self._refuse(f"a committed deletion could not be replayed ({(out or {}).get('error')})")
+        except (Refused, TimeoutError, OSError) as e:
+            self._kill()
+            self.dead = f"it could not be restarted ({e})"
 
     def _call(self, msg: dict) -> dict:
-        assert self.proc.stdin is not None
+        if self.dead:
+            return {"error": f"worker gone: {self.dead}"}
         try:
-            self.proc.stdin.write(json.dumps(msg) + "\n")
-            self.proc.stdin.flush()
-        except OSError as e:  # BrokenPipeError: the worker is gone
-            return {"error": f"worker gone: {e}"}
-        return self._read() or {"error": f"worker gone: {self._stderr_tail()}"}
+            self._send(msg)
+            got = self._read(self.timeout)
+        except TimeoutError:
+            self._restart()
+            return {"error": f"TrialTimeout: no answer within {self.timeout:g} s"}
+        except OSError:  # BrokenPipeError: the worker is gone
+            got = None
+        if got is None:
+            self._kill()
+            why = self._stderr_tail()
+            self._restart()
+            return {"error": f"worker gone: {why}"}
+        return got
 
     def answer(self, rel_keys=(), node_keys=()) -> EngineAnswer:
         return from_wire(self._call({"op": "trial", "rels": list(rel_keys), "nodes": list(node_keys)}))
 
     def commit(self, rel_keys=(), node_keys=()) -> None:
-        out = self._call({"op": "commit", "rels": list(rel_keys), "nodes": list(node_keys)})
-        if out.get("error"):
+        entry = (list(rel_keys), list(node_keys))
+        self.log.append(entry)  # first: a worker restarted by this very call replays it
+        before = self.restarts
+        out = self._call({"op": "commit", "rels": entry[0], "nodes": entry[1]})
+        if out.get("error") and (self.restarts == before or self.dead):
+            self.log.pop()
             raise RuntimeError(f"other engine commit failed: {out['error']}")
 
     def close(self) -> None:
-        if self.proc.poll() is None:
-            self._call({"op": "stop"})
-        self.proc.kill()  # a no-op once the worker has exited
-        self.proc.wait(10)
-        for f in (self.proc.stdin, self.proc.stdout, self.proc.stderr):
-            with contextlib.suppress(OSError):  # closing stdin flushes into a worker that may be gone
-                f.close()  # type: ignore[union-attr]
+        if self.proc.returncode is None:
+            with contextlib.suppress(OSError, TimeoutError):  # a worker that does not answer is killed just below
+                self._send({"op": "stop"})
+                self._read(self.STOP_TIMEOUT)
+        self._kill()
         self._tmp.cleanup()
 
 
@@ -395,7 +538,8 @@ def open_engine(
 ):
     """Open the other engine on ``source`` (a worker) or from ``sc`` (Neo4j loads the graph the Scratch holds).
 
-    ``timeout``: seconds the Neo4j server gives one trial before it ends it (that trial is then inconclusive)."""
+    ``sc`` is the graph on this side. Given it, a worker must report the same ``graph_shape`` or is refused.
+    ``timeout``: seconds one answer of the other engine may take before that trial is inconclusive."""
     kind, _ = parse_engine(spec)
     if kind == "neo4j":
         from .store import Scratch
@@ -407,7 +551,8 @@ def open_engine(
         finally:
             if own:
                 sc.close()
-    return WorkerEngine(spec, source, gq, strict_lists=strict_lists, digits=digits)
+    expect = graph_shape(sc) if sc is not None else None
+    return WorkerEngine(spec, source, gq, strict_lists=strict_lists, digits=digits, timeout=timeout, expect=expect)
 
 
 @dataclass
@@ -431,8 +576,12 @@ class TwoEngines:
         self.digits = digits
         self.rel_key = dict(sc.rel_keys)
         self.node_key = dict(sc.node_keys)
-        self.restarts = 0
         self.other_ms: list[float] = []
+
+    @property
+    def restarts(self) -> int:
+        """Workers replaced after a missed deadline or a crash (Neo4j has a server-side deadline instead: 0)."""
+        return getattr(self.engine, "restarts", 0)
 
     def trial_many(self, statements, rel_ids=(), node_ids=(), check_counts=None) -> EngineTrialResult:
         t0 = time.perf_counter()

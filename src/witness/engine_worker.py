@@ -1,9 +1,10 @@
 """The other-engine worker: ``python -m witness.engine_worker spec.json`` on any relate-db release.
 
-It opens its own byte copy of the store, says hello (its relate-db version and counts), then answers one JSON line per
-request on stdin: ``trial`` (delete the elements named by canonical key, run the query, roll back, return the canonical
-answer), ``commit`` (delete them for good) and ``stop``. It imports only the parts of Witness that need nothing but
-relate-db, so it runs under whichever release the interpreter has.
+It opens its own byte copy of the store, says hello (its relate-db version, its counts and one hash over every
+canonical key, which the parent compares with its own graph), then answers one JSON line per request on stdin:
+``trial`` (delete the elements named by canonical key, run the query, roll back, return the canonical answer),
+``commit`` (delete them for good) and ``stop``. It imports only the parts of Witness that need nothing but relate-db,
+so it runs under whichever release the interpreter has.
 """
 
 from __future__ import annotations
@@ -19,7 +20,7 @@ os.environ.setdefault("DO_NOT_TRACK", "1")
 def serve(spec: dict, inp, out) -> int:
     import relate
 
-    from .engines import query_from_spec, wire_answer
+    from .engines import graph_shape, query_from_spec, wire_answer
     from .predicates import answer_of
     from .store import Scratch
 
@@ -30,17 +31,23 @@ def serve(spec: dict, inp, out) -> int:
         out.write(json.dumps(d) + "\n")
         out.flush()
 
+    by_key: dict[str, dict[str, str]] = {}
+
+    def index() -> None:  # key -> id, once per committed graph (open_copy has already refused two equal keys)
+        by_key["rels"] = {k: i for i, k in sc.rel_keys.items()}
+        by_key["nodes"] = {k: i for i, k in sc.node_keys.items()}
+
     def ids(msg: dict) -> tuple[list[str], list[str]]:
-        rel_by_key = {k: i for i, k in sc.rel_keys.items()}
-        node_by_key = {k: i for i, k in sc.node_keys.items()}
+        rel_by_key, node_by_key = by_key["rels"], by_key["nodes"]
         missing = [k for k in msg["rels"] if k not in rel_by_key] + [k for k in msg["nodes"] if k not in node_by_key]
         if missing:
             raise KeyError(f"{len(missing)} element(s) not in this store")
         return [rel_by_key[k] for k in msg["rels"]], [node_by_key[k] for k in msg["nodes"]]
 
     try:
-        n, r = sc.counts()
-        send({"relate_db": relate.__version__, "nodes": n, "relationships": r})
+        index()
+        n, r, digest = graph_shape(sc)
+        send({"relate_db": relate.__version__, "nodes": n, "relationships": r, "keys_sha256": digest})
         for line in inp:
             msg = json.loads(line)
             op = msg.get("op")
@@ -52,6 +59,7 @@ def serve(spec: dict, inp, out) -> int:
                 rels, nodes = ids(msg)
                 if op == "commit":
                     sc.commit_delete(rels, nodes)
+                    index()  # a deleted node takes its relationships with it
                     send({"ok": True})
                     continue
                 t = sc.trial_many([(gq.exec_text, gq.params)], rels, nodes)

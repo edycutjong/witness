@@ -191,7 +191,13 @@ def reduce_request(req: Request, progress=None) -> Outcome:
             from .engines import TwoEngines, open_engine
 
             engine = open_engine(
-                req.other_engine, source, queries[0], sc=sc, strict_lists=req.strict_lists, digits=req.digits
+                req.other_engine,
+                source,
+                queries[0],
+                sc=sc,
+                strict_lists=req.strict_lists,
+                digits=req.digits,
+                timeout=req.trial_timeout,
             )
             backend = TwoEngines(sc, queries[0], engine, strict_lists=req.strict_lists, digits=req.digits)
             first = engine.answer()

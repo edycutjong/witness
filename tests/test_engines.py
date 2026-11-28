@@ -11,7 +11,9 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import shutil
+import signal
 import sys
 import types
 from pathlib import Path
@@ -30,6 +32,7 @@ from witness.engines import (
     TwoEngines,
     WorkerEngine,
     from_wire,
+    graph_shape,
     neo4j_settings,
     open_engine,
     parse_engine,
@@ -37,6 +40,7 @@ from witness.engines import (
     query_spec,
     read_env_file,
     wire_answer,
+    worker_command,
 )
 from witness.guard import Cut, GuardedQuery, Refused, Tie
 from witness.pipeline import Request, reduce_request
@@ -123,16 +127,117 @@ def test_worker_on_this_interpreter(tiny_rl):
         sc.close()
 
 
+def _a_key(tiny_rl) -> str:
+    sc = Scratch.open_copy(tiny_rl)
+    try:
+        return next(k for i, k in sc.node_keys.items() if sc.node_props[i]["name"] == "A")
+    finally:
+        sc.close()
+
+
 def test_worker_gone_and_failed_starts(tiny_rl, tmp_path):
+    """A worker that dies is replaced: that request is an error, the next one is answered on the same graph."""
+    a_key = _a_key(tiny_rl)
     eng = WorkerEngine(SELF, tiny_rl, gq())
-    eng.proc.kill()
-    eng.proc.wait(5)
-    assert eng.answer().error.startswith("worker gone")
-    eng.close()
+    try:
+        full = eng.answer()
+        eng.commit([], [a_key])
+        after = eng.answer()
+        assert after.error is None and repr(after.answer) != repr(full.answer)
+        eng.proc.kill()
+        eng.proc.wait(5)
+        assert eng.answer().error.startswith("worker gone") and eng.restarts == 1 and eng.dead is None
+        assert repr(eng.answer().answer) == repr(after.answer)  # the fresh worker replayed the committed deletion
+        eng.proc.stdin.write(b"not json\n")  # a worker that crashes on its own: the reason is its last stderr line
+        eng.proc.stdin.flush()
+        assert "JSONDecodeError" in eng.answer().error and eng.restarts == 2
+    finally:
+        eng.close()
     with pytest.raises(Refused, match="cannot start"):
         WorkerEngine(f"python:{tmp_path / 'no-python'}", tiny_rl, gq())
     with pytest.raises(Refused, match="did not start"):
         WorkerEngine(f"python:{shutil.which('false')}", tiny_rl, gq())
+
+
+def test_worker_that_misses_the_deadline_is_replaced(tiny_rl, monkeypatch):
+    """relate-db has no statement timeout: a worker that does not answer in time is killed and a fresh one replays
+    the log. SIGSTOP stands in for a statement that never returns."""
+    a_key = _a_key(tiny_rl)
+    monkeypatch.setattr(WorkerEngine, "STOP_TIMEOUT", 0.2)
+    eng = WorkerEngine(SELF, tiny_rl, gq(), timeout=1.0)
+    try:
+        full = eng.answer()
+        first = eng.proc.pid
+        os.kill(first, signal.SIGSTOP)
+        late = eng.answer()
+        assert late.answer is None and late.error == "TrialTimeout: no answer within 1 s"
+        assert eng.restarts == 1 and eng.proc.pid != first
+        assert repr(eng.answer().answer) == repr(full.answer)
+        os.kill(eng.proc.pid, signal.SIGSTOP)
+        eng.commit([], [a_key])  # lost with the stopped worker, replayed into the next one
+        assert eng.restarts == 2 and eng.log == [([], [a_key])]
+        assert "'A'" not in repr(eng.answer().answer)
+        os.kill(eng.proc.pid, signal.SIGSTOP)  # close() does not wait for a worker that has stopped answering
+    finally:
+        eng.close()
+    assert eng.proc.returncode is not None and eng not in engines._LIVE
+
+
+def test_worker_start_refusals(tiny_rl, monkeypatch):
+    """The worker must say hello in time, run the release that was asked for, and hold the same graph."""
+    assert worker_command("relate", "1.3.0")[-3:] == ["--with", "relate-db==1.3.0", "python"]
+    assert worker_command("python", "/x/python") == ["/x/python"]
+    sc = Scratch.open_copy(tiny_rl)
+    n, r, digest = graph_shape(sc)
+    sc.close()
+    assert (n, r) == (5, 6) and len(digest) == 64
+    WorkerEngine(SELF, tiny_rl, gq(), expect=(n, r, digest)).close()
+    with pytest.raises(Refused, match="reads a different graph .*the same counts, other properties or labels"):
+        WorkerEngine(SELF, tiny_rl, gq(), expect=(n, r, "0" * 64))
+    with pytest.raises(Refused, match=rf"{n} nodes and {r} relationships there, {n} and {r + 1} here\)"):
+        WorkerEngine(SELF, tiny_rl, gq(), expect=(n, r + 1, digest))
+    monkeypatch.setattr(engines, "worker_command", lambda kind, arg: [sys.executable])
+    with pytest.raises(Refused, match=f"runs relate-db {relate.__version__}, not the release that was asked for"):
+        WorkerEngine("relate-db==9.9.9", tiny_rl, gq())
+    monkeypatch.setattr(WorkerEngine, "START_TIMEOUT", 0.3)
+    sleeper = [sys.executable, "-c", "import time; time.sleep(60)", "--"]
+    monkeypatch.setattr(engines, "worker_command", lambda kind, arg: sleeper)
+    with pytest.raises(Refused, match="did not start within 0.3 s"):
+        WorkerEngine(SELF, tiny_rl, gq())
+    assert not engines._LIVE
+
+
+def test_worker_that_cannot_come_back_is_reported_gone(tiny_rl, tmp_path):
+    src = tmp_path / "copy.rl"
+    shutil.copyfile(tiny_rl, src)
+    eng = WorkerEngine(SELF, src, gq())
+    try:
+        src.unlink()  # the next worker has nothing to open
+        eng.proc.kill()
+        eng.proc.wait(5)
+        assert eng.answer().error.startswith("worker gone")
+        assert "could not be restarted" in eng.dead and "could not be restarted" in eng.answer().error
+        with pytest.raises(RuntimeError, match="commit failed"):
+            eng.commit([], ["k"])
+        assert eng.log == []
+    finally:
+        eng.close()
+    eng = WorkerEngine(SELF, tiny_rl, gq())
+    try:
+        eng.log.append((["no-such-key"], []))  # a deletion the fresh worker cannot repeat
+        eng.proc.kill()
+        eng.proc.wait(5)
+        assert eng.answer().error.startswith("worker gone") and "could not be replayed" in eng.dead
+    finally:
+        eng.close()
+
+
+def test_live_workers_end_with_the_interpreter(tiny_rl):
+    eng = WorkerEngine(SELF, tiny_rl, gq())
+    assert eng in engines._LIVE
+    engines._end_live_workers()  # the atexit hook
+    assert eng not in engines._LIVE and eng.proc.returncode is not None
+    eng.close()
 
 
 def test_worker_reads_eof_as_gone(tiny_rl):
@@ -495,12 +600,6 @@ def test_check_closes_the_engine_when_it_fails(tiny_rl, monkeypatch):
         check_mod.check(tiny_rl, spec, use_cli=False)
 
 
-def test_open_engine_worker(tiny_rl):
-    eng = open_engine(SELF, tiny_rl, gq())
-    assert isinstance(eng, WorkerEngine)
-    eng.close()
-
-
 def test_check_keeps_the_other_engines_error_and_always_closes_it(tiny_rl, monkeypatch):
     from witness import check as check_mod
 
@@ -532,3 +631,14 @@ def test_check_keeps_the_other_engines_error_and_always_closes_it(tiny_rl, monke
     with pytest.raises(KeyboardInterrupt):
         check_mod.check(tiny_rl, spec(), use_cli=False)
     assert stub2.closed  # Ctrl-C in the middle of the probes still ends the other engine
+
+
+def test_open_engine_worker(tiny_rl):
+    sc = Scratch.open_copy(tiny_rl)
+    eng = open_engine(SELF, tiny_rl, gq(), sc=sc, timeout=5.0)  # sc: the worker must report this graph's shape
+    sc.close()
+    assert isinstance(eng, WorkerEngine) and eng.timeout == 5.0 and eng.expect[:2] == (5, 6)
+    eng.close()
+    eng = open_engine(SELF, tiny_rl, gq())
+    assert eng.expect is None
+    eng.close()

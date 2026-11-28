@@ -425,7 +425,7 @@ class Neo4jEngine:
                 comps = "CALL dbms.components() YIELD name, versions RETURN name, versions[0] AS v"
                 found = {rec["name"]: rec["v"] for rec in s.run(comps)}
                 self.version = found.get("Neo4j Kernel") or next(iter(found.values()), "unknown")
-                if self.version.split(".")[0].isdigit() and int(self.version.split(".")[0]) < 5:
+                if re.fullmatch(r"[0-9]+", self.version.split(".")[0]) and int(self.version.split(".")[0]) < 5:
                     raise Refused(
                         f"--other-engine neo4j needs Neo4j 5 or later (elementId); this server is {self.version}",
                         "other-engine",

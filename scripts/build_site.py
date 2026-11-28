@@ -665,6 +665,7 @@ _and = lambda xs: ", ".join(xs[:-1]) + " and " + xs[-1] if len(xs) > 1 else xs[0
 # Relate's release notes as regression fixtures (--other-engine against the release that fixed each one)
 _rn = json.loads((ROOT / "evidence" / "release-notes-fixes.json").read_text())
 RN_ENTRIES = _rn["entries"]
+assert RN_ENTRIES == len(_rn["fixes"]), "the number of release-note entries is a count of the list, not a typed number"
 RN_CHANGE = sum(1 for f in _rn["fixes"] if f["status"].startswith("reproduced"))
 RN_SHRUNK = sum(1 for f in _rn["fixes"] if f["status"].startswith("reproduced, shrunk"))
 _rg = [json.loads(p.read_text()) for p in sorted((ROOT / "witnesses" / "regress").glob("*.manifest.json"))]
@@ -684,6 +685,15 @@ for _m in _rg:  # each witness changes its answer exactly once, at the release i
     _digs = [next(r["digest"] for r in _rv if r["witness"].endswith("/" + _m["name"]) and r["relate_db"] == v) for v in RV_RELEASES]
     _flips = [RV_RELEASES[i] for i in range(1, len(_digs)) if _digs[i] != _digs[i - 1]]
     assert _flips == [_fix], (_m["name"], _flips, _fix)
+    # "the release the notes name": the release this witness was reduced against is the one its fix entry carries
+    _w = f"witnesses/regress/{_m['name']}.rl"
+    _noted = [f["release"] for f in _rn["fixes"] if f["status"].startswith("reproduced, shrunk") and _w in ([f["witness"]] if isinstance(f["witness"], str) else f["witness"])]
+    assert _noted == ["v" + _fix], (_m["name"], _noted, _fix)
+    # the table is of the committed witness script, and every release built the same graph from it: where the answer
+    # changes it is the query that answered differently, not CREATE that stored something else
+    _rows = [r for r in _rv if r["witness"].endswith("/" + _m["name"])]
+    assert {r["cypher_sha256"] for r in _rows} == {hashlib.sha256((ROOT / "witnesses" / "regress" / f"{_m['name']}.cypher").read_bytes()).hexdigest()}, _m["name"]
+    assert len({r["graph_sha256"] for r in _rows}) == 1 and len(_rows) == len(RV_RELEASES), _m["name"]
 # the differential run (agent-written queries, relate-db 1.0.1 vs 1.3.0; Neo4j when it was reachable)
 _df = json.loads((ROOT / "evidence" / "differential.json").read_text())
 DF_Q, DF_T = _df["queries"], _df["tally"]["relate_1_0_1_vs_1_3_0"]
